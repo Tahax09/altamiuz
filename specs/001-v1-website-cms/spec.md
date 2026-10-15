@@ -53,6 +53,9 @@ features, any claim that engineering standards certify the consultancy."
   default; a free or self-hostable provider selected after evaluating privacy, security, hosting
   compatibility, and applicable Libyan and EU legal requirements. Cookieless analytics is not
   assumed to remove every legal obligation.
+- Owner planning decisions (WS4): public addresses use localized static route segments as well
+  as localized slugs, generated from one typed route map (final Arabic vocabulary pending CD-13);
+  Publishers may edit navigation and banner drafts but not publish or unpublish them.
 - Owner decisions recorded alongside Q-1 (constraints, not clarification answers): local
   development first, managed hosting as the initial deployment target, VPS deferred, no deployment
   yet; no paid subscriptions or purchases for now; admin right-to-left behaviour requires a proof
@@ -691,6 +694,8 @@ None may be invented or inferred from the legacy site without evidence.
 - CD-11 English and Arabic copy approval owner and translation review process.
 - CD-12 Approval of the destination for every legacy URL in the FR-065 inventory, including where
   the legacy blog article and document index should point while those sections are deferred.
+- CD-13 Approved Arabic and English static route vocabulary (e.g. the Arabic segment for
+  services and training listings), reviewed for meaning, readability, and SEO before launch.
 
 ## Success Criteria *(mandatory)*
 
@@ -751,6 +756,8 @@ None may be invented or inferred from the legacy site without evidence.
 - **A-5** Roles: Owner, Administrator, Publisher, Editor. Editors draft only; Publishers also
   publish/unpublish/restore; Administrators also manage users (below Owner), navigation, banners,
   redirects, settings, and read audit logs; Owners also manage Administrators and security settings.
+  Publishers may also edit navigation and banner drafts; publishing or unpublishing them stays
+  with Administrators and Owners (owner decision 2026-10-16; see contracts/access-matrix.md).
   Enquiry read/export/delete is granted to Owners and Administrators only. Roles are fixed in v1:
   their permission sets change only through a reviewed release, not through the admin interface.
   The exact permission matrix is finalised in planning.
