@@ -1,0 +1,13 @@
+# Local agent/tool state
+.repowise/
+.claude-flow/
+.swarm/
+ruvector.db
+.claude/*
+!.claude/skills/
+# Secrets
+.env
+.env.*
+!.env.example
+# OS
+.DS_Store
