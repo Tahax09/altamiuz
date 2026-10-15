@@ -182,16 +182,11 @@ Rationale: misrepresenting certification undermines the client's core business.
 
 ## Technology Stack & Open Decisions
 
-Approved (WS1, 2026-10-16):
+Approved architecture (WS1 2026-10-16, reaffirmed v1.1.0):
 
 - Application: Next.js (App Router) with Payload CMS 3 embedded, TypeScript, single deployable.
-- Database: PostgreSQL via Payload's Postgres adapter; migrations via Payload/Drizzle. Prisma is
-  not used.
-- Media storage: Cloudflare R2 (S3-compatible adapter).
-- Supporting services, each behind a documented adapter: Upstash Redis (rate limiting, caching),
-  Upstash QStash (background jobs), Resend (transactional email), Cloudflare Turnstile (bot
-  protection on public and auth forms).
-- Deployment direction: Docker Compose on a VPS behind Cloudflare (proxy, WAF, bot controls).
+- Database: PostgreSQL via Payload's Postgres adapter; migrations via Payload's Drizzle-based
+  workflow. Prisma is not used.
 - Locales: `ar` and `en`, full RTL/LTR parity.
 - CMS scope: public website management only, structured for future portal extensibility.
 - Typography candidates: Manrope (English headings), Inter (English body/UI), IBM Plex Sans
@@ -200,16 +195,50 @@ Approved (WS1, 2026-10-16):
 - Multi-tenancy is out of scope. PostgreSQL RLS is adopted only if a real data-isolation
   requirement is approved.
 
+Environments, hosting, and cost (v1.1.0):
+
+- Local development comes first. Local development and the automated test suite MUST run
+  without paid accounts or external service credentials.
+- Vercel MAY be used for private preview deployments only, and only within its applicable plan
+  terms. Production hosting is undecided.
+- No paid subscription, purchase, production deployment, or production secret may be created
+  without explicit owner approval for that specific item.
+- Application code MUST stay deployment-neutral (no hard dependency on a single host's
+  proprietary runtime features) until production hosting is decided.
+
+External services (proposed production options; none is approved for purchase):
+
+- Every external service MUST sit behind a documented adapter with a local or test substitute,
+  selected by configuration. Production mode MUST refuse to start when a required production
+  service or security setting is missing; it MUST NOT fall back silently to a development
+  substitute.
+- Media storage: local storage in development; Cloudflare R2 is the proposed production option,
+  pending account and billing verification.
+- Planned integrations: Upstash Redis (rate limiting, caching), Upstash QStash (background jobs),
+  Resend (transactional email), Cloudflare Turnstile (bot challenge on public and auth forms).
+- Analytics: cookieless, no personal data or persistent identifiers, configurable, and disabled
+  by default in local development and tests.
+- Cloudflare WAF, proxying, bot management, and related edge controls MUST be evaluated against
+  the eventual production architecture; they are not assumed compatible with any host.
+
+Implementation status (non-negotiable reading of this document):
+
+- Engineering requirements in this constitution and in specs do not prove that any control is
+  implemented. Only merged code with passing tests and recorded verification counts.
+- Payload is not assumed to meet this project's requirements for MFA, audit logging, upload
+  security, or authorization. Each is an acceptance criterion to implement and verify.
+
 Unresolved (MUST be decided before the stage that depends on them):
 
-- TODO(DEPLOY_PROVIDER): VPS provider and region (EU low-latency to Libya preferred) and
-  payment feasibility for all vendors.
-- TODO(PAYLOAD_RTL): Payload admin Arabic/RTL behaviour is assumed, not validated; requires a
-  proof-of-concept check before CMS UX is planned in detail.
+- TODO(PROD_HOSTING): production host, region (EU low-latency to Libya preferred), and cost
+  approval; VPS remains a candidate.
+- TODO(VENDOR_BILLING): account and billing verification for each proposed production service.
+- TODO(PAYLOAD_RTL): Payload admin Arabic/RTL experience is unverified; a proof of concept MUST
+  precede finalising the admin experience. Public-site RTL support does not prove admin support.
 - TODO(TYPOGRAPHY): final typefaces and licences after specimen review in both scripts.
 - TODO(PERF_BUDGETS): numeric performance budgets, set in the first implementation plan.
-- MFA, audit logging, and upload hardening are not provided by Payload out of the box to the
-  required standard; they are project work to be planned, not assumed.
+- TODO(ANALYTICS_PROVIDER): free or self-hostable provider, selected after privacy, security,
+  hosting, and legal evaluation.
 
 ## Delivery Workflow & Quality Gates
 
@@ -236,4 +265,4 @@ Unresolved (MUST be decided before the stage that depends on them):
 - Runtime agent guidance lives in `CLAUDE.md` (to be created) and MUST NOT contradict this
   document.
 
-**Version**: 1.0.0 | **Ratified**: 2026-10-16 | **Last Amended**: 2026-10-16
+**Version**: 1.1.0 | **Ratified**: 2026-10-16 | **Last Amended**: 2026-10-16
