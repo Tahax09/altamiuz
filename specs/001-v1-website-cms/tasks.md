@@ -97,37 +97,61 @@ green; gitleaks clean → prepare commit for owner approval.
 
 ### Rich-text policy (D-22, contracts/rich-text.md)
 
-- [ ] T026 [P] Create adversarial corpus `tests/fixtures/richtext/corpus.ts`: `javascript:` variants (mixed case, leading space, tab/newline inside scheme, `%6A`-encoded, `javascript&colon;`, `javascript://x/%0aalert(1)`), `vbscript:`, `data:text/html`, `data:image/svg+xml`, `file:`, `ftp:`, `blob:`, `about:`, `//evil.example`, backslash `\\evil`, `https:\\evil`, >2048-char URL, empty/whitespace link text, unknown node types (`html`, `upload`, `relationship`, `block`, `code`, `horizontalrule`, `iframe`), `heading` tag h1/h5, text `style: "color:red"`, format bits code/strikethrough/underline/sub/sup, extra attributes (`onClick`, `className`, `href` on paragraph), depth 11, 5,001 nodes, link `doc.relationTo: "users"`, `linkType: "raw"`; plus valid baseline docs in ar and en with `direction: rtl|ltr` (FR-013b, FR-014, SC-018)
-- [ ] T027 [P] Write failing tests `tests/unit/content/richtext/policy.test.ts`: every corpus attack rejected with the error code from the contract (`node_type`, `attribute`, `format`, `style`, `url_scheme`, `url_malformed`, `limit`, `link_text`) and JSON path; valid docs accepted unchanged; errors never echo the raw URL (FR-013b, FR-014, FR-013d)
-- [ ] T028 [P] Write failing tests `tests/unit/content/richtext/safe-href.test.ts`: `safeHref()` returns `null` for every disallowed URL and the normalised value for `https:`, allow-listed `http:`, `mailto:`, `tel:`, `/path`, `#id` (FR-013c, FR-014)
-- [ ] T029 Implement `src/modules/content/richtext/policy.ts` (`POLICY_VERSION`, `assertSafeRichText`, `safeHref`, limits depth ≤10, nodes ≤5,000, text ≤10,000, URL ≤2,048) until T027–T028 pass (FR-013b, FR-013c, FR-014)
+- [X] T026 [P] Create adversarial corpus `tests/fixtures/richtext/corpus.ts`: `javascript:` variants (mixed case, leading space, tab/newline inside scheme, `%6A`-encoded, `javascript&colon;`, `javascript://x/%0aalert(1)`), `vbscript:`, `data:text/html`, `data:image/svg+xml`, `file:`, `ftp:`, `blob:`, `about:`, `//evil.example`, backslash `\\evil`, `https:\\evil`, >2048-char URL, empty/whitespace link text, unknown node types (`html`, `upload`, `relationship`, `block`, `code`, `horizontalrule`, `iframe`), `heading` tag h1/h5, text `style: "color:red"`, format bits code/strikethrough/underline/sub/sup, extra attributes (`onClick`, `className`, `href` on paragraph), depth 11, 5,001 nodes, link `doc.relationTo: "users"`, `linkType: "raw"`; plus valid baseline docs in ar and en with `direction: rtl|ltr` (FR-013b, FR-014, SC-018)
+- [X] T027 [P] Write failing tests `tests/unit/content/richtext/policy.test.ts`: every corpus attack rejected with the error code from the contract (`node_type`, `attribute`, `format`, `style`, `url_scheme`, `url_malformed`, `limit`, `link_text`) and JSON path; valid docs accepted unchanged; errors never echo the raw URL (FR-013b, FR-014, FR-013d)
+- [X] T028 [P] Write failing tests `tests/unit/content/richtext/safe-href.test.ts`: `safeHref()` returns `null` for every disallowed URL and the normalised value for `https:`, allow-listed `http:`, `mailto:`, `tel:`, `/path`, `#id` (FR-013c, FR-014)
+- [X] T029 Implement `src/modules/content/richtext/policy.ts` (`POLICY_VERSION`, `assertSafeRichText`, `safeHref`, limits depth ≤10, nodes ≤5,000, text ≤10,000, URL ≤2,048) until T027–T028 pass (FR-013b, FR-013c, FR-014)
 
 ### Authorization matrix (D-8, contracts/access-matrix.md)
 
-- [ ] T030 [P] Encode the matrix as data `src/modules/access/matrix.ts` (roles `owner | administrator | publisher | editor`; every resource/action row of the contract)
-- [ ] T031 Write failing tests `tests/unit/access/matrix.test.ts` that parse `contracts/access-matrix.md` and assert `can(role, resource, action)` equals every ✓/blank cell (drift detection), plus invariants: no self-escalation, no grant above own role, equal/higher accounts untouchable except owner→owner, last owner protected (FR-036, FR-038, SC-003)
-- [ ] T032 Implement `src/modules/access/index.ts`: `can()`, deny-by-default collection/global/field access factories, `requireAuth`, `requireMfa` (session `mfaVerified`), anonymous denial for all REST except published-use media files, role-field update rule, until T031 passes (FR-037, FR-038, FR-092, D-3)
-- [ ] T033 Write failing tests `tests/security/injection.spec.ts`: REST `where`/`sort`/`select` operator abuse, SQL metacharacters in slugs/search, prototype-pollution keys in JSON bodies, oversized bodies → rejected or inert; no 500 with internals (FR-093, FR-095)
+- [X] T030 [P] Encode the matrix as data `src/modules/access/matrix.ts` (roles `owner | administrator | publisher | editor`; every resource/action row of the contract)
+- [X] T031 Write failing tests `tests/unit/access/matrix.test.ts` that parse `contracts/access-matrix.md` and assert `can(role, resource, action)` equals every ✓/blank cell (drift detection), plus invariants: no self-escalation, no grant above own role, equal/higher accounts untouchable except owner→owner, last owner protected (FR-036, FR-038, SC-003)
+- [X] T032 Implement `src/modules/access/index.ts`: `can()`, deny-by-default collection/global/field access factories, `requireAuth`, `requireMfa` (session `mfaVerified`), anonymous denial for all REST except published-use media files, role-field update rule, until T031 passes (FR-037, FR-038, FR-092, D-3)
+- [X] T033 Write failing tests `tests/security/injection.spec.ts`: REST `where`/`sort`/`select` operator abuse, SQL metacharacters in slugs/search, prototype-pollution keys in JSON bodies, oversized bodies → rejected or inert; no 500 with internals (FR-093, FR-095)
 
 ### Audit log (D-9)
 
-- [ ] T034 Write failing tests `tests/integration/audit/append-only.test.ts`: REST and Local API (`overrideAccess:false`) create/update/delete on `audit-events` denied for every role; direct SQL `UPDATE`/`DELETE` rejected by trigger; retention function deletes only entries older than 24 months (A-9) (FR-047, FR-048)
-- [ ] T035 Implement `src/modules/audit/collection.ts` (fields: actor, action enum per FR-045, targetType, targetId, outcome `success|denied|failure`, ip, userAgent truncated to 256, meta JSON, at; indexes `(at)`, `(actor, at)`, `(action, at)`, `(targetType, targetId)`) and `src/modules/audit/record.ts` with per-action meta schemas that reject secret-like keys (FR-045, FR-046)
-- [ ] T036 Create migration `migrations/*_audit_append_only.ts` (trigger + retention function, with `down`) and job `purgeAuditEvents` in `src/modules/audit/retention.ts` until T034 passes (FR-047, FR-048)
+- [X] T034 Write failing tests `tests/integration/audit/append-only.test.ts`: REST and Local API (`overrideAccess:false`) create/update/delete on `audit-events` denied for every role; direct SQL `UPDATE`/`DELETE` rejected by trigger; retention function deletes only entries older than 24 months (A-9) (FR-047, FR-048)
+- [X] T035 Implement `src/modules/audit/collection.ts` (fields: actor, action enum per FR-045, targetType, targetId, outcome `success|denied|failure`, ip, userAgent truncated to 256, meta JSON, at; indexes `(at)`, `(actor, at)`, `(action, at)`, `(targetType, targetId)`) and `src/modules/audit/record.ts` with per-action meta schemas that reject secret-like keys (FR-045, FR-046)
+- [X] T036 Create migration `migrations/*_audit_append_only.ts` (trigger + retention function, with `down`) and job `purgeAuditEvents` in `src/modules/audit/retention.ts` until T034 passes (FR-047, FR-048)
 
 ### Rate limiting (D-14)
 
-- [ ] T037 Write failing tests `tests/integration/platform/ratelimit.test.ts`: Postgres limiter fixed-window counts, atomic under 50 concurrent increments, stores only a hashed key, TTL cleanup job; memory limiter parity; trusted-proxy config ignores spoofed `X-Forwarded-For` (FR-094)
-- [ ] T038 [P] R-C spike `tests/integration/auth/rc-sessions.test.ts` + `docs/adr/ADR-005-sessions.md`: verify Payload `useSessions` revocation, idle/absolute expiry hooks, lockout settings, enumeration-safe responses; decide built-in vs `sessions` collection (D-7)
-- [ ] T039 Implement `src/modules/platform/adapters/ratelimit/postgres.ts` + `rate-limit-buckets` migration + `purgeRateLimitBuckets` job until T037 passes (FR-094)
+- [X] T037 Write failing tests `tests/integration/platform/ratelimit.test.ts`: Postgres limiter fixed-window counts, atomic under 50 concurrent increments, stores only a hashed key, TTL cleanup job; memory limiter parity; trusted-proxy config ignores spoofed `X-Forwarded-For` (FR-094)
+- [X] T038 [P] R-C spike `tests/integration/auth/rc-sessions.test.ts` + `docs/adr/ADR-005-sessions.md`: verify Payload `useSessions` revocation, idle/absolute expiry hooks, lockout settings, enumeration-safe responses; decide built-in vs `sessions` collection (D-7)
+- [X] T039 Implement `src/modules/platform/adapters/ratelimit/postgres.ts` + `rate-limit-buckets` migration + `purgeRateLimitBuckets` job until T037 passes (FR-094)
 
 ### Admin accessibility baseline (D-25)
 
-- [ ] T040 [P] Create admin a11y regression suite `tests/a11y/admin/baseline.spec.ts`: axe (`wcag2a`, `wcag2aa`, `wcag21a`, `wcag21aa`, `wcag22aa`) on login, dashboard, list, edit, versions and media views of every collection; snapshot `tests/a11y/admin/baseline.json`; fail on any serious/critical finding not in the baseline (FR-080a, SC-019)
-- [ ] T041 [P] Create `docs/accessibility/admin-findings.md` seeded from R-A (rule, view, node count, remediation path: upstream / extension point / unresolved, issue link) (FR-080a)
+- [X] T040 [P] Create admin a11y regression suite `tests/a11y/admin/baseline.spec.ts`: axe (`wcag2a`, `wcag2aa`, `wcag21a`, `wcag21aa`, `wcag22aa`) on login, dashboard, list, edit, versions and media views of every collection; snapshot `tests/a11y/admin/baseline.json`; fail on any serious/critical finding not in the baseline (FR-080a, SC-019)
+- [X] T041 [P] Create `docs/accessibility/admin-findings.md` seeded from R-A (rule, view, node count, remediation path: upstream / extension point / unresolved, issue link) (FR-080a)
 
 **Checkpoint (Gate 2a)**: policy corpus 100% rejected; matrix tests green; audit append-only
 proven at DB level; limiter green; admin baseline recorded → commit checkpoint.
+
+**Foundational implementation notes (WS7, 2026-10-16)**:
+- T026–T029: 62 corpus attacks + 4 valid documents; `checkRichText`/`assertSafeRichText`/
+  `safeHref` in `src/modules/content`. Write-path and render enforcement (Payload hooks, JSX
+  converters) remain T071–T083 as planned.
+- T030–T032: the matrix test parses `contracts/access-matrix.md` (20 rows × 4 roles). **Contract
+  gaps (denied, not invented)**: `navigation`/`banner` read and `users` read have no row; owner
+  decision needed before T065/T131. `requireMfa` reads `user.mfaVerified === true`, which no
+  session sets until T061/T062, so all authenticated access is denied until then.
+- T033: Local API injection suite (`tests/integration/security/injection.test.ts`) plus a
+  real-server suite (`tests/security/injection.spec.ts`). **Finding**: Payload does not escape
+  LIKE wildcards in `like`/`contains` (a bare `%` matches all); values remain parameterised.
+- T034–T036: append-only enforced by triggers; the owner/superuser bypass is documented in
+  `docs/security/audit-log.md`, with a production non-owner role requirement proven by test.
+  Retention job registration waits for the jobs runner.
+- T037–T039: `rate_limit_buckets` is a migration-only table (not a Payload collection, never
+  exposed). The limiter is fail-closed on DB errors. New config `TRUSTED_PROXY_HOPS` /
+  `CLIENT_IP_HEADER`; production requires one. `purgeRateLimitBuckets` job registration waits for
+  the jobs runner.
+- T038: ADR-005. Built-in revocation and absolute expiry confirmed; **gaps**: no idle timeout, and
+  account enumeration via `LockedAuth` and timing (≈82 ms vs ≈1 ms) → T062/T063.
+- T040–T041: only the login view can render without an admin session (0 serious/critical);
+  dashboard/list/edit/versions/media are `fixme` until T056/T061. Added
+  `@axe-core/playwright` 4.14.0 (dev, MPL-2.0).
 
 ---
 

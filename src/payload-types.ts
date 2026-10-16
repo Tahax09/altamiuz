@@ -68,6 +68,7 @@ export interface Config {
   blocks: {};
   collections: {
     users: User;
+    'audit-events': AuditEvent;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -76,6 +77,7 @@ export interface Config {
   collectionsJoins: {};
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
+    'audit-events': AuditEventsSelect<false> | AuditEventsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -140,6 +142,60 @@ export interface User {
     | null;
   password?: string | null;
   collection: 'users';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "audit-events".
+ */
+export interface AuditEvent {
+  id: number;
+  at: string;
+  actor: string;
+  action:
+    | 'auth.login.success'
+    | 'auth.login.failure'
+    | 'auth.logout'
+    | 'auth.lockout'
+    | 'auth.recovery.request'
+    | 'auth.recovery.complete'
+    | 'mfa.enrol'
+    | 'mfa.reset'
+    | 'mfa.remove'
+    | 'mfa.recovery_code_used'
+    | 'session.revoke'
+    | 'user.invite'
+    | 'user.create'
+    | 'user.suspend'
+    | 'user.delete'
+    | 'user.role_change'
+    | 'content.publish'
+    | 'content.unpublish'
+    | 'content.restore'
+    | 'content.delete'
+    | 'media.delete'
+    | 'redirect.change'
+    | 'navigation.change'
+    | 'settings.change'
+    | 'enquiry.view'
+    | 'enquiry.export'
+    | 'enquiry.delete'
+    | 'enquiry.retention_delete'
+    | 'access.denied'
+    | 'audit.retention_purge';
+  targetType?: string | null;
+  targetId?: string | null;
+  outcome: 'success' | 'denied' | 'failure';
+  ip?: string | null;
+  userAgent?: string | null;
+  meta?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -232,6 +288,21 @@ export interface UsersSelect<T extends boolean = true> {
         createdAt?: T;
         expiresAt?: T;
       };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "audit-events_select".
+ */
+export interface AuditEventsSelect<T extends boolean = true> {
+  at?: T;
+  actor?: T;
+  action?: T;
+  targetType?: T;
+  targetId?: T;
+  outcome?: T;
+  ip?: T;
+  userAgent?: T;
+  meta?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

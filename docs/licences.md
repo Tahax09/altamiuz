@@ -7,6 +7,7 @@ on 2026-10-16 after `pnpm install` (lockfile `pnpm-lock.yaml`). 640 packages in 
 
 | Package                      | Version | Licence    |
 | ---------------------------- | ------- | ---------- |
+| @axe-core/playwright         | 4.14.0  | MPL-2.0    |
 | @eslint/js                   | 9.39.5  | MIT        |
 | @payloadcms/db-postgres      | 3.91.0  | MIT        |
 | @payloadcms/next             | 3.91.0  | MIT        |
@@ -65,6 +66,7 @@ on 2026-10-16 after `pnpm install` (lockfile `pnpm-lock.yaml`). 640 packages in 
 - **LGPL-3.0-or-later**: `@img/sharp-libvips-darwin-arm64` (platform-specific prebuilt libvips used by `sharp`). It is dynamically linked and unmodified, and is used under LGPL terms. The Linux build used in containers resolves to the equivalent `@img/sharp-libvips-linux-*` package with the same licence.
 - **(MPL-2.0 OR Apache-2.0)**: `dompurify` (via Payload). Used under Apache-2.0.
 - **WTFPL / (WTFPL OR ISC) / (WTFPL OR MIT)**: `truncate-utf8-bytes`, `sanitize-filename`, `utf8-byte-length` (Payload transitive). Permissive.
+- **MPL-2.0**: `axe-core` (via `@axe-core/playwright`, devDependency, accessibility testing only; not shipped).
 - **Python-2.0, CC-BY-4.0, BlueOak-1.0.0, CC0-1.0, 0BSD, MIT-0**: permissive or attribution-only transitive tooling and data packages.
 
 No GPL/AGPL licence in the resolved tree. Re-run this check whenever dependencies change (Constitution I).

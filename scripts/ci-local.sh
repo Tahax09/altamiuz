@@ -10,7 +10,11 @@ pnpm test
 pnpm test:integration
 pnpm test:migrations
 pnpm build
-PLAYWRIGHT_BROWSERS_PATH="${PLAYWRIGHT_BROWSERS_PATH:-$PWD/.pw-browsers}" pnpm test:smoke
+pnpm migrate
+export PLAYWRIGHT_BROWSERS_PATH="${PLAYWRIGHT_BROWSERS_PATH:-$PWD/.pw-browsers}"
+pnpm test:smoke
+pnpm test:security
+pnpm test:a11y
 pnpm audit --audit-level high
 sh scripts/gitleaks.sh detect
 sh scripts/osv-scan.sh

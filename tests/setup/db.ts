@@ -15,6 +15,7 @@ export default async function setup() {
 
   const url = new URL(base)
   url.pathname = `/${name}`
+  process.env.TEST_ADMIN_DATABASE_URL = base
   process.env.DATABASE_URL = url.toString()
   process.env.TEST_DATABASE_NAME = name
 

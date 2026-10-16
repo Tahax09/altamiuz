@@ -5,6 +5,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { buildConfig } from 'payload'
 import sharp from 'sharp'
+import { auditEvents } from '@/modules/audit'
 import { usersPlaceholder } from '@/modules/auth'
 import { getConfig } from '@/modules/platform'
 
@@ -36,7 +37,7 @@ export default buildConfig({
   // D-3: public site uses the Local API only; GraphQL is off.
   graphQL: { disable: true },
   csrf: [cfg.siteUrl],
-  collections: [usersPlaceholder],
+  collections: [usersPlaceholder, auditEvents],
   db: postgresAdapter({
     pool: { connectionString: cfg.database.url },
     push: cfg.database.allowPush,

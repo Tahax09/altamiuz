@@ -46,6 +46,7 @@ const prodEnv = (): EnvSource => ({
   TURNSTILE_SECRET_KEY: '0x4AAAAAAAB7cDeFgHiJkLmNoPqRsTuVwXyZ',
   ANALYTICS_DRIVER: 'none',
   LOG_LEVEL: 'info',
+  TRUSTED_PROXY_HOPS: '1',
 })
 
 const errorFor = (env: EnvSource): ConfigError => {
@@ -152,6 +153,26 @@ describe('loadConfig — production refuses unsafe configuration (FR-105)', () =
     expect(
       errorFor({ ...prodEnv(), DATABASE_ALLOW_PUSH: 'true' }).issues.some(
         (i) => i.variable === 'DATABASE_ALLOW_PUSH',
+      ),
+    ).toBe(true)
+  })
+
+  it('requires a trusted client-IP source so limits are per client', () => {
+    expect(
+      errorFor({ ...prodEnv(), TRUSTED_PROXY_HOPS: '0' }).issues.some(
+        (i) => i.variable === 'TRUSTED_PROXY_HOPS',
+      ),
+    ).toBe(true)
+    expect(
+      loadConfig({ ...prodEnv(), TRUSTED_PROXY_HOPS: '0', CLIENT_IP_HEADER: 'cf-connecting-ip' })
+        .rateLimit.clientIpHeader,
+    ).toBe('cf-connecting-ip')
+  })
+
+  it.each(['9', '-1', 'abc'])('rejects TRUSTED_PROXY_HOPS=%s', (v) => {
+    expect(
+      errorFor({ ...prodEnv(), TRUSTED_PROXY_HOPS: v }).issues.some(
+        (i) => i.variable === 'TRUSTED_PROXY_HOPS',
       ),
     ).toBe(true)
   })

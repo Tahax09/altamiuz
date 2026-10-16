@@ -20,6 +20,8 @@ missing secret, or any placeholder value causes the app to **refuse to start** (
 | `RESEND_API_KEY`, `EMAIL_FROM` | email | — | required if `resend` |
 | `RATELIMIT_DRIVER` | `memory` / `postgres` / `upstash` | `postgres` | `postgres` or `upstash` |
 | `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` | Redis | — | required if `upstash` |
+| `TRUSTED_PROXY_HOPS` | trusted proxies appending to `X-Forwarded-For` (0–5) | `0` (header ignored) | ≥1, or set `CLIENT_IP_HEADER` |
+| `CLIENT_IP_HEADER` | single-value client-IP header set by the edge (e.g. `cf-connecting-ip`) | unset | per hosting decision |
 | `JOBS_TRIGGER` | `local-runner` / `cron` / `qstash` | `local-runner` | decided with hosting |
 | `JOBS_SIGNING_SECRET` / `QSTASH_*` | job endpoint auth | generated locally | required |
 | `CAPTCHA_DRIVER` | `test` / `turnstile` | `test` (emulates Cloudflare test secrets offline) | `turnstile` |

@@ -12,6 +12,8 @@ export default defineConfig({
   projects: [
     { name: 'smoke', testDir: './tests/smoke', use: { browserName: 'chromium' } },
     { name: 'webkit-smoke', testDir: './tests/smoke', use: { browserName: 'webkit' } },
+    { name: 'security', testDir: './tests/security', use: { browserName: 'chromium' } },
+    { name: 'a11y-admin', testDir: './tests/a11y/admin', use: { browserName: 'chromium' } },
   ],
   webServer: {
     command: `pnpm start --port ${PORT} --hostname 127.0.0.1`,

@@ -46,6 +46,13 @@ const rawSchema = z.object({
   EMAIL_FROM: optional,
   RESEND_API_KEY: optional,
   RATELIMIT_DRIVER: z.enum(['memory', 'postgres', 'upstash']).default('postgres'),
+  TRUSTED_PROXY_HOPS: z.coerce.number().int().min(0).max(5).default(0),
+  CLIENT_IP_HEADER: optional.pipe(
+    z
+      .string()
+      .regex(/^[a-z0-9-]{1,64}$/, 'lower-case header name')
+      .optional(),
+  ),
   UPSTASH_REDIS_REST_URL: optional,
   UPSTASH_REDIS_REST_TOKEN: optional,
   JOBS_TRIGGER: z.enum(['local-runner', 'cron', 'qstash']).default('local-runner'),
@@ -141,6 +148,11 @@ function crossChecks(raw: Raw): ConfigIssue[] {
         })
     }
     need('JOBS_SIGNING_SECRET', 'APP_ENV=production')
+    if (raw.TRUSTED_PROXY_HOPS === 0 && !raw.CLIENT_IP_HEADER)
+      issues.push({
+        variable: 'TRUSTED_PROXY_HOPS',
+        reason: 'set TRUSTED_PROXY_HOPS or CLIENT_IP_HEADER so rate limits are per client',
+      })
     if (new URL(raw.SITE_URL).protocol !== 'https:')
       issues.push({ variable: 'SITE_URL', reason: 'must use https in production' })
     for (const v of ['TURNSTILE_SITE_KEY', 'TURNSTILE_SECRET_KEY'] as const) {
@@ -191,6 +203,8 @@ function build(raw: Raw) {
       driver: raw.RATELIMIT_DRIVER,
       upstashUrl: raw.UPSTASH_REDIS_REST_URL,
       upstashToken: raw.UPSTASH_REDIS_REST_TOKEN,
+      trustedProxyHops: raw.TRUSTED_PROXY_HOPS,
+      clientIpHeader: raw.CLIENT_IP_HEADER,
     },
     jobs: { trigger: raw.JOBS_TRIGGER },
     captcha: {

@@ -7,6 +7,22 @@ import { createTestCaptcha, type CaptchaVerifier } from './captcha'
 import { createEmail, type EmailAdapter, type EmailConfig } from './email'
 import { createMemoryJobQueue, type JobQueue } from './jobs'
 import { createMemoryRateLimiter, type RateLimiter } from './ratelimit'
+
+export {
+  createMemoryRateLimiter,
+  limitKey,
+  resolveClientIp,
+  type ClientIpOptions,
+  type RateLimitOptions,
+  type RateLimitResult,
+} from './ratelimit'
+export {
+  createPostgresRateLimiter,
+  purgeRateLimitBuckets,
+  type PostgresRateLimiterOptions,
+} from './ratelimit/postgres'
+import type { Pool } from 'pg'
+import { createPostgresRateLimiter } from './ratelimit/postgres'
 import { createLocalStorage, type StorageAdapter } from './storage'
 
 export { EmailValidationError } from './email'
@@ -36,9 +52,19 @@ export function createEmailAdapter(
 
 export function createRateLimiter(
   cfg: { driver: string },
-  opts: { now?: () => number } = {},
+  opts: { now?: () => number; pool?: Pool; hashSecret?: string; onError?: (e: Error) => void } = {},
 ): RateLimiter {
   if (cfg.driver === 'memory') return createMemoryRateLimiter(opts.now)
+  if (cfg.driver === 'postgres') {
+    if (!opts.pool || !opts.hashSecret)
+      throw new Error('postgres rate limiter needs a pool and hashSecret')
+    return createPostgresRateLimiter({
+      pool: opts.pool,
+      hashSecret: opts.hashSecret,
+      now: opts.now,
+      onError: opts.onError,
+    })
+  }
   throw new NotYetImplemented('rate limit', cfg.driver)
 }
 
