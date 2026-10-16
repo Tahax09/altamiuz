@@ -155,8 +155,8 @@ cover `data:`, `file:` or other schemes.
 `safeHref()` and node allow-list still apply. A `scan:richtext` script reports any stored
 violations and is part of the migration and restore runbooks.
 
-**Version pin**: `payload` and all `@payloadcms/*` at **3.91.0 exact**, and `next` **16.3.3
-exact** (the combination tested in R-A). Upgrades are a deliberate task. The rich-text
+**Version pin**: `payload` and all `@payloadcms/*` at **3.91.0 exact**, and `next` **16.3.8
+exact** (ADR-003 Amendment 1: a security patch bump over the R-A-tested 16.3.3). Upgrades are a deliberate task. The rich-text
 adversarial suite and the per-locale-publish (`experimental.localizeStatus`) regression suite
 must pass before any version bump merges.
 
@@ -291,7 +291,7 @@ Otherwise propose one change, with evidence.
 
 ### D-1 Runtime and framework versions
 - **Decision**: Node 22 LTS, pnpm 10, TypeScript strict. **Pinned exactly (WS5)**: Payload and
-  `@payloadcms/*` 3.91.0, Next.js 16.3.3 (the R-A-tested pair). Upgrade only deliberately, behind
+  `@payloadcms/*` 3.91.0, Next.js 16.3.8 (patch bump over the R-A-tested 16.3.3; ADR-003 Amendment 1). Upgrade only deliberately, behind
   the regression suites (D-22).
 - **Rationale**: these are the current versions that satisfy Payload's peer range. Node 22 is
   already installed locally.

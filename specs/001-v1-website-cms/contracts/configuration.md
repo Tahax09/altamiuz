@@ -9,6 +9,8 @@ missing secret, or any placeholder value causes the app to **refuse to start** (
 | `APP_ENV` | `development` / `test` / `preview` / `production` | `development` | `production` |
 | `SITE_URL` | canonical origin | `http://localhost:3000` | required |
 | `DATABASE_URL` | Postgres | Docker Compose service | required |
+| `DATABASE_ALLOW_PUSH` | Payload schema push (throwaway DBs only) | `false` | must be `false` (refused otherwise; also refused in `preview`) |
+| `POSTGRES_DEV_PASSWORD` | password for the local compose Postgres | random, `.env.local` only | — |
 | `PAYLOAD_SECRET` | Payload signing secret | generated locally, never committed | required (≥32 bytes) |
 | `MFA_ENCRYPTION_KEY` | TOTP secret encryption | generated locally | required (32 bytes) |
 | `STORAGE_DRIVER` | `local` / `s3` | `local` | `s3` (R2, proposed) |
@@ -20,11 +22,12 @@ missing secret, or any placeholder value causes the app to **refuse to start** (
 | `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` | Redis | — | required if `upstash` |
 | `JOBS_TRIGGER` | `local-runner` / `cron` / `qstash` | `local-runner` | decided with hosting |
 | `JOBS_SIGNING_SECRET` / `QSTASH_*` | job endpoint auth | generated locally | required |
-| `TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY` | bot challenge | Cloudflare official test keys | required, real keys |
+| `CAPTCHA_DRIVER` | `test` / `turnstile` | `test` (emulates Cloudflare test secrets offline) | `turnstile` |
+| `TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY` | bot challenge | Cloudflare official test keys | required, real keys (test keys refused) |
 | `ANALYTICS_DRIVER` | `none` / provider (R-F) | `none` | to be decided |
 | `LOG_LEVEL` | pino level | `debug` | `info` |
 | `HEALTH_READY_TOKEN` | readiness probe | generated locally | required |
 | `BOOTSTRAP_OWNER_EMAIL` | one-time first-owner setup (FR-030) | unset | set only for the bootstrap run, then removed |
 
-Local services (`docker-compose.dev.yml`): `postgres:17` and `axllent/mailpit`. No paid accounts.
+Local services (`docker-compose.dev.yml`): `postgres:17` on `127.0.0.1:54320` and `axllent/mailpit:v1.27` (SMTP `1025`, UI `8025`). No paid accounts.
 Test runs use `memory` email and rate limit, Turnstile test keys, and a disposable database.

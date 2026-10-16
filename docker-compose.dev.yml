@@ -1,0 +1,25 @@
+# Local development services only. Ports bind to 127.0.0.1. No paid accounts.
+name: altamiuz-dev
+services:
+  postgres:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: altamiuz
+      POSTGRES_DB: altamiuz
+      POSTGRES_PASSWORD: ${POSTGRES_DEV_PASSWORD:?set POSTGRES_DEV_PASSWORD in .env.local}
+    ports:
+      - '127.0.0.1:54320:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U altamiuz -d altamiuz']
+      interval: 5s
+      timeout: 3s
+      retries: 20
+  mailpit:
+    image: axllent/mailpit:v1.27
+    ports:
+      - '127.0.0.1:1025:1025'
+      - '127.0.0.1:8025:8025'
+volumes:
+  pgdata:

@@ -1,0 +1,354 @@
+# OWASP ASVS 5.0.0 — Level 2 Verification Register
+
+**Status**: skeleton (T025). Every requirement starts as `not addressed`. Rows move to `partial` or
+`verified` only with linked test evidence at a phase gate. This register is an **engineering target**
+(constitution XIV); it is not a certification or a compliance claim.
+
+**Source**: OWASP ASVS 5.0.0, release asset `OWASP_Application_Security_Verification_Standard_5.0.0_en.flat.json`
+from `github.com/OWASP/ASVS/releases/tag/v5.0.0_release` (SHA-256 `8201b20eec2908c3380ac600c91c8ba746346fbb808859366abb232027532311`), downloaded 2026-10-16.
+Level 1 + Level 2 requirements: **253** (of 345 total). Requirement text is truncated here; the
+official text is authoritative.
+
+Status values: `not addressed` · `partial` · `verified` · `not applicable` (with rationale).
+
+## V1 Encoding and Sanitization
+
+| ID      | L   | Requirement (abridged)                                                                                                                               | Status        | Evidence / phase |
+| ------- | --- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- | ---------------- |
+| V1.1.1  | 2   | Verify that input is decoded or unescaped into a canonical form only once, it is only decoded when encoded data in that form is expected, and that…  | not addressed |                  |
+| V1.1.2  | 2   | Verify that the application performs output encoding and escaping either as a final step before being used by the interpreter for which it is inten… | not addressed |                  |
+| V1.2.1  | 1   | Verify that output encoding for an HTTP response, HTML document, or XML document is relevant for the context required, such as encoding the relevan… | not addressed |                  |
+| V1.2.2  | 1   | Verify that when dynamically building URLs, untrusted data is encoded according to its context (e.g., URL encoding or base64url encoding for query…  | not addressed |                  |
+| V1.2.3  | 1   | Verify that output encoding or escaping is used when dynamically building JavaScript content (including JSON), to avoid changing the message or doc… | not addressed |                  |
+| V1.2.4  | 1   | Verify that data selection or database queries (e.g., SQL, HQL, NoSQL, Cypher) use parameterized queries, ORMs, entity frameworks, or are otherwise… | not addressed |                  |
+| V1.2.5  | 1   | Verify that the application protects against OS command injection and that operating system calls use parameterized OS queries or use contextual co… | not addressed |                  |
+| V1.2.6  | 2   | Verify that the application protects against LDAP injection vulnerabilities, or that specific security controls to prevent LDAP injection have been… | not addressed |                  |
+| V1.2.7  | 2   | Verify that the application is protected against XPath injection attacks by using query parameterization or precompiled queries.                     | not addressed |                  |
+| V1.2.8  | 2   | Verify that LaTeX processors are configured securely (such as not using the "--shell-escape" flag) and an allowlist of commands is used to prevent…  | not addressed |                  |
+| V1.2.9  | 2   | Verify that the application escapes special characters in regular expressions (typically using a backslash) to prevent them from being misinterpret… | not addressed |                  |
+| V1.3.1  | 1   | Verify that all untrusted HTML input from WYSIWYG editors or similar is sanitized using a well-known and secure HTML sanitization library or framew… | not addressed |                  |
+| V1.3.2  | 1   | Verify that the application avoids the use of eval() or other dynamic code execution features such as Spring Expression Language (SpEL). Where ther… | not addressed |                  |
+| V1.3.3  | 2   | Verify that data being passed to a potentially dangerous context is sanitized beforehand to enforce safety measures, such as only allowing characte… | not addressed |                  |
+| V1.3.4  | 2   | Verify that user-supplied Scalable Vector Graphics (SVG) scriptable content is validated or sanitized to contain only tags and attributes (such as…  | not addressed |                  |
+| V1.3.5  | 2   | Verify that the application sanitizes or disables user-supplied scriptable or expression template language content, such as Markdown, CSS or XSL st… | not addressed |                  |
+| V1.3.6  | 2   | Verify that the application protects against Server-side Request Forgery (SSRF) attacks, by validating untrusted data against an allowlist of proto… | not addressed |                  |
+| V1.3.7  | 2   | Verify that the application protects against template injection attacks by not allowing templates to be built based on untrusted input. Where there… | not addressed |                  |
+| V1.3.8  | 2   | Verify that the application appropriately sanitizes untrusted input before use in Java Naming and Directory Interface (JNDI) queries and that JNDI…  | not addressed |                  |
+| V1.3.9  | 2   | Verify that the application sanitizes content before it is sent to memcache to prevent injection attacks.                                            | not addressed |                  |
+| V1.3.10 | 2   | Verify that format strings which might resolve in an unexpected or malicious way when used are sanitized before being processed.                     | not addressed |                  |
+| V1.3.11 | 2   | Verify that the application sanitizes user input before passing to mail systems to protect against SMTP or IMAP injection.                           | not addressed |                  |
+| V1.4.1  | 2   | Verify that the application uses memory-safe string, safer memory copy and pointer arithmetic to detect or prevent stack, buffer, or heap overflows. | not addressed |                  |
+| V1.4.2  | 2   | Verify that sign, range, and input validation techniques are used to prevent integer overflows.                                                      | not addressed |                  |
+| V1.4.3  | 2   | Verify that dynamically allocated memory and resources are released, and that references or pointers to freed memory are removed or set to null to…  | not addressed |                  |
+| V1.5.1  | 1   | Verify that the application configures XML parsers to use a restrictive configuration and that unsafe features such as resolving external entities…  | not addressed |                  |
+| V1.5.2  | 2   | Verify that deserialization of untrusted data enforces safe input handling, such as using an allowlist of object types or restricting client-define… | not addressed |                  |
+
+## V2 Validation and Business Logic
+
+| ID     | L   | Requirement (abridged)                                                                                                                                 | Status        | Evidence / phase |
+| ------ | --- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------- | ---------------- |
+| V2.1.1 | 1   | Verify that the application's documentation defines input validation rules for how to check the validity of data items against an expected structur…   | not addressed |                  |
+| V2.1.2 | 2   | Verify that the application's documentation defines how to validate the logical and contextual consistency of combined data items, such as checking…   | not addressed |                  |
+| V2.1.3 | 2   | Verify that expectations for business logic limits and validations are documented, including both per-user and globally across the application.        | not addressed |                  |
+| V2.2.1 | 1   | Verify that input is validated to enforce business or functional expectations for that input. This should either use positive validation against an…   | not addressed |                  |
+| V2.2.2 | 1   | Verify that the application is designed to enforce input validation at a trusted service layer. While client-side validation improves usability and…   | not addressed |                  |
+| V2.2.3 | 2   | Verify that the application ensures that combinations of related data items are reasonable according to the pre-defined rules.                         | not addressed |                  |
+| V2.3.1 | 1   | Verify that the application will only process business logic flows for the same user in the expected sequential step order and without skipping steps. | not addressed |                  |
+| V2.3.2 | 2   | Verify that business logic limits are implemented per the application's documentation to avoid business logic flaws being exploited.                   | not addressed |                  |
+| V2.3.3 | 2   | Verify that transactions are being used at the business logic level such that either a business logic operation succeeds in its entirety or it is r…   | not addressed |                  |
+| V2.3.4 | 2   | Verify that business logic level locking mechanisms are used to ensure that limited quantity resources (such as theater seats or delivery slots) ca…   | not addressed |                  |
+| V2.4.1 | 2   | Verify that anti-automation controls are in place to protect against excessive calls to application functions that could lead to data exfiltration,…   | not addressed |                  |
+
+## V3 Web Frontend Security
+
+| ID     | L   | Requirement (abridged)                                                                                                                               | Status        | Evidence / phase |
+| ------ | --- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- | ---------------- |
+| V3.2.1 | 1   | Verify that security controls are in place to prevent browsers from rendering content or functionality in HTTP responses in an incorrect context (e… | not addressed |                  |
+| V3.2.2 | 1   | Verify that content intended to be displayed as text, rather than rendered as HTML, is handled using safe rendering functions (such as createTextNo… | not addressed |                  |
+| V3.3.1 | 1   | Verify that cookies have the 'Secure' attribute set, and if the '\__Host-' prefix is not used for the cookie name, the '__Secure-' prefix must be u… | not addressed |                  |
+| V3.3.2 | 2   | Verify that each cookie's 'SameSite' attribute value is set according to the purpose of the cookie, to limit exposure to user interface redress att… | not addressed |                  |
+| V3.3.3 | 2   | Verify that cookies have the '__Host-' prefix for the cookie name unless they are explicitly designed to be shared with other hosts.                 | not addressed |                  |
+| V3.3.4 | 2   | Verify that if the value of a cookie is not meant to be accessible to client-side scripts (such as a session token), the cookie must have the 'Http… | not addressed |                  |
+| V3.4.1 | 1   | Verify that a Strict-Transport-Security header field is included on all responses to enforce an HTTP Strict Transport Security (HSTS) policy. A max… | not addressed |                  |
+| V3.4.2 | 1   | Verify that the Cross-Origin Resource Sharing (CORS) Access-Control-Allow-Origin header field is a fixed value by the application, or if the Origin… | not addressed |                  |
+| V3.4.3 | 2   | Verify that HTTP responses include a Content-Security-Policy response header field which defines directives to ensure the browser only loads and ex… | not addressed |                  |
+| V3.4.4 | 2   | Verify that all HTTP responses contain an 'X-Content-Type-Options: nosniff' header field. This instructs browsers not to use content sniffing and M… | not addressed |                  |
+| V3.4.5 | 2   | Verify that the application sets a referrer policy to prevent leakage of technically sensitive data to third-party services via the 'Referer' HTTP…  | not addressed |                  |
+| V3.4.6 | 2   | Verify that the web application uses the frame-ancestors directive of the Content-Security-Policy header field for every HTTP response to ensure th… | not addressed |                  |
+| V3.5.1 | 1   | Verify that, if the application does not rely on the CORS preflight mechanism to prevent disallowed cross-origin requests to use sensitive function… | not addressed |                  |
+| V3.5.2 | 1   | Verify that, if the application relies on the CORS preflight mechanism to prevent disallowed cross-origin use of sensitive functionality, it is not… | not addressed |                  |
+| V3.5.3 | 1   | Verify that HTTP requests to sensitive functionality use appropriate HTTP methods such as POST, PUT, PATCH, or DELETE, and not methods defined by t… | not addressed |                  |
+| V3.5.4 | 2   | Verify that separate applications are hosted on different hostnames to leverage the restrictions provided by same-origin policy, including how docu… | not addressed |                  |
+| V3.5.5 | 2   | Verify that messages received by the postMessage interface are discarded if the origin of the message is not trusted, or if the syntax of the messa… | not addressed |                  |
+| V3.7.1 | 2   | Verify that the application only uses client-side technologies which are still supported and considered secure. Examples of technologies which do n… | not addressed |                  |
+| V3.7.2 | 2   | Verify that the application will only automatically redirect the user to a different hostname or domain (which is not controlled by the application… | not addressed |                  |
+
+## V4 API and Web Service
+
+| ID     | L   | Requirement (abridged)                                                                                                                               | Status        | Evidence / phase |
+| ------ | --- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- | ---------------- |
+| V4.1.1 | 1   | Verify that every HTTP response with a message body contains a Content-Type header field that matches the actual content of the response, including… | not addressed |                  |
+| V4.1.2 | 2   | Verify that only user-facing endpoints (intended for manual web-browser access) automatically redirect from HTTP to HTTPS, while other services or…  | not addressed |                  |
+| V4.1.3 | 2   | Verify that any HTTP header field used by the application and set by an intermediary layer, such as a load balancer, a web proxy, or a backend-for-… | not addressed |                  |
+| V4.2.1 | 2   | Verify that all application components (including load balancers, firewalls, and application servers) determine boundaries of incoming HTTP message… | not addressed |                  |
+| V4.3.1 | 2   | Verify that a query allowlist, depth limiting, amount limiting, or query cost analysis is used to prevent GraphQL or data layer expression Denial o… | not addressed |                  |
+| V4.3.2 | 2   | Verify that GraphQL introspection queries are disabled in the production environment unless the GraphQL API is meant to be used by other parties.    | not addressed |                  |
+| V4.4.1 | 1   | Verify that WebSocket over TLS (WSS) is used for all WebSocket connections.                                                                          | not addressed |                  |
+| V4.4.2 | 2   | Verify that, during the initial HTTP WebSocket handshake, the Origin header field is checked against a list of origins allowed for the application.  | not addressed |                  |
+| V4.4.3 | 2   | Verify that, if the application's standard session management cannot be used, dedicated tokens are being used for this, which comply with the relev… | not addressed |                  |
+| V4.4.4 | 2   | Verify that dedicated WebSocket session management tokens are initially obtained or validated through the previously authenticated HTTPS session wh… | not addressed |                  |
+
+## V5 File Handling
+
+| ID     | L   | Requirement (abridged)                                                                                                                                 | Status        | Evidence / phase |
+| ------ | --- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------- | ---------------- |
+| V5.1.1 | 2   | Verify that the documentation defines the permitted file types, expected file extensions, and maximum size (including unpacked size) for each uploa…   | not addressed |                  |
+| V5.2.1 | 1   | Verify that the application will only accept files of a size which it can process without causing a loss of performance or a denial of service attack. | not addressed |                  |
+| V5.2.2 | 1   | Verify that when the application accepts a file, either on its own or within an archive such as a zip file, it checks if the file extension matches…   | not addressed |                  |
+| V5.2.3 | 2   | Verify that the application checks compressed files (e.g., zip, gz, docx, odt) against maximum allowed uncompressed size and against maximum number…   | not addressed |                  |
+| V5.3.1 | 1   | Verify that files uploaded or generated by untrusted input and stored in a public folder, are not executed as server-side program code when accesse…   | not addressed |                  |
+| V5.3.2 | 1   | Verify that when the application creates file paths for file operations, instead of user-submitted filenames, it uses internally generated or trust…   | not addressed |                  |
+| V5.4.1 | 2   | Verify that the application validates or ignores user-submitted filenames, including in a JSON, JSONP, or URL parameter and specifies a filename in…   | not addressed |                  |
+| V5.4.2 | 2   | Verify that file names served (e.g., in HTTP response header fields or email attachments) are encoded or sanitized (e.g., following RFC 6266) to pr…   | not addressed |                  |
+| V5.4.3 | 2   | Verify that files obtained from untrusted sources are scanned by antivirus scanners to prevent serving of known malicious content.                     | not addressed |                  |
+
+## V6 Authentication
+
+| ID      | L   | Requirement (abridged)                                                                                                                                 | Status        | Evidence / phase |
+| ------- | --- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------- | ---------------- |
+| V6.1.1  | 1   | Verify that application documentation defines how controls such as rate limiting, anti-automation, and adaptive response, are used to defend agains…   | not addressed |                  |
+| V6.1.2  | 2   | Verify that a list of context-specific words is documented in order to prevent their use in passwords. The list could include permutations of organ…   | not addressed |                  |
+| V6.1.3  | 2   | Verify that, if the application includes multiple authentication pathways, these are all documented together with the security controls and authent…   | not addressed |                  |
+| V6.2.1  | 1   | Verify that user set passwords are at least 8 characters in length although a minimum of 15 characters is strongly recommended.                        | not addressed |                  |
+| V6.2.2  | 1   | Verify that users can change their password.                                                                                                           | not addressed |                  |
+| V6.2.3  | 1   | Verify that password change functionality requires the user's current and new password.                                                                | not addressed |                  |
+| V6.2.4  | 1   | Verify that passwords submitted during account registration or password change are checked against an available set of, at least, the top 3000 pass…   | not addressed |                  |
+| V6.2.5  | 1   | Verify that passwords of any composition can be used, without rules limiting the type of characters permitted. There must be no requirement for a m…   | not addressed |                  |
+| V6.2.6  | 1   | Verify that password input fields use type=password to mask the entry. Applications may allow the user to temporarily view the entire masked passwo…   | not addressed |                  |
+| V6.2.7  | 1   | Verify that "paste" functionality, browser password helpers, and external password managers are permitted.                                             | not addressed |                  |
+| V6.2.8  | 1   | Verify that the application verifies the user's password exactly as received from the user, without any modifications such as truncation or case tr…   | not addressed |                  |
+| V6.2.9  | 2   | Verify that passwords of at least 64 characters are permitted.                                                                                         | not addressed |                  |
+| V6.2.10 | 2   | Verify that a user's password stays valid until it is discovered to be compromised or the user rotates it. The application must not require periodi…   | not addressed |                  |
+| V6.2.11 | 2   | Verify that the documented list of context specific words is used to prevent easy to guess passwords being created.                                    | not addressed |                  |
+| V6.2.12 | 2   | Verify that passwords submitted during account registration or password changes are checked against a set of breached passwords.                       | not addressed |                  |
+| V6.3.1  | 1   | Verify that controls to prevent attacks such as credential stuffing and password brute force are implemented according to the application's securit…   | not addressed |                  |
+| V6.3.2  | 1   | Verify that default user accounts (e.g., "root", "admin", or "sa") are not present in the application or are disabled.                                 | not addressed |                  |
+| V6.3.3  | 2   | Verify that either a multi-factor authentication mechanism or a combination of single-factor authentication mechanisms, must be used in order to ac…   | not addressed |                  |
+| V6.3.4  | 2   | Verify that, if the application includes multiple authentication pathways, there are no undocumented pathways and that security controls and authen…   | not addressed |                  |
+| V6.4.1  | 1   | Verify that system generated initial passwords or activation codes are securely randomly generated, follow the existing password policy, and expire…   | not addressed |                  |
+| V6.4.2  | 1   | Verify that password hints or knowledge-based authentication (so-called "secret questions") are not present.                                           | not addressed |                  |
+| V6.4.3  | 2   | Verify that a secure process for resetting a forgotten password is implemented, that does not bypass any enabled multi-factor authentication mechan…   | not addressed |                  |
+| V6.4.4  | 2   | Verify that if a multi-factor authentication factor is lost, evidence of identity proofing is performed at the same level as during enrollment.        | not addressed |                  |
+| V6.5.1  | 2   | Verify that lookup secrets, out-of-band authentication requests or codes, and time-based one-time passwords (TOTPs) are only successfully usable once. | not addressed |                  |
+| V6.5.2  | 2   | Verify that, when being stored in the application's backend, lookup secrets with less than 112 bits of entropy (19 random alphanumeric characters o…   | not addressed |                  |
+| V6.5.3  | 2   | Verify that lookup secrets, out-of-band authentication code, and time-based one-time password seeds, are generated using a Cryptographically Secure…   | not addressed |                  |
+| V6.5.4  | 2   | Verify that lookup secrets and out-of-band authentication codes have a minimum of 20 bits of entropy (typically 4 random alphanumeric characters or…   | not addressed |                  |
+| V6.5.5  | 2   | Verify that out-of-band authentication requests, codes, or tokens, as well as time-based one-time passwords (TOTPs) have a defined lifetime. Out of…   | not addressed |                  |
+| V6.6.1  | 2   | Verify that authentication mechanisms using the Public Switched Telephone Network (PSTN) to deliver One-time Passwords (OTPs) via phone or SMS are…    | not addressed |                  |
+| V6.6.2  | 2   | Verify that out-of-band authentication requests, codes, or tokens are bound to the original authentication request for which they were generated an…   | not addressed |                  |
+| V6.6.3  | 2   | Verify that a code based out-of-band authentication mechanism is protected against brute force attacks by using rate limiting. Consider also using…    | not addressed |                  |
+| V6.8.1  | 2   | Verify that, if the application supports multiple identity providers (IdPs), the user's identity cannot be spoofed via another supported identity p…   | not addressed |                  |
+| V6.8.2  | 2   | Verify that the presence and integrity of digital signatures on authentication assertions (for example on JWTs or SAML assertions) are always valid…   | not addressed |                  |
+| V6.8.3  | 2   | Verify that SAML assertions are uniquely processed and used only once within the validity period to prevent replay attacks.                            | not addressed |                  |
+| V6.8.4  | 2   | Verify that, if an application uses a separate Identity Provider (IdP) and expects specific authentication strength, methods, or recentness for spe…   | not addressed |                  |
+
+## V7 Session Management
+
+| ID     | L   | Requirement (abridged)                                                                                                                               | Status        | Evidence / phase |
+| ------ | --- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- | ---------------- |
+| V7.1.1 | 2   | Verify that the user's session inactivity timeout and absolute maximum session lifetime are documented, are appropriate in combination with other c… | not addressed |                  |
+| V7.1.2 | 2   | Verify that the documentation defines how many concurrent (parallel) sessions are allowed for one account as well as the intended behaviors and act… | not addressed |                  |
+| V7.1.3 | 2   | Verify that all systems that create and manage user sessions as part of a federated identity management ecosystem (such as SSO systems) are documen… | not addressed |                  |
+| V7.2.1 | 1   | Verify that the application performs all session token verification using a trusted, backend service.                                                | not addressed |                  |
+| V7.2.2 | 1   | Verify that the application uses either self-contained or reference tokens that are dynamically generated for session management, i.e. not using st… | not addressed |                  |
+| V7.2.3 | 1   | Verify that if reference tokens are used to represent user sessions, they are unique and generated using a cryptographically secure pseudo-random n… | not addressed |                  |
+| V7.2.4 | 1   | Verify that the application generates a new session token on user authentication, including re-authentication, and terminates the current session t… | not addressed |                  |
+| V7.3.1 | 2   | Verify that there is an inactivity timeout such that re-authentication is enforced according to risk analysis and documented security decisions.     | not addressed |                  |
+| V7.3.2 | 2   | Verify that there is an absolute maximum session lifetime such that re-authentication is enforced according to risk analysis and documented securit… | not addressed |                  |
+| V7.4.1 | 1   | Verify that when session termination is triggered (such as logout or expiration), the application disallows any further use of the session. For ref… | not addressed |                  |
+| V7.4.2 | 1   | Verify that the application terminates all active sessions when a user account is disabled or deleted (such as an employee leaving the company).     | not addressed |                  |
+| V7.4.3 | 2   | Verify that the application gives the option to terminate all other active sessions after a successful change or removal of any authentication fact… | not addressed |                  |
+| V7.4.4 | 2   | Verify that all pages that require authentication have easy and visible access to logout functionality.                                              | not addressed |                  |
+| V7.4.5 | 2   | Verify that application administrators are able to terminate active sessions for an individual user or for all users.                                | not addressed |                  |
+| V7.5.1 | 2   | Verify that the application requires full re-authentication before allowing modifications to sensitive account attributes which may affect authenti… | not addressed |                  |
+| V7.5.2 | 2   | Verify that users are able to view and (having authenticated again with at least one factor) terminate any or all currently active sessions.         | not addressed |                  |
+| V7.6.1 | 2   | Verify that session lifetime and termination between Relying Parties (RPs) and Identity Providers (IdPs) behave as documented, requiring re-authent… | not addressed |                  |
+| V7.6.2 | 2   | Verify that creation of a session requires either the user's consent or an explicit action, preventing the creation of new application sessions wit… | not addressed |                  |
+
+## V8 Authorization
+
+| ID     | L   | Requirement (abridged)                                                                                                                               | Status        | Evidence / phase |
+| ------ | --- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- | ---------------- |
+| V8.1.1 | 1   | Verify that authorization documentation defines rules for restricting function-level and data-specific access based on consumer permissions and res… | not addressed |                  |
+| V8.1.2 | 2   | Verify that authorization documentation defines rules for field-level access restrictions (both read and write) based on consumer permissions and r… | not addressed |                  |
+| V8.2.1 | 1   | Verify that the application ensures that function-level access is restricted to consumers with explicit permissions.                                 | not addressed |                  |
+| V8.2.2 | 1   | Verify that the application ensures that data-specific access is restricted to consumers with explicit permissions to specific data items to mitiga… | not addressed |                  |
+| V8.2.3 | 2   | Verify that the application ensures that field-level access is restricted to consumers with explicit permissions to specific fields to mitigate bro… | not addressed |                  |
+| V8.3.1 | 1   | Verify that the application enforces authorization rules at a trusted service layer and doesn't rely on controls that an untrusted consumer could m… | not addressed |                  |
+| V8.4.1 | 2   | Verify that multi-tenant applications use cross-tenant controls to ensure consumer operations will never affect tenants with which they do not have… | not addressed |                  |
+
+## V9 Self-contained Tokens
+
+| ID     | L   | Requirement (abridged)                                                                                                                               | Status        | Evidence / phase |
+| ------ | --- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- | ---------------- |
+| V9.1.1 | 1   | Verify that self-contained tokens are validated using their digital signature or MAC to protect against tampering before accepting the token's cont… | not addressed |                  |
+| V9.1.2 | 1   | Verify that only algorithms on an allowlist can be used to create and verify self-contained tokens, for a given context. The allowlist must include… | not addressed |                  |
+| V9.1.3 | 1   | Verify that key material that is used to validate self-contained tokens is from trusted pre-configured sources for the token issuer, preventing att… | not addressed |                  |
+| V9.2.1 | 1   | Verify that, if a validity time span is present in the token data, the token and its content are accepted only if the verification time is within t… | not addressed |                  |
+| V9.2.2 | 2   | Verify that the service receiving a token validates the token to be the correct type and is meant for the intended purpose before accepting the tok… | not addressed |                  |
+| V9.2.3 | 2   | Verify that the service only accepts tokens which are intended for use with that service (audience). For JWTs, this can be achieved by validating t… | not addressed |                  |
+| V9.2.4 | 2   | Verify that, if a token issuer uses the same private key for issuing tokens to different audiences, the issued tokens contain an audience restricti… | not addressed |                  |
+
+## V10 OAuth and OIDC
+
+> Not applicable in v1: no OAuth/OIDC client, resource or authorization server.
+
+| ID       | L   | Requirement (abridged)                                                                                                                               | Status         | Evidence / phase |
+| -------- | --- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | -------------- | ---------------- |
+| V10.1.1  | 2   | Verify that tokens are only sent to components that strictly need them. For example, when using a backend-for-frontend pattern for browser-based Ja… | not applicable |                  |
+| V10.1.2  | 2   | Verify that the client only accepts values from the authorization server (such as the authorization code or ID Token) if these values result from a… | not applicable |                  |
+| V10.2.1  | 2   | Verify that, if the code flow is used, the OAuth client has protection against browser-based request forgery attacks, commonly known as cross-site…  | not applicable |                  |
+| V10.2.2  | 2   | Verify that, if the OAuth client can interact with more than one authorization server, it has a defense against mix-up attacks. For example, it cou… | not applicable |                  |
+| V10.3.1  | 2   | Verify that the resource server only accepts access tokens that are intended for use with that service (audience). The audience may be included in…  | not applicable |                  |
+| V10.3.2  | 2   | Verify that the resource server enforces authorization decisions based on claims from the access token that define delegated authorization. If clai… | not applicable |                  |
+| V10.3.3  | 2   | Verify that if an access control decision requires identifying a unique user from an access token (JWT or related token introspection response), th… | not applicable |                  |
+| V10.3.4  | 2   | Verify that, if the resource server requires specific authentication strength, methods, or recentness, it verifies that the presented access token…  | not applicable |                  |
+| V10.4.1  | 1   | Verify that the authorization server validates redirect URIs based on a client-specific allowlist of pre-registered URIs using exact string compari… | not applicable |                  |
+| V10.4.2  | 1   | Verify that, if the authorization server returns the authorization code in the authorization response, it can be used only once for a token request… | not applicable |                  |
+| V10.4.3  | 1   | Verify that the authorization code is short-lived. The maximum lifetime can be up to 10 minutes for L1 and L2 applications and up to 1 minute for L… | not applicable |                  |
+| V10.4.4  | 1   | Verify that for a given client, the authorization server only allows the usage of grants that this client needs to use. Note that the grants 'token… | not applicable |                  |
+| V10.4.5  | 1   | Verify that the authorization server mitigates refresh token replay attacks for public clients, preferably using sender-constrained refresh tokens,… | not applicable |                  |
+| V10.4.6  | 2   | Verify that, if the code grant is used, the authorization server mitigates authorization code interception attacks by requiring proof key for code…  | not applicable |                  |
+| V10.4.7  | 2   | Verify that if the authorization server supports unauthenticated dynamic client registration, it mitigates the risk of malicious client application… | not applicable |                  |
+| V10.4.8  | 2   | Verify that refresh tokens have an absolute expiration, including if sliding refresh token expiration is applied.                                    | not applicable |                  |
+| V10.4.9  | 2   | Verify that refresh tokens and reference access tokens can be revoked by an authorized user using the authorization server user interface, to mitig… | not applicable |                  |
+| V10.4.10 | 2   | Verify that confidential client is authenticated for client-to-authorized server backchannel requests such as token requests, pushed authorization…  | not applicable |                  |
+| V10.4.11 | 2   | Verify that the authorization server configuration only assigns the required scopes to the OAuth client.                                             | not applicable |                  |
+| V10.5.1  | 2   | Verify that the client (as the relying party) mitigates ID Token replay attacks. For example, by ensuring that the 'nonce' claim in the ID Token ma… | not applicable |                  |
+| V10.5.2  | 2   | Verify that the client uniquely identifies the user from ID Token claims, usually the 'sub' claim, which cannot be reassigned to other users (for t… | not applicable |                  |
+| V10.5.3  | 2   | Verify that the client rejects attempts by a malicious authorization server to impersonate another authorization server through authorization serve… | not applicable |                  |
+| V10.5.4  | 2   | Verify that the client validates that the ID Token is intended to be used for that client (audience) by checking that the 'aud' claim from the toke… | not applicable |                  |
+| V10.5.5  | 2   | Verify that, when using OIDC back-channel logout, the relying party mitigates denial of service through forced logout and cross-JWT confusion in th… | not applicable |                  |
+| V10.6.1  | 2   | Verify that the OpenID Provider only allows values 'code', 'ciba', 'id_token', or 'id_token code' for response mode. Note that 'code' is preferred…  | not applicable |                  |
+| V10.6.2  | 2   | Verify that the OpenID Provider mitigates denial of service through forced logout. By obtaining explicit confirmation from the end-user or, if pres… | not applicable |                  |
+| V10.7.1  | 2   | Verify that the authorization server ensures that the user consents to each authorization request. If the identity of the client cannot be assured,… | not applicable |                  |
+| V10.7.2  | 2   | Verify that when the authorization server prompts for user consent, it presents sufficient and clear information about what is being consented to.…  | not applicable |                  |
+| V10.7.3  | 2   | Verify that the user can review, modify, and revoke consents which the user has granted through the authorization server.                            | not applicable |                  |
+
+## V11 Cryptography
+
+| ID      | L   | Requirement (abridged)                                                                                                                               | Status        | Evidence / phase |
+| ------- | --- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- | ---------------- |
+| V11.1.1 | 2   | Verify that there is a documented policy for management of cryptographic keys and a cryptographic key lifecycle that follows a key management stand… | not addressed |                  |
+| V11.1.2 | 2   | Verify that a cryptographic inventory is performed, maintained, regularly updated, and includes all cryptographic keys, algorithms, and certificate… | not addressed |                  |
+| V11.2.1 | 2   | Verify that industry-validated implementations (including libraries and hardware-accelerated implementations) are used for cryptographic operations. | not addressed |                  |
+| V11.2.2 | 2   | Verify that the application is designed with crypto agility such that random number, authenticated encryption, MAC, or hashing algorithms, key leng… | not addressed |                  |
+| V11.2.3 | 2   | Verify that all cryptographic primitives utilize a minimum of 128-bits of security based on the algorithm, key size, and configuration. For example… | not addressed |                  |
+| V11.3.1 | 1   | Verify that insecure block modes (e.g., ECB) and weak padding schemes (e.g., PKCS#1 v1.5) are not used.                                              | not addressed |                  |
+| V11.3.2 | 1   | Verify that only approved ciphers and modes such as AES with GCM are used.                                                                           | not addressed |                  |
+| V11.3.3 | 2   | Verify that encrypted data is protected against unauthorized modification preferably by using an approved authenticated encryption method or by com… | not addressed |                  |
+| V11.4.1 | 1   | Verify that only approved hash functions are used for general cryptographic use cases, including digital signatures, HMAC, KDF, and random bit gene… | not addressed |                  |
+| V11.4.2 | 2   | Verify that passwords are stored using an approved, computationally intensive, key derivation function (also known as a "password hashing function"… | not addressed |                  |
+| V11.4.3 | 2   | Verify that hash functions used in digital signatures, as part of data authentication or data integrity are collision resistant and have appropriat… | not addressed |                  |
+| V11.4.4 | 2   | Verify that the application uses approved key derivation functions with key stretching parameters when deriving secret keys from passwords. The par… | not addressed |                  |
+| V11.5.1 | 2   | Verify that all random numbers and strings which are intended to be non-guessable must be generated using a cryptographically secure pseudo-random…  | not addressed |                  |
+| V11.6.1 | 2   | Verify that only approved cryptographic algorithms and modes of operation are used for key generation and seeding, and digital signature generation… | not addressed |                  |
+
+## V12 Secure Communication
+
+| ID      | L   | Requirement (abridged)                                                                                                                               | Status        | Evidence / phase |
+| ------- | --- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- | ---------------- |
+| V12.1.1 | 1   | Verify that only the latest recommended versions of the TLS protocol are enabled, such as TLS 1.2 and TLS 1.3. The latest version of the TLS protoc… | not addressed |                  |
+| V12.1.2 | 2   | Verify that only recommended cipher suites are enabled, with the strongest cipher suites set as preferred. L3 applications must only support cipher… | not addressed |                  |
+| V12.1.3 | 2   | Verify that the application validates that mTLS client certificates are trusted before using the certificate identity for authentication or authori… | not addressed |                  |
+| V12.2.1 | 1   | Verify that TLS is used for all connectivity between a client and external facing, HTTP-based services, and does not fall back to insecure or unenc… | not addressed |                  |
+| V12.2.2 | 1   | Verify that external facing services use publicly trusted TLS certificates.                                                                          | not addressed |                  |
+| V12.3.1 | 2   | Verify that an encrypted protocol such as TLS is used for all inbound and outbound connections to and from the application, including monitoring sy… | not addressed |                  |
+| V12.3.2 | 2   | Verify that TLS clients validate certificates received before communicating with a TLS server.                                                       | not addressed |                  |
+| V12.3.3 | 2   | Verify that TLS or another appropriate transport encryption mechanism used for all connectivity between internal, HTTP-based services within the ap… | not addressed |                  |
+| V12.3.4 | 2   | Verify that TLS connections between internal services use trusted certificates. Where internally generated or self-signed certificates are used, th… | not addressed |                  |
+
+## V13 Configuration
+
+| ID      | L   | Requirement (abridged)                                                                                                                                | Status        | Evidence / phase |
+| ------- | --- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- | ---------------- |
+| V13.1.1 | 2   | Verify that all communication needs for the application are documented. This must include external services which the application relies upon and c…  | not addressed |                  |
+| V13.2.1 | 2   | Verify that communications between backend application components that don't support the application's standard user session mechanism, including A…  | not addressed |                  |
+| V13.2.2 | 2   | Verify that communications between backend application components, including local or operating system services, APIs, middleware, and data layers,…  | not addressed |                  |
+| V13.2.3 | 2   | Verify that if a credential has to be used for service authentication, the credential being used by the consumer is not a default credential (e.g.,…  | not addressed |                  |
+| V13.2.4 | 2   | Verify that an allowlist is used to define the external resources or systems with which the application is permitted to communicate (e.g., for outb…  | not addressed |                  |
+| V13.2.5 | 2   | Verify that the web or application server is configured with an allowlist of resources or systems to which the server can send requests or load dat…  | not addressed |                  |
+| V13.3.1 | 2   | Verify that a secrets management solution, such as a key vault, is used to securely create, store, control access to, and destroy backend secrets.…   | not addressed |                  |
+| V13.3.2 | 2   | Verify that access to secret assets adheres to the principle of least privilege.                                                                      | not addressed |                  |
+| V13.4.1 | 1   | Verify that the application is deployed either without any source control metadata, including the .git or .svn folders, or in a way that these fold…  | not addressed |                  |
+| V13.4.2 | 2   | Verify that debug modes are disabled for all components in production environments to prevent exposure of debugging features and information leakage. | not addressed |                  |
+| V13.4.3 | 2   | Verify that web servers do not expose directory listings to clients unless explicitly intended.                                                       | not addressed |                  |
+| V13.4.4 | 2   | Verify that using the HTTP TRACE method is not supported in production environments, to avoid potential information leakage.                          | not addressed |                  |
+| V13.4.5 | 2   | Verify that documentation (such as for internal APIs) and monitoring endpoints are not exposed unless explicitly intended.                            | not addressed |                  |
+
+## V14 Data Protection
+
+| ID      | L   | Requirement (abridged)                                                                                                                               | Status        | Evidence / phase |
+| ------- | --- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- | ---------------- |
+| V14.1.1 | 2   | Verify that all sensitive data created and processed by the application has been identified and classified into protection levels. This includes da… | not addressed |                  |
+| V14.1.2 | 2   | Verify that all sensitive data protection levels have a documented set of protection requirements. This must include (but not be limited to) requir… | not addressed |                  |
+| V14.2.1 | 1   | Verify that sensitive data is only sent to the server in the HTTP message body or header fields, and that the URL and query string do not contain s… | not addressed |                  |
+| V14.2.2 | 2   | Verify that the application prevents sensitive data from being cached in server components, such as load balancers and application caches, or ensur… | not addressed |                  |
+| V14.2.3 | 2   | Verify that defined sensitive data is not sent to untrusted parties (e.g., user trackers) to prevent unwanted collection of data outside of the app… | not addressed |                  |
+| V14.2.4 | 2   | Verify that controls around sensitive data related to encryption, integrity verification, retention, how the data is to be logged, access controls…  | not addressed |                  |
+| V14.3.1 | 1   | Verify that authenticated data is cleared from client storage, such as the browser DOM, after the client or session is terminated. The 'Clear-Site-… | not addressed |                  |
+| V14.3.2 | 2   | Verify that the application sets sufficient anti-caching HTTP response header fields (i.e., Cache-Control: no-store) so that sensitive data is not…  | not addressed |                  |
+| V14.3.3 | 2   | Verify that data stored in browser storage (such as localStorage, sessionStorage, IndexedDB, or cookies) does not contain sensitive data, with the…  | not addressed |                  |
+
+## V15 Secure Coding and Architecture
+
+| ID      | L   | Requirement (abridged)                                                                                                                                | Status        | Evidence / phase |
+| ------- | --- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- | ---------------- |
+| V15.1.1 | 1   | Verify that application documentation defines risk based remediation time frames for 3rd party component versions with vulnerabilities and for upda…  | not addressed |                  |
+| V15.1.2 | 2   | Verify that an inventory catalog, such as software bill of materials (SBOM), is maintained of all third-party libraries in use, including verifying…  | not addressed |                  |
+| V15.1.3 | 2   | Verify that the application documentation identifies functionality which is time-consuming or resource-demanding. This must include how to prevent…   | not addressed |                  |
+| V15.2.1 | 1   | Verify that the application only contains components which have not breached the documented update and remediation time frames.                       | not addressed |                  |
+| V15.2.2 | 2   | Verify that the application has implemented defenses against loss of availability due to functionality which is time-consuming or resource-demandin…  | not addressed |                  |
+| V15.2.3 | 2   | Verify that the production environment only includes functionality that is required for the application to function, and does not expose extraneous…  | not addressed |                  |
+| V15.3.1 | 1   | Verify that the application only returns the required subset of fields from a data object. For example, it should not return an entire data object,…  | not addressed |                  |
+| V15.3.2 | 2   | Verify that where the application backend makes calls to external URLs, it is configured to not follow redirects unless it is intended functionality. | not addressed |                  |
+| V15.3.3 | 2   | Verify that the application has countermeasures to protect against mass assignment attacks by limiting allowed fields per controller and action, e.…  | not addressed |                  |
+| V15.3.4 | 2   | Verify that all proxying and middleware components transfer the user's original IP address correctly using trusted data fields that cannot be manip…  | not addressed |                  |
+| V15.3.5 | 2   | Verify that the application explicitly ensures that variables are of the correct type and performs strict equality and comparator operations. This…   | not addressed |                  |
+| V15.3.6 | 2   | Verify that JavaScript code is written in a way that prevents prototype pollution, for example, by using Set() or Map() instead of object literals.   | not addressed |                  |
+| V15.3.7 | 2   | Verify that the application has defenses against HTTP parameter pollution attacks, particularly if the application framework makes no distinction a…  | not addressed |                  |
+
+## V16 Security Logging and Error Handling
+
+| ID      | L   | Requirement (abridged)                                                                                                                               | Status        | Evidence / phase |
+| ------- | --- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- | ---------------- |
+| V16.1.1 | 2   | Verify that an inventory exists documenting the logging performed at each layer of the application's technology stack, what events are being logged… | not addressed |                  |
+| V16.2.1 | 2   | Verify that each log entry includes necessary metadata (such as when, where, who, what) that would allow for a detailed investigation of the timeli… | not addressed |                  |
+| V16.2.2 | 2   | Verify that time sources for all logging components are synchronized, and that timestamps in security event metadata use UTC or include an explicit… | not addressed |                  |
+| V16.2.3 | 2   | Verify that the application only stores or broadcasts logs to the files and services that are documented in the log inventory.                       | not addressed |                  |
+| V16.2.4 | 2   | Verify that logs can be read and correlated by the log processor that is in use, preferably by using a common logging format.                        | not addressed |                  |
+| V16.2.5 | 2   | Verify that when logging sensitive data, the application enforces logging based on the data's protection level. For example, it may not be allowed…  | not addressed |                  |
+| V16.3.1 | 2   | Verify that all authentication operations are logged, including successful and unsuccessful attempts. Additional metadata, such as the type of auth… | not addressed |                  |
+| V16.3.2 | 2   | Verify that failed authorization attempts are logged. For L3, this must include logging all authorization decisions, including logging when sensiti… | not addressed |                  |
+| V16.3.3 | 2   | Verify that the application logs the security events that are defined in the documentation and also logs attempts to bypass the security controls,…  | not addressed |                  |
+| V16.3.4 | 2   | Verify that the application logs unexpected errors and security control failures such as backend TLS failures.                                       | not addressed |                  |
+| V16.4.1 | 2   | Verify that all logging components appropriately encode data to prevent log injection.                                                               | not addressed |                  |
+| V16.4.2 | 2   | Verify that logs are protected from unauthorized access and cannot be modified.                                                                      | not addressed |                  |
+| V16.4.3 | 2   | Verify that logs are securely transmitted to a logically separate system for analysis, detection, alerting, and escalation. The aim is to ensure th… | not addressed |                  |
+| V16.5.1 | 2   | Verify that a generic message is returned to the consumer when an unexpected or security-sensitive error occurs, ensuring no exposure of sensitive…  | not addressed |                  |
+| V16.5.2 | 2   | Verify that the application continues to operate securely when external resource access fails, for example, by using patterns such as circuit break… | not addressed |                  |
+| V16.5.3 | 2   | Verify that the application fails gracefully and securely, including when an exception occurs, preventing fail-open conditions such as processing a… | not addressed |                  |
+
+## V17 WebRTC
+
+> Not applicable in v1: no WebRTC.
+
+| ID      | L   | Requirement (abridged)                                                                                                                               | Status         | Evidence / phase |
+| ------- | --- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | -------------- | ---------------- |
+| V17.1.1 | 2   | Verify that the Traversal Using Relays around NAT (TURN) service only allows access to IP addresses that are not reserved for special purposes (e.g… | not applicable |                  |
+| V17.2.1 | 2   | Verify that the key for the Datagram Transport Layer Security (DTLS) certificate is managed and protected based on the documented policy for manage… | not applicable |                  |
+| V17.2.2 | 2   | Verify that the media server is configured to use and support approved Datagram Transport Layer Security (DTLS) cipher suites and a secure protecti… | not applicable |                  |
+| V17.2.3 | 2   | Verify that Secure Real-time Transport Protocol (SRTP) authentication is checked at the media server to prevent Real-time Transport Protocol (RTP)…  | not applicable |                  |
+| V17.2.4 | 2   | Verify that the media server is able to continue processing incoming media traffic when encountering malformed Secure Real-time Transport Protocol…  | not applicable |                  |
+| V17.3.1 | 2   | Verify that the signaling server is able to continue processing legitimate incoming signaling messages during a flood attack. This should be achiev… | not applicable |                  |
+| V17.3.2 | 2   | Verify that the signaling server is able to continue processing legitimate signaling messages when encountering malformed signaling message that co… | not applicable |                  |

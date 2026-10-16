@@ -1,0 +1,14 @@
+node_modules/
+.next/
+coverage/
+test-results/
+playwright-report/
+pnpm-lock.yaml
+research/
+specs/
+.specify/
+.claude/
+migrations/*.json
+src/app/(payload)/admin/importMap.js
+src/payload-types.ts
+.pw-browsers/

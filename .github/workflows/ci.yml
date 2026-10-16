@@ -1,0 +1,54 @@
+# CI pipeline (FR-098). No remote is configured yet; run the same steps locally with `pnpm ci:local`.
+name: ci
+on:
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: altamiuz
+          POSTGRES_PASSWORD: ci-only-throwaway
+          POSTGRES_DB: altamiuz
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U altamiuz" --health-interval 5s --health-timeout 3s --health-retries 20
+    env:
+      APP_ENV: test
+      DATABASE_URL: postgres://altamiuz:ci-only-throwaway@127.0.0.1:5432/altamiuz
+      PAYLOAD_SECRET: ci-only-throwaway-secret-0123456789abcdef
+      MFA_ENCRYPTION_KEY: '0000000000000000000000000000000000000000000000000000000000000000'
+      HEALTH_READY_TOKEN: ci-only-throwaway-token
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.25.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm typecheck
+      - run: pnpm lint
+      - run: pnpm format
+      - run: pnpm test
+      - run: pnpm test:integration
+      - run: pnpm test:migrations
+      - run: pnpm build
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm test:smoke
+      - run: pnpm audit --audit-level high
+      - name: Secret scan (full history)
+        run: docker run --rm -v "$PWD:/repo" -w /repo ghcr.io/gitleaks/gitleaks:v8.30.1 git --config .gitleaks.toml --redact --no-banner .
+      - name: Dependency vulnerability scan
+        run: docker run --rm -v "$PWD:/src" -w /src ghcr.io/google/osv-scanner:v2.7.0 scan source --config /src/osv-scanner.toml --lockfile /src/pnpm-lock.yaml

@@ -41,34 +41,53 @@ US2 = plan Phase 3; US1 = plan Phase 5 (public part); US4 = plan Phase 4; US6 = 
 **Gate before starting**: owner approval to install dependencies in the repository root
 (not yet granted — WS1–WS5 authorised only `research/payload-rtl-poc/`).
 
-- [ ] T001 Create `package.json` (pnpm 10, `"engines": {"node": "22.x"}`) pinning exact versions: `payload`, `@payloadcms/next`, `@payloadcms/db-postgres`, `@payloadcms/richtext-lexical`, `@payloadcms/ui`, `@payloadcms/translations` = 3.91.0; `next` = 16.3.3; `react`/`react-dom` = 19.2.6; `sharp` = 0.35.4; record licence of every dependency in `docs/licences.md` (D-1, Constitution I)
-- [ ] T002 [P] Configure strict TypeScript and path aliases (`@/modules/*`, `@/ui/*`) in `tsconfig.json`
-- [ ] T003 [P] Configure ESLint in `eslint.config.mjs` with (a) module-boundary rule: imports into `src/modules/<m>/` only via `index.ts`; (b) rule forbidding string-built URL paths outside `src/modules/i18n/routes.ts` (D-2, D-5)
-- [ ] T004 [P] Add `.prettierrc.json` and `.editorconfig`
-- [ ] T005 [P] Create placeholder-only `.env.example` covering every variable in `contracts/configuration.md` (FR-104)
-- [ ] T006 [P] Create `docker-compose.dev.yml` with `postgres:17` and `axllent/mailpit`, ports bound to `127.0.0.1`, throwaway credentials from `.env.local` (FR-105)
-- [ ] T007 [P] Add gitleaks config `.gitleaks.toml` and pre-commit hook `.githooks/pre-commit` (gitleaks protect --staged, typecheck, lint) with `pnpm prepare` installer (FR-098, SC-014)
-- [ ] T008 [P] Write CI workflow `.github/workflows/ci.yml` (typecheck, lint, unit, integration with Postgres service, security, a11y, gitleaks, `pnpm audit`/osv-scanner, migrations up→down→up); runs locally via `pnpm ci:local` until a remote is authorised (FR-098)
-- [ ] T009 Configure test tooling: `vitest.config.mts` (projects `unit`, `integration`), `playwright.config.ts` (projects chromium, webkit), disposable-DB helper `tests/setup/db.ts` creating/dropping a database per run
-- [ ] T010 Write failing tests `tests/unit/platform/config.test.ts`: production mode refuses dev drivers (`STORAGE_DRIVER=local`, `EMAIL_DRIVER=smtp|memory`, `RATELIMIT_DRIVER=memory`, Turnstile test keys), missing secrets, placeholder values, `PAYLOAD_SECRET` < 32 bytes, `MFA_ENCRYPTION_KEY` ≠ 32 bytes (FR-104, FR-105)
-- [ ] T011 Implement typed config loader `src/modules/platform/config/index.ts` (zod) per `contracts/configuration.md` until T010 passes (FR-105)
-- [ ] T012 [P] Write failing tests `tests/unit/platform/logger.test.ts`: passwords, tokens, cookies, `authorization`, TOTP codes/secrets, recovery codes, session ids, enquiry `message`/`email`/`phone` are redacted (FR-101)
-- [ ] T013 Implement pino logger with redaction `src/modules/platform/logger/index.ts` until T012 passes (FR-101)
-- [ ] T014 Write failing contract tests `tests/integration/platform/adapters.test.ts` for ports storage/email/ratelimit/jobs/captcha/analytics: each local substitute satisfies the port contract; analytics driver `none` is a no-op (FR-105, FR-086)
-- [ ] T015 Implement ports and local substitutes `src/modules/platform/adapters/{storage,email,ratelimit,jobs,captcha,analytics}/index.ts` (local disk, Mailpit SMTP + memory, memory limiter, Payload jobs local runner, Turnstile test keys, none) until T014 passes (FR-105)
-- [ ] T016 Create `src/payload.config.ts` composing module configs: Postgres adapter, `localization` {ar (rtl, default), en, `fallback: false`}, `experimental.localizeStatus: true`, admin `i18n.supportedLanguages: { en }` only (D-23), `graphQL.disable: true`, `csrf` origins from config, no public registration (FR-001, FR-004, FR-030, D-3, D-23)
-- [ ] T017 Create Next app skeleton `src/app/(payload)/**` (generated admin/API routes), `next.config.ts` with `output: 'standalone'` and no host-proprietary APIs (D-14)
-- [ ] T018 R-D spike: measure the minimal CSP Payload admin needs (script/style hashes or nonce support) and record in `docs/adr/ADR-004-admin-csp.md` (FR-090)
-- [ ] T019 Write failing tests `tests/integration/platform/headers.test.ts`: public routes carry nonce-based CSP, admin carries ADR-004 policy; HSTS, `frame-ancestors 'none'`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, restrictive `Permissions-Policy`; error responses contain no stack trace or version (FR-090, FR-095)
-- [ ] T020 Implement headers/CSP nonce in `src/proxy.ts` and generic error handling until T019 passes (FR-090, FR-095)
-- [ ] T021 Write failing tests `tests/integration/platform/health.test.ts`: `/api/health` returns `{status}` only; `/api/health/ready` requires `HEALTH_READY_TOKEN` and pings DB (FR-100)
-- [ ] T022 Implement `src/app/api/health/route.ts` and `src/app/api/health/ready/route.ts` until T021 passes (FR-100)
-- [ ] T023 Add migration scripts (`migrate`, `migrate:create`, `migrate:down`) and failing-then-passing harness `tests/integration/migrations/updownup.test.ts` running every migration up→down→up on a disposable DB; disable `push` outside throwaway DBs (Constitution X)
-- [ ] T024 [P] Write ADRs `docs/adr/ADR-001-single-app.md`, `ADR-002-local-api-only-public.md`, `ADR-003-version-pin.md` (Payload 3.91.0 / Next 16.3.3 exact; upgrades require rich-text + localizeStatus regression suites) (D-1, D-2, D-3)
-- [ ] T025 [P] Create `docs/security/asvs-l2.md` requirement-level skeleton after re-verifying ASVS 5.0.0 chapter titles against the official release; every row status `not addressed` initially (FR-097, Constitution XIV)
+- [X] T001 Create `package.json` (pnpm 10, `"engines": {"node": "22.x"}`) pinning exact versions: `payload`, `@payloadcms/next`, `@payloadcms/db-postgres`, `@payloadcms/richtext-lexical`, `@payloadcms/ui`, `@payloadcms/translations` = 3.91.0; `next` = 16.3.8 (ADR-003 Amendment 1); `react`/`react-dom` = 19.2.6; `sharp` = 0.35.5; record licence of every dependency in `docs/licences.md` (D-1, Constitution I)
+- [X] T002 [P] Configure strict TypeScript and path aliases (`@/modules/*`, `@/ui/*`) in `tsconfig.json`
+- [X] T003 [P] Configure ESLint in `eslint.config.mjs` with (a) module-boundary rule: imports into `src/modules/<m>/` only via `index.ts`; (b) rule forbidding string-built URL paths outside `src/modules/i18n/routes.ts` (D-2, D-5)
+- [X] T004 [P] Add `.prettierrc.json` and `.editorconfig`
+- [X] T005 [P] Create placeholder-only `.env.example` covering every variable in `contracts/configuration.md` (FR-104)
+- [X] T006 [P] Create `docker-compose.dev.yml` with `postgres:17` and `axllent/mailpit`, ports bound to `127.0.0.1`, throwaway credentials from `.env.local` (FR-105)
+- [X] T007 [P] Add gitleaks config `.gitleaks.toml` and pre-commit hook `.githooks/pre-commit` (gitleaks protect --staged, typecheck, lint) with `pnpm prepare` installer (FR-098, SC-014)
+- [X] T008 [P] Write CI workflow `.github/workflows/ci.yml` (typecheck, lint, unit, integration with Postgres service, security, a11y, gitleaks, `pnpm audit`/osv-scanner, migrations up→down→up); runs locally via `pnpm ci:local` until a remote is authorised (FR-098)
+- [X] T009 Configure test tooling: `vitest.config.mts` (projects `unit`, `integration`), `playwright.config.ts` (projects chromium, webkit), disposable-DB helper `tests/setup/db.ts` creating/dropping a database per run
+- [X] T010 Write failing tests `tests/unit/platform/config.test.ts`: production mode refuses dev drivers (`STORAGE_DRIVER=local`, `EMAIL_DRIVER=smtp|memory`, `RATELIMIT_DRIVER=memory`, Turnstile test keys), missing secrets, placeholder values, `PAYLOAD_SECRET` < 32 bytes, `MFA_ENCRYPTION_KEY` ≠ 32 bytes (FR-104, FR-105)
+- [X] T011 Implement typed config loader `src/modules/platform/config/index.ts` (zod) per `contracts/configuration.md` until T010 passes (FR-105)
+- [X] T012 [P] Write failing tests `tests/unit/platform/logger.test.ts`: passwords, tokens, cookies, `authorization`, TOTP codes/secrets, recovery codes, session ids, enquiry `message`/`email`/`phone` are redacted (FR-101)
+- [X] T013 Implement pino logger with redaction `src/modules/platform/logger/index.ts` until T012 passes (FR-101)
+- [X] T014 Write failing contract tests `tests/integration/platform/adapters.test.ts` for ports storage/email/ratelimit/jobs/captcha/analytics: each local substitute satisfies the port contract; analytics driver `none` is a no-op (FR-105, FR-086)
+- [X] T015 Implement ports and local substitutes `src/modules/platform/adapters/{storage,email,ratelimit,jobs,captcha,analytics}/index.ts` (local disk, Mailpit SMTP + memory, memory limiter, Payload jobs local runner, Turnstile test keys, none) until T014 passes (FR-105)
+- [X] T016 Create `src/payload.config.ts` composing module configs: Postgres adapter, `localization` {ar (rtl, default), en, `fallback: false`}, `experimental.localizeStatus: true`, admin `i18n.supportedLanguages: { en }` only (D-23), `graphQL.disable: true`, `csrf` origins from config, no public registration (FR-001, FR-004, FR-030, D-3, D-23)
+- [X] T017 Create Next app skeleton `src/app/(payload)/**` (generated admin/API routes), `next.config.ts` with `output: 'standalone'` and no host-proprietary APIs (D-14)
+- [X] T018 R-D spike: measure the minimal CSP Payload admin needs (script/style hashes or nonce support) and record in `docs/adr/ADR-004-admin-csp.md` (FR-090)
+- [X] T019 Write failing tests `tests/integration/platform/headers.test.ts`: public routes carry nonce-based CSP, admin carries ADR-004 policy; HSTS, `frame-ancestors 'none'`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, restrictive `Permissions-Policy`; error responses contain no stack trace or version (FR-090, FR-095)
+- [X] T020 Implement headers/CSP nonce in `src/proxy.ts` and generic error handling until T019 passes (FR-090, FR-095)
+- [X] T021 Write failing tests `tests/integration/platform/health.test.ts`: `/api/health` returns `{status}` only; `/api/health/ready` requires `HEALTH_READY_TOKEN` and pings DB (FR-100)
+- [X] T022 Implement `src/app/api/health/route.ts` and `src/app/api/health/ready/route.ts` until T021 passes (FR-100)
+- [X] T023 Add migration scripts (`migrate`, `migrate:create`, `migrate:down`) and failing-then-passing harness `tests/integration/migrations/updownup.test.ts` running every migration up→down→up on a disposable DB; disable `push` outside throwaway DBs (Constitution X)
+- [X] T024 [P] Write ADRs `docs/adr/ADR-001-single-app.md`, `ADR-002-local-api-only-public.md`, `ADR-003-version-pin.md` (Payload 3.91.0 / Next 16.3.3 exact; upgrades require rich-text + localizeStatus regression suites) (D-1, D-2, D-3)
+- [X] T025 [P] Create `docs/security/asvs-l2.md` requirement-level skeleton after re-verifying ASVS 5.0.0 chapter titles against the official release; every row status `not addressed` initially (FR-097, Constitution XIV)
 
 **Checkpoint (Gate 1)**: app boots locally with no paid accounts; T010/T012/T014/T019/T021/T023
 green; gitleaks clean → prepare commit for owner approval.
+
+**Setup implementation notes (WS6, 2026-10-16)**:
+- T019 tests live in `tests/unit/platform/headers.test.ts` (proxy and CSP logic need no database)
+  and `tests/smoke/foundation.spec.ts` (real production server, Chromium and WebKit), rather than
+  `tests/integration/platform/headers.test.ts`.
+- T023 harness was written after the baseline migration was generated, so it was not observed
+  failing first. It passes up→down→up on a disposable database.
+- T015 ships ports plus local substitutes only. The Payload jobs runner, Postgres limiter (T039),
+  S3/R2, Resend, Upstash, QStash, real Turnstile (T124) and analytics provider (T127) are deferred
+  to the phases that first need them.
+- T016 uses a deny-all placeholder `users` collection. `src/proxy.ts` blocks Payload's
+  first-user screen and endpoint until T056/T057.
+- T018 measured the admin **login** view only (ADR-004); authenticated views are re-measured in
+  Phase 3/4.
+- T008 cannot run on GitHub (no remote authorised). Its steps were run individually and locally.
+- **Gate 1 audit finding resolved (owner-approved)**: `pnpm audit` and osv-scanner found 1
+  critical + 3 high advisories in the original pins. ADR-003 Amendment 1 bumps `next` to 16.3.8
+  and `sharp` to 0.35.5. The remaining dev-only/transitive advisories are time-bound exceptions
+  in `docs/security/dependency-exceptions.md` (expire 2026-11-16).
 
 ---
 

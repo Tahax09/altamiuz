@@ -1,0 +1,20 @@
+# gitleaks configuration: default ruleset plus narrow allow-lists for documented placeholders.
+title = "altamiuz"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Documented non-secret placeholders and Cloudflare Turnstile public TEST keys"
+regexTarget = "match"
+regexes = [
+  '''1x00000000000000000000AA''',
+  '''1x0000000000000000000000000000000AA''',
+  '''2x0000000000000000000000000000000AA''',
+  '''3x0000000000000000000000000000000AA''',
+  '''replace-with-[a-z0-9-]+''',
+  '''change-me-local-only''',
+]
+paths = [
+  '''pnpm-lock\.yaml''',
+]

@@ -1,0 +1,6 @@
+#!/bin/sh
+# Pre-commit gate: secrets in staged changes, types, lint. Installed by `pnpm prepare`.
+set -eu
+sh scripts/gitleaks.sh staged
+pnpm -s typecheck
+pnpm -s lint
