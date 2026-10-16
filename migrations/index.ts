@@ -5,6 +5,7 @@ import * as migration_20261016_140000_rate_limit_buckets from './20261016_140000
 import * as migration_20261016_143300_accounts from './20261016_143300_accounts'
 import * as migration_20261016_143400_auth_tables from './20261016_143400_auth_tables'
 import * as migration_20261016_150837_audit_export from './20261016_150837_audit_export'
+import * as migration_20261016_201017_content from './20261016_201017_content'
 
 export const migrations = [
   {
@@ -41,5 +42,10 @@ export const migrations = [
     up: migration_20261016_150837_audit_export.up,
     down: migration_20261016_150837_audit_export.down,
     name: '20261016_150837_audit_export',
+  },
+  {
+    up: migration_20261016_201017_content.up,
+    down: migration_20261016_201017_content.down,
+    name: '20261016_201017_content',
   },
 ]

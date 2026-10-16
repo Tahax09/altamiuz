@@ -100,6 +100,13 @@ test('authenticated admin views: no new serious/critical findings', async ({ pag
     ['list:audit-events', '/admin/collections/audit-events'],
     ['list:invitations', '/admin/collections/invitations'],
     ['create:invitations', '/admin/collections/invitations/create'],
+    ['list:pages', '/admin/collections/pages'],
+    [
+      'edit:pages',
+      `/admin/collections/pages/${JSON.parse(fs.readFileSync('test-results/e2e-fixtures.json', 'utf8')).content.pageId}`,
+    ],
+    ['create:pages', '/admin/collections/pages/create'],
+    ['list:redirects', '/admin/collections/redirects'],
   ] as const) {
     await page.goto(path)
     await page.waitForLoadState('networkidle')

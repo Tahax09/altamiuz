@@ -70,6 +70,10 @@ export interface Config {
     users: User;
     invitations: Invitation;
     'audit-events': AuditEvent;
+    pages: Page;
+    services: Service;
+    courses: Course;
+    redirects: Redirect;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -80,6 +84,10 @@ export interface Config {
     users: UsersSelect<false> | UsersSelect<true>;
     invitations: InvitationsSelect<false> | InvitationsSelect<true>;
     'audit-events': AuditEventsSelect<false> | AuditEventsSelect<true>;
+    pages: PagesSelect<false> | PagesSelect<true>;
+    services: ServicesSelect<false> | ServicesSelect<true>;
+    courses: CoursesSelect<false> | CoursesSelect<true>;
+    redirects: RedirectsSelect<false> | RedirectsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -224,6 +232,893 @@ export interface AuditEvent {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages".
+ */
+export interface Page {
+  id: number;
+  title: string;
+  slug: string;
+  template?: ('default' | 'home' | 'legal') | null;
+  sections?:
+    | (
+        | {
+            heading: string;
+            subheading?: string | null;
+            primaryCta?: {
+              linkType?: ('internal' | 'external' | 'email' | 'tel') | null;
+              doc?:
+                | ({
+                    relationTo: 'pages';
+                    value: number | Page;
+                  } | null)
+                | ({
+                    relationTo: 'services';
+                    value: number | Service;
+                  } | null)
+                | ({
+                    relationTo: 'courses';
+                    value: number | Course;
+                  } | null);
+              url?: string | null;
+              email?: string | null;
+              tel?: string | null;
+              label?: string | null;
+              newTab?: boolean | null;
+            };
+            secondaryCta?: {
+              linkType?: ('internal' | 'external' | 'email' | 'tel') | null;
+              doc?:
+                | ({
+                    relationTo: 'pages';
+                    value: number | Page;
+                  } | null)
+                | ({
+                    relationTo: 'services';
+                    value: number | Service;
+                  } | null)
+                | ({
+                    relationTo: 'courses';
+                    value: number | Course;
+                  } | null);
+              url?: string | null;
+              email?: string | null;
+              tel?: string | null;
+              label?: string | null;
+              newTab?: boolean | null;
+            };
+            /**
+             * Hidden sections stay editable but are not published.
+             */
+            hidden?: boolean | null;
+            anchorId?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'hero';
+          }
+        | {
+            /**
+             * Formatting: headings, bold, italic, lists, quotes and links. To leave the editor with the keyboard, press Escape, then Tab.
+             */
+            content?: {
+              root: {
+                type: string;
+                children: {
+                  type: any;
+                  version: number;
+                  [k: string]: unknown;
+                }[];
+                direction: ('ltr' | 'rtl') | null;
+                format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+                indent: number;
+                version: number;
+              };
+              [k: string]: unknown;
+            } | null;
+            /**
+             * Hidden sections stay editable but are not published.
+             */
+            hidden?: boolean | null;
+            anchorId?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'richText';
+          }
+        | {
+            heading?: string | null;
+            items?:
+              | {
+                  icon?: ('shield' | 'audit' | 'policy' | 'training' | 'risk' | 'response') | null;
+                  title: string;
+                  text?: string | null;
+                  id?: string | null;
+                }[]
+              | null;
+            /**
+             * Hidden sections stay editable but are not published.
+             */
+            hidden?: boolean | null;
+            anchorId?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'featureGrid';
+          }
+        | {
+            heading?: string | null;
+            mode?: ('all' | 'selected') | null;
+            services?: (number | Service)[] | null;
+            /**
+             * Hidden sections stay editable but are not published.
+             */
+            hidden?: boolean | null;
+            anchorId?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'serviceList';
+          }
+        | {
+            heading?: string | null;
+            mode?: ('all' | 'selected') | null;
+            courses?: (number | Course)[] | null;
+            /**
+             * Hidden sections stay editable but are not published.
+             */
+            hidden?: boolean | null;
+            anchorId?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'courseList';
+          }
+        | {
+            heading: string;
+            text?: string | null;
+            link?: {
+              linkType?: ('internal' | 'external' | 'email' | 'tel') | null;
+              doc?:
+                | ({
+                    relationTo: 'pages';
+                    value: number | Page;
+                  } | null)
+                | ({
+                    relationTo: 'services';
+                    value: number | Service;
+                  } | null)
+                | ({
+                    relationTo: 'courses';
+                    value: number | Course;
+                  } | null);
+              url?: string | null;
+              email?: string | null;
+              tel?: string | null;
+              label?: string | null;
+              newTab?: boolean | null;
+            };
+            /**
+             * Hidden sections stay editable but are not published.
+             */
+            hidden?: boolean | null;
+            anchorId?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'cta';
+          }
+        | {
+            items?:
+              | {
+                  question: string;
+                  /**
+                   * Formatting: headings, bold, italic, lists, quotes and links. To leave the editor with the keyboard, press Escape, then Tab.
+                   */
+                  answer?: {
+                    root: {
+                      type: string;
+                      children: {
+                        type: any;
+                        version: number;
+                        [k: string]: unknown;
+                      }[];
+                      direction: ('ltr' | 'rtl') | null;
+                      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+                      indent: number;
+                      version: number;
+                    };
+                    [k: string]: unknown;
+                  } | null;
+                  id?: string | null;
+                }[]
+              | null;
+            /**
+             * Hidden sections stay editable but are not published.
+             */
+            hidden?: boolean | null;
+            anchorId?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'faq';
+          }
+        | {
+            items?:
+              | {
+                  value: string;
+                  label: string;
+                  id?: string | null;
+                }[]
+              | null;
+            /**
+             * Claims are publishable only once verified by an administrator, with a recorded evidence reference.
+             */
+            evidence: {
+              status: 'unverified' | 'verified';
+              reference?: string | null;
+              verifiedBy?: (number | null) | User;
+              verifiedAt?: string | null;
+            };
+            /**
+             * Hidden sections stay editable but are not published.
+             */
+            hidden?: boolean | null;
+            anchorId?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'stats';
+          }
+        | {
+            items?:
+              | {
+                  name: string;
+                  issuer?: string | null;
+                  validUntil?: string | null;
+                  id?: string | null;
+                }[]
+              | null;
+            /**
+             * Claims are publishable only once verified by an administrator, with a recorded evidence reference.
+             */
+            evidence: {
+              status: 'unverified' | 'verified';
+              reference?: string | null;
+              verifiedBy?: (number | null) | User;
+              verifiedAt?: string | null;
+            };
+            /**
+             * Hidden sections stay editable but are not published.
+             */
+            hidden?: boolean | null;
+            anchorId?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'credentials';
+          }
+        | {
+            heading?: string | null;
+            intro?: string | null;
+            /**
+             * Hidden sections stay editable but are not published.
+             */
+            hidden?: boolean | null;
+            anchorId?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'contactBlock';
+          }
+      )[]
+    | null;
+  seo?: {
+    title?: string | null;
+    description?: string | null;
+    noindex?: boolean | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "services".
+ */
+export interface Service {
+  id: number;
+  title: string;
+  slug: string;
+  summary?: string | null;
+  sections?:
+    | (
+        | {
+            heading: string;
+            subheading?: string | null;
+            primaryCta?: {
+              linkType?: ('internal' | 'external' | 'email' | 'tel') | null;
+              doc?:
+                | ({
+                    relationTo: 'pages';
+                    value: number | Page;
+                  } | null)
+                | ({
+                    relationTo: 'services';
+                    value: number | Service;
+                  } | null)
+                | ({
+                    relationTo: 'courses';
+                    value: number | Course;
+                  } | null);
+              url?: string | null;
+              email?: string | null;
+              tel?: string | null;
+              label?: string | null;
+              newTab?: boolean | null;
+            };
+            secondaryCta?: {
+              linkType?: ('internal' | 'external' | 'email' | 'tel') | null;
+              doc?:
+                | ({
+                    relationTo: 'pages';
+                    value: number | Page;
+                  } | null)
+                | ({
+                    relationTo: 'services';
+                    value: number | Service;
+                  } | null)
+                | ({
+                    relationTo: 'courses';
+                    value: number | Course;
+                  } | null);
+              url?: string | null;
+              email?: string | null;
+              tel?: string | null;
+              label?: string | null;
+              newTab?: boolean | null;
+            };
+            /**
+             * Hidden sections stay editable but are not published.
+             */
+            hidden?: boolean | null;
+            anchorId?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'hero';
+          }
+        | {
+            /**
+             * Formatting: headings, bold, italic, lists, quotes and links. To leave the editor with the keyboard, press Escape, then Tab.
+             */
+            content?: {
+              root: {
+                type: string;
+                children: {
+                  type: any;
+                  version: number;
+                  [k: string]: unknown;
+                }[];
+                direction: ('ltr' | 'rtl') | null;
+                format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+                indent: number;
+                version: number;
+              };
+              [k: string]: unknown;
+            } | null;
+            /**
+             * Hidden sections stay editable but are not published.
+             */
+            hidden?: boolean | null;
+            anchorId?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'richText';
+          }
+        | {
+            heading?: string | null;
+            items?:
+              | {
+                  icon?: ('shield' | 'audit' | 'policy' | 'training' | 'risk' | 'response') | null;
+                  title: string;
+                  text?: string | null;
+                  id?: string | null;
+                }[]
+              | null;
+            /**
+             * Hidden sections stay editable but are not published.
+             */
+            hidden?: boolean | null;
+            anchorId?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'featureGrid';
+          }
+        | {
+            heading?: string | null;
+            mode?: ('all' | 'selected') | null;
+            services?: (number | Service)[] | null;
+            /**
+             * Hidden sections stay editable but are not published.
+             */
+            hidden?: boolean | null;
+            anchorId?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'serviceList';
+          }
+        | {
+            heading?: string | null;
+            mode?: ('all' | 'selected') | null;
+            courses?: (number | Course)[] | null;
+            /**
+             * Hidden sections stay editable but are not published.
+             */
+            hidden?: boolean | null;
+            anchorId?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'courseList';
+          }
+        | {
+            heading: string;
+            text?: string | null;
+            link?: {
+              linkType?: ('internal' | 'external' | 'email' | 'tel') | null;
+              doc?:
+                | ({
+                    relationTo: 'pages';
+                    value: number | Page;
+                  } | null)
+                | ({
+                    relationTo: 'services';
+                    value: number | Service;
+                  } | null)
+                | ({
+                    relationTo: 'courses';
+                    value: number | Course;
+                  } | null);
+              url?: string | null;
+              email?: string | null;
+              tel?: string | null;
+              label?: string | null;
+              newTab?: boolean | null;
+            };
+            /**
+             * Hidden sections stay editable but are not published.
+             */
+            hidden?: boolean | null;
+            anchorId?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'cta';
+          }
+        | {
+            items?:
+              | {
+                  question: string;
+                  /**
+                   * Formatting: headings, bold, italic, lists, quotes and links. To leave the editor with the keyboard, press Escape, then Tab.
+                   */
+                  answer?: {
+                    root: {
+                      type: string;
+                      children: {
+                        type: any;
+                        version: number;
+                        [k: string]: unknown;
+                      }[];
+                      direction: ('ltr' | 'rtl') | null;
+                      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+                      indent: number;
+                      version: number;
+                    };
+                    [k: string]: unknown;
+                  } | null;
+                  id?: string | null;
+                }[]
+              | null;
+            /**
+             * Hidden sections stay editable but are not published.
+             */
+            hidden?: boolean | null;
+            anchorId?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'faq';
+          }
+        | {
+            items?:
+              | {
+                  value: string;
+                  label: string;
+                  id?: string | null;
+                }[]
+              | null;
+            /**
+             * Claims are publishable only once verified by an administrator, with a recorded evidence reference.
+             */
+            evidence: {
+              status: 'unverified' | 'verified';
+              reference?: string | null;
+              verifiedBy?: (number | null) | User;
+              verifiedAt?: string | null;
+            };
+            /**
+             * Hidden sections stay editable but are not published.
+             */
+            hidden?: boolean | null;
+            anchorId?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'stats';
+          }
+        | {
+            items?:
+              | {
+                  name: string;
+                  issuer?: string | null;
+                  validUntil?: string | null;
+                  id?: string | null;
+                }[]
+              | null;
+            /**
+             * Claims are publishable only once verified by an administrator, with a recorded evidence reference.
+             */
+            evidence: {
+              status: 'unverified' | 'verified';
+              reference?: string | null;
+              verifiedBy?: (number | null) | User;
+              verifiedAt?: string | null;
+            };
+            /**
+             * Hidden sections stay editable but are not published.
+             */
+            hidden?: boolean | null;
+            anchorId?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'credentials';
+          }
+        | {
+            heading?: string | null;
+            intro?: string | null;
+            /**
+             * Hidden sections stay editable but are not published.
+             */
+            hidden?: boolean | null;
+            anchorId?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'contactBlock';
+          }
+      )[]
+    | null;
+  /**
+   * Listing position (lower first). Keyboard-editable alternative to drag ordering.
+   */
+  order?: number | null;
+  hidden?: boolean | null;
+  seo?: {
+    title?: string | null;
+    description?: string | null;
+    noindex?: boolean | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "courses".
+ */
+export interface Course {
+  id: number;
+  title: string;
+  slug: string;
+  summary?: string | null;
+  sections?:
+    | (
+        | {
+            heading: string;
+            subheading?: string | null;
+            primaryCta?: {
+              linkType?: ('internal' | 'external' | 'email' | 'tel') | null;
+              doc?:
+                | ({
+                    relationTo: 'pages';
+                    value: number | Page;
+                  } | null)
+                | ({
+                    relationTo: 'services';
+                    value: number | Service;
+                  } | null)
+                | ({
+                    relationTo: 'courses';
+                    value: number | Course;
+                  } | null);
+              url?: string | null;
+              email?: string | null;
+              tel?: string | null;
+              label?: string | null;
+              newTab?: boolean | null;
+            };
+            secondaryCta?: {
+              linkType?: ('internal' | 'external' | 'email' | 'tel') | null;
+              doc?:
+                | ({
+                    relationTo: 'pages';
+                    value: number | Page;
+                  } | null)
+                | ({
+                    relationTo: 'services';
+                    value: number | Service;
+                  } | null)
+                | ({
+                    relationTo: 'courses';
+                    value: number | Course;
+                  } | null);
+              url?: string | null;
+              email?: string | null;
+              tel?: string | null;
+              label?: string | null;
+              newTab?: boolean | null;
+            };
+            /**
+             * Hidden sections stay editable but are not published.
+             */
+            hidden?: boolean | null;
+            anchorId?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'hero';
+          }
+        | {
+            /**
+             * Formatting: headings, bold, italic, lists, quotes and links. To leave the editor with the keyboard, press Escape, then Tab.
+             */
+            content?: {
+              root: {
+                type: string;
+                children: {
+                  type: any;
+                  version: number;
+                  [k: string]: unknown;
+                }[];
+                direction: ('ltr' | 'rtl') | null;
+                format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+                indent: number;
+                version: number;
+              };
+              [k: string]: unknown;
+            } | null;
+            /**
+             * Hidden sections stay editable but are not published.
+             */
+            hidden?: boolean | null;
+            anchorId?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'richText';
+          }
+        | {
+            heading?: string | null;
+            items?:
+              | {
+                  icon?: ('shield' | 'audit' | 'policy' | 'training' | 'risk' | 'response') | null;
+                  title: string;
+                  text?: string | null;
+                  id?: string | null;
+                }[]
+              | null;
+            /**
+             * Hidden sections stay editable but are not published.
+             */
+            hidden?: boolean | null;
+            anchorId?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'featureGrid';
+          }
+        | {
+            heading?: string | null;
+            mode?: ('all' | 'selected') | null;
+            services?: (number | Service)[] | null;
+            /**
+             * Hidden sections stay editable but are not published.
+             */
+            hidden?: boolean | null;
+            anchorId?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'serviceList';
+          }
+        | {
+            heading?: string | null;
+            mode?: ('all' | 'selected') | null;
+            courses?: (number | Course)[] | null;
+            /**
+             * Hidden sections stay editable but are not published.
+             */
+            hidden?: boolean | null;
+            anchorId?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'courseList';
+          }
+        | {
+            heading: string;
+            text?: string | null;
+            link?: {
+              linkType?: ('internal' | 'external' | 'email' | 'tel') | null;
+              doc?:
+                | ({
+                    relationTo: 'pages';
+                    value: number | Page;
+                  } | null)
+                | ({
+                    relationTo: 'services';
+                    value: number | Service;
+                  } | null)
+                | ({
+                    relationTo: 'courses';
+                    value: number | Course;
+                  } | null);
+              url?: string | null;
+              email?: string | null;
+              tel?: string | null;
+              label?: string | null;
+              newTab?: boolean | null;
+            };
+            /**
+             * Hidden sections stay editable but are not published.
+             */
+            hidden?: boolean | null;
+            anchorId?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'cta';
+          }
+        | {
+            items?:
+              | {
+                  question: string;
+                  /**
+                   * Formatting: headings, bold, italic, lists, quotes and links. To leave the editor with the keyboard, press Escape, then Tab.
+                   */
+                  answer?: {
+                    root: {
+                      type: string;
+                      children: {
+                        type: any;
+                        version: number;
+                        [k: string]: unknown;
+                      }[];
+                      direction: ('ltr' | 'rtl') | null;
+                      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+                      indent: number;
+                      version: number;
+                    };
+                    [k: string]: unknown;
+                  } | null;
+                  id?: string | null;
+                }[]
+              | null;
+            /**
+             * Hidden sections stay editable but are not published.
+             */
+            hidden?: boolean | null;
+            anchorId?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'faq';
+          }
+        | {
+            items?:
+              | {
+                  value: string;
+                  label: string;
+                  id?: string | null;
+                }[]
+              | null;
+            /**
+             * Claims are publishable only once verified by an administrator, with a recorded evidence reference.
+             */
+            evidence: {
+              status: 'unverified' | 'verified';
+              reference?: string | null;
+              verifiedBy?: (number | null) | User;
+              verifiedAt?: string | null;
+            };
+            /**
+             * Hidden sections stay editable but are not published.
+             */
+            hidden?: boolean | null;
+            anchorId?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'stats';
+          }
+        | {
+            items?:
+              | {
+                  name: string;
+                  issuer?: string | null;
+                  validUntil?: string | null;
+                  id?: string | null;
+                }[]
+              | null;
+            /**
+             * Claims are publishable only once verified by an administrator, with a recorded evidence reference.
+             */
+            evidence: {
+              status: 'unverified' | 'verified';
+              reference?: string | null;
+              verifiedBy?: (number | null) | User;
+              verifiedAt?: string | null;
+            };
+            /**
+             * Hidden sections stay editable but are not published.
+             */
+            hidden?: boolean | null;
+            anchorId?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'credentials';
+          }
+        | {
+            heading?: string | null;
+            intro?: string | null;
+            /**
+             * Hidden sections stay editable but are not published.
+             */
+            hidden?: boolean | null;
+            anchorId?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'contactBlock';
+          }
+      )[]
+    | null;
+  /**
+   * Listing position (lower first). Keyboard-editable alternative to drag ordering.
+   */
+  order?: number | null;
+  hidden?: boolean | null;
+  audience?: string | null;
+  duration?: {
+    value?: number | null;
+    unit?: ('hours' | 'days' | 'weeks') | null;
+  };
+  deliveryFormat?: ('in-person' | 'online' | 'hybrid') | null;
+  provider?: string | null;
+  /**
+   * Claim-bearing: needs verified evidence to publish.
+   */
+  accreditationStatement?: string | null;
+  /**
+   * Claims are publishable only once verified by an administrator, with a recorded evidence reference.
+   */
+  accreditationEvidence: {
+    status: 'unverified' | 'verified';
+    reference?: string | null;
+    verifiedBy?: (number | null) | User;
+    verifiedAt?: string | null;
+  };
+  seo?: {
+    title?: string | null;
+    description?: string | null;
+    noindex?: boolean | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "redirects".
+ */
+export interface Redirect {
+  id: number;
+  from: string;
+  to: string;
+  type: '301' | '302';
+  source: 'manual' | 'slug-change' | 'legacy';
+  createdBy?: (number | null) | User;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -253,6 +1148,22 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'invitations';
         value: number | Invitation;
+      } | null)
+    | ({
+        relationTo: 'pages';
+        value: number | Page;
+      } | null)
+    | ({
+        relationTo: 'services';
+        value: number | Service;
+      } | null)
+    | ({
+        relationTo: 'courses';
+        value: number | Course;
+      } | null)
+    | ({
+        relationTo: 'redirects';
+        value: number | Redirect;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -348,6 +1259,629 @@ export interface AuditEventsSelect<T extends boolean = true> {
   ip?: T;
   userAgent?: T;
   meta?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages_select".
+ */
+export interface PagesSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  template?: T;
+  sections?:
+    | T
+    | {
+        hero?:
+          | T
+          | {
+              heading?: T;
+              subheading?: T;
+              primaryCta?:
+                | T
+                | {
+                    linkType?: T;
+                    doc?: T;
+                    url?: T;
+                    email?: T;
+                    tel?: T;
+                    label?: T;
+                    newTab?: T;
+                  };
+              secondaryCta?:
+                | T
+                | {
+                    linkType?: T;
+                    doc?: T;
+                    url?: T;
+                    email?: T;
+                    tel?: T;
+                    label?: T;
+                    newTab?: T;
+                  };
+              hidden?: T;
+              anchorId?: T;
+              id?: T;
+              blockName?: T;
+            };
+        richText?:
+          | T
+          | {
+              content?: T;
+              hidden?: T;
+              anchorId?: T;
+              id?: T;
+              blockName?: T;
+            };
+        featureGrid?:
+          | T
+          | {
+              heading?: T;
+              items?:
+                | T
+                | {
+                    icon?: T;
+                    title?: T;
+                    text?: T;
+                    id?: T;
+                  };
+              hidden?: T;
+              anchorId?: T;
+              id?: T;
+              blockName?: T;
+            };
+        serviceList?:
+          | T
+          | {
+              heading?: T;
+              mode?: T;
+              services?: T;
+              hidden?: T;
+              anchorId?: T;
+              id?: T;
+              blockName?: T;
+            };
+        courseList?:
+          | T
+          | {
+              heading?: T;
+              mode?: T;
+              courses?: T;
+              hidden?: T;
+              anchorId?: T;
+              id?: T;
+              blockName?: T;
+            };
+        cta?:
+          | T
+          | {
+              heading?: T;
+              text?: T;
+              link?:
+                | T
+                | {
+                    linkType?: T;
+                    doc?: T;
+                    url?: T;
+                    email?: T;
+                    tel?: T;
+                    label?: T;
+                    newTab?: T;
+                  };
+              hidden?: T;
+              anchorId?: T;
+              id?: T;
+              blockName?: T;
+            };
+        faq?:
+          | T
+          | {
+              items?:
+                | T
+                | {
+                    question?: T;
+                    answer?: T;
+                    id?: T;
+                  };
+              hidden?: T;
+              anchorId?: T;
+              id?: T;
+              blockName?: T;
+            };
+        stats?:
+          | T
+          | {
+              items?:
+                | T
+                | {
+                    value?: T;
+                    label?: T;
+                    id?: T;
+                  };
+              evidence?:
+                | T
+                | {
+                    status?: T;
+                    reference?: T;
+                    verifiedBy?: T;
+                    verifiedAt?: T;
+                  };
+              hidden?: T;
+              anchorId?: T;
+              id?: T;
+              blockName?: T;
+            };
+        credentials?:
+          | T
+          | {
+              items?:
+                | T
+                | {
+                    name?: T;
+                    issuer?: T;
+                    validUntil?: T;
+                    id?: T;
+                  };
+              evidence?:
+                | T
+                | {
+                    status?: T;
+                    reference?: T;
+                    verifiedBy?: T;
+                    verifiedAt?: T;
+                  };
+              hidden?: T;
+              anchorId?: T;
+              id?: T;
+              blockName?: T;
+            };
+        contactBlock?:
+          | T
+          | {
+              heading?: T;
+              intro?: T;
+              hidden?: T;
+              anchorId?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  seo?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        noindex?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "services_select".
+ */
+export interface ServicesSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  summary?: T;
+  sections?:
+    | T
+    | {
+        hero?:
+          | T
+          | {
+              heading?: T;
+              subheading?: T;
+              primaryCta?:
+                | T
+                | {
+                    linkType?: T;
+                    doc?: T;
+                    url?: T;
+                    email?: T;
+                    tel?: T;
+                    label?: T;
+                    newTab?: T;
+                  };
+              secondaryCta?:
+                | T
+                | {
+                    linkType?: T;
+                    doc?: T;
+                    url?: T;
+                    email?: T;
+                    tel?: T;
+                    label?: T;
+                    newTab?: T;
+                  };
+              hidden?: T;
+              anchorId?: T;
+              id?: T;
+              blockName?: T;
+            };
+        richText?:
+          | T
+          | {
+              content?: T;
+              hidden?: T;
+              anchorId?: T;
+              id?: T;
+              blockName?: T;
+            };
+        featureGrid?:
+          | T
+          | {
+              heading?: T;
+              items?:
+                | T
+                | {
+                    icon?: T;
+                    title?: T;
+                    text?: T;
+                    id?: T;
+                  };
+              hidden?: T;
+              anchorId?: T;
+              id?: T;
+              blockName?: T;
+            };
+        serviceList?:
+          | T
+          | {
+              heading?: T;
+              mode?: T;
+              services?: T;
+              hidden?: T;
+              anchorId?: T;
+              id?: T;
+              blockName?: T;
+            };
+        courseList?:
+          | T
+          | {
+              heading?: T;
+              mode?: T;
+              courses?: T;
+              hidden?: T;
+              anchorId?: T;
+              id?: T;
+              blockName?: T;
+            };
+        cta?:
+          | T
+          | {
+              heading?: T;
+              text?: T;
+              link?:
+                | T
+                | {
+                    linkType?: T;
+                    doc?: T;
+                    url?: T;
+                    email?: T;
+                    tel?: T;
+                    label?: T;
+                    newTab?: T;
+                  };
+              hidden?: T;
+              anchorId?: T;
+              id?: T;
+              blockName?: T;
+            };
+        faq?:
+          | T
+          | {
+              items?:
+                | T
+                | {
+                    question?: T;
+                    answer?: T;
+                    id?: T;
+                  };
+              hidden?: T;
+              anchorId?: T;
+              id?: T;
+              blockName?: T;
+            };
+        stats?:
+          | T
+          | {
+              items?:
+                | T
+                | {
+                    value?: T;
+                    label?: T;
+                    id?: T;
+                  };
+              evidence?:
+                | T
+                | {
+                    status?: T;
+                    reference?: T;
+                    verifiedBy?: T;
+                    verifiedAt?: T;
+                  };
+              hidden?: T;
+              anchorId?: T;
+              id?: T;
+              blockName?: T;
+            };
+        credentials?:
+          | T
+          | {
+              items?:
+                | T
+                | {
+                    name?: T;
+                    issuer?: T;
+                    validUntil?: T;
+                    id?: T;
+                  };
+              evidence?:
+                | T
+                | {
+                    status?: T;
+                    reference?: T;
+                    verifiedBy?: T;
+                    verifiedAt?: T;
+                  };
+              hidden?: T;
+              anchorId?: T;
+              id?: T;
+              blockName?: T;
+            };
+        contactBlock?:
+          | T
+          | {
+              heading?: T;
+              intro?: T;
+              hidden?: T;
+              anchorId?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  order?: T;
+  hidden?: T;
+  seo?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        noindex?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "courses_select".
+ */
+export interface CoursesSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  summary?: T;
+  sections?:
+    | T
+    | {
+        hero?:
+          | T
+          | {
+              heading?: T;
+              subheading?: T;
+              primaryCta?:
+                | T
+                | {
+                    linkType?: T;
+                    doc?: T;
+                    url?: T;
+                    email?: T;
+                    tel?: T;
+                    label?: T;
+                    newTab?: T;
+                  };
+              secondaryCta?:
+                | T
+                | {
+                    linkType?: T;
+                    doc?: T;
+                    url?: T;
+                    email?: T;
+                    tel?: T;
+                    label?: T;
+                    newTab?: T;
+                  };
+              hidden?: T;
+              anchorId?: T;
+              id?: T;
+              blockName?: T;
+            };
+        richText?:
+          | T
+          | {
+              content?: T;
+              hidden?: T;
+              anchorId?: T;
+              id?: T;
+              blockName?: T;
+            };
+        featureGrid?:
+          | T
+          | {
+              heading?: T;
+              items?:
+                | T
+                | {
+                    icon?: T;
+                    title?: T;
+                    text?: T;
+                    id?: T;
+                  };
+              hidden?: T;
+              anchorId?: T;
+              id?: T;
+              blockName?: T;
+            };
+        serviceList?:
+          | T
+          | {
+              heading?: T;
+              mode?: T;
+              services?: T;
+              hidden?: T;
+              anchorId?: T;
+              id?: T;
+              blockName?: T;
+            };
+        courseList?:
+          | T
+          | {
+              heading?: T;
+              mode?: T;
+              courses?: T;
+              hidden?: T;
+              anchorId?: T;
+              id?: T;
+              blockName?: T;
+            };
+        cta?:
+          | T
+          | {
+              heading?: T;
+              text?: T;
+              link?:
+                | T
+                | {
+                    linkType?: T;
+                    doc?: T;
+                    url?: T;
+                    email?: T;
+                    tel?: T;
+                    label?: T;
+                    newTab?: T;
+                  };
+              hidden?: T;
+              anchorId?: T;
+              id?: T;
+              blockName?: T;
+            };
+        faq?:
+          | T
+          | {
+              items?:
+                | T
+                | {
+                    question?: T;
+                    answer?: T;
+                    id?: T;
+                  };
+              hidden?: T;
+              anchorId?: T;
+              id?: T;
+              blockName?: T;
+            };
+        stats?:
+          | T
+          | {
+              items?:
+                | T
+                | {
+                    value?: T;
+                    label?: T;
+                    id?: T;
+                  };
+              evidence?:
+                | T
+                | {
+                    status?: T;
+                    reference?: T;
+                    verifiedBy?: T;
+                    verifiedAt?: T;
+                  };
+              hidden?: T;
+              anchorId?: T;
+              id?: T;
+              blockName?: T;
+            };
+        credentials?:
+          | T
+          | {
+              items?:
+                | T
+                | {
+                    name?: T;
+                    issuer?: T;
+                    validUntil?: T;
+                    id?: T;
+                  };
+              evidence?:
+                | T
+                | {
+                    status?: T;
+                    reference?: T;
+                    verifiedBy?: T;
+                    verifiedAt?: T;
+                  };
+              hidden?: T;
+              anchorId?: T;
+              id?: T;
+              blockName?: T;
+            };
+        contactBlock?:
+          | T
+          | {
+              heading?: T;
+              intro?: T;
+              hidden?: T;
+              anchorId?: T;
+              id?: T;
+              blockName?: T;
+            };
+      };
+  order?: T;
+  hidden?: T;
+  audience?: T;
+  duration?:
+    | T
+    | {
+        value?: T;
+        unit?: T;
+      };
+  deliveryFormat?: T;
+  provider?: T;
+  accreditationStatement?: T;
+  accreditationEvidence?:
+    | T
+    | {
+        status?: T;
+        reference?: T;
+        verifiedBy?: T;
+        verifiedAt?: T;
+      };
+  seo?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        noindex?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "redirects_select".
+ */
+export interface RedirectsSelect<T extends boolean = true> {
+  from?: T;
+  to?: T;
+  type?: T;
+  source?: T;
+  createdBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

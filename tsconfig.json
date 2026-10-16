@@ -25,7 +25,8 @@
     "paths": {
       "@/modules/*": ["./src/modules/*"],
       "@/ui/*": ["./src/ui/*"],
-      "@payload-config": ["./src/payload.config.ts"]
+      "@payload-config": ["./src/payload.config.ts"],
+      "@/ui": ["./src/ui/index.ts"]
     }
   },
   "include": [

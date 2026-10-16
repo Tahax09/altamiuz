@@ -1,1 +1,39 @@
-/* Admin overrides (accessibility remediations land here in Phase 4, T093). */
+/* Admin accessibility remediations via supported extension points (T093, FR-080a, D-25). */
+
+/* Visible focus on the rich-text editor (R-A finding A-07). Lexical sets
+   `.ContentEditable__root:focus-visible { outline: none !important }` inside a cascade layer, and
+   layered !important beats any unlayered rule, so the indicator goes on the editor container. */
+.rich-text-lexical .editor-container:focus-within {
+  outline: 3px solid #1d4ed8;
+  outline-offset: 2px;
+}
+
+/* Visible focus for every interactive admin control. */
+.payload__app :is(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 3px solid #1d4ed8;
+  outline-offset: 2px;
+}
+
+/* Reorder control (T092). */
+.altamiuz-row-label {
+  display: inline-flex;
+  gap: 0.75rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.altamiuz-reorder {
+  display: inline-flex;
+  gap: 0.25rem;
+}
+.altamiuz-reorder button {
+  min-height: 24px;
+  min-width: 24px;
+}
+.altamiuz-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

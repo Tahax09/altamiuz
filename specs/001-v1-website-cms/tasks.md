@@ -242,36 +242,78 @@ publishing, revisions, locking, preview, accessible reordering.
 
 ### Tests for US2 (write first)
 
-- [ ] T071 [P] [US2] Failing attack tests `tests/security/richtext-writepaths.spec.ts`: T026 corpus submitted via admin paste (Playwright), REST create/update, Local API, draft save, autosave, duplicate, copy-to-locale, version restore of a malicious historical version inserted by SQL, admin bulk edit, admin Copy/Paste Field and Paste Row, nested rich text in blocks/arrays, `link`-group fields, both locales — all rejected with field path and code; nothing persisted (FR-013b, FR-014, SC-018)
-- [ ] T072 [P] [US2] Failing tests `tests/security/richtext-render.spec.ts`: malicious Lexical JSON written directly to the DB renders on the public page and preview with no unsafe `href`, no unknown elements, no inline `style`; `newTab` links get `rel="noopener noreferrer"` (FR-013c, SC-018)
-- [ ] T073 [P] [US2] Failing tests `tests/e2e/richtext-bidi.spec.ts`: ar/en paragraphs honour `direction`; Latin identifiers isolated; preview HTML equals public HTML for the same document; every link has non-empty text (FR-013a, FR-013d)
-- [ ] T074 [P] [US2] Failing tests `tests/integration/content/publish.test.ts`: publishing `ar` leaves `en` draft (`experimental.localizeStatus`); public queries never return drafts; unpublish per locale; restore creates a draft; publish blocked when required locale fields are incomplete or evidence is unverified; editor publish via REST denied and audited (FR-004, FR-016, FR-020, FR-021, FR-023, FR-024, FR-045)
-- [ ] T075 [P] [US2] Failing tests `tests/integration/content/localize-status-regression.test.ts`: asserts installed Payload version equals ADR-003 pin and per-locale status semantics hold (D-4)
-- [ ] T076 [P] [US2] Failing tests `tests/e2e/locking.spec.ts`: second editor sees lock; no silent overwrite (FR-015)
-- [ ] T077 [P] [US2] Failing attack tests `tests/security/preview.spec.ts`: anonymous, password-only and no-read-permission sessions denied; preview responses `noindex`; no shareable-link endpoint exists (FR-022)
-- [ ] T078 [P] [US2] Failing tests `tests/a11y/admin/reorder.spec.ts`: keyboard-only move up/down for blocks, gallery items and listing order; announcement "Moved {label} to position {n} of {total}"; focus stays on moved item; order persists after save + reload; single-pointer alternative; axe clean on the control (FR-012, FR-055, FR-080, FR-080a)
-- [ ] T079 [P] [US2] Failing tests `tests/a11y/admin/editor.spec.ts`: visible focus indicator on the rich-text editor; Escape+Tab exit described in field help; on validation failure focus moves to first invalid field, which has `aria-invalid="true"` and an announced message (FR-080a)
-- [ ] T080 [P] [US2] Failing tests `tests/integration/content/collision.test.ts`: slug equal to or prefixing a static route segment, duplicate slug in same locale/scope, or slug equal to an active redirect `from` → rejected; slug change creates a redirect (FR-002, FR-025)
+- [X] T071 [P] [US2] Failing attack tests `tests/security/richtext-writepaths.spec.ts`: T026 corpus submitted via admin paste (Playwright), REST create/update, Local API, draft save, autosave, duplicate, copy-to-locale, version restore of a malicious historical version inserted by SQL, admin bulk edit, admin Copy/Paste Field and Paste Row, nested rich text in blocks/arrays, `link`-group fields, both locales — all rejected with field path and code; nothing persisted (FR-013b, FR-014, SC-018)
+- [X] T072 [P] [US2] Failing tests `tests/security/richtext-render.spec.ts`: malicious Lexical JSON written directly to the DB renders on the public page and preview with no unsafe `href`, no unknown elements, no inline `style`; `newTab` links get `rel="noopener noreferrer"` (FR-013c, SC-018)
+- [X] T073 [P] [US2] Failing tests `tests/e2e/richtext-bidi.spec.ts`: ar/en paragraphs honour `direction`; Latin identifiers isolated; preview HTML equals public HTML for the same document; every link has non-empty text (FR-013a, FR-013d)
+- [X] T074 [P] [US2] Failing tests `tests/integration/content/publish.test.ts`: publishing `ar` leaves `en` draft (`experimental.localizeStatus`); public queries never return drafts; unpublish per locale; restore creates a draft; publish blocked when required locale fields are incomplete or evidence is unverified; editor publish via REST denied and audited (FR-004, FR-016, FR-020, FR-021, FR-023, FR-024, FR-045)
+- [X] T075 [P] [US2] Failing tests `tests/integration/content/localize-status-regression.test.ts`: asserts installed Payload version equals ADR-003 pin and per-locale status semantics hold (D-4)
+- [X] T076 [P] [US2] Failing tests `tests/e2e/locking.spec.ts`: second editor sees lock; no silent overwrite (FR-015)
+- [X] T077 [P] [US2] Failing attack tests `tests/security/preview.spec.ts`: anonymous, password-only and no-read-permission sessions denied; preview responses `noindex`; no shareable-link endpoint exists (FR-022)
+- [X] T078 [P] [US2] Failing tests `tests/a11y/admin/reorder.spec.ts`: keyboard-only move up/down for blocks, gallery items and listing order; announcement "Moved {label} to position {n} of {total}"; focus stays on moved item; order persists after save + reload; single-pointer alternative; axe clean on the control (FR-012, FR-055, FR-080, FR-080a)
+- [X] T079 [P] [US2] Failing tests `tests/a11y/admin/editor.spec.ts`: visible focus indicator on the rich-text editor; Escape+Tab exit described in field help; on validation failure focus moves to first invalid field, which has `aria-invalid="true"` and an announced message (FR-080a)
+- [X] T080 [P] [US2] Failing tests `tests/integration/content/collision.test.ts`: slug equal to or prefixing a static route segment, duplicate slug in same locale/scope, or slug equal to an active redirect `from` → rejected; slug change creates a redirect (FR-002, FR-025)
 
 ### Implementation for US2
 
-- [ ] T081 [US2] Implement shared editor config `src/modules/content/richtext/editor.ts`: Lexical features allow-list (paragraph, heading h2–h4, bold, italic, ordered/unordered list, blockquote, link with `url` validate override via `LinkFeature({ fields })`) (FR-013, FR-013a)
-- [ ] T082 [US2] Implement `richTextField()` factory applying `hooks.beforeChange: assertSafeRichText` and `validate`; set `versions.drafts.validate: true` on all versioned collections/globals until T071 passes (FR-013b)
-- [ ] T083 [US2] Implement safe renderer `src/ui/richtext/RichText.tsx` (custom JSX converters: `link`/`autolink` via `safeHref` → plain text when null; unknown nodes → nothing; `<bdi>` for inline Latin runs) used by preview and public site until T072–T073 pass (FR-013c, FR-013d, D-24)
-- [ ] T084 [US2] Implement read-only `scripts/scan-richtext.ts` (`pnpm scan:richtext`, non-zero exit on violations) and add it to migration/restore runbooks (FR-013c)
-- [ ] T085 [US2] Implement block library `src/modules/content/blocks/` per data-model (hero, richText, featureGrid, serviceList, courseList, cta, faq, mediaGallery, stats+evidence, credentials+evidence, contactBlock; each with `hidden` and `anchorId`; testimonials/clientLogos not registered until CD-08); the shared `link` group (hero/CTA/nav/social/banner) validates `url`/`email`/`tel` with `safeHref` on save, with corpus cases added to T071 (FR-011, FR-012, FR-014, FR-019)
-- [ ] T086 [US2] Implement `evidence` group and publish gate `src/modules/content/evidence.ts` (status `unverified|verified`, reference required if verified, verifiedBy, verifiedAt; only administrator/owner may set `verified`) (FR-016)
-- [ ] T087 [US2] Implement `pages` collection: `title` L required to publish; `slug` L "unique per locale and route scope; NFC; `^[\p{L}\p{N}-]+$`u"; `template`; `sections`; `seo` L; collision validator (T080) (FR-002, FR-010, FR-011)
-- [ ] T088 [US2] Implement `services` and `courses` collections: common `title` L, `slug` L, `summary` L (≤300), `sections`, `order`, `hidden`, `seo` L; course `audience` L, `duration {value, unit}`, `deliveryFormat` (`in-person|online|hybrid`), `provider` L, `accreditationStatement` L + evidence (FR-017)
-- [ ] T089 [US2] Implement publish workflow hooks (localizeStatus, unpublish, restore→draft, publish/unpublish/restore audit, revalidation tags) and version retention job `pruneVersions` per A-11 with R-E decision `docs/adr/ADR-006-versions.md` until T074 passes (FR-020, FR-021, FR-023, FR-024, FR-045)
-- [ ] T090 [US2] Implement slug-change redirect hook `src/modules/seo/redirects/slug-change.ts` until T080 passes (FR-025)
-- [ ] T091 [US2] Implement preview route `src/app/preview/[collection]/[id]/route.ts` (draft mode, `requireMfa`, read check, `noindex`) until T077 passes (FR-022)
-- [ ] T092 [US2] Implement accessible reorder control `src/modules/content/admin/ReorderControl.tsx` as a custom array/blocks row component (supported extension point) with live region; apply to blocks, gallery arrays and listing `order` until T078 passes (FR-012, FR-055, D-12)
-- [ ] T093 [US2] Admin a11y remediations via extension points: focus styles in `src/app/(payload)/custom.scss`, field help text, error-focus component; file upstream issues for core findings and record links in `docs/accessibility/admin-findings.md` until T079 passes (FR-080a)
-- [ ] T094 [US2] Write `docs/security/TM-preview.md` and `docs/security/TM-admin.md`; update ASVS V1/V2/V4 rows (FR-097)
+- [X] T081 [US2] Implement shared editor config `src/modules/content/richtext/editor.ts`: Lexical features allow-list (paragraph, heading h2–h4, bold, italic, ordered/unordered list, blockquote, link with `url` validate override via `LinkFeature({ fields })`) (FR-013, FR-013a)
+- [X] T082 [US2] Implement `richTextField()` factory applying `hooks.beforeChange: assertSafeRichText` and `validate`; set `versions.drafts.validate: true` on all versioned collections/globals until T071 passes (FR-013b)
+- [X] T083 [US2] Implement safe renderer `src/ui/richtext/RichText.tsx` (custom JSX converters: `link`/`autolink` via `safeHref` → plain text when null; unknown nodes → nothing; `<bdi>` for inline Latin runs) used by preview and public site until T072–T073 pass (FR-013c, FR-013d, D-24)
+- [X] T084 [US2] Implement read-only `scripts/scan-richtext.ts` (`pnpm scan:richtext`, non-zero exit on violations) and add it to migration/restore runbooks (FR-013c)
+- [X] T085 [US2] Implement block library `src/modules/content/blocks/` per data-model (hero, richText, featureGrid, serviceList, courseList, cta, faq, mediaGallery, stats+evidence, credentials+evidence, contactBlock; each with `hidden` and `anchorId`; testimonials/clientLogos not registered until CD-08); the shared `link` group (hero/CTA/nav/social/banner) validates `url`/`email`/`tel` with `safeHref` on save, with corpus cases added to T071 (FR-011, FR-012, FR-014, FR-019)
+- [X] T086 [US2] Implement `evidence` group and publish gate `src/modules/content/evidence.ts` (status `unverified|verified`, reference required if verified, verifiedBy, verifiedAt; only administrator/owner may set `verified`) (FR-016)
+- [X] T087 [US2] Implement `pages` collection: `title` L required to publish; `slug` L "unique per locale and route scope; NFC; `^[\p{L}\p{N}-]+$`u"; `template`; `sections`; `seo` L; collision validator (T080) (FR-002, FR-010, FR-011)
+- [X] T088 [US2] Implement `services` and `courses` collections: common `title` L, `slug` L, `summary` L (≤300), `sections`, `order`, `hidden`, `seo` L; course `audience` L, `duration {value, unit}`, `deliveryFormat` (`in-person|online|hybrid`), `provider` L, `accreditationStatement` L + evidence (FR-017)
+- [X] T089 [US2] Implement publish workflow hooks (localizeStatus, unpublish, restore→draft, publish/unpublish/restore audit, revalidation tags) and version retention job `pruneVersions` per A-11 with R-E decision `docs/adr/ADR-006-versions.md` until T074 passes (FR-020, FR-021, FR-023, FR-024, FR-045)
+- [X] T090 [US2] Implement slug-change redirect hook `src/modules/seo/redirects/slug-change.ts` until T080 passes (FR-025)
+- [X] T091 [US2] Implement preview route `src/app/preview/[collection]/[id]/route.ts` (draft mode, `requireMfa`, read check, `noindex`) until T077 passes (FR-022)
+- [X] T092 [US2] Implement accessible reorder control `src/modules/content/admin/ReorderControl.tsx` as a custom array/blocks row component (supported extension point) with live region; apply to blocks, gallery arrays and listing `order` until T078 passes (FR-012, FR-055, D-12)
+- [X] T093 [US2] Admin a11y remediations via extension points: focus styles in `src/app/(payload)/custom.scss`, field help text, error-focus component; file upstream issues for core findings and record links in `docs/accessibility/admin-findings.md` until T079 passes (FR-080a)
+- [X] T094 [US2] Write `docs/security/TM-preview.md` and `docs/security/TM-admin.md`; update ASVS V1/V2/V4 rows (FR-097)
 
 **Checkpoint (Gate 3)**: T071–T080 green; SC-018 green on write and render paths;
 publish-to-live wiring ready for T106 → commit checkpoint.
+
+**US2 implementation notes (WS9, 2026-10-16)**:
+
+- Test files differ from the planned names but cover the same tasks:
+  - T071: `tests/integration/content/richtext-writepaths.test.ts` (85 cases), plus admin paste in
+    `tests/security/content-http.spec.ts`.
+  - T072: `tests/unit/content/render.test.ts`.
+  - T073: `render.test.ts` and `content-http.spec.ts`. The preview `<article>` equals the
+    `DocumentView` output byte for byte.
+  - T074, T075: `tests/integration/content/publish.test.ts`.
+  - T076, T077: `content-http.spec.ts`.
+  - T078, T079: `tests/a11y/admin/content-editing.spec.ts`.
+  - T080, T084, T089 (prune): `tests/integration/content/slugs-ops.test.ts`.
+  - Role matrix, IDOR, anonymous REST and locale confusion:
+    `tests/integration/content/access.test.ts` (99 cases).
+- Deviations, all recorded in ADR-006:
+  - `drafts.validate: false`, not `true` (T082). Safety hooks still run on every draft.
+  - **Autosave off**: Payload 3.91.0 deletes the lock on every save, which defeats FR-015.
+  - Restore always creates a draft, through an overridden `POST /versions/:id` and
+    `restoreAsDraft()`, because the Local API drops `draft`.
+- The preview route is a page, `src/app/(preview)/preview/[collection]/[id]/page.tsx`, not a
+  route handler. The admin "Preview" link points to it. There is no draft-mode or token
+  endpoint.
+- Minimal prerequisites pulled forward:
+  - `redirects` collection (T118 scope: `from`, `to`, `type`, `source`).
+  - `STATIC_SEGMENTS` / `RESERVED_SEGMENTS` in `src/modules/i18n/routes.ts` (T098). The Arabic
+    segments stay `TODO(AR_ROUTE_VOCAB)` per D-5.
+- Deferred:
+  - US4: `mediaGallery` block, image fields, gallery reorder.
+  - CD-08: testimonials and clientLogos.
+  - US1: public page route. "Preview equals public" is proven through the shared renderer.
+  - US7: navigation/banner globals and their permissions.
+- T093: upstream issues are drafted in `docs/accessibility/admin-findings.md` and **not filed**,
+  because filing is an external action.
+- Hardening found while testing:
+  - Structural rich-text check in `beforeOperation`. Malformed `children` caused a 500 inside
+    Lexical's hooks.
+  - Renderer depth cap.
+  - Slug-change redirects now compare against the live document and re-point chains.
+  - `ErrorFocus` handles toast-only failures.
+  - Gravatar disabled.
+
 
 ---
 

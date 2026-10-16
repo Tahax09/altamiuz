@@ -7,6 +7,8 @@ import { buildConfig } from 'payload'
 import sharp from 'sharp'
 import { auditDeniedOperations, auditEvents } from '@/modules/audit'
 import { invitations, securitySettings, users } from '@/modules/auth'
+import { courses, pages, safeEditor, services } from '@/modules/content'
+import { redirects } from '@/modules/seo'
 import { getConfig } from '@/modules/platform'
 
 const dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -19,7 +21,15 @@ export default buildConfig({
   debug: false,
   admin: {
     user: users.slug,
-    components: { providers: ['/modules/auth/admin/MfaGate#MfaGate'] },
+    // Payload's default avatar is Gravatar, which would send a hash of each user's email to a
+    // third party (and is blocked by the admin CSP anyway).
+    avatar: 'default',
+    components: {
+      providers: [
+        '/modules/auth/admin/MfaGate#MfaGate',
+        '/modules/content/admin/ErrorFocus#ErrorFocus',
+      ],
+    },
     importMap: { baseDir: dirname },
   },
   // D-23: English-only CMS navigation and controls in v1.
@@ -49,6 +59,10 @@ export default buildConfig({
     },
     invitations,
     auditEvents,
+    pages,
+    services,
+    courses,
+    redirects,
   ],
   globals: [securitySettings],
   hooks: { afterError: [auditDeniedOperations] },
@@ -59,6 +73,8 @@ export default buildConfig({
     push: cfg.database.allowPush,
     migrationDir: path.resolve(dirname, '../migrations'),
   }),
+  // Any rich-text field without its own editor still gets the allow-listed one (D-22).
+  editor: safeEditor,
   sharp,
   typescript: { outputFile: path.resolve(dirname, 'payload-types.ts') },
 })

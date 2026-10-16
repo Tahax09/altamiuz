@@ -9,7 +9,7 @@ const { generate } = await import('otplib')
 const out: Record<string, unknown> = {}
 const pw = (r: string) => `e2e ${r} pass phrase ${Math.random().toString(36).slice(2)} 7` // gitleaks:allow (synthetic)
 
-for (const role of ['owner', 'administrator', 'editor', 'passwordOnly'] as const) {
+for (const role of ['owner', 'administrator', 'publisher', 'editor', 'passwordOnly'] as const) {
   const email = `e2e-${role.toLowerCase()}@example.invalid`
   const password = pw(role)
   const user = (await payload.create({
@@ -36,6 +36,57 @@ for (const role of ['owner', 'administrator', 'editor', 'passwordOnly'] as const
   }
   out[role] = entry
 }
+// US2 content: one bilingual draft page with three sections (reorder, preview, locking tests).
+const rt = (text: string) => ({
+  root: {
+    type: 'root',
+    version: 1,
+    direction: null,
+    format: '',
+    indent: 0,
+    children: [
+      {
+        type: 'paragraph',
+        version: 1,
+        direction: null,
+        format: '',
+        indent: 0,
+        children: [{ type: 'text', version: 1, text, format: 0 }],
+      },
+    ],
+  },
+})
+const page = (await payload.create({
+  collection: 'pages',
+  locale: 'en',
+  draft: true,
+  data: {
+    title: 'E2E draft page',
+    slug: 'e2e-draft',
+    template: 'default',
+    sections: [
+      { blockType: 'richText', blockName: 'First section', content: rt('Draft-only English body') },
+      { blockType: 'cta', blockName: 'Second section', heading: 'Talk to us' },
+      { blockType: 'richText', blockName: 'Third section', content: rt('Closing words') },
+    ],
+  } as never,
+  overrideAccess: true,
+})) as unknown as { id: number; sections: { id: string }[] }
+await payload.update({
+  collection: 'pages',
+  id: page.id,
+  locale: 'ar',
+  draft: true,
+  data: {
+    title: 'صفحة تجريبية',
+    slug: 'مسودة-تجريبية',
+    sections: page.sections.map((s, i) =>
+      i === 0 ? { id: s.id, content: rt('نص عربي مع ISO 27001 داخل الجملة') } : { id: s.id },
+    ),
+  } as never,
+  overrideAccess: true,
+})
+out.content = { pageId: page.id }
 fs.mkdirSync('test-results', { recursive: true })
 fs.writeFileSync('test-results/e2e-fixtures.json', JSON.stringify(out))
 process.exit(0)

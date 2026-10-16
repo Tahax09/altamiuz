@@ -53,6 +53,11 @@ export function proxy(request: NextRequest): NextResponse {
 
   const response = NextResponse.next({ request: { headers: requestHeaders } })
   response.headers.set('Content-Security-Policy', csp)
+  if (path === '/preview' || path.startsWith('/preview/')) {
+    // FR-022: previews are never indexed or cached by shared caches.
+    response.headers.set('X-Robots-Tag', 'noindex, nofollow')
+    response.headers.set('Cache-Control', 'private, no-store')
+  }
   return response
 }
 

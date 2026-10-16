@@ -35,7 +35,8 @@
     "ci:local": "sh scripts/ci-local.sh",
     "prepare": "sh scripts/install-hooks.sh",
     "test:a11y": "playwright test --project a11y-admin",
-    "bootstrap:owner": "payload run scripts/bootstrap-owner.ts"
+    "bootstrap:owner": "payload run scripts/bootstrap-owner.ts",
+    "scan:richtext": "payload run scripts/scan-richtext.ts"
   },
   "dependencies": {
     "@payloadcms/db-postgres": "3.91.0",
