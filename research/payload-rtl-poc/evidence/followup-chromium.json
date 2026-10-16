@@ -1,0 +1,194 @@
+{
+  "ar": {
+    "03-search:أمن": 0,
+    "03-search:أَمْنِ": 1,
+    "03-search:صفحة": 0,
+    "07-before": [
+      "الأول",
+      "الثاني",
+      "الثالث"
+    ],
+    "07-handles": [
+      {
+        "tag": "DIV",
+        "cls": "array-field__draggable-rows",
+        "role": null,
+        "rd": null,
+        "label": null,
+        "tabindex": null
+      },
+      {
+        "tag": "DIV",
+        "cls": "collapsible array-field__row array-field__row--no-errors col",
+        "role": null,
+        "rd": null,
+        "label": null,
+        "tabindex": null
+      },
+      {
+        "tag": "DIV",
+        "cls": "collapsible__drag",
+        "role": "button",
+        "rd": "sortable",
+        "label": null,
+        "tabindex": "0"
+      },
+      {
+        "tag": "svg",
+        "cls": "[object SVGAnimatedString]",
+        "role": null,
+        "rd": null,
+        "label": null,
+        "tabindex": null
+      }
+    ],
+    "07-afterKeyboardDrag": [
+      "الأول",
+      "الثاني",
+      "الثالث"
+    ],
+    "07-liveRegion": [
+      "Draggable item 6ad168bce23c596a2223d4f4 was moved over droppable area 6ad168bce23c596a2223d4f6.",
+      "",
+      "",
+      ""
+    ],
+    "07-menuFocusable": false,
+    "07-afterMenuMove": [
+      "الثاني",
+      "الثالث",
+      "الأول"
+    ],
+    "07-afterReload": [
+      "الثاني",
+      "الثالث",
+      "الأول"
+    ],
+    "08-focalControls": [
+      {
+        "tag": "DIV",
+        "cls": "edit-upload__focal-wrapper",
+        "tabindex": -1,
+        "role": null
+      },
+      {
+        "tag": "BUTTON",
+        "cls": "edit-upload__draggable edit-upload__focalPoint",
+        "tabindex": 0,
+        "role": null
+      }
+    ],
+    "08-focalNumericInputs": 2,
+    "14-focusAfterError": "BODY",
+    "14-titleAriaInvalid": null,
+    "14-errorTexts": [
+      "Galleryأضف Gallery",
+      "Sectionsأضف Section",
+      "Sections"
+    ],
+    "15-tabStillInEditor": true,
+    "15-escTabStillInEditor": false,
+    "15-shiftTabStillInEditor": true,
+    "15-editorFocusStyle": {
+      "outline": "none 0px",
+      "boxShadow": "none",
+      "parentOutline": "none"
+    }
+  },
+  "en": {
+    "03-search:أمن": 0,
+    "03-search:أَمْنِ": 1,
+    "03-search:صفحة": 0,
+    "07-before": [
+      "الثالث",
+      "الثاني",
+      "الأول"
+    ],
+    "07-handles": [
+      {
+        "tag": "DIV",
+        "cls": "array-field__draggable-rows",
+        "role": null,
+        "rd": null,
+        "label": null,
+        "tabindex": null
+      },
+      {
+        "tag": "DIV",
+        "cls": "collapsible array-field__row array-field__row--no-errors col",
+        "role": null,
+        "rd": null,
+        "label": null,
+        "tabindex": null
+      },
+      {
+        "tag": "DIV",
+        "cls": "collapsible__drag",
+        "role": "button",
+        "rd": "sortable",
+        "label": null,
+        "tabindex": "0"
+      },
+      {
+        "tag": "svg",
+        "cls": "[object SVGAnimatedString]",
+        "role": null,
+        "rd": null,
+        "label": null,
+        "tabindex": null
+      }
+    ],
+    "07-afterKeyboardDrag": [
+      "الثالث",
+      "الثاني",
+      "الأول"
+    ],
+    "07-liveRegion": [
+      "Draggable item 6ad168bce23c596a2223d4f6 was moved over droppable area 6ad168bce23c596a2223d4f4.",
+      "",
+      "",
+      ""
+    ],
+    "07-menuFocusable": false,
+    "07-afterMenuMove": [
+      "الثاني",
+      "الأول",
+      "الثالث"
+    ],
+    "07-afterReload": [
+      "الثاني",
+      "الأول",
+      "الثالث"
+    ],
+    "08-focalControls": [
+      {
+        "tag": "DIV",
+        "cls": "edit-upload__focal-wrapper",
+        "tabindex": -1,
+        "role": null
+      },
+      {
+        "tag": "BUTTON",
+        "cls": "edit-upload__draggable edit-upload__focalPoint",
+        "tabindex": 0,
+        "role": null
+      }
+    ],
+    "08-focalNumericInputs": 2,
+    "14-focusAfterError": "BODY",
+    "14-titleAriaInvalid": null,
+    "14-errorTexts": [
+      "GalleryAdd Gallery",
+      "SectionsAdd Section",
+      "Sections"
+    ],
+    "15-tabStillInEditor": true,
+    "15-escTabStillInEditor": false,
+    "15-shiftTabStillInEditor": true,
+    "15-editorFocusStyle": {
+      "outline": "none 0px",
+      "boxShadow": "none",
+      "parentOutline": "none"
+    }
+  }
+}

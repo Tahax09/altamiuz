@@ -1,0 +1,31 @@
+{
+  "11-locale-publish": {
+    "docId": 8,
+    "publishedAr": {
+      "title": "صفحة للنشر",
+      "status": "published"
+    },
+    "publishedEn": {
+      "status": "draft"
+    },
+    "statusAllLocales": {
+      "ar": "published"
+    },
+    "enPublishedQueryCount": 0
+  },
+  "12-version-restore": {
+    "versionCountBefore": 5,
+    "restoredFrom": 17,
+    "restoredDocStatus": "draft",
+    "newestVersionStatus": {
+      "ar": "draft",
+      "en": "draft"
+    },
+    "newestIsLatest": false
+  },
+  "rc-session-logout": {
+    "meBeforeLogout": true,
+    "sameTokenAfterLogout": false,
+    "sessionsFieldPresent": true
+  }
+}

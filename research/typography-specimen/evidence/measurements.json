@@ -1,0 +1,254 @@
+{
+  "chromium-375": {
+    "loadedFaces": [
+      "IBM Plex Sans Arabic 400",
+      "IBM Plex Sans Arabic 400",
+      "IBM Plex Sans Arabic 500",
+      "IBM Plex Sans Arabic 500",
+      "IBM Plex Sans Arabic 600",
+      "IBM Plex Sans Arabic 600",
+      "IBM Plex Sans Arabic 700",
+      "IBM Plex Sans Arabic 700",
+      "Inter 400 600",
+      "Manrope 500 800"
+    ],
+    "arHeadingFont": "\"IBM Plex Sans Arabic\", system-ui, sans-serif",
+    "arBodyFont": "\"IBM Plex Sans Arabic\", system-ui, sans-serif",
+    "enHeadingFont": "Manrope, Inter, sans-serif",
+    "enBodyFont": "Inter, system-ui, sans-serif",
+    "diacriticsLine": {
+      "inkTop": 2839.078125,
+      "inkBottom": 2941.46875,
+      "boxTop": 2836.078125,
+      "boxBottom": 2944.859375
+    },
+    "metrics": {
+      "interX": {
+        "ascent": 54.6,
+        "descent": 0
+      },
+      "manropeX": {
+        "ascent": 54,
+        "descent": 0
+      },
+      "plexArabicLatinX": {
+        "ascent": 51.6,
+        "descent": 0
+      },
+      "plexArabicAlef": {
+        "ascent": 74,
+        "descent": 0
+      },
+      "plexArabicBeh": {
+        "ascent": 38,
+        "descent": 20
+      },
+      "interCapH": {
+        "ascent": 72.8,
+        "descent": 0
+      }
+    },
+    "horizontalOverflow": false,
+    "woff2BytesFetched": {
+      "v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa1ZL7W0Q5nw.woff2": 48432,
+      "v15/Qw3NZRtWPQCuHme67tEYUIx3Kh0PHR9N6YOG-eCRXMRrKATtYV0.woff2": 33628,
+      "v15/Qw3NZRtWPQCuHme67tEYUIx3Kh0PHR9N6YPO_-CUXMRrKATt.woff2": 14792,
+      "v15/Qw3NZRtWPQCuHme67tEYUIx3Kh0PHR9N6YPO_-CRXMRrKATtYV0.woff2": 35884,
+      "v15/Qw3NZRtWPQCuHme67tEYUIx3Kh0PHR9N6YPi-OCUXMRrKATt.woff2": 15092,
+      "v15/Qw3CZRtWPQCuHme67tEYUIx3Kh0PHR9N6Ys93PW5fslB.woff2": 13944,
+      "v15/Qw3CZRtWPQCuHme67tEYUIx3Kh0PHR9N6Ys43PW5fslBEg0.woff2": 33512,
+      "v20/xn7gYHE41ni1AdIRggexSvfedN4.woff2": 24576,
+      "v15/Qw3NZRtWPQCuHme67tEYUIx3Kh0PHR9N6YOG-eCUXMRrKATt.woff2": 14208,
+      "v15/Qw3NZRtWPQCuHme67tEYUIx3Kh0PHR9N6YPi-OCRXMRrKATtYV0.woff2": 35884
+    }
+  },
+  "chromium-1440": {
+    "loadedFaces": [
+      "IBM Plex Sans Arabic 400",
+      "IBM Plex Sans Arabic 400",
+      "IBM Plex Sans Arabic 500",
+      "IBM Plex Sans Arabic 500",
+      "IBM Plex Sans Arabic 600",
+      "IBM Plex Sans Arabic 600",
+      "IBM Plex Sans Arabic 700",
+      "IBM Plex Sans Arabic 700",
+      "Inter 400 600",
+      "Manrope 500 800"
+    ],
+    "arHeadingFont": "\"IBM Plex Sans Arabic\", system-ui, sans-serif",
+    "arBodyFont": "\"IBM Plex Sans Arabic\", system-ui, sans-serif",
+    "enHeadingFont": "Manrope, Inter, sans-serif",
+    "enBodyFont": "Inter, system-ui, sans-serif",
+    "diacriticsLine": {
+      "inkTop": 1171.8125,
+      "inkBottom": 1219.8125,
+      "boxTop": 1168.8125,
+      "boxBottom": 1223.203125
+    },
+    "metrics": {
+      "interX": {
+        "ascent": 54.6,
+        "descent": 0
+      },
+      "manropeX": {
+        "ascent": 54,
+        "descent": 0
+      },
+      "plexArabicLatinX": {
+        "ascent": 51.6,
+        "descent": 0
+      },
+      "plexArabicAlef": {
+        "ascent": 74,
+        "descent": 0
+      },
+      "plexArabicBeh": {
+        "ascent": 38,
+        "descent": 20
+      },
+      "interCapH": {
+        "ascent": 72.8,
+        "descent": 0
+      }
+    },
+    "horizontalOverflow": false,
+    "woff2BytesFetched": {
+      "v20/xn7gYHE41ni1AdIRggexSvfedN4.woff2": 24576,
+      "v15/Qw3CZRtWPQCuHme67tEYUIx3Kh0PHR9N6Ys93PW5fslB.woff2": 13944,
+      "v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa1ZL7W0Q5nw.woff2": 48432,
+      "v15/Qw3CZRtWPQCuHme67tEYUIx3Kh0PHR9N6Ys43PW5fslBEg0.woff2": 33512,
+      "v15/Qw3NZRtWPQCuHme67tEYUIx3Kh0PHR9N6YOG-eCRXMRrKATtYV0.woff2": 33628,
+      "v15/Qw3NZRtWPQCuHme67tEYUIx3Kh0PHR9N6YOG-eCUXMRrKATt.woff2": 14208,
+      "v15/Qw3NZRtWPQCuHme67tEYUIx3Kh0PHR9N6YPi-OCUXMRrKATt.woff2": 15092,
+      "v15/Qw3NZRtWPQCuHme67tEYUIx3Kh0PHR9N6YPO_-CUXMRrKATt.woff2": 14792,
+      "v15/Qw3NZRtWPQCuHme67tEYUIx3Kh0PHR9N6YPO_-CRXMRrKATtYV0.woff2": 35884,
+      "v15/Qw3NZRtWPQCuHme67tEYUIx3Kh0PHR9N6YPi-OCRXMRrKATtYV0.woff2": 35884
+    }
+  },
+  "webkit-375": {
+    "loadedFaces": [
+      "IBM Plex Sans Arabic 400",
+      "IBM Plex Sans Arabic 400",
+      "IBM Plex Sans Arabic 500",
+      "IBM Plex Sans Arabic 500",
+      "IBM Plex Sans Arabic 600",
+      "IBM Plex Sans Arabic 600",
+      "IBM Plex Sans Arabic 700",
+      "IBM Plex Sans Arabic 700",
+      "Inter 400 600",
+      "Manrope 500 800"
+    ],
+    "arHeadingFont": "\"IBM Plex Sans Arabic\", system-ui, sans-serif",
+    "arBodyFont": "\"IBM Plex Sans Arabic\", system-ui, sans-serif",
+    "enHeadingFont": "Manrope, Inter, sans-serif",
+    "enBodyFont": "Inter, system-ui, sans-serif",
+    "diacriticsLine": {
+      "inkTop": 2812,
+      "inkBottom": 2914,
+      "boxTop": 2809,
+      "boxBottom": 2917
+    },
+    "metrics": {
+      "interX": {
+        "ascent": 54.6,
+        "descent": 0
+      },
+      "manropeX": {
+        "ascent": 54,
+        "descent": 0
+      },
+      "plexArabicLatinX": {
+        "ascent": 51.6,
+        "descent": 0
+      },
+      "plexArabicAlef": {
+        "ascent": 74,
+        "descent": 0
+      },
+      "plexArabicBeh": {
+        "ascent": 38,
+        "descent": 20
+      },
+      "interCapH": {
+        "ascent": 72.8,
+        "descent": 0
+      }
+    },
+    "horizontalOverflow": false,
+    "woff2BytesFetched": {
+      "v15/Qw3NZRtWPQCuHme67tEYUIx3Kh0PHR9N6YOG-eCUXMRrKATt.woff2": 14208,
+      "v15/Qw3NZRtWPQCuHme67tEYUIx3Kh0PHR9N6YPO_-CUXMRrKATt.woff2": 14792,
+      "v15/Qw3CZRtWPQCuHme67tEYUIx3Kh0PHR9N6Ys93PW5fslB.woff2": 13944,
+      "v15/Qw3NZRtWPQCuHme67tEYUIx3Kh0PHR9N6YPi-OCUXMRrKATt.woff2": 15092,
+      "v15/Qw3NZRtWPQCuHme67tEYUIx3Kh0PHR9N6YPi-OCRXMRrKATtYV0.woff2": 35884,
+      "v20/xn7gYHE41ni1AdIRggexSvfedN4.woff2": 24576,
+      "v15/Qw3NZRtWPQCuHme67tEYUIx3Kh0PHR9N6YOG-eCRXMRrKATtYV0.woff2": 33628,
+      "v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa1ZL7W0Q5nw.woff2": 48432,
+      "v15/Qw3CZRtWPQCuHme67tEYUIx3Kh0PHR9N6Ys43PW5fslBEg0.woff2": 33512,
+      "v15/Qw3NZRtWPQCuHme67tEYUIx3Kh0PHR9N6YPO_-CRXMRrKATtYV0.woff2": 35884
+    }
+  },
+  "webkit-1440": {
+    "loadedFaces": [
+      "IBM Plex Sans Arabic 400",
+      "IBM Plex Sans Arabic 400",
+      "IBM Plex Sans Arabic 500",
+      "IBM Plex Sans Arabic 500",
+      "IBM Plex Sans Arabic 600",
+      "IBM Plex Sans Arabic 600",
+      "IBM Plex Sans Arabic 700",
+      "IBM Plex Sans Arabic 700",
+      "Inter 400 600",
+      "Manrope 500 800"
+    ],
+    "arHeadingFont": "\"IBM Plex Sans Arabic\", system-ui, sans-serif",
+    "arBodyFont": "\"IBM Plex Sans Arabic\", system-ui, sans-serif",
+    "enHeadingFont": "Manrope, Inter, sans-serif",
+    "enBodyFont": "Inter, system-ui, sans-serif",
+    "diacriticsLine": {
+      "inkTop": 1160,
+      "inkBottom": 1208,
+      "boxTop": 1157,
+      "boxBottom": 1211
+    },
+    "metrics": {
+      "interX": {
+        "ascent": 54.6,
+        "descent": 0
+      },
+      "manropeX": {
+        "ascent": 54,
+        "descent": 0
+      },
+      "plexArabicLatinX": {
+        "ascent": 51.6,
+        "descent": 0
+      },
+      "plexArabicAlef": {
+        "ascent": 74,
+        "descent": 0
+      },
+      "plexArabicBeh": {
+        "ascent": 38,
+        "descent": 20
+      },
+      "interCapH": {
+        "ascent": 72.8,
+        "descent": 0
+      }
+    },
+    "horizontalOverflow": false,
+    "woff2BytesFetched": {
+      "v15/Qw3NZRtWPQCuHme67tEYUIx3Kh0PHR9N6YPi-OCUXMRrKATt.woff2": 15092,
+      "v15/Qw3NZRtWPQCuHme67tEYUIx3Kh0PHR9N6YPO_-CUXMRrKATt.woff2": 14792,
+      "v15/Qw3NZRtWPQCuHme67tEYUIx3Kh0PHR9N6YOG-eCUXMRrKATt.woff2": 14208,
+      "v15/Qw3CZRtWPQCuHme67tEYUIx3Kh0PHR9N6Ys93PW5fslB.woff2": 13944,
+      "v20/xn7gYHE41ni1AdIRggexSvfedN4.woff2": 24576,
+      "v15/Qw3CZRtWPQCuHme67tEYUIx3Kh0PHR9N6Ys43PW5fslBEg0.woff2": 33512,
+      "v15/Qw3NZRtWPQCuHme67tEYUIx3Kh0PHR9N6YPO_-CRXMRrKATtYV0.woff2": 35884,
+      "v15/Qw3NZRtWPQCuHme67tEYUIx3Kh0PHR9N6YPi-OCRXMRrKATtYV0.woff2": 35884,
+      "v20/UcC73FwrK3iLTeHuS_nVMrMxCp50SjIa1ZL7W0Q5nw.woff2": 48432,
+      "v15/Qw3NZRtWPQCuHme67tEYUIx3Kh0PHR9N6YOG-eCRXMRrKATtYV0.woff2": 33628
+    }
+  }
+}

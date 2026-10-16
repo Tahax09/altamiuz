@@ -44,7 +44,7 @@ nothing here is implemented or verified.
 | T3 | TOTP replay or guessing, recovery-code reuse | last-used-step check, attempt limits, hashed single-use codes (FR-033b) | replay and brute-force tests |
 | T4 | Privilege escalation via the role field or user management | field-level access from the matrix, strict-higher rule, last-owner guard (D-8) | matrix-generated tests incl. self-escalation |
 | T5 | IDOR/BOLA on drafts, enquiries, media | Local API for public site, anonymous REST denied, per-document access, private draft media (D-3, D-12) | id-swap tests per collection |
-| T6 | Stored XSS through CMS content | Lexical allow-list, no HTML fields, JSX rendering, link scheme validation, strict CSP with nonces (FR-013/014, D-17) | XSS payload corpus via paste and API |
+| T6 | Stored XSS through CMS content. **R-A confirmed**: the default Lexical editor (Payload 3.91.0) stores a pasted `javascript:` link URL | Lexical allow-list, no HTML fields, JSX rendering, **server-side link-URL scheme validation on save plus render-time allow-list (D-22)**, strict CSP with nonces (FR-013/014, D-17) | XSS payload corpus via paste and via direct API save; stored-document scan for disallowed schemes |
 | T7 | Malicious upload (polyglot, SVG script, decompression bomb, path tricks) | magic-byte allow-list, pixel and size limits, re-encode, random names, no SVG (D-12) | malicious fixture suite |
 | T8 | Contact form spam, header injection, flooding | Turnstile fail-closed, rate limit, schema limits, plain-text email, escaped reply-to (D-15) | abuse suite |
 | T9 | Open redirect or redirect loop | internal targets or allow-listed hosts only, graph validation (D-13) | redirect suite |

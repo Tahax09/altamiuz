@@ -1,0 +1,234 @@
+{
+  "ar-1440": [
+    {
+      "t": 0,
+      "scrollX": 0,
+      "scrollWidth": 11380,
+      "clientWidth": 1440,
+      "centreEl": "P.LexicalEditorTheme__paragraph",
+      "titleRect": {
+        "x": 60,
+        "y": 235,
+        "w": 1320
+      },
+      "bodyOpacity": "1",
+      "overlays": []
+    },
+    {
+      "t": 1000,
+      "scrollX": 0,
+      "scrollWidth": 11380,
+      "clientWidth": 1440,
+      "centreEl": "P.LexicalEditorTheme__paragraph",
+      "titleRect": {
+        "x": 60,
+        "y": 235,
+        "w": 1320
+      },
+      "bodyOpacity": "1",
+      "overlays": []
+    },
+    {
+      "t": 3000,
+      "scrollX": 0,
+      "scrollWidth": 11380,
+      "clientWidth": 1440,
+      "centreEl": "P.LexicalEditorTheme__paragraph",
+      "titleRect": {
+        "x": 60,
+        "y": 235,
+        "w": 1320
+      },
+      "bodyOpacity": "1",
+      "overlays": []
+    },
+    {
+      "t": 6000,
+      "scrollX": 0,
+      "scrollWidth": 11380,
+      "clientWidth": 1440,
+      "centreEl": "P.LexicalEditorTheme__paragraph",
+      "titleRect": {
+        "x": 60,
+        "y": 235,
+        "w": 1320
+      },
+      "bodyOpacity": "1",
+      "overlays": []
+    }
+  ],
+  "ar-768": [
+    {
+      "t": 0,
+      "scrollX": 0,
+      "scrollWidth": 10752,
+      "clientWidth": 768,
+      "centreEl": "P.LexicalEditorTheme__paragraph",
+      "titleRect": {
+        "x": 16,
+        "y": 274,
+        "w": 736
+      },
+      "bodyOpacity": "1",
+      "overlays": []
+    },
+    {
+      "t": 1000,
+      "scrollX": 0,
+      "scrollWidth": 10752,
+      "clientWidth": 768,
+      "centreEl": "P.LexicalEditorTheme__paragraph",
+      "titleRect": {
+        "x": 16,
+        "y": 274,
+        "w": 736
+      },
+      "bodyOpacity": "1",
+      "overlays": []
+    },
+    {
+      "t": 3000,
+      "scrollX": 0,
+      "scrollWidth": 10752,
+      "clientWidth": 768,
+      "centreEl": "P.LexicalEditorTheme__paragraph",
+      "titleRect": {
+        "x": 16,
+        "y": 274,
+        "w": 736
+      },
+      "bodyOpacity": "1",
+      "overlays": []
+    },
+    {
+      "t": 6000,
+      "scrollX": 0,
+      "scrollWidth": 10752,
+      "clientWidth": 768,
+      "centreEl": "P.LexicalEditorTheme__paragraph",
+      "titleRect": {
+        "x": 16,
+        "y": 274,
+        "w": 736
+      },
+      "bodyOpacity": "1",
+      "overlays": []
+    }
+  ],
+  "en-1440": [
+    {
+      "t": 0,
+      "scrollX": 0,
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "centreEl": "P.LexicalEditorTheme__paragraph",
+      "titleRect": {
+        "x": 60,
+        "y": 235,
+        "w": 1320
+      },
+      "bodyOpacity": "1",
+      "overlays": []
+    },
+    {
+      "t": 1000,
+      "scrollX": 0,
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "centreEl": "P.LexicalEditorTheme__paragraph",
+      "titleRect": {
+        "x": 60,
+        "y": 235,
+        "w": 1320
+      },
+      "bodyOpacity": "1",
+      "overlays": []
+    },
+    {
+      "t": 3000,
+      "scrollX": 0,
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "centreEl": "P.LexicalEditorTheme__paragraph",
+      "titleRect": {
+        "x": 60,
+        "y": 235,
+        "w": 1320
+      },
+      "bodyOpacity": "1",
+      "overlays": []
+    },
+    {
+      "t": 6000,
+      "scrollX": 0,
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "centreEl": "P.LexicalEditorTheme__paragraph",
+      "titleRect": {
+        "x": 60,
+        "y": 235,
+        "w": 1320
+      },
+      "bodyOpacity": "1",
+      "overlays": []
+    }
+  ],
+  "en-768": [
+    {
+      "t": 0,
+      "scrollX": 0,
+      "scrollWidth": 768,
+      "clientWidth": 768,
+      "centreEl": "P.LexicalEditorTheme__paragraph",
+      "titleRect": {
+        "x": 16,
+        "y": 274,
+        "w": 736
+      },
+      "bodyOpacity": "1",
+      "overlays": []
+    },
+    {
+      "t": 1000,
+      "scrollX": 0,
+      "scrollWidth": 768,
+      "clientWidth": 768,
+      "centreEl": "P.LexicalEditorTheme__paragraph",
+      "titleRect": {
+        "x": 16,
+        "y": 274,
+        "w": 736
+      },
+      "bodyOpacity": "1",
+      "overlays": []
+    },
+    {
+      "t": 3000,
+      "scrollX": 0,
+      "scrollWidth": 768,
+      "clientWidth": 768,
+      "centreEl": "P.LexicalEditorTheme__paragraph",
+      "titleRect": {
+        "x": 16,
+        "y": 274,
+        "w": 736
+      },
+      "bodyOpacity": "1",
+      "overlays": []
+    },
+    {
+      "t": 6000,
+      "scrollX": 0,
+      "scrollWidth": 768,
+      "clientWidth": 768,
+      "centreEl": "P.LexicalEditorTheme__paragraph",
+      "titleRect": {
+        "x": 16,
+        "y": 274,
+        "w": 736
+      },
+      "bodyOpacity": "1",
+      "overlays": []
+    }
+  ]
+}

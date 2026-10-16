@@ -1,0 +1,400 @@
+[
+  {
+    "config": "C1",
+    "width": 768,
+    "check": "01-login",
+    "status": "pass",
+    "data": {
+      "lang": "ar",
+      "dir": "rtl"
+    }
+  },
+  {
+    "config": "C1",
+    "width": 768,
+    "check": "02-nav",
+    "status": "pass",
+    "data": {
+      "lang": "ar",
+      "dir": "rtl",
+      "side": "right",
+      "box": {
+        "x": 0,
+        "y": 0,
+        "width": 768,
+        "height": 900
+      }
+    }
+  },
+  {
+    "config": "C1",
+    "width": 768,
+    "check": "03-list",
+    "status": "partial",
+    "data": {
+      "thAlign": "n/a",
+      "rowsAfterArabicSearch": 0
+    }
+  },
+  {
+    "config": "C1",
+    "width": 768,
+    "check": "04-field-direction",
+    "status": "pass",
+    "data": {
+      "title": {
+        "dirAttr": null,
+        "computed": "rtl"
+      },
+      "summary": {
+        "dirAttr": null,
+        "computed": "rtl"
+      },
+      "number": {
+        "dirAttr": null,
+        "computed": "rtl"
+      },
+      "html": {
+        "lang": "ar",
+        "dir": "rtl"
+      }
+    }
+  },
+  {
+    "config": "C1",
+    "width": 768,
+    "check": "05-richtext",
+    "status": "pass",
+    "data": {
+      "dir": {
+        "computed": "rtl",
+        "pDir": "auto"
+      },
+      "unsafeMarkupInEditorDom": false,
+      "pastedSample": "<p class=\"LexicalEditorTheme__paragraph\" dir=\"auto\"><span data-lexical-text=\"true\">فقرة تجريبية: لا، لأ، لإ — علامات الترقيم ، ؛ ؟ مع نص إنجليزي ISO/IEC 27002 داخل السطر.نص ملصوق </span><strong class=\"LexicalEditorTheme__textBold\" data-lexical-text=\"true\">عريض</strong><div class=\"LexicalEditorTheme_"
+    }
+  },
+  {
+    "config": "C1",
+    "width": 768,
+    "check": "06-mixed-direction",
+    "status": "partial",
+    "data": {
+      "note": "visual review of screenshot required",
+      "value": "نص تجريبي يتضمن ISO/IEC 27001:2022 و PCI DSS v4.0.1 والبريد info@example.ly والهاتف +218 21 000 0000 وأرقام ١٢٣٤٥ و 12345."
+    }
+  },
+  {
+    "config": "C1",
+    "width": 768,
+    "check": "07-array-reorder",
+    "status": "fail",
+    "data": {
+      "before": [
+        "الأول",
+        "الثاني",
+        "الثالث"
+      ],
+      "afterKeyboard": [
+        "الأول",
+        "الثاني",
+        "الثالث"
+      ],
+      "afterReload": [
+        "الأول",
+        "الثاني",
+        "الثالث"
+      ],
+      "handleInfo": {
+        "tag": "DIV",
+        "role": null,
+        "label": null,
+        "tabindex": null,
+        "cls": "array-field__draggable-rows"
+      },
+      "keyboard": "attempted",
+      "liveRegionText": [],
+      "menuItems": [
+        "التّحريك إلى الأسفل",
+        "",
+        "أضف في الاسفل",
+        "استنساخ",
+        " نسخ الصف",
+        " لصق الصف",
+        "إزالة",
+        "التّحريك إلى الأعلى",
+        "",
+        "التّحريك إلى الأسفل",
+        "",
+        "أضف في الاسفل",
+        "استنساخ",
+        " نسخ الصف",
+        " لصق الصف",
+        "إزالة",
+        "التّحريك إلى الأعلى",
+        "",
+        "أضف في الاسفل",
+        "استنساخ",
+        " نسخ الصف",
+        " لصق الصف",
+        "إزالة",
+        "التّحريك إلى الأسفل",
+        "",
+        "أضف في الاسفل",
+        "استنساخ",
+        " نسخ الصف",
+        " لصق الصف",
+        "إزالة",
+        "التّحريك إلى الأعلى",
+        "",
+        "أضف في الاسفل",
+        "استنساخ",
+        " نسخ الصف",
+        " لصق الصف",
+        "إزالة"
+      ]
+    }
+  },
+  {
+    "config": "C1",
+    "width": 768,
+    "check": "08-focal-point",
+    "status": "partial",
+    "data": {
+      "opened": false,
+      "focalElements": 2,
+      "note": "keyboard operability judged from screenshot/DOM"
+    }
+  },
+  {
+    "config": "C1",
+    "width": 768,
+    "check": "09-date",
+    "status": "partial",
+    "data": {
+      "month": "نوفمبر 2026",
+      "pickerDir": "rtl"
+    }
+  },
+  {
+    "config": "C1",
+    "width": 768,
+    "check": "10-dropdowns",
+    "status": "pass",
+    "data": {
+      "optionsForArabicQuery": [
+        "اختبار الاختراق"
+      ],
+      "fieldDirection": "rtl"
+    }
+  },
+  {
+    "config": "C1",
+    "width": 768,
+    "check": "11-publish-ui",
+    "status": "partial",
+    "data": {
+      "publishButtons": [
+        "نشر التّغييرات",
+        "نشر في العربية"
+      ],
+      "options": [
+        "العربية (ar)",
+        "الإنجليزية (en)",
+        "نسخ إلى الموقع المحلي",
+        "أنشاء جديد",
+        "استنساخ",
+        "استنساخ المواقع المختارة",
+        "حذف",
+        " نسخ الحقل",
+        " لصق الحقل",
+        " نسخ الحقل",
+        " لصق الحقل",
+        "نشر في العربية",
+        "التّحريك إلى الأسفل",
+        "أضف في الاسفل",
+        "استنساخ",
+        " نسخ الصف",
+        " لصق الصف",
+        "إزالة",
+        "التّحريك إلى الأعلى",
+        "التّحريك إلى الأسفل",
+        "أضف في الاسفل",
+        "استنساخ",
+        " نسخ الصف",
+        " لصق الصف",
+        "إزالة",
+        "التّحريك إلى الأعلى",
+        "أضف في الاسفل",
+        "استنساخ",
+        " نسخ الصف",
+        " لصق الصف",
+        "إزالة",
+        "التّحريك إلى الأسفل",
+        "أضف في الاسفل",
+        "استنساخ",
+        " نسخ الصف",
+        " لصق الصف",
+        "إزالة",
+        "التّحريك إلى الأعلى",
+        "أضف في الاسفل",
+        "استنساخ",
+        " نسخ الصف",
+        " لصق الصف",
+        "إزالة"
+      ]
+    }
+  },
+  {
+    "config": "C1",
+    "width": 768,
+    "check": "13-locking",
+    "status": "pass",
+    "data": {
+      "lockedIndicators": 4
+    }
+  },
+  {
+    "config": "C1",
+    "width": 768,
+    "check": "14-validation",
+    "status": "partial",
+    "data": {
+      "messages": [
+        "3"
+      ],
+      "toastDir": "rtl",
+      "focusAfterError": "BODY"
+    }
+  },
+  {
+    "config": "C1",
+    "width": 768,
+    "check": "15-keyboard-focus",
+    "status": "partial",
+    "data": {
+      "stops": 45,
+      "withoutVisibleIndicator": 43,
+      "obscured": 0,
+      "sample": [
+        {
+          "el": "INPUT#field-title.",
+          "visible": true,
+          "obscured": false
+        },
+        {
+          "el": "TEXTAREA#field-summary.",
+          "visible": true,
+          "obscured": false
+        },
+        {
+          "el": "DIV#.ContentEditable__root",
+          "visible": false,
+          "obscured": false
+        },
+        {
+          "el": "DIV#.ContentEditable__root",
+          "visible": false,
+          "obscured": false
+        },
+        {
+          "el": "DIV#.ContentEditable__root",
+          "visible": false,
+          "obscured": false
+        },
+        {
+          "el": "DIV#.ContentEditable__root",
+          "visible": false,
+          "obscured": false
+        },
+        {
+          "el": "DIV#.ContentEditable__root",
+          "visible": false,
+          "obscured": false
+        },
+        {
+          "el": "DIV#.ContentEditable__root",
+          "visible": false,
+          "obscured": false
+        },
+        {
+          "el": "DIV#.ContentEditable__root",
+          "visible": false,
+          "obscured": false
+        },
+        {
+          "el": "DIV#.ContentEditable__root",
+          "visible": false,
+          "obscured": false
+        },
+        {
+          "el": "DIV#.ContentEditable__root",
+          "visible": false,
+          "obscured": false
+        },
+        {
+          "el": "DIV#.ContentEditable__root",
+          "visible": false,
+          "obscured": false
+        }
+      ]
+    }
+  },
+  {
+    "config": "C1",
+    "width": 768,
+    "check": "16-axe",
+    "status": "fail",
+    "data": {
+      "/admin": {
+        "serious": 2,
+        "critical": 1,
+        "ids": [
+          "aria-hidden-focus(1)",
+          "label(1)",
+          "target-size(4)"
+        ]
+      },
+      "/admin/collections/poc-pages?locale=ar": {
+        "serious": 2,
+        "critical": 1,
+        "ids": [
+          "color-contrast(4)",
+          "label(3)",
+          "target-size(8)"
+        ]
+      },
+      "/admin/collections/poc-pages/1?locale=ar": {
+        "serious": 7,
+        "critical": 2,
+        "ids": [
+          "aria-command-name(5)",
+          "aria-hidden-focus(4)",
+          "aria-input-field-name(1)",
+          "button-name(18)",
+          "color-contrast(6)",
+          "label-content-name-mismatch(1)",
+          "label(3)",
+          "list(1)",
+          "target-size(19)"
+        ]
+      },
+      "/admin/collections/poc-pages/1/versions?locale=ar": {
+        "serious": 2,
+        "critical": 0,
+        "ids": [
+          "list(1)",
+          "target-size(2)"
+        ]
+      },
+      "/admin/collections/poc-media/1?locale=ar": {
+        "serious": 1,
+        "critical": 1,
+        "ids": [
+          "button-name(3)",
+          "list(1)"
+        ]
+      }
+    }
+  }
+]

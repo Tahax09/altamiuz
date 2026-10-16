@@ -1,0 +1,87 @@
+[
+  {
+    "config": "C1",
+    "width": 768,
+    "check": "01-login",
+    "status": "pass",
+    "data": {
+      "lang": "ar",
+      "dir": "rtl"
+    }
+  },
+  {
+    "config": "C1",
+    "width": 768,
+    "check": "02-nav",
+    "status": "pass",
+    "data": {
+      "lang": "ar",
+      "dir": "rtl",
+      "side": "right",
+      "box": {
+        "x": 0,
+        "y": 0,
+        "width": 768,
+        "height": 900
+      }
+    }
+  },
+  {
+    "config": "C1",
+    "width": 768,
+    "check": "03-list",
+    "status": "partial",
+    "data": {
+      "thAlign": "n/a",
+      "rowsAfterArabicSearch": 0
+    }
+  },
+  {
+    "config": "C1",
+    "width": 768,
+    "check": "04-field-direction",
+    "status": "pass",
+    "data": {
+      "title": {
+        "dirAttr": null,
+        "computed": "rtl"
+      },
+      "summary": {
+        "dirAttr": null,
+        "computed": "rtl"
+      },
+      "number": {
+        "dirAttr": null,
+        "computed": "rtl"
+      },
+      "html": {
+        "lang": "ar",
+        "dir": "rtl"
+      }
+    }
+  },
+  {
+    "config": "C1",
+    "width": 768,
+    "check": "05-richtext",
+    "status": "pass",
+    "data": {
+      "dir": {
+        "computed": "rtl",
+        "pDir": "auto"
+      },
+      "unsafeMarkupInEditorDom": false,
+      "pastedSample": "<p class=\"LexicalEditorTheme__paragraph\" dir=\"auto\"><span data-lexical-text=\"true\"> فقرة تجريبية: لا، لأ، لإ — علامات الترقيم ، ؛ ؟ مع نص إنجليزي ISO/IEC 27002 داخل السطر.نص ملصوق </span><strong class=\"LexicalEditorTheme__textBold\" data-lexical-text=\"true\">عريض</strong><div class=\"LexicalEditorTheme"
+    }
+  },
+  {
+    "config": "C1",
+    "width": 768,
+    "check": "06-mixed-direction",
+    "status": "partial",
+    "data": {
+      "note": "visual review of screenshot required",
+      "value": "نص تجريبي يتضمن ISO/IEC 27001:2022 و PCI DSS v4.0.1 والبريد info@example.ly والهاتف +218 21 000 0000 وأرقام ١٢٣٤٥ و 12345."
+    }
+  }
+]

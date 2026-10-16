@@ -1,0 +1,9 @@
+{
+  "linkUrlsInStoredBody": [
+    "javascript:alert(3)",
+    "javascript:alert(3)",
+    "javascript:alert(3)",
+    "javascript:alert(3)"
+  ],
+  "hasJavascriptScheme": true
+}

@@ -141,12 +141,12 @@ Each phase ends with:
 
 | Phase | Scope | Gate (all must hold) |
 |---|---|---|
-| **0 Research** | R-A Payload RTL POC; R-B typography specimen | `findings.md` and `report.md` with evidence; owner decisions on admin language and typefaces; any plan amendments recorded |
+| **0 Research** (R-A, R-B **done** 2026-10-16) | R-A Payload RTL POC; R-B typography specimen | Evidence committed; D-4 updated, D-12 updated, D-22–D-24 added (research.md § Research results). **Owner review pending**: English admin UI for v1 (D-23), typeface adoption (D-24), core-admin accessibility risk |
 | **1 Foundation** | Scaffold, strict TS, lint boundaries, config loader + adapters with local substitutes, Docker dev, logger, health, proxy with headers/CSP (R-D), gitleaks + audit, CI files, migration tooling, ADR-001..003 | App boots locally with no paid accounts; production mode refuses dev substitutes (test); headers verified; gitleaks clean; migration up/down test runs |
 | **2 Identity & access** (test-first) | R-C spike; users, invitations, owner bootstrap, password policy + breached-password check, lockout, MFA enrol/verify/recovery, sessions, RBAC matrix, audit log + DB trigger | 100% access-matrix cells pass (SC-003); MFA bypass/replay/brute-force suite passes (SC-017); all FR-045 auth events audited; threat model TM-auth signed off |
-| **3 Content core** | Localization, block library, Lexical allow-list, evidence gating, pages/services/courses + listings, globals, drafts/versions/restore/locking, preview, revalidation | US2 and US7 e2e pass in both locales; XSS paste suite passes; unverified claim cannot publish; publish-to-live ≤60 s |
-| **4 Media** (test-first) | Upload validation, re-encode/strip, variants, focal point, random names, private draft media, usage panel, accessible reordering | US4 e2e + malicious-fixture suite pass; keyboard reorder announced and persisted |
-| **5 Public site & SEO** | Design tokens and typography (R-B), section renderers, locale routing, switcher, 404/error pages, metadata, hreflang, JSON-LD, sitemap, robots, redirects + legacy map loader | US1 and US6 e2e pass; axe 0 serious/critical; perf budgets met on all templates in both locales |
+| **3 Content core** | Localization (`experimental.localizeStatus`, D-4), block library, Lexical allow-list + **server-side link-URL scheme validation (D-22)**, evidence gating, pages/services/courses + listings, globals, drafts/versions/restore/locking, preview, revalidation, **accessible reorder control for blocks (D-12)**, editor focus style + Esc-Tab help text | US2 and US7 e2e pass in both locales; XSS paste suite passes, including a `javascript:` link pasted via the admin **and** sent directly to the API (both rejected); per-locale publish regression test passes; unverified claim cannot publish; publish-to-live ≤60 s |
+| **4 Media** (test-first) | Upload validation, re-encode/strip, variants, focal point (numeric inputs as keyboard path), random names, private draft media, usage panel, accessible reordering (D-12 control) | US4 e2e + malicious-fixture suite pass; keyboard reorder works without a pointer, is announced in the UI language, and persists after reload |
+| **5 Public site & SEO** | Design tokens and typography (D-24: self-hosted OFL woff2, ≤3 Arabic weights, `clamp()` scale, bidi wrappers), section renderers, typed route map (D-5), switcher, 404/error pages, metadata, hreflang, JSON-LD, sitemap, robots, redirects + legacy map loader | US1 and US6 e2e pass; axe 0 serious/critical; perf budgets met on all templates in both locales, including fonts ≤120 KB per locale (re-measured on self-hosted files); Firefox + real iOS/Android typography check |
 | **6 Enquiries & analytics** | Form, Turnstile, rate limit, persist-then-confirm, email job with retries, inbox with audited read/export/delete, retention job, R-F analytics behind a flag | US5 e2e + abuse suite pass; outage test passes before any delivery claim; retention deletion audited |
 | **7 Hardening & operations** | Full adversarial suite, manual a11y and screen-reader pass, observability and alerts, backup/restore scripts + drill, runbooks, `docs/api.md`, ASVS L2 report, R-H hosting comparison | SC-003…SC-017 evidence pack; restore drill within RPO/RTO; 0 critical/high findings; launch readiness review (content dependencies cleared separately) |
 
@@ -155,8 +155,16 @@ are written at the start of their phase, before code.
 
 ## Risks and Dependencies
 
-- **Payload capability gaps** in per-locale publishing, sessions, keyboard reordering or admin RTL
-  would add custom work. They are surfaced early by R-A and R-C.
+- **Payload capability gaps (R-A evidence)**:
+  - Keyboard reordering and rich-text URL safety need project work (D-12, D-22).
+  - Per-locale publish relies on an **experimental** flag (D-4); pin the version and add a
+    regression test.
+  - The Arabic admin UI is deferred (D-23).
+  - Sessions and expiry still need R-C.
+- **Core admin accessibility**: Payload's own admin views fail axe (serious/critical) in both UI
+  languages. Project-built admin parts must pass (FR-080). Core gaps are tracked, may be reported
+  upstream, and **need owner acceptance** as a known limitation, or extra scope to override
+  components.
 - **MFA in Payload's admin flow** needs a gate across admin views and the REST API. A missed path
   means a bypass, hence the security suite and the single access wrapper.
 - **Hosting is undecided**: background jobs, cron and media storage depend on it. Adapters keep

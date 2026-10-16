@@ -1,0 +1,169 @@
+<!doctype html>
+<!-- R-B typography specimen. Research only: fonts load from Google Fonts here; production self-hosts. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Typography Specimen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Inter:wght@400..600&family=Manrope:wght@500..800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0f1e3a; --charcoal: #1f2733; --muted: #4a5568; --line: #d9dee7;
+    --accent: #1d4ed8; --bg: #ffffff; --surface: #f5f7fa; --error: #b42318;
+    --lh-ar: 1.7; --lh-en: 1.55;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--charcoal); }
+  .panel { padding: 32px 24px; border-bottom: 1px solid var(--line); }
+  .panel h6 { font: 600 12px/1.4 Inter, sans-serif; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); margin: 0 0 16px; direction: ltr; text-align: left; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
+  @media (max-width: 700px) { .grid { grid-template-columns: 1fr; } }
+  /* :lang() follows the nearest lang attribute, so <html lang> never overrides a panel */
+  :lang(ar) { font-family: "IBM Plex Sans Arabic", system-ui, sans-serif; line-height: var(--lh-ar); }
+  :lang(en) { font-family: Inter, system-ui, sans-serif; line-height: var(--lh-en); }
+  :is(h1, h2, h3, h4, .brand):lang(en) { font-family: Manrope, Inter, sans-serif; letter-spacing: -0.01em; }
+  :is(h1, h2, h3, h4, .brand):lang(ar) { font-family: "IBM Plex Sans Arabic", system-ui, sans-serif; font-weight: 700; line-height: 1.45; }
+  h1 { font-size: 56px; margin: 0 0 12px; color: var(--navy); }
+  h2 { font-size: 40px; margin: 0 0 12px; color: var(--navy); }
+  h3 { font-size: 32px; margin: 0 0 10px; color: var(--navy); }
+  h4 { font-size: 24px; margin: 0 0 8px; color: var(--navy); }
+  .h5 { font-size: 20px; font-weight: 600; margin: 0 0 8px; }
+  .p18 { font-size: 18px; } .p16 { font-size: 16px; } .p14 { font-size: 14px; color: var(--muted); }
+  nav { display: flex; gap: 24px; align-items: center; padding: 16px 0; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+  nav a { color: var(--charcoal); text-decoration: none; font-size: 15px; font-weight: 500; }
+  nav .brand { font-size: 20px; font-weight: 800; color: var(--navy); margin-inline-end: auto; }
+  .btn { display: inline-block; padding: 12px 20px; border-radius: 6px; font-size: 15px; font-weight: 600; border: 1px solid var(--navy); margin-inline-end: 8px; }
+  .btn.primary { background: var(--navy); color: #fff; } .btn.secondary { color: var(--navy); background: transparent; }
+  label { display: block; font-size: 14px; font-weight: 600; margin: 12px 0 4px; }
+  .hint { font-size: 13px; color: var(--muted); }
+  input, textarea { width: 100%; font: inherit; font-size: 16px; padding: 10px 12px; border: 1px solid #8a94a6; border-radius: 6px; }
+  input:focus, textarea:focus { outline: 3px solid var(--accent); outline-offset: 1px; }
+  .err { border-color: var(--error); } .errmsg { color: var(--error); font-size: 13px; margin-top: 4px; }
+  table { border-collapse: collapse; width: 100%; font-size: 15px; font-variant-numeric: tabular-nums; }
+  th, td { border-bottom: 1px solid var(--line); padding: 8px; text-align: start; }
+  .card { background: var(--surface); padding: 20px; border-radius: 8px; }
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
+  .narrow { max-width: 340px; }
+  .diacritics { font-size: 32px; }
+  .mixed span { unicode-bidi: isolate; }
+  footer { font-size: 14px; color: var(--muted); }
+</style>
+</head>
+<body>
+
+<section class="panel"><h6 lang="en">Navigation and buttons</h6>
+  <div class="grid">
+    <div lang="ar" dir="rtl">
+      <nav><span class="brand">التميز</span><a href="#">الرئيسية</a><a href="#">الخدمات</a><a href="#">التدريب</a><a href="#">من نحن</a><a href="#">تواصل معنا</a><a href="#">English</a></nav>
+      <p><span class="btn primary">اطلب استشارة</span><span class="btn secondary">استعرض الخدمات</span></p>
+    </div>
+    <div lang="en" dir="ltr">
+      <nav><span class="brand">Altamiuz</span><a href="#">Home</a><a href="#">Services</a><a href="#">Training</a><a href="#">About</a><a href="#">Contact</a><a href="#">العربية</a></nav>
+      <p><span class="btn primary">Request a consultation</span><span class="btn secondary">Explore services</span></p>
+    </div>
+  </div>
+</section>
+
+<section class="panel"><h6 lang="en">Heading scale 56 / 40 / 32 / 24 / 20</h6>
+  <div class="grid">
+    <div lang="ar" dir="rtl">
+      <h1>استشارات أمن المعلومات</h1>
+      <h2>حوكمة وإدارة المخاطر</h2>
+      <h3>تقييم الجاهزية والامتثال</h3>
+      <h4>برامج التوعية والتدريب</h4>
+      <p class="h5">استجابة منظمة للحوادث</p>
+    </div>
+    <div lang="en" dir="ltr">
+      <h1>Information security consulting</h1>
+      <h2>Governance and risk management</h2>
+      <h3>Readiness and compliance assessment</h3>
+      <h4>Awareness and training programmes</h4>
+      <p class="h5">Structured incident response</p>
+    </div>
+  </div>
+</section>
+
+<section class="panel"><h6 lang="en">Body 18 / 16 / 14</h6>
+  <div class="grid">
+    <div lang="ar" dir="rtl">
+      <p class="p18">نساعد المؤسسات على فهم مخاطر المعلومات لديها وبناء ضوابط عملية تتناسب مع طبيعة أعمالها ومتطلباتها التنظيمية، مع التركيز على النتائج القابلة للقياس.</p>
+      <p class="p16">يتضمن العمل عادةً مراجعة السياسات والإجراءات، وتقييم الضوابط التقنية والإدارية، وإعداد خطة معالجة واضحة الأولويات يمكن متابعتها على مراحل.</p>
+      <p class="p14">ملاحظة: هذا نص تجريبي لأغراض المعاينة فقط ولا يمثل ادعاءً عن الشركة.</p>
+    </div>
+    <div lang="en" dir="ltr">
+      <p class="p18">We help organisations understand their information risks and build practical controls that fit the nature of their business and its regulatory obligations, with a focus on measurable outcomes.</p>
+      <p class="p16">Work typically covers a review of policies and procedures, an assessment of technical and administrative controls, and a clearly prioritised treatment plan that can be followed in stages.</p>
+      <p class="p14">Note: sample text for specimen purposes only; not a company claim.</p>
+    </div>
+  </div>
+</section>
+
+<section class="panel"><h6 lang="en">Arabic stress tests: diacritics, ligatures, punctuation, numerals, mixed direction</h6>
+  <div lang="ar" dir="rtl">
+    <p class="diacritics">إِدَارَةُ أَمْنِ المَعْلُومَاتِ — مُسْتَشَارُونَ مُتَخَصِّصُونَ</p>
+    <p class="p18">لا · لأ · لإ · لآ · الله · ﻻ — كلماتٌ طويلةٌ متصلةٌ: والمستشارونالمتخصصونفيالأمنالسيبراني</p>
+    <p class="p18">علامات الترقيم: نعم، لا؛ لماذا؟ «اقتباس» (قوسان) — شرطة.</p>
+    <p class="p18">أرقام عربية مشرقية: ٠١٢٣٤٥٦٧٨٩ — أرقام غربية: 0123456789 — نسبة ٩٥٪ و 95%</p>
+    <p class="p18 mixed">المعيار <span>ISO/IEC 27001:2022</span> ومتطلبات <span>PCI DSS v4.0.1</span> وإرشادات <span>NIST SP 800-53 Rev. 5</span>.</p>
+    <p class="p18 mixed">البريد <span>info@example.ly</span> والهاتف <span dir="ltr">+218 21 000 0000</span> والجوال <span dir="ltr">+218 91 000 0000</span>.</p>
+    <div class="narrow"><h3>عنوان طويل جدًا يلتف على ثلاثة أسطر لاختبار ارتفاع السطر والتشكيل</h3></div>
+  </div>
+  <div lang="en" dir="ltr">
+    <p class="p18">Long words: interoperability, internationalisation, Telecommunications­Infrastructure, ISO/IEC 27001:2022, PCI DSS v4.0.1, +218 21 000 0000.</p>
+    <div class="narrow"><h3>A deliberately long heading that wraps across three lines</h3></div>
+  </div>
+</section>
+
+<section class="panel"><h6 lang="en">Form: labels, hints, errors, focus</h6>
+  <div class="grid">
+    <form lang="ar" dir="rtl" onsubmit="return false">
+      <label for="a1">الاسم الكامل</label><input id="a1" value="محمد عبد الله">
+      <label for="a2">البريد الإلكتروني</label><input id="a2" class="err" dir="ltr" value="name@example">
+      <div class="errmsg">يرجى إدخال بريد إلكتروني صالح.</div>
+      <label for="a3">رقم الهاتف <span class="hint">(اختياري)</span></label><input id="a3" dir="ltr" value="+218 91 000 0000">
+      <label for="a4">رسالتك</label><textarea id="a4" rows="3">نرغب في تقييم جاهزيتنا لمعيار ISO/IEC 27001:2022.</textarea>
+      <p class="hint">لا ترسل كلمات مرور أو بيانات حساسة عبر هذا النموذج.</p>
+    </form>
+    <form lang="en" dir="ltr" onsubmit="return false">
+      <label for="e1">Full name</label><input id="e1" value="Jane Smith">
+      <label for="e2">Email</label><input id="e2" class="err" value="name@example">
+      <div class="errmsg">Please enter a valid email address.</div>
+      <label for="e3">Phone <span class="hint">(optional)</span></label><input id="e3" value="+218 91 000 0000">
+      <label for="e4">Your message</label><textarea id="e4" rows="3">We would like to assess our readiness for ISO/IEC 27001:2022.</textarea>
+      <p class="hint">Do not send passwords or sensitive data through this form.</p>
+    </form>
+  </div>
+</section>
+
+<section class="panel"><h6 lang="en">Cards and table</h6>
+  <div class="grid">
+    <div lang="ar" dir="rtl">
+      <div class="cards">
+        <div class="card"><h4>تقييم المخاطر</h4><p class="p16">منهجية واضحة لتحديد الأصول والتهديدات وأولويات المعالجة.</p></div>
+        <div class="card"><h4>الحوكمة</h4><p class="p16">سياسات وأدوار ومسؤوليات قابلة للتطبيق والمتابعة.</p></div>
+      </div>
+      <table><thead><tr><th>البرنامج</th><th>المدة</th><th>الأيام</th></tr></thead>
+      <tbody><tr><td>مقدمة في نظام إدارة أمن المعلومات</td><td>٥ أيام</td><td>5</td></tr><tr><td>التدقيق الداخلي</td><td>٣ أيام</td><td>3</td></tr></tbody></table>
+    </div>
+    <div lang="en" dir="ltr">
+      <div class="cards">
+        <div class="card"><h4>Risk assessment</h4><p class="p16">A clear method for identifying assets, threats and treatment priorities.</p></div>
+        <div class="card"><h4>Governance</h4><p class="p16">Policies, roles and responsibilities that can be applied and followed up.</p></div>
+      </div>
+      <table><thead><tr><th>Programme</th><th>Duration</th><th>Days</th></tr></thead>
+      <tbody><tr><td>Introduction to ISMS</td><td>5 days</td><td>5</td></tr><tr><td>Internal audit</td><td>3 days</td><td>3</td></tr></tbody></table>
+    </div>
+  </div>
+</section>
+
+<section class="panel"><h6 lang="en">Footer</h6>
+  <div class="grid">
+    <footer lang="ar" dir="rtl">طرابلس، ليبيا · <span dir="ltr">+218 21 000 0000</span> · سياسة الخصوصية · الشروط</footer>
+    <footer lang="en" dir="ltr">Tripoli, Libya · +218 21 000 0000 · Privacy notice · Terms</footer>
+  </div>
+</section>
+
+</body>
+</html>

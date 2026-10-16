@@ -1,0 +1,49 @@
+{
+  "edit": {
+    "scrollWidth": 11380,
+    "culprits": [
+      {
+        "el": "BUTTON.icon draggable-block-menu",
+        "left": -9940,
+        "width": 18,
+        "pos": "absolute"
+      },
+      {
+        "el": "DIV.icon",
+        "left": -9940,
+        "width": 18,
+        "pos": "static"
+      },
+      {
+        "el": "DIV.link-editor",
+        "left": -9940,
+        "width": 76,
+        "pos": "absolute"
+      },
+      {
+        "el": "DIV.link-input",
+        "left": -9928,
+        "width": 60,
+        "pos": "relative"
+      },
+      {
+        "el": "BUTTON.link-edit",
+        "left": -9898,
+        "width": 30,
+        "pos": "static"
+      }
+    ]
+  },
+  "list": {
+    "scrollWidth": 1440,
+    "culprits": []
+  },
+  "dashboard": {
+    "scrollWidth": 1440,
+    "culprits": []
+  },
+  "media": {
+    "scrollWidth": 1440,
+    "culprits": []
+  }
+}

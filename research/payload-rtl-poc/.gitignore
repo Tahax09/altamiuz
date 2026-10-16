@@ -1,0 +1,14 @@
+# Throwaway POC: only config, scripts, findings and evidence are committed
+node_modules/
+.next/
+.pw-browsers/
+media/
+.env
+.env.*
+*.log
+next-env.d.ts
+src/app/(payload)/admin/importMap.js
+test-results/
+playwright-report/
+CLAUDE.md
+AGENTS.md

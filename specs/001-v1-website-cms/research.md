@@ -22,6 +22,67 @@ that depends on them. Nothing here claims a control is implemented.
 
 The RTL styling evidence shows intent, not usability. It does not satisfy TODO(PAYLOAD_RTL).
 
+## Research results (2026-10-16, WS4)
+
+### R-A Payload Arabic/RTL admin: done
+Full matrix, versions, reproduction steps and evidence:
+[research/payload-rtl-poc/findings.md](../../research/payload-rtl-poc/findings.md).
+Tested with Payload 3.91.0, Next 16.3.3 and Postgres 17 (Docker), using Playwright Chromium and
+WebKit engines.
+
+| Area | Result |
+|---|---|
+| Arabic content entry (fields, rich text, dropdowns, dates) in both UI languages | **works**: Arabic-locale fields render RTL, also under the English UI |
+| Arabic admin UI | mostly mirrored correctly, **but** edit views with rich text overflow horizontally by ≈10,000 px in RTL (Lexical floating controls parked at `left:-9940px`); date meta glitch |
+| Per-locale publish | **works** via `experimental.localizeStatus` (API verified: publishing `ar` leaves `en` draft) |
+| Version restore | restore yields a **draft**; UI compare/restore not exercised |
+| Document locking | **works** |
+| Sessions | default `useSessions`: token **rejected after logout** |
+| Array/blocks keyboard reorder | **fails**: drag handle not focusable; menu Move Up/Down exists but keyboard result unreliable; announcements English-only raw IDs |
+| Rich-text paste | scripts, handlers and iframes dropped, **but a `javascript:` link URL is stored** (security finding) |
+| Keyboard and focus in editor | Tab trapped (Esc+Tab exits); no visible editor focus indicator |
+| axe on core admin | serious/critical violations on every view, identical in both UI languages |
+| Not tested | 200% zoom, branded Safari/Chrome, Firefox, screen readers, real devices |
+
+**Admin is not RTL-ready as an Arabic-language UI.** Arabic *content* editing is viable.
+
+### R-B Typography: done
+Report: [research/typography-specimen/report.md](../../research/typography-specimen/report.md).
+- All three families are SIL OFL 1.1, confirmed at upstream: IBM/plex, rsms/inter,
+  googlefonts/manrope. "Plex" is a Reserved Font Name.
+- Shaping, ligatures, diacritics (no clipping at line-height 1.7) and isolated mixed-direction
+  runs render correctly in the Chromium and WebKit engines at 375 and 1440 px.
+- Not tested: Firefox, branded browsers, real devices.
+- The 120 KB per-locale font budget is achievable **only** with ≤3 Arabic weights and no latin-ext
+  on first load. Example: Arabic page with 2 weights = 93 KB; English page = 71–104 KB, computed
+  from measured Google woff2 sizes. To be re-measured with self-hosted files.
+
+### Decisions changed or added by the research
+- **D-4 updated**: adopt `experimental.localizeStatus`. Pin Payload exactly; add a regression
+  test for per-locale publish to the Phase 3 gate and re-run it on every Payload upgrade. Keep the
+  `publishedLocales` fallback design documented.
+- **D-12 updated**: Payload's built-in array/blocks reordering does not meet FR-012, FR-055 or
+  WCAG 2.1.1. Build a project-owned **accessible reorder control** (focusable Move up/down, order
+  position, localized `aria-live` announcements), used for gallery items, blocks and listing
+  order.
+- **D-22 (new) Rich-text URL safety**: a server-side `validate` hook walks the Lexical JSON and
+  rejects any link or autolink URL whose scheme is not `https:`, `http:` (allow-listed host),
+  `mailto:` or `tel:`, or an internal reference. The public renderer applies the same allow-list
+  again. Covered by the XSS suite (threat T6). Check upstream Payload issues before reporting.
+- **D-23 (new) Admin UI language**: English admin UI in v1, with Arabic content entered RTL. An
+  Arabic admin UI is a later per-user option, gated on (a) an admin CSS fix for the RTL overflow,
+  verified, and (b) re-running R-A checks 2–6.
+- **D-24 (new) Typography**: adopt Manrope (EN headings), Inter (EN body/UI) and IBM Plex Sans
+  Arabic (AR, ≤3 weights: 400/600/700).
+  - Self-host unmodified OFL woff2 via `next/font/local`; no runtime Google requests.
+  - Arabic line-height 1.7 (headings 1.45); Arabic small text ≥15 px.
+  - Responsive `clamp()` type scale.
+  - `<bdi>`/`dir="ltr"` wrappers for Latin identifiers, numbers with symbols, emails and phone
+    numbers (the specimen showed "95%" rendering as "%95" without one).
+- **Admin accessibility risk**: Payload core admin views have axe violations outside our control.
+  FR-080 covers project-built customisations, which must pass. Core issues are tracked as a risk
+  and may go to upstream reports. Owner awareness is needed (see plan Risks).
+
 ## Priority research tasks (run before detailed implementation)
 
 ### R-A. Payload Arabic/RTL admin proof of concept
