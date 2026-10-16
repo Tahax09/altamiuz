@@ -1,11 +1,21 @@
-// Request proxy (Next 16): per-request CSP nonce (FR-090) and Setup-phase blocking of Payload's
-// first-user registration (FR-030). Locale routing and redirects arrive in later phases.
+// Request proxy (Next 16): per-request CSP nonce (FR-090) and blocking of Payload built-in auth
+// routes replaced by project flows. Locale routing and redirects arrive in later phases.
 import { NextResponse, type NextRequest } from 'next/server'
 import { buildCsp, type CspKind } from '@/modules/security'
 
-// Until the real users collection and one-time bootstrap exist (T056/T057), no account may be
-// created through Payload's built-in "create first user" flow.
-const BLOCKED = new Set(['/admin/create-first-user', '/api/users/first-register'])
+// Payload built-ins replaced by project flows (FR-030, FR-034, ADR-005): no first-user
+// registration, recovery only via /account/recover, no session extension past the absolute
+// lifetime (refresh-token), no unlock or e-mail verification endpoints.
+const BLOCKED = new Set([
+  '/admin/create-first-user',
+  '/api/users/first-register',
+  '/api/users/forgot-password',
+  '/api/users/reset-password',
+  '/api/users/unlock',
+  '/api/users/refresh-token',
+])
+const BLOCKED_PREFIXES = ['/admin/reset/', '/admin/verify/', '/api/users/verify/']
+const REDIRECTS: Record<string, string> = { '/admin/forgot': '/account/recover' }
 
 function normalise(pathname: string): string {
   const lower = pathname.toLowerCase()
@@ -26,7 +36,9 @@ function newNonce(): string {
 
 export function proxy(request: NextRequest): NextResponse {
   const path = normalise(request.nextUrl.pathname)
-  if (BLOCKED.has(path)) return new NextResponse(null, { status: 404 })
+  if (BLOCKED.has(path) || BLOCKED_PREFIXES.some((p) => path.startsWith(p)))
+    return new NextResponse(null, { status: 404 })
+  if (REDIRECTS[path]) return NextResponse.redirect(new URL(REDIRECTS[path], request.url), 307)
 
   const nonce = newNonce()
   const csp = buildCsp({

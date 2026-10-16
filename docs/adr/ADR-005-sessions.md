@@ -34,6 +34,12 @@
 5. Per-source and per-account rate limits (T039 limiter) apply in front of login, MFA and recovery
    (T055).
 
+## Implementation (WS8)
+
+Implemented in `src/modules/auth/sessions.ts`, `login.ts`, `mfa.ts`. The R-C spike test was retired
+once its default-config assumptions no longer applied; its gaps are now asserted closed by
+`tests/integration/auth/{sessions,enumeration}.test.ts` (measured spread 1 ms; see TM-auth).
+
 ## Consequences
 
 T048 and T049 tests must assert the gaps closed: uniform locked/unknown responses, timing within

@@ -1,3 +1,105 @@
 {
-  "login": []
+  "login": [],
+  "dashboard": [
+    {
+      "rule": "aria-hidden-focus",
+      "impact": "serious",
+      "nodes": 1
+    },
+    {
+      "rule": "color-contrast",
+      "impact": "serious",
+      "nodes": 1
+    },
+    {
+      "rule": "label",
+      "impact": "critical",
+      "nodes": 1
+    }
+  ],
+  "list:users": [
+    {
+      "rule": "color-contrast",
+      "impact": "serious",
+      "nodes": 5
+    },
+    {
+      "rule": "label",
+      "impact": "critical",
+      "nodes": 5
+    },
+    {
+      "rule": "target-size",
+      "impact": "serious",
+      "nodes": 8
+    }
+  ],
+  "edit:users": [
+    {
+      "rule": "aria-hidden-focus",
+      "impact": "serious",
+      "nodes": 4
+    },
+    {
+      "rule": "button-name",
+      "impact": "critical",
+      "nodes": 1
+    },
+    {
+      "rule": "color-contrast",
+      "impact": "serious",
+      "nodes": 1
+    },
+    {
+      "rule": "label",
+      "impact": "critical",
+      "nodes": 2
+    },
+    {
+      "rule": "list",
+      "impact": "serious",
+      "nodes": 1
+    }
+  ],
+  "list:audit-events": [
+    {
+      "rule": "color-contrast",
+      "impact": "serious",
+      "nodes": 5
+    },
+    {
+      "rule": "label",
+      "impact": "critical",
+      "nodes": 7
+    },
+    {
+      "rule": "target-size",
+      "impact": "serious",
+      "nodes": 8
+    }
+  ],
+  "list:invitations": [
+    {
+      "rule": "color-contrast",
+      "impact": "serious",
+      "nodes": 1
+    }
+  ],
+  "create:invitations": [
+    {
+      "rule": "aria-hidden-focus",
+      "impact": "serious",
+      "nodes": 2
+    },
+    {
+      "rule": "color-contrast",
+      "impact": "serious",
+      "nodes": 1
+    },
+    {
+      "rule": "label",
+      "impact": "critical",
+      "nodes": 3
+    }
+  ]
 }

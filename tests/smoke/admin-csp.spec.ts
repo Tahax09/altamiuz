@@ -15,7 +15,10 @@ test.describe.configure({ mode: 'serial' })
 test.beforeAll(async () => {
   const c = db()
   await c.connect()
-  await c.query('insert into users (email) values ($1) on conflict do nothing', [PROBE])
+  await c.query('insert into users (email, name) values ($1, $2) on conflict do nothing', [
+    PROBE,
+    'probe',
+  ])
   await c.end()
 })
 

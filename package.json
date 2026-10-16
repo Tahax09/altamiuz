@@ -34,7 +34,8 @@
     "audit:deps": "pnpm audit --audit-level high && sh scripts/osv-scan.sh",
     "ci:local": "sh scripts/ci-local.sh",
     "prepare": "sh scripts/install-hooks.sh",
-    "test:a11y": "playwright test --project a11y-admin"
+    "test:a11y": "playwright test --project a11y-admin",
+    "bootstrap:owner": "payload run scripts/bootstrap-owner.ts"
   },
   "dependencies": {
     "@payloadcms/db-postgres": "3.91.0",
@@ -45,6 +46,7 @@
     "graphql": "16.14.2",
     "next": "16.3.8",
     "nodemailer": "10.1.1",
+    "otplib": "13.5.0",
     "payload": "3.91.0",
     "pg": "8.20.0",
     "pino": "10.4.0",

@@ -29,7 +29,9 @@ describe('migrations up → down → up', () => {
     const afterUp = await tables()
     expect(afterUp).toEqual(expect.arrayContaining(['users', 'payload_migrations']))
 
-    payload('migrate:reset')
+    // `migrate:down` reverts the whole batch newest-first. (Finding: Payload 3.91.0 `migrate:reset`
+    // runs downs oldest-first, which breaks dependent migrations; operators must use migrate:down.)
+    payload('migrate:down')
     const afterDown = (await tables()).filter((t) => t !== 'payload_migrations')
     expect(afterDown).toEqual([])
 

@@ -14,14 +14,17 @@ the public site and contact submission.
 | evidence: set `verified` | | | ✓ | ✓ |
 | media: read, upload, update (alt, focal point) | ✓ | ✓ | ✓ | ✓ |
 | media: delete | | ✓ | ✓ | ✓ |
-| navigation, banner: update draft | | ✓ | ✓ | ✓ |
+| navigation, banner: read | ✓ | ✓ | ✓ | ✓ |
+| navigation, banner: create, update draft | | ✓ | ✓ | ✓ |
 | navigation, banner: publish, unpublish | | | ✓ | ✓ |
+| navigation, banner: delete | | | ✓ | ✓ |
 | redirects: read | ✓ | ✓ | ✓ | ✓ |
 | redirects: create, update, delete | | | ✓ | ✓ |
 | site-settings: read | ✓ | ✓ | ✓ | ✓ |
 | site-settings: update, publish | | | ✓ | ✓ |
 | enquiries: read, export, delete | | | ✓ | ✓ |
 | audit-events: read, export | | | ✓ | ✓ |
+| users: read directory (never authentication secrets) | | | ✓ | ✓ |
 | users: invite, suspend, revoke sessions, reset MFA (editor/publisher targets) | | | ✓ | ✓ |
 | users: same actions on administrator targets | | | | ✓ |
 | users: same actions on owner targets | | | | ✓ (not the last owner) |
@@ -39,6 +42,12 @@ Owner decisions (WS4, 2026-10-16):
 - Enquiry permissions (read, export, delete) stay separate from other permissions, and are
   granted to Owners and Administrators only.
 - Roles are fixed in v1. Permission sets change only through a reviewed release.
+
+Owner decisions (WS8, 2026-10-16): navigation and banners are readable by every role (Editors are
+read-only) and creatable/editable as drafts by Publishers. Publishing, unpublishing and deleting
+are Administrator/Owner only. The user directory is readable and manageable by Administrators and
+Owners only, within the target rules above. Password hashes, MFA secrets, recovery codes and
+session tokens are never returned by any API.
 
 Invariants tested separately:
 - No user can raise any account, including their own, above their own role.

@@ -73,14 +73,20 @@ const ROW_MAP: Record<string, Check> = {
   'evidence: set `verified`': res(['evidence'], ['verify']),
   'media: read, upload, update (alt, focal point)': res(['media'], ['read', 'upload', 'update']),
   'media: delete': res(['media'], ['delete']),
-  'navigation, banner: update draft': res(['navigation', 'banner'], ['updateDraft']),
+  'navigation, banner: read': res(['navigation', 'banner'], ['read']),
+  'navigation, banner: create, update draft': res(
+    ['navigation', 'banner'],
+    ['create', 'updateDraft'],
+  ),
   'navigation, banner: publish, unpublish': res(['navigation', 'banner'], ['publish', 'unpublish']),
+  'navigation, banner: delete': res(['navigation', 'banner'], ['delete']),
   'redirects: read': res(['redirects'], ['read']),
   'redirects: create, update, delete': res(['redirects'], ['create', 'update', 'delete']),
   'site-settings: read': res(['site-settings'], ['read']),
   'site-settings: update, publish': res(['site-settings'], ['update', 'publish']),
   'enquiries: read, export, delete': res(['enquiries'], ['read', 'export', 'delete']),
   'audit-events: read, export': res(['audit-events'], ['read', 'export']),
+  'users: read directory (never authentication secrets)': res(['users'], ['read']),
   'users: invite, suspend, revoke sessions, reset MFA (editor/publisher targets)': userRow(
     ['editor', 'publisher'],
     SAME,
@@ -203,7 +209,7 @@ describe('unknown inputs are denied (deny by default)', () => {
     ['unknown resource', 'owner', 'users-table', 'read'],
     ['unknown action', 'owner', 'pages', 'impersonate'],
     ['prototype key', 'owner', '__proto__', 'read'],
-    ['unlisted (navigation read)', 'owner', 'navigation', 'read'],
+    ['unlisted (users delete via matrix)', 'owner', 'users', 'delete'],
   ])('%s', (_l, role, resource, action) => {
     expect(can(role as Role, resource as Resource, action as Action)).toBe(false)
   })

@@ -59,6 +59,8 @@ export async function bootPayload(): Promise<TestPayload> {
     APP_ENV: 'test',
     DATABASE_URL: db.url,
     DATABASE_ALLOW_PUSH: 'false',
+    EMAIL_DRIVER: 'memory', // tests read the in-memory outbox; never send real mail
+    TRUSTED_PROXY_HOPS: '1', // helpers send X-Forwarded-For so per-IP limits behave per client
   })
   const { getPayload } = await import('payload')
   const config = (await import('../../src/payload.config')).default

@@ -28,16 +28,14 @@ collection grants anonymous REST access except `media` file delivery of publishe
 | name | required |
 | role | `owner` / `administrator` / `publisher` / `editor`; editable only by a strictly higher role, or by an owner on an owner (D-8) |
 | status | `invited` / `active` / `suspended` |
-| mfa.enabled, mfa.secretEnc, mfa.enrolledAt | secret encrypted, never readable via API |
-| mfa.recoveryCodes[] | `{ hash, usedAt }`, hidden from all reads |
-| mfa.lastUsedStep | replay protection (FR-033b) |
-| lockout fields | Payload `loginAttempts`, `lockUntil` (tuned per A-8) |
+| MFA material | **not on users** (WS8): `user_mfa` (AES-256-GCM secret, `last_used_step` replay guard) and `mfa_recovery_codes` (salted scrypt, atomic `used_at`), reachable by no Payload API |
+| lockout | per-account limiter (`login:account`, A-8); Payload `maxLoginAttempts` disabled (ADR-005) |
 
 - Status transitions: `invited → active` (password and MFA enrolment done), `active ↔ suspended`.
   Suspension revokes every session.
 - Invariant: at least one `owner` with status `active` exists.
 
-### sessions *(if Payload's built-in sessions fail R-C)*
+### sessions (ADR-005: Payload built-in sessions + project `auth_sessions` state)
 `user` → users, `createdAt`, `lastSeenAt`, `expiresAt` (absolute), `mfaVerified` (bool),
 `ip`, `userAgent`, `revokedAt`, `revokedBy`. Hidden from the API; listed through a custom
 endpoint for the owner of the session and for administrators.

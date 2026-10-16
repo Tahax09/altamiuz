@@ -6,10 +6,12 @@ export const AUDIT_ACTIONS = {
   'auth.lockout': [],
   'auth.recovery.request': [],
   'auth.recovery.complete': [],
+  'auth.password_change': [],
   'mfa.enrol': [],
   'mfa.reset': [],
   'mfa.remove': [],
   'mfa.recovery_code_used': ['remaining'],
+  'mfa.recovery_codes_regenerate': [],
   'session.revoke': ['scope'],
   'user.invite': ['role'],
   'user.create': ['role'],
@@ -30,6 +32,7 @@ export const AUDIT_ACTIONS = {
   'enquiry.retention_delete': ['count'],
   'access.denied': ['resource', 'action'],
   'audit.retention_purge': ['count'],
+  'audit.export': ['count'],
 } as const satisfies Record<string, readonly string[]>
 
 export type AuditAction = keyof typeof AUDIT_ACTIONS

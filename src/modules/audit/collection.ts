@@ -2,7 +2,8 @@
 // written only by recordAudit(). The database additionally rejects UPDATE/DELETE/TRUNCATE
 // (migration *_audit_append_only).
 import type { CollectionConfig } from 'payload'
-import { allow, denyAll } from '../access'
+import { allow, can, denyAll, isMfaVerified, roleOf } from '../access'
+import { exportAuditCsv } from './export'
 import { AUDIT_ACTION_VALUES, AUDIT_OUTCOMES } from './events'
 
 export const AUDIT_COLLECTION = 'audit-events'
@@ -19,6 +20,22 @@ export const auditEvents: CollectionConfig = {
     update: denyAll,
     delete: denyAll,
   },
+  endpoints: [
+    {
+      path: '/export',
+      method: 'get',
+      handler: async (req) => {
+        const role = roleOf(req.user)
+        const reauthAt = (req.user as { reauthAt?: string } | null)?.reauthAt
+        const recent =
+          typeof reauthAt === 'string' && Date.now() - new Date(reauthAt).getTime() <= 5 * 60_000
+        if (!req.user || !isMfaVerified(req.user) || !role || !can(role, 'audit-events', 'export'))
+          return Response.json({ error: 'forbidden' }, { status: 403 })
+        if (!recent) return Response.json({ error: 'reauth_required' }, { status: 403 })
+        return exportAuditCsv(req)
+      },
+    },
+  ],
   indexes: [
     { fields: ['actor', 'at'] },
     { fields: ['action', 'at'] },

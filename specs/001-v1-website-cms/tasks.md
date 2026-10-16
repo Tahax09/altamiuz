@@ -164,42 +164,73 @@ MFA/session/lockout scenarios; audit entries for every event.
 
 ### Tests for US3 (write first; must fail)
 
-- [ ] T042 [P] [US3] Failing tests `tests/integration/auth/bootstrap.test.ts`: first owner created once from `BOOTSTRAP_OWNER_EMAIL`; refuses when any owner exists; anonymous `POST /api/users` denied; no default credentials in any seed (FR-030)
-- [ ] T043 [P] [US3] Failing tests `tests/integration/auth/invitations.test.ts`: invitation fields `email, role, tokenHash, expiresAt (72 h), usedAt, invitedBy`; single use; expired/reused/forged token rejected; owners may invite any role incl. owner, every other inviter only roles strictly below their own (attempts above rejected); audited (FR-031, FR-038, FR-045)
-- [ ] T044 [P] [US3] Failing tests `tests/unit/auth/password.test.ts`: length ≥12 accepted, <12 rejected, breached/common list hit rejected, no composition rules, no forced rotation (FR-032)
-- [ ] T045 [P] [US3] Failing tests `tests/integration/auth/mfa.test.ts`: factor inactive until a valid code is confirmed; secret absent from every API response (`/api/users/me`, list, versions, GraphQL disabled); DB value encrypted (≠ base32 secret); code replay within the same step rejected; ±1 step window; per-account and per-source attempt limits; 10 recovery codes, stored hashed, single use, regeneration requires re-auth; enrol/reset/remove/recovery-use revokes other sessions, emails the user, writes audit (FR-033, FR-033a, FR-033b, FR-045)
-- [ ] T046 [P] [US3] Failing attack tests `tests/security/mfa-bypass.spec.ts`: with a password-only session, every collection/global REST route, every admin view, `/preview/*`, and every custom endpoint returns 401/403; a pre-MFA session cannot be promoted by replaying cookies; direct `PATCH /api/users/:id` on `mfa.*` fields denied (FR-033, SC-017)
-- [ ] T047 [P] [US3] Failing tests `tests/integration/auth/mfa-reset.test.ts`: only administrator/owner on a lower role (owner on owner) can reset; forces re-enrolment; old secret never revealed; audited (FR-033c)
-- [ ] T048 [P] [US3] Failing attack tests `tests/security/auth-enumeration.spec.ts`: login and recovery responses identical and timing within tolerance for existing vs unknown accounts; throttling after 5 consecutive failures (A-8) escalating; lockout notification email; recovery link single-use and 30-minute expiry; completing recovery revokes all sessions and still requires MFA (FR-034, FR-045)
-- [ ] T049 [P] [US3] Failing tests `tests/integration/auth/sessions.test.ts` (controlled clock): idle 30 min and absolute 12 h (A-6) expiry; id rotation on login, MFA completion and role change; user and administrator can list and revoke; suspension ends sessions immediately; cookie flags `HttpOnly`, `Secure`, `SameSite=Lax`, `__Host-` prefix where possible (FR-035, FR-091)
-- [ ] T050 [P] [US3] Failing tests `tests/integration/auth/reauth.test.ts`: password/MFA/email change, user/role management and security settings require re-auth within 5 minutes (FR-039)
-- [ ] T051 [P] [US3] Failing attack tests `tests/security/privilege-escalation.spec.ts`: self role raise; raising another above own role; modifying equal/higher accounts; demoting/deleting the last owner; mass assignment of `role`/`status`/`mfa` on create/update; IDOR on `/api/users/:id` and sessions across roles (FR-038, FR-092, SC-003)
-- [ ] T052 [P] [US3] Failing generated tests `tests/security/authz-matrix.spec.ts`: for every matrix cell, assert UI affordance AND direct REST AND Local API (`overrideAccess:false`) outcome; every denial writes a `denied` audit event (FR-037, FR-045, SC-003)
-- [ ] T053 [P] [US3] Failing tests `tests/integration/audit/auth-events.test.ts`: each auth/user event in FR-045 yields actor, action, target, timestamp, source address, outcome; meta contains no secrets (FR-045, FR-046, SC-005)
-- [ ] T054 [P] [US3] Failing attack tests `tests/security/csrf.spec.ts`: cross-origin state-changing POSTs to admin, REST and custom endpoints rejected (FR-091)
-- [ ] T055 [P] [US3] Failing tests `tests/security/auth-ratelimit.spec.ts`: login, MFA verify, recovery and invitation-accept endpoints limited per account and per source with `Retry-After`; spoofed forwarding headers ineffective (FR-094)
+- [X] T042 [P] [US3] Failing tests `tests/integration/auth/bootstrap.test.ts`: first owner created once from `BOOTSTRAP_OWNER_EMAIL`; refuses when any owner exists; anonymous `POST /api/users` denied; no default credentials in any seed (FR-030)
+- [X] T043 [P] [US3] Failing tests `tests/integration/auth/invitations.test.ts`: invitation fields `email, role, tokenHash, expiresAt (72 h), usedAt, invitedBy`; single use; expired/reused/forged token rejected; owners may invite any role incl. owner, every other inviter only roles strictly below their own (attempts above rejected); audited (FR-031, FR-038, FR-045)
+- [X] T044 [P] [US3] Failing tests `tests/unit/auth/password.test.ts`: length ≥12 accepted, <12 rejected, breached/common list hit rejected, no composition rules, no forced rotation (FR-032)
+- [X] T045 [P] [US3] Failing tests `tests/integration/auth/mfa.test.ts`: factor inactive until a valid code is confirmed; secret absent from every API response (`/api/users/me`, list, versions, GraphQL disabled); DB value encrypted (≠ base32 secret); code replay within the same step rejected; ±1 step window; per-account and per-source attempt limits; 10 recovery codes, stored hashed, single use, regeneration requires re-auth; enrol/reset/remove/recovery-use revokes other sessions, emails the user, writes audit (FR-033, FR-033a, FR-033b, FR-045)
+- [X] T046 [P] [US3] Failing attack tests `tests/security/mfa-bypass.spec.ts`: with a password-only session, every collection/global REST route, every admin view, `/preview/*`, and every custom endpoint returns 401/403; a pre-MFA session cannot be promoted by replaying cookies; direct `PATCH /api/users/:id` on `mfa.*` fields denied (FR-033, SC-017)
+- [X] T047 [P] [US3] Failing tests `tests/integration/auth/mfa-reset.test.ts`: only administrator/owner on a lower role (owner on owner) can reset; forces re-enrolment; old secret never revealed; audited (FR-033c)
+- [X] T048 [P] [US3] Failing attack tests `tests/security/auth-enumeration.spec.ts`: login and recovery responses identical and timing within tolerance for existing vs unknown accounts; throttling after 5 consecutive failures (A-8) escalating; lockout notification email; recovery link single-use and 30-minute expiry; completing recovery revokes all sessions and still requires MFA (FR-034, FR-045)
+- [X] T049 [P] [US3] Failing tests `tests/integration/auth/sessions.test.ts` (controlled clock): idle 30 min and absolute 12 h (A-6) expiry; id rotation on login, MFA completion and role change; user and administrator can list and revoke; suspension ends sessions immediately; cookie flags `HttpOnly`, `Secure`, `SameSite=Lax`, `__Host-` prefix where possible (FR-035, FR-091)
+- [X] T050 [P] [US3] Failing tests `tests/integration/auth/reauth.test.ts`: password/MFA/email change, user/role management and security settings require re-auth within 5 minutes (FR-039)
+- [X] T051 [P] [US3] Failing attack tests `tests/security/privilege-escalation.spec.ts`: self role raise; raising another above own role; modifying equal/higher accounts; demoting/deleting the last owner; mass assignment of `role`/`status`/`mfa` on create/update; IDOR on `/api/users/:id` and sessions across roles (FR-038, FR-092, SC-003)
+- [X] T052 [P] [US3] Failing generated tests `tests/security/authz-matrix.spec.ts`: for every matrix cell, assert UI affordance AND direct REST AND Local API (`overrideAccess:false`) outcome; every denial writes a `denied` audit event (FR-037, FR-045, SC-003)
+- [X] T053 [P] [US3] Failing tests `tests/integration/audit/auth-events.test.ts`: each auth/user event in FR-045 yields actor, action, target, timestamp, source address, outcome; meta contains no secrets (FR-045, FR-046, SC-005)
+- [X] T054 [P] [US3] Failing attack tests `tests/security/csrf.spec.ts`: cross-origin state-changing POSTs to admin, REST and custom endpoints rejected (FR-091)
+- [X] T055 [P] [US3] Failing tests `tests/security/auth-ratelimit.spec.ts`: login, MFA verify, recovery and invitation-accept endpoints limited per account and per source with `Retry-After`; spoofed forwarding headers ineffective (FR-094)
 
 ### Implementation for US3
 
-- [ ] T056 [US3] Implement `src/modules/auth/users.collection.ts`: `email` unique, normalised lower-case; `name` required; `role` enum; `status` `invited | active | suspended`; `mfa.enabled`, `mfa.secretEnc`, `mfa.enrolledAt`, `mfa.recoveryCodes[] {hash, usedAt}`, `mfa.lastUsedStep` hidden from all reads; Payload lockout fields; field access from `modules/access` (FR-036, FR-092)
-- [ ] T057 [US3] Implement one-time owner bootstrap `src/modules/auth/bootstrap.ts` + `pnpm bootstrap:owner` until T042 passes (FR-030)
-- [ ] T058 [US3] Implement invitations collection and accept flow `src/modules/auth/invitations/` until T043 passes (FR-031)
-- [ ] T059 [US3] Implement `src/modules/auth/password.ts` with an offline common/breached list `data/passwords/common.txt.gz` (source and licence recorded in `docs/licences.md`) until T044 passes (FR-032)
-- [ ] T060 [US3] Implement MFA `src/modules/auth/mfa/{totp.ts,crypto.ts,recovery.ts,endpoints.ts}` (otplib pinned; SHA-1/6 digits/30 s/±1; AES-256-GCM with `MFA_ENCRYPTION_KEY`; scrypt or argon2id recovery hashes) until T045, T047 pass (FR-033a, FR-033b, FR-033c)
-- [ ] T061 [US3] Implement accessible English admin views `/admin/mfa/enrol` and `/admin/mfa/verify` as Payload custom views (labels, `autocomplete="one-time-code"`, errors announced via live region, focus moved to first error); wire `requireMfa` into every access function, preview and custom endpoint until T046 passes (FR-033, FR-080, FR-080a)
-- [ ] T062 [US3] Implement sessions per ADR-005 in `src/modules/auth/sessions/` until T049 passes (FR-035, FR-091)
-- [ ] T063 [US3] Implement enumeration-safe login, lockout and recovery `src/modules/auth/{login.ts,recovery.ts}` with bilingual notification email templates `src/modules/auth/emails/` until T048, T055 pass (FR-034, FR-005, FR-094)
-- [ ] T064 [US3] Implement re-auth guard `src/modules/auth/reauth.ts` until T050 passes (FR-039)
-- [ ] T065 [US3] Implement user-management admin actions (invite, suspend, revoke sessions, reset MFA, change role) and session list view `src/modules/auth/admin/` until T051, T052 pass (FR-035, FR-038)
-- [ ] T066 [US3] Implement audit hooks `src/modules/audit/hooks/auth.ts` for all auth/user events and denied attempts until T053 passes (FR-045)
-- [ ] T067 [US3] Implement audit admin view with filters (actor, action, target, date range) and audited CSV export `src/modules/audit/admin/` (FR-047)
-- [ ] T068 [US3] Implement owner-only `security-settings` global (session timeouts, lockout thresholds within safe bounds) `src/modules/auth/security-settings.global.ts` (FR-035, FR-036)
-- [ ] T069 [US3] Write `docs/security/TM-auth.md` and update ASVS V6/V7/V8/V11 rows in `docs/security/asvs-l2.md` with test evidence links (FR-097)
-- [ ] T070 [P] [US3] Write runbooks `docs/runbooks/first-owner-bootstrap.md` and `docs/runbooks/lockout-recovery.md` (FR-103)
+- [X] T056 [US3] Implement `src/modules/auth/users.collection.ts`: `email` unique, normalised lower-case; `name` required; `role` enum; `status` `invited | active | suspended`; `mfa.enabled`, `mfa.secretEnc`, `mfa.enrolledAt`, `mfa.recoveryCodes[] {hash, usedAt}`, `mfa.lastUsedStep` hidden from all reads; Payload lockout fields; field access from `modules/access` (FR-036, FR-092)
+- [X] T057 [US3] Implement one-time owner bootstrap `src/modules/auth/bootstrap.ts` + `pnpm bootstrap:owner` until T042 passes (FR-030)
+- [X] T058 [US3] Implement invitations collection and accept flow `src/modules/auth/invitations/` until T043 passes (FR-031)
+- [X] T059 [US3] Implement `src/modules/auth/password.ts` with an offline common/breached list `data/passwords/common.txt.gz` (source and licence recorded in `docs/licences.md`) until T044 passes (FR-032)
+- [X] T060 [US3] Implement MFA `src/modules/auth/mfa/{totp.ts,crypto.ts,recovery.ts,endpoints.ts}` (otplib pinned; SHA-1/6 digits/30 s/±1; AES-256-GCM with `MFA_ENCRYPTION_KEY`; scrypt or argon2id recovery hashes) until T045, T047 pass (FR-033a, FR-033b, FR-033c)
+- [X] T061 [US3] Implement accessible English admin views `/admin/mfa/enrol` and `/admin/mfa/verify` as Payload custom views (labels, `autocomplete="one-time-code"`, errors announced via live region, focus moved to first error); wire `requireMfa` into every access function, preview and custom endpoint until T046 passes (FR-033, FR-080, FR-080a)
+- [X] T062 [US3] Implement sessions per ADR-005 in `src/modules/auth/sessions/` until T049 passes (FR-035, FR-091)
+- [X] T063 [US3] Implement enumeration-safe login, lockout and recovery `src/modules/auth/{login.ts,recovery.ts}` with bilingual notification email templates `src/modules/auth/emails/` until T048, T055 pass (FR-034, FR-005, FR-094)
+- [X] T064 [US3] Implement re-auth guard `src/modules/auth/reauth.ts` until T050 passes (FR-039)
+- [X] T065 [US3] Implement user-management admin actions (invite, suspend, revoke sessions, reset MFA, change role) and session list view `src/modules/auth/admin/` until T051, T052 pass (FR-035, FR-038)
+- [X] T066 [US3] Implement audit hooks `src/modules/audit/hooks/auth.ts` for all auth/user events and denied attempts until T053 passes (FR-045)
+- [X] T067 [US3] Implement audit admin view with filters (actor, action, target, date range) and audited CSV export `src/modules/audit/admin/` (FR-047)
+- [X] T068 [US3] Implement owner-only `security-settings` global (session timeouts, lockout thresholds within safe bounds) `src/modules/auth/security-settings.global.ts` (FR-035, FR-036)
+- [X] T069 [US3] Write `docs/security/TM-auth.md` and update ASVS V6/V7/V8/V11 rows in `docs/security/asvs-l2.md` with test evidence links (FR-097)
+- [X] T070 [P] [US3] Write runbooks `docs/runbooks/first-owner-bootstrap.md` and `docs/runbooks/lockout-recovery.md` (FR-103)
 
 **Checkpoint (Gate 2)**: T042–T055 green; SC-003 100%; SC-017 green; T053 green; no regressions in
 T026–T041 → commit checkpoint (plan Phase 2 complete).
 
+
+**US3 implementation notes (WS8, 2026-10-16)**:
+- Permissions: owner-approved rows added (navigation/banner read, create, delete; users directory
+  read), with contract, matrix and drift test updated together.
+- T056: MFA secrets and recovery codes live in `user_mfa`/`mfa_recovery_codes` (not hidden users
+  fields), so no Payload API, query or `select` can reach them; `sessions` stripped from
+  user-context reads. Payload lockout (`maxLoginAttempts`) disabled in favour of the per-account
+  limiter (ADR-005).
+- T058/T061: invitation acceptance, MFA, recovery and security pages are Next pages under
+  `/account/*`. Payload custom admin views only render for signed-in users. The admin gets an
+  MFA-gate provider (redirect, UX only) and a user-edit "security actions" field.
+- T062: Payload sessions + `auth_sessions` state; the `altamiuz-session` strategy enforces
+  MFA, 30 min idle and 12 h absolute, and deletes rejected sessions so the built-in strategy
+  cannot accept them. Login and `/me` overridden by static routes; refresh-token,
+  forgot/reset-password, unlock, verify and first-register blocked.
+- Password change: Payload ends **all** sessions (including the current one); tests assert this.
+- T048/T063: failures padded to 400 ms after equal hash work; measured median spread 1 ms
+  (`test-results/auth-timing.json`), not assumed.
+- T052: role × action asserted via Local API (`overrideAccess:false`) and real HTTP for the
+  collections that exist (users, invitations, audit-events, security-settings). **Gap**: no
+  systematic UI-affordance assertions; content/media/nav cells await their collections (matrix
+  unit-tested).
+- T067: the Payload list view provides filters; `GET /api/audit-events/export` (CSV,
+  formula-neutralised, re-auth, audited `audit.export`).
+- T049: `__Host-` prefix and `Secure` apply only with an https `SITE_URL`; asserted absent on local
+  http, unverified on https until a preview/production host exists.
+- Admin a11y: authenticated core views now baselined; `/account/*` pages asserted at 0
+  serious/critical.
+- **Findings**: Payload 3.91.0 `migrate:reset` runs downs oldest-first (use `migrate:down`); the
+  Drizzle-generated accounts `down` needed `IF EXISTS` fixes; enum downgrades fail once new
+  values are used (documented).
 ---
 
 ## Phase 4: User Story 2 — Editor composes, previews, publishes (P1) (plan Phase 3)

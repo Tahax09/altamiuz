@@ -5,8 +5,8 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { buildConfig } from 'payload'
 import sharp from 'sharp'
-import { auditEvents } from '@/modules/audit'
-import { usersPlaceholder } from '@/modules/auth'
+import { auditDeniedOperations, auditEvents } from '@/modules/audit'
+import { invitations, securitySettings, users } from '@/modules/auth'
 import { getConfig } from '@/modules/platform'
 
 const dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -18,7 +18,8 @@ export default buildConfig({
   telemetry: false,
   debug: false,
   admin: {
-    user: usersPlaceholder.slug,
+    user: users.slug,
+    components: { providers: ['/modules/auth/admin/MfaGate#MfaGate'] },
     importMap: { baseDir: dirname },
   },
   // D-23: English-only CMS navigation and controls in v1.
@@ -37,7 +38,22 @@ export default buildConfig({
   // D-3: public site uses the Local API only; GraphQL is off.
   graphQL: { disable: true },
   csrf: [cfg.siteUrl],
-  collections: [usersPlaceholder, auditEvents],
+  collections: [
+    // HttpOnly session cookie; Secure whenever the public origin is https (always in production).
+    {
+      ...users,
+      auth: {
+        ...(users.auth as object),
+        cookies: { sameSite: 'Lax', secure: cfg.siteUrl.startsWith('https://') },
+      },
+    },
+    invitations,
+    auditEvents,
+  ],
+  globals: [securitySettings],
+  hooks: { afterError: [auditDeniedOperations] },
+  // __Host- prefix requires https; local http uses a plain name (ADR-005).
+  cookiePrefix: cfg.siteUrl.startsWith('https://') ? '__Host-altamiuz' : 'altamiuz',
   db: postgresAdapter({
     pool: { connectionString: cfg.database.url },
     push: cfg.database.allowPush,

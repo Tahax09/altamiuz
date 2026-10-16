@@ -68,6 +68,7 @@ export interface Config {
   blocks: {};
   collections: {
     users: User;
+    invitations: Invitation;
     'audit-events': AuditEvent;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
@@ -77,6 +78,7 @@ export interface Config {
   collectionsJoins: {};
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
+    invitations: InvitationsSelect<false> | InvitationsSelect<true>;
     'audit-events': AuditEventsSelect<false> | AuditEventsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -87,8 +89,12 @@ export interface Config {
     defaultIDType: number;
   };
   fallbackLocale: ('false' | 'none' | 'null') | false | null | ('ar' | 'en') | ('ar' | 'en')[];
-  globals: {};
-  globalsSelect: {};
+  globals: {
+    'security-settings': SecuritySetting;
+  };
+  globalsSelect: {
+    'security-settings': SecuritySettingsSelect<false> | SecuritySettingsSelect<true>;
+  };
   locale: 'ar' | 'en';
   widgets: {
     collections: CollectionsWidget;
@@ -123,6 +129,9 @@ export interface UserAuthOperations {
  */
 export interface User {
   id: number;
+  name: string;
+  role: 'editor' | 'publisher' | 'administrator' | 'owner';
+  status: 'invited' | 'active' | 'suspended';
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -131,8 +140,6 @@ export interface User {
   salt?: string | null;
   hash?: string | null;
   resetPasswordRequestedAt?: string | null;
-  loginAttempts?: number | null;
-  lockUntil?: string | null;
   sessions?:
     | {
         id: string;
@@ -142,6 +149,21 @@ export interface User {
     | null;
   password?: string | null;
   collection: 'users';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "invitations".
+ */
+export interface Invitation {
+  id: number;
+  email: string;
+  role: 'editor' | 'publisher' | 'administrator' | 'owner';
+  tokenHash?: string | null;
+  expiresAt?: string | null;
+  usedAt?: string | null;
+  invitedBy?: (number | null) | User;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -158,10 +180,12 @@ export interface AuditEvent {
     | 'auth.lockout'
     | 'auth.recovery.request'
     | 'auth.recovery.complete'
+    | 'auth.password_change'
     | 'mfa.enrol'
     | 'mfa.reset'
     | 'mfa.remove'
     | 'mfa.recovery_code_used'
+    | 'mfa.recovery_codes_regenerate'
     | 'session.revoke'
     | 'user.invite'
     | 'user.create'
@@ -181,7 +205,8 @@ export interface AuditEvent {
     | 'enquiry.delete'
     | 'enquiry.retention_delete'
     | 'access.denied'
-    | 'audit.retention_purge';
+    | 'audit.retention_purge'
+    | 'audit.export';
   targetType?: string | null;
   targetId?: string | null;
   outcome: 'success' | 'denied' | 'failure';
@@ -220,10 +245,15 @@ export interface PayloadKv {
  */
 export interface PayloadLockedDocument {
   id: number;
-  document?: {
-    relationTo: 'users';
-    value: number | User;
-  } | null;
+  document?:
+    | ({
+        relationTo: 'users';
+        value: number | User;
+      } | null)
+    | ({
+        relationTo: 'invitations';
+        value: number | Invitation;
+      } | null);
   globalSlug?: string | null;
   user: {
     relationTo: 'users';
@@ -271,6 +301,9 @@ export interface PayloadMigration {
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
+  name?: T;
+  role?: T;
+  status?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -279,8 +312,6 @@ export interface UsersSelect<T extends boolean = true> {
   salt?: T;
   hash?: T;
   resetPasswordRequestedAt?: T;
-  loginAttempts?: T;
-  lockUntil?: T;
   sessions?:
     | T
     | {
@@ -288,6 +319,20 @@ export interface UsersSelect<T extends boolean = true> {
         createdAt?: T;
         expiresAt?: T;
       };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "invitations_select".
+ */
+export interface InvitationsSelect<T extends boolean = true> {
+  email?: T;
+  role?: T;
+  tokenHash?: T;
+  expiresAt?: T;
+  usedAt?: T;
+  invitedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -343,6 +388,32 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   batch?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "security-settings".
+ */
+export interface SecuritySetting {
+  id: number;
+  idleMinutes: number;
+  absoluteHours: number;
+  lockoutThreshold: number;
+  lockoutMinutes: number;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "security-settings_select".
+ */
+export interface SecuritySettingsSelect<T extends boolean = true> {
+  idleMinutes?: T;
+  absoluteHours?: T;
+  lockoutThreshold?: T;
+  lockoutMinutes?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

@@ -15,6 +15,7 @@ export type Resource =
   | 'site-settings'
   | 'enquiries'
   | 'audit-events'
+  | 'users'
   | 'own-account'
   | 'security-settings'
 
@@ -47,16 +48,30 @@ const content: Grants = {
   delete: ADMIN_UP,
 }
 
-// Not specified by the contract (therefore denied): navigation/banner `read`, users `read`.
-// Raised as an open question in the WS7 report; not invented here.
+// WS8 owner decisions: navigation/banner read/create/delete; users directory read.
 export const MATRIX: Readonly<Record<Resource, Grants>> = {
   pages: content,
   services: content,
   courses: content,
   evidence: { verify: ADMIN_UP },
   media: { read: ALL, upload: ALL, update: ALL, delete: PUBLISHER_UP },
-  navigation: { updateDraft: PUBLISHER_UP, publish: ADMIN_UP, unpublish: ADMIN_UP },
-  banner: { updateDraft: PUBLISHER_UP, publish: ADMIN_UP, unpublish: ADMIN_UP },
+  navigation: {
+    read: ALL,
+    create: PUBLISHER_UP,
+    updateDraft: PUBLISHER_UP,
+    publish: ADMIN_UP,
+    unpublish: ADMIN_UP,
+    delete: ADMIN_UP,
+  },
+  banner: {
+    read: ALL,
+    create: PUBLISHER_UP,
+    updateDraft: PUBLISHER_UP,
+    publish: ADMIN_UP,
+    unpublish: ADMIN_UP,
+    delete: ADMIN_UP,
+  },
+  users: { read: ADMIN_UP },
   redirects: { read: ALL, create: ADMIN_UP, update: ADMIN_UP, delete: ADMIN_UP },
   'site-settings': { read: ALL, update: ADMIN_UP, publish: ADMIN_UP },
   enquiries: { read: ADMIN_UP, export: ADMIN_UP, delete: ADMIN_UP },

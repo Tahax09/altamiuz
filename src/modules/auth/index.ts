@@ -1,13 +1,40 @@
-// Setup placeholder (T016): Payload's admin needs an auth collection. Every operation is denied
-// so no account can exist yet — including Payload's "first user" registration, which the
-// request proxy also blocks. Replaced by the real users collection in Phase 3 (T056).
-import type { CollectionConfig } from 'payload'
-
-const deny = () => false
-
-export const usersPlaceholder: CollectionConfig = {
-  slug: 'users',
-  auth: true,
-  access: { admin: deny, create: deny, read: deny, update: deny, delete: deny, unlock: deny },
-  fields: [],
-}
+export { users } from './users.collection'
+export {
+  invitations,
+  acceptInvitation,
+  bootstrapOwner,
+  BootstrapError,
+  INVITE_TTL_HOURS,
+} from './invitations'
+export {
+  securitySettings,
+  getSecuritySettings,
+  resetSecuritySettingsCache,
+  SECURITY_DEFAULTS,
+  SECURITY_BOUNDS,
+} from './settings'
+export { signIn, padToFloor, FAILURE_FLOOR_MS } from './login'
+export { requestRecovery, completeRecovery, RECOVERY_TTL_MINUTES } from './recovery'
+export { reauthenticate, hasRecentReauth, REAUTH_WINDOW_MS } from './reauth'
+export {
+  startEnrolment,
+  confirmEnrolment,
+  verifySecondFactor,
+  useRecoveryCode,
+  regenerateRecoveryCodes,
+  resetMfa,
+  mfaStatus,
+  MfaError,
+  RECOVERY_CODE_COUNT,
+} from './mfa'
+export {
+  SESSION_STRATEGY,
+  revokeAllSessions,
+  revokeSession,
+  listSessions,
+  getSessionState,
+} from './sessions'
+export { checkPassword, PASSWORD_MIN } from './password'
+export { getMailer, setLimiterForTests } from './services'
+export { clientIp, sameOrigin } from './endpoints'
+export { ApiForm, MfaFlow, RecoveryCodes, SecurityPanel, TokenForm } from './ui'

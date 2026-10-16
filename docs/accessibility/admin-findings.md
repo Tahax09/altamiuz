@@ -13,11 +13,13 @@ in `tests/a11y/admin/baseline.json`.
 
 ## Source of current evidence
 
-| Source                                                                                  | Scope                                                                           | Status                                          |
-| --------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- | ----------------------------------------------- |
-| R-A POC, `research/payload-rtl-poc/evidence/results-chromium-C2-1440.json` (2026-10-16) | Payload 3.91.0 core views, English UI, **POC field config** (fields unlabelled) | reference only. POC config differs from the app |
-| App baseline, `tests/a11y/admin/baseline.json` (WS7, 2026-10-16)                        | Login view, production build, English UI                                        | **0 serious/critical**                          |
-| App: dashboard, list, edit, versions, media                                             | needs an authenticated MFA-verified admin                                       | **pending**: measured once T056/T061 exist      |
+| Source                                                                                  | Scope                                                                           | Status                                                                                                                                            |
+| --------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| R-A POC, `research/payload-rtl-poc/evidence/results-chromium-C2-1440.json` (2026-10-16) | Payload 3.91.0 core views, English UI, **POC field config** (fields unlabelled) | reference only. POC config differs from the app                                                                                                   |
+| App baseline, `tests/a11y/admin/baseline.json` (WS7, 2026-10-16)                        | Login view, production build, English UI                                        | **0 serious/critical**                                                                                                                            |
+| App, WS8: dashboard, users list/edit, audit-events list, invitations list/create        | authenticated MFA-verified owner, production build                              | **baselined** (`baseline.json`): same rule families as R-A (`color-contrast`, `label`, `target-size`, `aria-hidden-focus`, `button-name`, `list`) |
+| Project-built account pages (`/account/*`)                                              | 4 pages                                                                         | **0 serious/critical** (asserted, not baselined)                                                                                                  |
+| App: versions, media views                                                              | collections not built yet                                                       | pending (Phase 4/6)                                                                                                                               |
 
 ## Findings (R-A, English UI; axe serious/critical rule → node count)
 
