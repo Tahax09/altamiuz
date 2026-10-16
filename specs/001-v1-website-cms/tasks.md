@@ -1,0 +1,467 @@
+---
+description: "Task list for Altamiuz v1 bilingual website and CMS"
+---
+
+# Tasks: Altamiuz v1 Bilingual Website and CMS
+
+**Input**: `specs/001-v1-website-cms/` — spec.md, plan.md, research.md, threat-model.md,
+data-model.md, contracts/ (access-matrix, http-surface, configuration, rich-text), quickstart.md
+
+**Prerequisites**: constitution v1.1.0; Phase 0 research complete (below).
+
+**Tests**: REQUIRED. Constitution VI makes test-first non-negotiable for auth, authorization,
+uploads, publishing, localization and security boundaries; every such task pair is ordered
+"failing test → implementation". Requirement IDs in parentheses map tasks to spec.md; the
+coverage matrix at the end is generated from them.
+
+**Organization**: Setup → Foundational → user stories in dependency/priority order → Polish.
+Plan phase mapping: Setup = plan Phase 1; Foundational + US3 = plan Phase 2 (detailed);
+US2 = plan Phase 3; US1 = plan Phase 5 (public part); US4 = plan Phase 4; US6 = plan Phase 5
+(SEO part); US5 = plan Phase 6; US7 = plan Phase 3 globals; US8 + Polish = plan Phase 7.
+
+## Format: `[ID] [P?] [Story] Description`
+
+- **[P]**: parallelizable (different files, no dependency on an incomplete task)
+- **[Story]**: US1…US8 from spec.md
+- Paths follow plan.md "Source Code" layout (single Next.js + Payload app at repo root)
+
+## Phase 0: Research — COMPLETE (no tasks)
+
+- R-A Payload Arabic/RTL admin POC → `research/payload-rtl-poc/findings.md` (commit `46e87a1`)
+- R-B Typography specimen → `research/typography-specimen/report.md` (commit `46e87a1`)
+- Decisions D-4, D-12, D-22–D-25, CD-13 gate, version pin → `research.md`
+- Remaining research is task-tracked: R-C (T038), R-D (T018), R-E (T089), R-F (T127),
+  R-G (T141), R-H (T132)
+
+---
+
+## Phase 1: Setup (plan Phase 1 — Foundation)
+
+**Purpose**: runnable skeleton with no paid accounts, security headers, scanning, migrations.
+**Gate before starting**: owner approval to install dependencies in the repository root
+(not yet granted — WS1–WS5 authorised only `research/payload-rtl-poc/`).
+
+- [ ] T001 Create `package.json` (pnpm 10, `"engines": {"node": "22.x"}`) pinning exact versions: `payload`, `@payloadcms/next`, `@payloadcms/db-postgres`, `@payloadcms/richtext-lexical`, `@payloadcms/ui`, `@payloadcms/translations` = 3.91.0; `next` = 16.3.3; `react`/`react-dom` = 19.2.6; `sharp` = 0.35.4; record licence of every dependency in `docs/licences.md` (D-1, Constitution I)
+- [ ] T002 [P] Configure strict TypeScript and path aliases (`@/modules/*`, `@/ui/*`) in `tsconfig.json`
+- [ ] T003 [P] Configure ESLint in `eslint.config.mjs` with (a) module-boundary rule: imports into `src/modules/<m>/` only via `index.ts`; (b) rule forbidding string-built URL paths outside `src/modules/i18n/routes.ts` (D-2, D-5)
+- [ ] T004 [P] Add `.prettierrc.json` and `.editorconfig`
+- [ ] T005 [P] Create placeholder-only `.env.example` covering every variable in `contracts/configuration.md` (FR-104)
+- [ ] T006 [P] Create `docker-compose.dev.yml` with `postgres:17` and `axllent/mailpit`, ports bound to `127.0.0.1`, throwaway credentials from `.env.local` (FR-105)
+- [ ] T007 [P] Add gitleaks config `.gitleaks.toml` and pre-commit hook `.githooks/pre-commit` (gitleaks protect --staged, typecheck, lint) with `pnpm prepare` installer (FR-098, SC-014)
+- [ ] T008 [P] Write CI workflow `.github/workflows/ci.yml` (typecheck, lint, unit, integration with Postgres service, security, a11y, gitleaks, `pnpm audit`/osv-scanner, migrations up→down→up); runs locally via `pnpm ci:local` until a remote is authorised (FR-098)
+- [ ] T009 Configure test tooling: `vitest.config.mts` (projects `unit`, `integration`), `playwright.config.ts` (projects chromium, webkit), disposable-DB helper `tests/setup/db.ts` creating/dropping a database per run
+- [ ] T010 Write failing tests `tests/unit/platform/config.test.ts`: production mode refuses dev drivers (`STORAGE_DRIVER=local`, `EMAIL_DRIVER=smtp|memory`, `RATELIMIT_DRIVER=memory`, Turnstile test keys), missing secrets, placeholder values, `PAYLOAD_SECRET` < 32 bytes, `MFA_ENCRYPTION_KEY` ≠ 32 bytes (FR-104, FR-105)
+- [ ] T011 Implement typed config loader `src/modules/platform/config/index.ts` (zod) per `contracts/configuration.md` until T010 passes (FR-105)
+- [ ] T012 [P] Write failing tests `tests/unit/platform/logger.test.ts`: passwords, tokens, cookies, `authorization`, TOTP codes/secrets, recovery codes, session ids, enquiry `message`/`email`/`phone` are redacted (FR-101)
+- [ ] T013 Implement pino logger with redaction `src/modules/platform/logger/index.ts` until T012 passes (FR-101)
+- [ ] T014 Write failing contract tests `tests/integration/platform/adapters.test.ts` for ports storage/email/ratelimit/jobs/captcha/analytics: each local substitute satisfies the port contract; analytics driver `none` is a no-op (FR-105, FR-086)
+- [ ] T015 Implement ports and local substitutes `src/modules/platform/adapters/{storage,email,ratelimit,jobs,captcha,analytics}/index.ts` (local disk, Mailpit SMTP + memory, memory limiter, Payload jobs local runner, Turnstile test keys, none) until T014 passes (FR-105)
+- [ ] T016 Create `src/payload.config.ts` composing module configs: Postgres adapter, `localization` {ar (rtl, default), en, `fallback: false`}, `experimental.localizeStatus: true`, admin `i18n.supportedLanguages: { en }` only (D-23), `graphQL.disable: true`, `csrf` origins from config, no public registration (FR-001, FR-004, FR-030, D-3, D-23)
+- [ ] T017 Create Next app skeleton `src/app/(payload)/**` (generated admin/API routes), `next.config.ts` with `output: 'standalone'` and no host-proprietary APIs (D-14)
+- [ ] T018 R-D spike: measure the minimal CSP Payload admin needs (script/style hashes or nonce support) and record in `docs/adr/ADR-004-admin-csp.md` (FR-090)
+- [ ] T019 Write failing tests `tests/integration/platform/headers.test.ts`: public routes carry nonce-based CSP, admin carries ADR-004 policy; HSTS, `frame-ancestors 'none'`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, restrictive `Permissions-Policy`; error responses contain no stack trace or version (FR-090, FR-095)
+- [ ] T020 Implement headers/CSP nonce in `src/proxy.ts` and generic error handling until T019 passes (FR-090, FR-095)
+- [ ] T021 Write failing tests `tests/integration/platform/health.test.ts`: `/api/health` returns `{status}` only; `/api/health/ready` requires `HEALTH_READY_TOKEN` and pings DB (FR-100)
+- [ ] T022 Implement `src/app/api/health/route.ts` and `src/app/api/health/ready/route.ts` until T021 passes (FR-100)
+- [ ] T023 Add migration scripts (`migrate`, `migrate:create`, `migrate:down`) and failing-then-passing harness `tests/integration/migrations/updownup.test.ts` running every migration up→down→up on a disposable DB; disable `push` outside throwaway DBs (Constitution X)
+- [ ] T024 [P] Write ADRs `docs/adr/ADR-001-single-app.md`, `ADR-002-local-api-only-public.md`, `ADR-003-version-pin.md` (Payload 3.91.0 / Next 16.3.3 exact; upgrades require rich-text + localizeStatus regression suites) (D-1, D-2, D-3)
+- [ ] T025 [P] Create `docs/security/asvs-l2.md` requirement-level skeleton after re-verifying ASVS 5.0.0 chapter titles against the official release; every row status `not addressed` initially (FR-097, Constitution XIV)
+
+**Checkpoint (Gate 1)**: app boots locally with no paid accounts; T010/T012/T014/T019/T021/T023
+green; gitleaks clean → prepare commit for owner approval.
+
+---
+
+## Phase 2: Foundational (blocking prerequisites; plan Phase 2 part 1)
+
+**Purpose**: pure security policies and shared services every story depends on.
+
+### Rich-text policy (D-22, contracts/rich-text.md)
+
+- [ ] T026 [P] Create adversarial corpus `tests/fixtures/richtext/corpus.ts`: `javascript:` variants (mixed case, leading space, tab/newline inside scheme, `%6A`-encoded, `javascript&colon;`, `javascript://x/%0aalert(1)`), `vbscript:`, `data:text/html`, `data:image/svg+xml`, `file:`, `ftp:`, `blob:`, `about:`, `//evil.example`, backslash `\\evil`, `https:\\evil`, >2048-char URL, empty/whitespace link text, unknown node types (`html`, `upload`, `relationship`, `block`, `code`, `horizontalrule`, `iframe`), `heading` tag h1/h5, text `style: "color:red"`, format bits code/strikethrough/underline/sub/sup, extra attributes (`onClick`, `className`, `href` on paragraph), depth 11, 5,001 nodes, link `doc.relationTo: "users"`, `linkType: "raw"`; plus valid baseline docs in ar and en with `direction: rtl|ltr` (FR-013b, FR-014, SC-018)
+- [ ] T027 [P] Write failing tests `tests/unit/content/richtext/policy.test.ts`: every corpus attack rejected with the error code from the contract (`node_type`, `attribute`, `format`, `style`, `url_scheme`, `url_malformed`, `limit`, `link_text`) and JSON path; valid docs accepted unchanged; errors never echo the raw URL (FR-013b, FR-014, FR-013d)
+- [ ] T028 [P] Write failing tests `tests/unit/content/richtext/safe-href.test.ts`: `safeHref()` returns `null` for every disallowed URL and the normalised value for `https:`, allow-listed `http:`, `mailto:`, `tel:`, `/path`, `#id` (FR-013c, FR-014)
+- [ ] T029 Implement `src/modules/content/richtext/policy.ts` (`POLICY_VERSION`, `assertSafeRichText`, `safeHref`, limits depth ≤10, nodes ≤5,000, text ≤10,000, URL ≤2,048) until T027–T028 pass (FR-013b, FR-013c, FR-014)
+
+### Authorization matrix (D-8, contracts/access-matrix.md)
+
+- [ ] T030 [P] Encode the matrix as data `src/modules/access/matrix.ts` (roles `owner | administrator | publisher | editor`; every resource/action row of the contract)
+- [ ] T031 Write failing tests `tests/unit/access/matrix.test.ts` that parse `contracts/access-matrix.md` and assert `can(role, resource, action)` equals every ✓/blank cell (drift detection), plus invariants: no self-escalation, no grant above own role, equal/higher accounts untouchable except owner→owner, last owner protected (FR-036, FR-038, SC-003)
+- [ ] T032 Implement `src/modules/access/index.ts`: `can()`, deny-by-default collection/global/field access factories, `requireAuth`, `requireMfa` (session `mfaVerified`), anonymous denial for all REST except published-use media files, role-field update rule, until T031 passes (FR-037, FR-038, FR-092, D-3)
+- [ ] T033 Write failing tests `tests/security/injection.spec.ts`: REST `where`/`sort`/`select` operator abuse, SQL metacharacters in slugs/search, prototype-pollution keys in JSON bodies, oversized bodies → rejected or inert; no 500 with internals (FR-093, FR-095)
+
+### Audit log (D-9)
+
+- [ ] T034 Write failing tests `tests/integration/audit/append-only.test.ts`: REST and Local API (`overrideAccess:false`) create/update/delete on `audit-events` denied for every role; direct SQL `UPDATE`/`DELETE` rejected by trigger; retention function deletes only entries older than 24 months (A-9) (FR-047, FR-048)
+- [ ] T035 Implement `src/modules/audit/collection.ts` (fields: actor, action enum per FR-045, targetType, targetId, outcome `success|denied|failure`, ip, userAgent truncated to 256, meta JSON, at; indexes `(at)`, `(actor, at)`, `(action, at)`, `(targetType, targetId)`) and `src/modules/audit/record.ts` with per-action meta schemas that reject secret-like keys (FR-045, FR-046)
+- [ ] T036 Create migration `migrations/*_audit_append_only.ts` (trigger + retention function, with `down`) and job `purgeAuditEvents` in `src/modules/audit/retention.ts` until T034 passes (FR-047, FR-048)
+
+### Rate limiting (D-14)
+
+- [ ] T037 Write failing tests `tests/integration/platform/ratelimit.test.ts`: Postgres limiter fixed-window counts, atomic under 50 concurrent increments, stores only a hashed key, TTL cleanup job; memory limiter parity; trusted-proxy config ignores spoofed `X-Forwarded-For` (FR-094)
+- [ ] T038 [P] R-C spike `tests/integration/auth/rc-sessions.test.ts` + `docs/adr/ADR-005-sessions.md`: verify Payload `useSessions` revocation, idle/absolute expiry hooks, lockout settings, enumeration-safe responses; decide built-in vs `sessions` collection (D-7)
+- [ ] T039 Implement `src/modules/platform/adapters/ratelimit/postgres.ts` + `rate-limit-buckets` migration + `purgeRateLimitBuckets` job until T037 passes (FR-094)
+
+### Admin accessibility baseline (D-25)
+
+- [ ] T040 [P] Create admin a11y regression suite `tests/a11y/admin/baseline.spec.ts`: axe (`wcag2a`, `wcag2aa`, `wcag21a`, `wcag21aa`, `wcag22aa`) on login, dashboard, list, edit, versions and media views of every collection; snapshot `tests/a11y/admin/baseline.json`; fail on any serious/critical finding not in the baseline (FR-080a, SC-019)
+- [ ] T041 [P] Create `docs/accessibility/admin-findings.md` seeded from R-A (rule, view, node count, remediation path: upstream / extension point / unresolved, issue link) (FR-080a)
+
+**Checkpoint (Gate 2a)**: policy corpus 100% rejected; matrix tests green; audit append-only
+proven at DB level; limiter green; admin baseline recorded → commit checkpoint.
+
+---
+
+## Phase 3: User Story 3 — Administrator controls who can do what (P1) 🎯 MVP (plan Phase 2 part 2)
+
+**Goal**: invitation-only accounts, mandatory TOTP MFA for all, revocable sessions, server-side
+RBAC, complete audit trail.
+**Independent Test**: quickstart V3–V5 — full role × action matrix via UI and direct requests;
+MFA/session/lockout scenarios; audit entries for every event.
+
+### Tests for US3 (write first; must fail)
+
+- [ ] T042 [P] [US3] Failing tests `tests/integration/auth/bootstrap.test.ts`: first owner created once from `BOOTSTRAP_OWNER_EMAIL`; refuses when any owner exists; anonymous `POST /api/users` denied; no default credentials in any seed (FR-030)
+- [ ] T043 [P] [US3] Failing tests `tests/integration/auth/invitations.test.ts`: invitation fields `email, role, tokenHash, expiresAt (72 h), usedAt, invitedBy`; single use; expired/reused/forged token rejected; owners may invite any role incl. owner, every other inviter only roles strictly below their own (attempts above rejected); audited (FR-031, FR-038, FR-045)
+- [ ] T044 [P] [US3] Failing tests `tests/unit/auth/password.test.ts`: length ≥12 accepted, <12 rejected, breached/common list hit rejected, no composition rules, no forced rotation (FR-032)
+- [ ] T045 [P] [US3] Failing tests `tests/integration/auth/mfa.test.ts`: factor inactive until a valid code is confirmed; secret absent from every API response (`/api/users/me`, list, versions, GraphQL disabled); DB value encrypted (≠ base32 secret); code replay within the same step rejected; ±1 step window; per-account and per-source attempt limits; 10 recovery codes, stored hashed, single use, regeneration requires re-auth; enrol/reset/remove/recovery-use revokes other sessions, emails the user, writes audit (FR-033, FR-033a, FR-033b, FR-045)
+- [ ] T046 [P] [US3] Failing attack tests `tests/security/mfa-bypass.spec.ts`: with a password-only session, every collection/global REST route, every admin view, `/preview/*`, and every custom endpoint returns 401/403; a pre-MFA session cannot be promoted by replaying cookies; direct `PATCH /api/users/:id` on `mfa.*` fields denied (FR-033, SC-017)
+- [ ] T047 [P] [US3] Failing tests `tests/integration/auth/mfa-reset.test.ts`: only administrator/owner on a lower role (owner on owner) can reset; forces re-enrolment; old secret never revealed; audited (FR-033c)
+- [ ] T048 [P] [US3] Failing attack tests `tests/security/auth-enumeration.spec.ts`: login and recovery responses identical and timing within tolerance for existing vs unknown accounts; throttling after 5 consecutive failures (A-8) escalating; lockout notification email; recovery link single-use and 30-minute expiry; completing recovery revokes all sessions and still requires MFA (FR-034, FR-045)
+- [ ] T049 [P] [US3] Failing tests `tests/integration/auth/sessions.test.ts` (controlled clock): idle 30 min and absolute 12 h (A-6) expiry; id rotation on login, MFA completion and role change; user and administrator can list and revoke; suspension ends sessions immediately; cookie flags `HttpOnly`, `Secure`, `SameSite=Lax`, `__Host-` prefix where possible (FR-035, FR-091)
+- [ ] T050 [P] [US3] Failing tests `tests/integration/auth/reauth.test.ts`: password/MFA/email change, user/role management and security settings require re-auth within 5 minutes (FR-039)
+- [ ] T051 [P] [US3] Failing attack tests `tests/security/privilege-escalation.spec.ts`: self role raise; raising another above own role; modifying equal/higher accounts; demoting/deleting the last owner; mass assignment of `role`/`status`/`mfa` on create/update; IDOR on `/api/users/:id` and sessions across roles (FR-038, FR-092, SC-003)
+- [ ] T052 [P] [US3] Failing generated tests `tests/security/authz-matrix.spec.ts`: for every matrix cell, assert UI affordance AND direct REST AND Local API (`overrideAccess:false`) outcome; every denial writes a `denied` audit event (FR-037, FR-045, SC-003)
+- [ ] T053 [P] [US3] Failing tests `tests/integration/audit/auth-events.test.ts`: each auth/user event in FR-045 yields actor, action, target, timestamp, source address, outcome; meta contains no secrets (FR-045, FR-046, SC-005)
+- [ ] T054 [P] [US3] Failing attack tests `tests/security/csrf.spec.ts`: cross-origin state-changing POSTs to admin, REST and custom endpoints rejected (FR-091)
+- [ ] T055 [P] [US3] Failing tests `tests/security/auth-ratelimit.spec.ts`: login, MFA verify, recovery and invitation-accept endpoints limited per account and per source with `Retry-After`; spoofed forwarding headers ineffective (FR-094)
+
+### Implementation for US3
+
+- [ ] T056 [US3] Implement `src/modules/auth/users.collection.ts`: `email` unique, normalised lower-case; `name` required; `role` enum; `status` `invited | active | suspended`; `mfa.enabled`, `mfa.secretEnc`, `mfa.enrolledAt`, `mfa.recoveryCodes[] {hash, usedAt}`, `mfa.lastUsedStep` hidden from all reads; Payload lockout fields; field access from `modules/access` (FR-036, FR-092)
+- [ ] T057 [US3] Implement one-time owner bootstrap `src/modules/auth/bootstrap.ts` + `pnpm bootstrap:owner` until T042 passes (FR-030)
+- [ ] T058 [US3] Implement invitations collection and accept flow `src/modules/auth/invitations/` until T043 passes (FR-031)
+- [ ] T059 [US3] Implement `src/modules/auth/password.ts` with an offline common/breached list `data/passwords/common.txt.gz` (source and licence recorded in `docs/licences.md`) until T044 passes (FR-032)
+- [ ] T060 [US3] Implement MFA `src/modules/auth/mfa/{totp.ts,crypto.ts,recovery.ts,endpoints.ts}` (otplib pinned; SHA-1/6 digits/30 s/±1; AES-256-GCM with `MFA_ENCRYPTION_KEY`; scrypt or argon2id recovery hashes) until T045, T047 pass (FR-033a, FR-033b, FR-033c)
+- [ ] T061 [US3] Implement accessible English admin views `/admin/mfa/enrol` and `/admin/mfa/verify` as Payload custom views (labels, `autocomplete="one-time-code"`, errors announced via live region, focus moved to first error); wire `requireMfa` into every access function, preview and custom endpoint until T046 passes (FR-033, FR-080, FR-080a)
+- [ ] T062 [US3] Implement sessions per ADR-005 in `src/modules/auth/sessions/` until T049 passes (FR-035, FR-091)
+- [ ] T063 [US3] Implement enumeration-safe login, lockout and recovery `src/modules/auth/{login.ts,recovery.ts}` with bilingual notification email templates `src/modules/auth/emails/` until T048, T055 pass (FR-034, FR-005, FR-094)
+- [ ] T064 [US3] Implement re-auth guard `src/modules/auth/reauth.ts` until T050 passes (FR-039)
+- [ ] T065 [US3] Implement user-management admin actions (invite, suspend, revoke sessions, reset MFA, change role) and session list view `src/modules/auth/admin/` until T051, T052 pass (FR-035, FR-038)
+- [ ] T066 [US3] Implement audit hooks `src/modules/audit/hooks/auth.ts` for all auth/user events and denied attempts until T053 passes (FR-045)
+- [ ] T067 [US3] Implement audit admin view with filters (actor, action, target, date range) and audited CSV export `src/modules/audit/admin/` (FR-047)
+- [ ] T068 [US3] Implement owner-only `security-settings` global (session timeouts, lockout thresholds within safe bounds) `src/modules/auth/security-settings.global.ts` (FR-035, FR-036)
+- [ ] T069 [US3] Write `docs/security/TM-auth.md` and update ASVS V6/V7/V8/V11 rows in `docs/security/asvs-l2.md` with test evidence links (FR-097)
+- [ ] T070 [P] [US3] Write runbooks `docs/runbooks/first-owner-bootstrap.md` and `docs/runbooks/lockout-recovery.md` (FR-103)
+
+**Checkpoint (Gate 2)**: T042–T055 green; SC-003 100%; SC-017 green; T053 green; no regressions in
+T026–T041 → commit checkpoint (plan Phase 2 complete).
+
+---
+
+## Phase 4: User Story 2 — Editor composes, previews, publishes (P1) (plan Phase 3)
+
+**Goal**: schema-defined bilingual pages/services/courses with safe rich text, drafts, per-locale
+publishing, revisions, locking, preview, accessible reordering.
+**Independent Test**: quickstart V2 + rich-text suites + reorder/editor a11y suites.
+**Depends on**: Phase 3 (US3).
+
+### Tests for US2 (write first)
+
+- [ ] T071 [P] [US2] Failing attack tests `tests/security/richtext-writepaths.spec.ts`: T026 corpus submitted via admin paste (Playwright), REST create/update, Local API, draft save, autosave, duplicate, copy-to-locale, version restore of a malicious historical version inserted by SQL, admin bulk edit, admin Copy/Paste Field and Paste Row, nested rich text in blocks/arrays, `link`-group fields, both locales — all rejected with field path and code; nothing persisted (FR-013b, FR-014, SC-018)
+- [ ] T072 [P] [US2] Failing tests `tests/security/richtext-render.spec.ts`: malicious Lexical JSON written directly to the DB renders on the public page and preview with no unsafe `href`, no unknown elements, no inline `style`; `newTab` links get `rel="noopener noreferrer"` (FR-013c, SC-018)
+- [ ] T073 [P] [US2] Failing tests `tests/e2e/richtext-bidi.spec.ts`: ar/en paragraphs honour `direction`; Latin identifiers isolated; preview HTML equals public HTML for the same document; every link has non-empty text (FR-013a, FR-013d)
+- [ ] T074 [P] [US2] Failing tests `tests/integration/content/publish.test.ts`: publishing `ar` leaves `en` draft (`experimental.localizeStatus`); public queries never return drafts; unpublish per locale; restore creates a draft; publish blocked when required locale fields are incomplete or evidence is unverified; editor publish via REST denied and audited (FR-004, FR-016, FR-020, FR-021, FR-023, FR-024, FR-045)
+- [ ] T075 [P] [US2] Failing tests `tests/integration/content/localize-status-regression.test.ts`: asserts installed Payload version equals ADR-003 pin and per-locale status semantics hold (D-4)
+- [ ] T076 [P] [US2] Failing tests `tests/e2e/locking.spec.ts`: second editor sees lock; no silent overwrite (FR-015)
+- [ ] T077 [P] [US2] Failing attack tests `tests/security/preview.spec.ts`: anonymous, password-only and no-read-permission sessions denied; preview responses `noindex`; no shareable-link endpoint exists (FR-022)
+- [ ] T078 [P] [US2] Failing tests `tests/a11y/admin/reorder.spec.ts`: keyboard-only move up/down for blocks, gallery items and listing order; announcement "Moved {label} to position {n} of {total}"; focus stays on moved item; order persists after save + reload; single-pointer alternative; axe clean on the control (FR-012, FR-055, FR-080, FR-080a)
+- [ ] T079 [P] [US2] Failing tests `tests/a11y/admin/editor.spec.ts`: visible focus indicator on the rich-text editor; Escape+Tab exit described in field help; on validation failure focus moves to first invalid field, which has `aria-invalid="true"` and an announced message (FR-080a)
+- [ ] T080 [P] [US2] Failing tests `tests/integration/content/collision.test.ts`: slug equal to or prefixing a static route segment, duplicate slug in same locale/scope, or slug equal to an active redirect `from` → rejected; slug change creates a redirect (FR-002, FR-025)
+
+### Implementation for US2
+
+- [ ] T081 [US2] Implement shared editor config `src/modules/content/richtext/editor.ts`: Lexical features allow-list (paragraph, heading h2–h4, bold, italic, ordered/unordered list, blockquote, link with `url` validate override via `LinkFeature({ fields })`) (FR-013, FR-013a)
+- [ ] T082 [US2] Implement `richTextField()` factory applying `hooks.beforeChange: assertSafeRichText` and `validate`; set `versions.drafts.validate: true` on all versioned collections/globals until T071 passes (FR-013b)
+- [ ] T083 [US2] Implement safe renderer `src/ui/richtext/RichText.tsx` (custom JSX converters: `link`/`autolink` via `safeHref` → plain text when null; unknown nodes → nothing; `<bdi>` for inline Latin runs) used by preview and public site until T072–T073 pass (FR-013c, FR-013d, D-24)
+- [ ] T084 [US2] Implement read-only `scripts/scan-richtext.ts` (`pnpm scan:richtext`, non-zero exit on violations) and add it to migration/restore runbooks (FR-013c)
+- [ ] T085 [US2] Implement block library `src/modules/content/blocks/` per data-model (hero, richText, featureGrid, serviceList, courseList, cta, faq, mediaGallery, stats+evidence, credentials+evidence, contactBlock; each with `hidden` and `anchorId`; testimonials/clientLogos not registered until CD-08); the shared `link` group (hero/CTA/nav/social/banner) validates `url`/`email`/`tel` with `safeHref` on save, with corpus cases added to T071 (FR-011, FR-012, FR-014, FR-019)
+- [ ] T086 [US2] Implement `evidence` group and publish gate `src/modules/content/evidence.ts` (status `unverified|verified`, reference required if verified, verifiedBy, verifiedAt; only administrator/owner may set `verified`) (FR-016)
+- [ ] T087 [US2] Implement `pages` collection: `title` L required to publish; `slug` L "unique per locale and route scope; NFC; `^[\p{L}\p{N}-]+$`u"; `template`; `sections`; `seo` L; collision validator (T080) (FR-002, FR-010, FR-011)
+- [ ] T088 [US2] Implement `services` and `courses` collections: common `title` L, `slug` L, `summary` L (≤300), `sections`, `order`, `hidden`, `seo` L; course `audience` L, `duration {value, unit}`, `deliveryFormat` (`in-person|online|hybrid`), `provider` L, `accreditationStatement` L + evidence (FR-017)
+- [ ] T089 [US2] Implement publish workflow hooks (localizeStatus, unpublish, restore→draft, publish/unpublish/restore audit, revalidation tags) and version retention job `pruneVersions` per A-11 with R-E decision `docs/adr/ADR-006-versions.md` until T074 passes (FR-020, FR-021, FR-023, FR-024, FR-045)
+- [ ] T090 [US2] Implement slug-change redirect hook `src/modules/seo/redirects/slug-change.ts` until T080 passes (FR-025)
+- [ ] T091 [US2] Implement preview route `src/app/preview/[collection]/[id]/route.ts` (draft mode, `requireMfa`, read check, `noindex`) until T077 passes (FR-022)
+- [ ] T092 [US2] Implement accessible reorder control `src/modules/content/admin/ReorderControl.tsx` as a custom array/blocks row component (supported extension point) with live region; apply to blocks, gallery arrays and listing `order` until T078 passes (FR-012, FR-055, D-12)
+- [ ] T093 [US2] Admin a11y remediations via extension points: focus styles in `src/app/(payload)/custom.scss`, field help text, error-focus component; file upstream issues for core findings and record links in `docs/accessibility/admin-findings.md` until T079 passes (FR-080a)
+- [ ] T094 [US2] Write `docs/security/TM-preview.md` and `docs/security/TM-admin.md`; update ASVS V1/V2/V4 rows (FR-097)
+
+**Checkpoint (Gate 3)**: T071–T080 green; SC-018 green on write and render paths;
+publish-to-live wiring ready for T106 → commit checkpoint.
+
+---
+
+## Phase 5: User Story 1 — Visitor reads the site in their language (P1) (plan Phase 5, public part)
+
+**Goal**: bilingual public site with localized routes, switcher, typography, error pages.
+**Independent Test**: quickstart V1; route-map and CD-13 gate tests.
+**Depends on**: US2 (content) and US7 globals T130–T131 (header/footer navigation and site settings are CMS-managed, FR-010). Execute T130–T131 before T103.
+
+- [ ] T095 [P] [US1] Failing tests `tests/unit/i18n/routes.test.ts`: `href()` for every route key × locale; no duplicate segment per locale; `pnpm check:route-vocab` fails while any `TODO(AR_ROUTE_VOCAB)` placeholder remains (CD-13 publication gate) (FR-002)
+- [ ] T096 [P] [US1] Failing tests `tests/e2e/us1-locale.spec.ts`: `<html lang dir>` per locale; switcher reaches the same document's other-locale slug; missing locale → localized notice, switcher disabled; `/` redirects per A-3; no horizontal scroll at 320/768/1440 px; touch targets ≥24×24 CSS px (FR-001, FR-003, FR-004, FR-007, SC-001)
+- [ ] T097 [P] [US1] Failing tests `tests/e2e/no-js.spec.ts`: content and navigation readable with JavaScript disabled (FR-082)
+- [ ] T098 [US1] Implement typed route map `src/modules/i18n/routes.ts` (`href(routeKey, locale, params)`; Arabic segments `TODO(AR_ROUTE_VOCAB)` until CD-13) and `pnpm check:route-vocab` until T095 passes (FR-002, D-5)
+- [ ] T099 [US1] Implement locale routing in `src/proxy.ts` (A-3 root redirect with `Vary`, cross-locale segment → 404) (FR-002, FR-003)
+- [ ] T100 [US1] Implement UI strings `src/modules/i18n/messages/{ar,en}.ts` and formatters (one documented numeral convention per locale) (FR-005, FR-006)
+- [ ] T101 [US1] Self-host fonts `src/ui/fonts.ts` via `next/font/local` (Manrope, Inter, IBM Plex Sans Arabic ≤3 weights; unmodified OFL files; licences in `public/fonts/LICENSES/`) and failing-then-passing `tests/perf/fonts.test.ts` asserting ≤120 KB woff2 per locale first load (D-24)
+- [ ] T102 [US1] Implement design tokens and section renderers `src/ui/**` (server components, `clamp()` type scale, Arabic line-height 1.7, reduced-motion support, no flashing; every `link`-group `href` rendered via `safeHref`) (FR-014, FR-081)
+- [ ] T103 [US1] Implement public routes `src/app/(site)/[locale]/` (home, `[slug]`, services and training listings/details from published, non-hidden items in editor order) (FR-018, FR-021)
+- [ ] T104 [US1] Implement localized `not-found` and `error` pages without internal details (FR-008, FR-095)
+- [ ] T105 [US1] Run T096–T097 green and record axe results for public templates in `tests/a11y/public/baseline.json` (FR-080)
+- [ ] T106 [US1] Failing-then-passing `tests/integration/content/revalidate.test.ts`: published change visible ≤60 s (SC-009)
+
+**Checkpoint (Gate 4)**: US1 green; Lighthouse CI budgets (T139) configured and passing for existing templates and enforced in CI from here on (Constitution XII); CD-13 gate active (fails production build until approved) → commit checkpoint.
+
+---
+
+## Phase 6: User Story 4 — Media once, reused everywhere (P2) (plan Phase 4)
+
+**Depends on**: US3 (auth), US2 (reorder control).
+
+- [ ] T107 [P] [US4] Create fixture generator `tests/fixtures/uploads/generate.ts`: JPEG/HTML polyglot, SVG with `<script>`, PNG decompression bomb, 21 MB file, 41 MP image, `.jpg` that is a PDF, EXIF-GPS JPEG, truncated file (FR-051)
+- [ ] T108 [P] [US4] Failing attack tests `tests/security/upload.spec.ts`: every malicious fixture rejected with localized message and nothing stored; unauthenticated/no-permission upload denied; EXIF absent from master and variants; random 128-bit filenames; draft-only media not anonymously retrievable; interrupted upload leaves no asset (FR-051, FR-052, FR-056)
+- [ ] T109 [P] [US4] Failing tests `tests/e2e/us4-media.spec.ts`: variants generated; focal point respected at 3 aspect ratios (numeric focal inputs usable by keyboard); alt per locale or `decorative` required to publish; usage panel; delete warning + permission; replace updates all uses; keyboard reorder of gallery via ReorderControl (FR-050, FR-053, FR-054, FR-055, FR-057)
+- [ ] T110 [US4] Implement `src/modules/media/` upload collection + validation hook (magic-byte allow-list "JPEG, PNG, WebP, AVIF; maximum 20 MB and 40 megapixels"; sharp re-encode without metadata; random names; variants 480/768/1024/1440/1920 in AVIF/WebP + JPEG fallback) until T108 passes (FR-050, FR-051, FR-052)
+- [ ] T111 [US4] Implement public-read rule (only media referenced by a published document) and storage adapter selection (`local` | `s3`) (FR-056)
+- [ ] T112 [US4] Implement usage tracking, replace, delete warning with media-deletion audit in `src/modules/media/usage.ts` until T109 passes (FR-045, FR-053, FR-054, FR-057)
+- [ ] T113 [US4] Write `docs/security/TM-media.md`; update ASVS V5 (FR-097)
+
+**Checkpoint (Gate 5)**: US4 green → commit checkpoint.
+
+---
+
+## Phase 7: User Story 6 — Discoverable, correctly shared pages (P2) (plan Phase 5, SEO part)
+
+**Depends on**: US1 (routes), US2 (content).
+
+- [ ] T114 [P] [US6] Failing tests `tests/e2e/us6-seo.spec.ts`: per-locale title/description/canonical/hreflang/`x-default`/Open Graph from route map; sitemap lists only published indexable pages with alternates; robots disallows admin/api/preview/auth; non-production `noindex` and protected; JSON-LD only from verified fields (FR-060, FR-061, FR-062, FR-063, FR-066, SC-012)
+- [ ] T115 [P] [US6] Failing attack tests `tests/security/redirects.spec.ts`: loop, chain, self and non-allow-listed external targets rejected; open-redirect payloads (`//evil`, `/\evil`, encoded) rejected; every legacy inventory URL (with/without trailing slash, percent-encoded Arabic slugs) redirects in one hop (FR-064, FR-065, SC-012)
+- [ ] T116 [US6] Implement `src/modules/seo/` metadata builder, hreflang from route map, JSON-LD builders (Organization, WebSite, BreadcrumbList, FAQPage, Service, Course) (FR-060, FR-061, FR-063)
+- [ ] T117 [US6] Implement `src/app/sitemap.ts` and `src/app/robots.ts` (FR-062, FR-066)
+- [ ] T118 [US6] Implement `redirects` collection (`from` normalised unique, `to` link, `type` 301/302, `source`, `createdBy`), graph validation, proxy lookup with cache, redirect-change audit until T115 passes (FR-045, FR-064)
+- [ ] T119 [US6] Implement idempotent `scripts/seed-legacy-redirects.ts` reading `docs/content/legacy-redirect-map.md`; **blocked until CD-12 approval** (FR-065)
+
+**Checkpoint (Gate 6)**: US6 green (legacy redirects pending CD-12) → commit checkpoint.
+
+---
+
+## Phase 8: User Story 5 — Visitor sends an enquiry (P2) (plan Phase 6)
+
+**Depends on**: Foundational (limiter, audit), US1 (public pages).
+
+- [ ] T120 [P] [US5] Failing attack tests `tests/security/enquiry-abuse.spec.ts`: Turnstile always-fail key, missing, expired and reused tokens rejected; 6th submission in 10 min from one source → 429; CRLF/header injection in name/email inert; HTML/script in message inert in email and admin; captcha service unavailable → 503 fail-closed (FR-071, FR-072, FR-073, FR-094, SC-011)
+- [ ] T121 [P] [US5] Failing tests `tests/e2e/us5-enquiry.spec.ts`: enquiry persisted before confirmation; email in Mailpit; simulated email outage → retries then delivery, failure visible to Operator; localized field errors; consent required (FR-070, FR-074, SC-010)
+- [ ] T122 [P] [US5] Failing tests `tests/integration/enquiries/access-retention.test.ts`: read/export/delete owner/administrator only via UI and REST; every view/export/delete audited; retention deletes >12 months with content-free audit; enquiry content absent from logs and analytics (FR-045, FR-076, FR-077, FR-078)
+- [ ] T123 [US5] Implement `enquiries` collection ("name ≤100; email valid ≤254; phone optional ≤20; organization optional ≤150; topic select; message ≤5000 plain text; consent must be true; locale; delivery {status, attempts, lastError code, sentAt}; deleteAfter = createdAt + 12 months") and submit server action per `contracts/http-surface.md` check order (FR-070, FR-071, FR-078)
+- [ ] T124 [US5] Implement Turnstile server verification (hostname + action, single use) in `src/modules/platform/adapters/captcha/turnstile.ts` (FR-072)
+- [ ] T125 [US5] Implement `sendEnquiryEmail` job (retries with backoff, operator alert after final failure; plain-text body; escaped validated reply-to) and configurable recipients (FR-073, FR-074, FR-075)
+- [ ] T126 [US5] Implement enquiry inbox admin views, audited export, `purgeExpiredEnquiries` job until T122 passes (FR-076, FR-077)
+- [ ] T127 [US5] R-F: evaluate analytics options, record `docs/adr/ADR-007-analytics.md`; implement cookieless adapter (page views per locale, successful enquiry conversion; no identifiers) disabled by default (FR-084, FR-085, FR-086, FR-087)
+- [ ] T128 [P] [US5] Write `docs/content/privacy-notice-requirements.md` listing FR-079 items for CD-10 legal review (FR-079)
+- [ ] T129 [US5] Write `docs/security/TM-enquiry.md`; update ASVS V14 (FR-097)
+
+**Checkpoint (Gate 7)**: US5 green; no delivery-guarantee statement until SC-010 + SC-013 pass →
+commit checkpoint.
+
+---
+
+## Phase 9: User Story 7 — Navigation, banners, site-wide settings (P3)
+
+**Depends on**: US2, US3.
+
+- [ ] T130 [P] [US7] Failing tests `tests/e2e/us7-nav.spec.ts`: two-level menus in both locales; unpublished targets flagged; `javascript:` and other disallowed schemes rejected in menu links; banner schedule window and per-visitor dismissal; Publisher saves nav/banner drafts but publish/unpublish denied via UI and REST; settings changes audited (FR-014, FR-036, FR-045)
+- [ ] T131 [US7] Implement globals `site-settings` (contact details + evidence, social links, default SEO, legal links, `enquiryRecipients`, `enquiryTopics`), `header-nav`, `footer-nav`, `banner` per data-model until T130 passes (FR-010, FR-075)
+
+**Checkpoint (Gate 8)** → commit checkpoint.
+
+---
+
+## Phase 10: User Story 8 — Operate, observe, recover (P3) (plan Phase 7 ops)
+
+**Depends on**: T132 owner hosting decision for production targets.
+
+- [ ] T132 [US8] R-H: production hosting comparison (commercial terms, cost, sharp, cron/jobs, Cloudflare edge compatibility, TLS/HSTS preload, off-site backup target, email sending-domain authentication SPF/DKIM/DMARC) `docs/adr/ADR-008-hosting.md`; owner decision required before Phase 10 monitoring/backup targets (SC-015)
+- [ ] T133 [P] [US8] Failing tests `tests/integration/ops/observability.test.ts`: abuse events (login failures, rate-limit hits, rejected uploads, captcha failures) emitted as structured logs; redaction holds end-to-end (FR-100, FR-101)
+- [ ] T134 [US8] Implement encrypted backups `ops/backup/{db.sh,media.sh}` (age) and `ops/restore-drill.sh` restoring into a clean Compose project, measuring RPO ≤24 h / RTO ≤4 h (A-10), then running `pnpm scan:richtext` (FR-102, SC-013)
+- [ ] T135 [US8] Write runbooks `docs/runbooks/{deploy,rollback,secret-rotation,incident-response,backup,restore,migration}.md` (FR-103)
+- [ ] T136 [US8] Configure uptime monitoring and alert routing for the chosen host; configure the error-tracking adapter (console in dev; provider chosen with hosting, no PII); record availability measurement method in `docs/runbooks/monitoring.md` (FR-100, FR-101, SC-015)
+
+**Checkpoint (Gate 9)** → commit checkpoint.
+
+---
+
+## Phase 11: Polish & Cross-Cutting (plan Phase 7 hardening)
+
+- [ ] T137 Run full adversarial suite (all `tests/security/**`) and publish `docs/security/adversarial-report.md`; 0 open critical/high (FR-097, SC-004)
+- [ ] T138 Run public a11y (axe all templates × locales) + manual keyboard/screen-reader script `docs/runbooks/a11y-manual.md`; run admin regression vs baseline; update `docs/accessibility/admin-findings.md`; no conformance claim without evidence (FR-080, FR-080a, SC-006, SC-019)
+- [ ] T139 Configure Lighthouse CI `tests/perf/lighthouserc.json` (first introduced at Gate 4, extended here to all templates) with budgets (LCP ≤2.5 s, CLS ≤0.1, INP ≤200 ms, ≤1 MB, ≤150 KB JS, fonts ≤120 KB/locale) per template × locale (FR-083, SC-007, SC-008)
+- [ ] T140 Generate/check `docs/api.md` against route schemas in CI (FR-096)
+- [ ] T141 R-G: verify preview-deployment protection and plan-term compliance before any preview deploy; record `docs/adr/ADR-009-preview-deploys.md` (FR-066)
+- [ ] T142 Write usability protocol `docs/research/usability-sc002.md` and run with ≥2 staff (SC-002)
+- [ ] T143 Create `docs/content/evidence-register.md` and `pnpm check:evidence` verifying every published claim has an evidence reference (FR-016, SC-016)
+- [ ] T144 Create `docs/content/dependencies.md` tracking CD-01…CD-13 status as launch gates (FR-065, FR-079)
+- [ ] T145 Final supply-chain pass: `gitleaks detect` on full history, osv-scanner, licence report (FR-098, SC-014)
+- [ ] T146 Complete `docs/security/asvs-l2.md` (verified / partial / not addressed per requirement) and `docs/launch-readiness.md` mapping SC-001…SC-019 to evidence (FR-097, SC-001)
+
+---
+
+## Dependencies & Execution Order
+
+```text
+Phase 0 (done) → Setup (Gate 1) → Foundational (Gate 2a) → US3 (Gate 2)
+  → US2 (Gate 3) → [US7 T130–T131] → US1 (Gate 4) → { US4 (Gate 5), US6 (Gate 6), US7 (Gate 8) } → US5 (Gate 7)
+  → T132 hosting decision → US8 (Gate 9) → Polish
+```
+
+- Foundational blocks all stories. US3 blocks every CMS story (MFA/RBAC/audit).
+- US2 blocks US1 (content), US4 (reorder control), US6, US7. US7 globals (T130–T131) block US1 T103.
+- US4, US6, US7 can proceed in parallel after US1.
+- External blockers: dependency-install approval (Setup), CD-12 (T119), CD-13 (production build),
+  T132 hosting decision (T134, T136), CD-10 (privacy notice publication).
+- Within a story: failing tests → implementation → gate → commit checkpoint (owner approval;
+  no push/deploy).
+
+## Parallel Examples
+
+- Foundational: T026, T027, T028, T030, T038, T040, T041 in parallel; then T029, T031→T032.
+- US3 tests T042–T055 all [P] (separate files); implementation T056→T057…T068 mostly sequential
+  (shared users collection), T070 parallel.
+- US2 tests T071–T080 all [P]; T081→T082→T083 sequential; T085–T088 parallel after T082.
+
+## Implementation Strategy
+
+- **MVP** = Setup + Foundational + US3 + US2 + US1 (all P1): a secure CMS publishing a bilingual
+  site locally. Not launchable until US6 legacy redirects, US5 enquiries, US8 ops and Polish gates
+  pass and content dependencies clear.
+- Incremental: each gate is a commit checkpoint with recorded test output; nothing is pushed or
+  deployed without explicit owner approval.
+
+## Requirement → Task Coverage
+
+Generated from requirement IDs cited in task lines. Every FR/SC in spec.md maps to ≥1 task.
+
+| Requirement | Tasks |
+|---|---|
+| FR-001 | T016, T096 |
+| FR-002 | T080, T087, T095, T098, T099 |
+| FR-003 | T096, T099 |
+| FR-004 | T016, T074, T096 |
+| FR-005 | T063, T100 |
+| FR-006 | T100 |
+| FR-007 | T096 |
+| FR-008 | T104 |
+| FR-010 | T087, T131 |
+| FR-011 | T085, T087 |
+| FR-012 | T078, T085, T092 |
+| FR-013 | T081 |
+| FR-013a | T073, T081 |
+| FR-013b | T026, T027, T029, T071, T082 |
+| FR-013c | T028, T029, T072, T083, T084 |
+| FR-013d | T027, T073, T083 |
+| FR-014 | T026, T027, T028, T029, T071, T085, T102, T130 |
+| FR-015 | T076 |
+| FR-017 | T088 |
+| FR-018 | T103 |
+| FR-019 | T085 |
+| FR-016 | T074, T086, T143 |
+| FR-020 | T074, T089 |
+| FR-021 | T074, T089, T103 |
+| FR-022 | T077, T091 |
+| FR-023 | T074, T089 |
+| FR-024 | T074, T089 |
+| FR-025 | T080, T090 |
+| FR-030 | T016, T042, T057 |
+| FR-031 | T043, T058 |
+| FR-032 | T044, T059 |
+| FR-033 | T045, T046, T061 |
+| FR-033a | T045, T060 |
+| FR-033b | T045, T060 |
+| FR-033c | T047, T060 |
+| FR-034 | T048, T063 |
+| FR-035 | T049, T062, T065, T068 |
+| FR-036 | T031, T056, T068, T130 |
+| FR-037 | T032, T052 |
+| FR-038 | T031, T032, T043, T051, T065 |
+| FR-039 | T050, T064 |
+| FR-045 | T035, T043, T045, T048, T052, T053, T066, T074, T089, T112, T118, T122, T130 |
+| FR-046 | T035, T053 |
+| FR-047 | T034, T036, T067 |
+| FR-048 | T034, T036 |
+| FR-050 | T109, T110 |
+| FR-051 | T107, T108, T110 |
+| FR-052 | T108, T110 |
+| FR-053 | T109, T112 |
+| FR-054 | T109, T112 |
+| FR-055 | T078, T092, T109 |
+| FR-056 | T108, T111 |
+| FR-057 | T109, T112 |
+| FR-060 | T114, T116 |
+| FR-061 | T114, T116 |
+| FR-062 | T114, T117 |
+| FR-063 | T114, T116 |
+| FR-064 | T115, T118 |
+| FR-065 | T115, T119, T144 |
+| FR-066 | T114, T117, T141 |
+| FR-070 | T121, T123 |
+| FR-071 | T120, T123 |
+| FR-072 | T120, T124 |
+| FR-073 | T120, T125 |
+| FR-074 | T121, T125 |
+| FR-075 | T125, T131 |
+| FR-076 | T122, T126 |
+| FR-077 | T122, T126 |
+| FR-078 | T122, T123 |
+| FR-079 | T128, T144 |
+| FR-080 | T061, T078, T105, T138 |
+| FR-080a | T040, T041, T061, T078, T079, T093, T138 |
+| FR-081 | T102 |
+| FR-082 | T097 |
+| FR-083 | T139 |
+| FR-084 | T127 |
+| FR-085 | T127 |
+| FR-086 | T014, T127 |
+| FR-087 | T127 |
+| FR-090 | T018, T019, T020 |
+| FR-091 | T049, T054, T062 |
+| FR-092 | T032, T051, T056 |
+| FR-093 | T033 |
+| FR-094 | T037, T039, T055, T063, T120 |
+| FR-095 | T019, T020, T033, T104 |
+| FR-096 | T140 |
+| FR-097 | T025, T069, T094, T113, T129, T137, T146 |
+| FR-098 | T007, T008, T145 |
+| FR-100 | T021, T022, T133, T136 |
+| FR-101 | T012, T013, T133, T136 |
+| FR-102 | T134 |
+| FR-103 | T070, T135 |
+| FR-104 | T005, T010 |
+| FR-105 | T006, T010, T011, T014, T015 |
+| SC-001 | T096, T146 |
+| SC-002 | T142 |
+| SC-003 | T031, T051, T052 |
+| SC-004 | T137 |
+| SC-005 | T053 |
+| SC-006 | T138 |
+| SC-007 | T139 |
+| SC-008 | T139 |
+| SC-009 | T106 |
+| SC-010 | T121 |
+| SC-011 | T120 |
+| SC-012 | T114, T115 |
+| SC-013 | T134 |
+| SC-014 | T007, T145 |
+| SC-015 | T132, T136 |
+| SC-016 | T143 |
+| SC-017 | T046 |
+| SC-018 | T026, T071, T072 |
+| SC-019 | T040, T138, T146 |

@@ -65,23 +65,100 @@ Report: [research/typography-specimen/report.md](../../research/typography-speci
   WCAG 2.1.1. Build a project-owned **accessible reorder control** (focusable Move up/down, order
   position, localized `aria-live` announcements), used for gallery items, blocks and listing
   order.
-- **D-22 (new) Rich-text URL safety**: a server-side `validate` hook walks the Lexical JSON and
-  rejects any link or autolink URL whose scheme is not `https:`, `http:` (allow-listed host),
-  `mailto:` or `tel:`, or an internal reference. The public renderer applies the same allow-list
-  again. Covered by the XSS suite (threat T6). Check upstream Payload issues before reporting.
-- **D-23 (new) Admin UI language**: English admin UI in v1, with Arabic content entered RTL. An
-  Arabic admin UI is a later per-user option, gated on (a) an admin CSS fix for the RTL overflow,
-  verified, and (b) re-running R-A checks 2–6.
-- **D-24 (new) Typography**: adopt Manrope (EN headings), Inter (EN body/UI) and IBM Plex Sans
-  Arabic (AR, ≤3 weights: 400/600/700).
+- **D-22 (new; detailed in WS5 below) Rich-text safety**: project-owned server-side
+  allow-list enforcement plus a safe renderer. See "D-22 Rich-text editor: evidence and
+  enforcement".
+- **D-23 (approved by owner, WS5) Admin UI language**: English-only CMS navigation and controls in
+  v1. Arabic content is fully supported, and is editable and previewable RTL. An Arabic admin UI
+  is out of v1 scope. Revisiting it later requires a verified fix for the RTL overflow and a
+  re-run of R-A checks 2–6.
+- **D-24 (approved by owner, WS5) Typography**: adopt Manrope (EN headings), Inter (EN body/UI)
+  and IBM Plex Sans Arabic (AR, ≤3 weights: 400/600/700).
   - Self-host unmodified OFL woff2 via `next/font/local`; no runtime Google requests.
+  - **Keep the ≤120 KB per-language initial-load target.** Phase 5 must measure the real
+    self-hosted production files and re-confirm licences against the delivered files.
   - Arabic line-height 1.7 (headings 1.45); Arabic small text ≥15 px.
   - Responsive `clamp()` type scale.
   - `<bdi>`/`dir="ltr"` wrappers for Latin identifiers, numbers with symbols, emails and phone
     numbers (the specimen showed "95%" rendering as "%95" without one).
-- **Admin accessibility risk**: Payload core admin views have axe violations outside our control.
-  FR-080 covers project-built customisations, which must pass. Core issues are tracked as a risk
-  and may go to upstream reports. Owner awareness is needed (see plan Risks).
+- **D-25 (approved by owner, WS5) Admin accessibility**:
+  - The serious and critical findings from R-A are **not accepted as compliant**. Tasks cover
+    keyboard navigation, focus visibility, validation focus and announcements, accessible
+    reordering, and an admin accessibility regression suite.
+  - Order of preference: (1) an upstream fix (issue or PR to Payload); (2) supported extension
+    points (admin `components` overrides, custom field components, admin CSS); (3) documented
+    unresolved finding.
+  - No WCAG 2.2 AA claim is made for the admin without evidence. Unresolved findings are listed
+    in `docs/accessibility/admin-findings.md`.
+- **CD-13 gate (WS5)**: the Arabic static route vocabulary stays open until explicitly approved.
+  Route-map values stay `TODO(AR_ROUTE_VOCAB)` placeholders. A CI check fails the production
+  build while any placeholder remains, so this is a hard publication gate. No final Arabic segment
+  is invented.
+
+## D-22 Rich-text editor: evidence and enforcement (WS5)
+
+**Scope (in v1)**: structured, schema-defined Lexical rich text in page, service and course
+sections and FAQ answers. It supports headings (h2–h4), paragraphs, bold, italic, ordered and
+unordered lists, blockquotes, safe links (internal document or allow-listed URL), and line breaks.
+Images are not inline in rich text; they live in media blocks with required alt text. No embeds,
+HTML, code blocks or uploads inside rich text. Arabic and English bidirectional content is
+supported (`dir` per node is honoured, defaulting to `auto`).
+
+**Evidence (Payload 3.91.0 / @payloadcms/richtext-lexical 3.91.0, inspected 2026-10-16)**:
+
+| Finding | Source |
+|---|---|
+| Link `url` sub-field has a `beforeChange` hook that only `encodeURIComponent`s when `validateUrl()` is false | `dist/features/link/server/baseFields.js` |
+| `validateUrl()` returns **true** for `javascript:alert(3)`, `JaVaScRiPt:…`, `java\tscript:…`, `data:text/html;base64,…`, `vbscript:…`, `file:///etc/passwd`, `javascript://example.com/%0aalert(1)` | executed against `dist/lexical/utils/url.js` |
+| `sanitizeUrl()` maps `javascript:`, `data:text/html`, `vbscript:` to `https://`, but **allows `file:`, `ftp:`, `sms:`** | same |
+| JSX converter `LinkJSXConverter` renders `href={node.fields.url}` **unsanitized**; the HTML converters do use `sanitizeUrl` | `dist/features/converters/lexicalToJSX/converter/converters/link.js`, `.../lexicalToHtml/*/converters/link.js` |
+| R-A: a pasted `javascript:` link was **persisted** via a normal admin save | `research/payload-rtl-poc/evidence/stored-richtext-check.json` |
+| Drafts skip field `validate` unless `versions.drafts.validate: true` | `payload` type docs (`SanitizedDrafts.validate`) |
+
+**Conclusion**: Payload's built-in URL checks are not a security control for our policy. React 19
+may neutralise `javascript:` in `href` at render time, but that is not relied on, and it does not
+cover `data:`, `file:` or other schemes.
+
+**Supported extension points used** (all public Payload APIs; no patching of node_modules):
+1. `lexicalEditor({ features })` with an explicit feature list. This limits what the editor
+   offers (UX only, not a control).
+2. A richText field `hooks.beforeChange` running `assertSafeRichText()`. It runs on create,
+   update, draft save, autosave, duplicate, Local API, REST, and version restore (restore is to be
+   verified, task-tracked). It throws a `ValidationError` on violation.
+3. A richText field `validate` with the same policy, for in-form error display. Collections set
+   `versions.drafts.validate: true` so drafts are validated too.
+4. `LinkFeature({ fields })` overriding the `url` field `validate` with the project allow-list,
+   giving immediate drawer feedback.
+5. Custom JSX converters (`RichText` with `converters`) overriding `link` and `autolink` with
+   `safeHref()`. An unsafe or unknown URL renders as plain text without `<a>`. Unknown node types
+   render nothing. The same renderer is used for preview and the public site.
+
+**Policy (`modules/content/richtext/policy.ts`, pure, versioned)**:
+- **Node allow-list**: `root`, `paragraph`, `heading` (tag h2–h4), `list` (bullet/number),
+  `listitem`, `quote`, `text`, `linebreak`, `link`, `autolink`.
+- **Format bits**: bold and italic only.
+- **Text `style`**: must be `''`. Inline CSS is rejected.
+- **Node attributes**: `direction` ∈ {ltr, rtl, null}, `format` ∈ {'', start, end, center}, and
+  `indent` 0–3. Unknown keys are rejected.
+- **Link fields**: `linkType`, `url`, `doc`, `newTab` only.
+- **URLs**:
+  - Trimmed and checked for control characters or whitespace anywhere, then parsed with
+    `new URL()` against a base.
+  - Allowed: `https:`, `mailto:`, `tel:`, site-relative `/path` and `#anchor`.
+  - `http:` only for allow-listed hosts.
+  - Rejected: `javascript:`, `vbscript:`, `data:`, `file:`, `ftp:`, `blob:`, protocol-relative
+    `//host`, and anything else.
+- **Limits**: depth ≤10, node count ≤5,000, URL length ≤2,048.
+- Link text must be non-empty after trimming, so links are accessible.
+
+**Paths that bypass hooks** (direct SQL, restores from backup, migrations): the render-time
+`safeHref()` and node allow-list still apply. A `scan:richtext` script reports any stored
+violations and is part of the migration and restore runbooks.
+
+**Version pin**: `payload` and all `@payloadcms/*` at **3.91.0 exact**, and `next` **16.3.3
+exact** (the combination tested in R-A). Upgrades are a deliberate task. The rich-text
+adversarial suite and the per-locale-publish (`experimental.localizeStatus`) regression suite
+must pass before any version bump merges.
 
 ## Priority research tasks (run before detailed implementation)
 
@@ -213,8 +290,9 @@ Otherwise propose one change, with evidence.
 ## Decisions
 
 ### D-1 Runtime and framework versions
-- **Decision**: Node 22 LTS, pnpm 10, Next.js 16.x (≥16.3.3), Payload 3.91.x, TypeScript strict.
-  Pin exact versions in the lockfile and upgrade deliberately.
+- **Decision**: Node 22 LTS, pnpm 10, TypeScript strict. **Pinned exactly (WS5)**: Payload and
+  `@payloadcms/*` 3.91.0, Next.js 16.3.3 (the R-A-tested pair). Upgrade only deliberately, behind
+  the regression suites (D-22).
 - **Rationale**: these are the current versions that satisfy Payload's peer range. Node 22 is
   already installed locally.
 - **Alternatives**: Next 15.x LTS line (no benefit at this point); Payload 2 (end of life).

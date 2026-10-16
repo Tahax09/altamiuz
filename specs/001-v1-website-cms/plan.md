@@ -28,7 +28,7 @@ Arabic/RTL admin proof of concept, and **R-B**, the typography specimen
 | Item | Value |
 |---|---|
 | **Language/Version** | TypeScript 5.x (strict), Node.js 22 LTS |
-| **Primary Dependencies** | Next.js 16.x (≥16.3.3), Payload 3.91.x (`@payloadcms/next`, `db-postgres`, `richtext-lexical`, optional `storage-s3`), sharp, otplib, a content-type sniffer, pino, zod. Exact pins go in the lockfile; each new dependency gets a licence check and a lifecycle-script review |
+| **Primary Dependencies** | Next.js 16.3.3 and Payload 3.91.0, pinned exactly (ADR-003; D-1) (`@payloadcms/next`, `db-postgres`, `richtext-lexical`, optional `storage-s3`), sharp, otplib, a content-type sniffer, pino, zod. Exact pins go in the lockfile; each new dependency gets a licence check and a lifecycle-script review |
 | **Storage** | PostgreSQL 17 (Payload Drizzle adapter, committed migrations); media on local disk in development, R2 proposed for production |
 | **Testing** | Vitest (unit, integration against real Postgres), Playwright (e2e, security, axe), Lighthouse CI, gitleaks, `pnpm audit` / osv-scanner |
 | **Target Platform** | Modern evergreen browsers (last 2 versions, iOS Safari 16+); server: Node 22 standalone build, local Docker and Vercel preview; production host undecided |
@@ -81,7 +81,8 @@ specs/001-v1-website-cms/
 ├── contracts/
 │   ├── access-matrix.md
 │   ├── http-surface.md
-│   └── configuration.md
+│   ├── configuration.md
+│   └── rich-text.md     # rich-text allow-list policy (D-22)
 ├── checklists/requirements.md
 └── tasks.md             # created by /speckit-tasks (not yet)
 ```
@@ -141,9 +142,9 @@ Each phase ends with:
 
 | Phase | Scope | Gate (all must hold) |
 |---|---|---|
-| **0 Research** (R-A, R-B **done** 2026-10-16) | R-A Payload RTL POC; R-B typography specimen | Evidence committed; D-4 updated, D-12 updated, D-22–D-24 added (research.md § Research results). **Owner review pending**: English admin UI for v1 (D-23), typeface adoption (D-24), core-admin accessibility risk |
+| **0 Research** (R-A, R-B **done** 2026-10-16) | R-A Payload RTL POC; R-B typography specimen | Evidence committed; D-4 updated, D-12 updated, D-22–D-24 added (research.md § Research results). Owner decisions recorded WS5: D-23 English-only admin controls, D-24 typography, D-25 admin accessibility not accepted as compliant, CD-13 gate |
 | **1 Foundation** | Scaffold, strict TS, lint boundaries, config loader + adapters with local substitutes, Docker dev, logger, health, proxy with headers/CSP (R-D), gitleaks + audit, CI files, migration tooling, ADR-001..003 | App boots locally with no paid accounts; production mode refuses dev substitutes (test); headers verified; gitleaks clean; migration up/down test runs |
-| **2 Identity & access** (test-first) | R-C spike; users, invitations, owner bootstrap, password policy + breached-password check, lockout, MFA enrol/verify/recovery, sessions, RBAC matrix, audit log + DB trigger | 100% access-matrix cells pass (SC-003); MFA bypass/replay/brute-force suite passes (SC-017); all FR-045 auth events audited; threat model TM-auth signed off |
+| **2 Identity & access** (test-first) | R-C spike; rich-text policy module `assertSafeRichText`/`safeHref` + adversarial corpus (pure, D-22); admin accessibility baseline (axe snapshot of core views, D-25); users, invitations, owner bootstrap, password policy + breached-password check, lockout, MFA enrol/verify/recovery, sessions, RBAC matrix, audit log + DB trigger | 100% access-matrix cells pass (SC-003); MFA bypass/replay/brute-force suite passes (SC-017); all FR-045 auth events audited; rich-text policy corpus 100% rejected (unit); admin a11y baseline recorded; threat model TM-auth signed off |
 | **3 Content core** | Localization (`experimental.localizeStatus`, D-4), block library, Lexical allow-list + **server-side link-URL scheme validation (D-22)**, evidence gating, pages/services/courses + listings, globals, drafts/versions/restore/locking, preview, revalidation, **accessible reorder control for blocks (D-12)**, editor focus style + Esc-Tab help text | US2 and US7 e2e pass in both locales; XSS paste suite passes, including a `javascript:` link pasted via the admin **and** sent directly to the API (both rejected); per-locale publish regression test passes; unverified claim cannot publish; publish-to-live ≤60 s |
 | **4 Media** (test-first) | Upload validation, re-encode/strip, variants, focal point (numeric inputs as keyboard path), random names, private draft media, usage panel, accessible reordering (D-12 control) | US4 e2e + malicious-fixture suite pass; keyboard reorder works without a pointer, is announced in the UI language, and persists after reload |
 | **5 Public site & SEO** | Design tokens and typography (D-24: self-hosted OFL woff2, ≤3 Arabic weights, `clamp()` scale, bidi wrappers), section renderers, typed route map (D-5), switcher, 404/error pages, metadata, hreflang, JSON-LD, sitemap, robots, redirects + legacy map loader | US1 and US6 e2e pass; axe 0 serious/critical; perf budgets met on all templates in both locales, including fonts ≤120 KB per locale (re-measured on self-hosted files); Firefox + real iOS/Android typography check |

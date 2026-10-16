@@ -17,7 +17,7 @@ collection grants anonymous REST access except `media` file delivery of publishe
   carries `status ≠ verified`, the parent cannot be published (FR-016).
 - **link**: `type` (`internal` | `external` | `email` | `tel`), `page` / `service` / `course` →
   relationship (internal), `url` (external: `https:` only, or an allow-listed `http:` host),
-  `email`, `tel`, `label` (`L`), `newTab` (external only).
+  `email`, `tel`, `label` (`L`), `newTab` (external only). Every `url`/`email`/`tel` is validated with the rich-text URL policy (`safeHref`, contracts/rich-text.md) on save and re-checked at render (FR-014).
 
 ## Collections
 
@@ -44,7 +44,7 @@ endpoint for the owner of the session and for administrators.
 
 ### invitations
 `email`, `role`, `tokenHash`, `expiresAt` (72 h), `usedAt`, `invitedBy`. Single use. Creating one
-needs `users:manage` and a role below the inviter's.
+needs `users:manage`. Owners may invite any role, including owner; every other inviter only roles strictly below their own (matches contracts/access-matrix.md).
 
 ### pages (drafts + versions)
 | Field | Rules |
@@ -138,6 +138,18 @@ Tasks: `sendEnquiryEmail`, `purgeExpiredEnquiries`, `purgeAuditEvents`, `pruneVe
   targets are flagged on save.
 - **banner**: `enabled`, `message` `L` (plain), `link`, `startsAt`, `endsAt`, `dismissKey`
   (changes when the content changes).
+
+## Rich-text fields
+
+Every `richText` field (richText block `content`, FAQ `answer`, and service and course body
+sections) uses one shared editor configuration and the policy in
+[contracts/rich-text.md](./contracts/rich-text.md):
+
+- Feature-limited Lexical editor.
+- `beforeChange` hook and `validate` both enforce the allow-list.
+- Drafts are validated (`versions.drafts.validate: true`).
+
+Inline images, uploads, embeds, HTML and code nodes are not allowed.
 
 ## Block library (section types)
 

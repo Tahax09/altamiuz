@@ -53,6 +53,11 @@ features, any claim that engineering standards certify the consultancy."
   default; a free or self-hostable provider selected after evaluating privacy, security, hosting
   compatibility, and applicable Libyan and EU legal requirements. Cookieless analytics is not
   assumed to remove every legal obligation.
+- Owner decisions (WS5): English-only CMS navigation and controls in v1, with Arabic content
+  fully editable and previewable RTL; typography trio adopted and self-hosted within the 120 KB
+  per-language target; admin accessibility findings are not accepted as compliant (FR-080a);
+  the rich-text editor is in scope with server-side allow-list enforcement and safe rendering
+  (FR-013a–FR-013d); the Arabic route vocabulary (CD-13) remains a publication gate.
 - Owner planning decisions (WS4): public addresses use localized static route segments as well
   as localized slugs, generated from one typed route map (final Arabic vocabulary pending CD-13);
   Publishers may edit navigation and banner drafts but not publish or unpublish them.
@@ -395,8 +400,24 @@ the runbook and measure time and data loss.
 - **FR-013**: Rich text MUST be limited to a defined formatting set (headings, paragraphs, lists,
   emphasis, links, quotes) and MUST NOT accept or render scripts, raw markup, inline styles,
   event handlers, or embedded frames.
+- **FR-013a**: The rich-text editor is in scope for v1. It MUST support headings, paragraphs,
+  bold, italic, ordered and unordered lists, blockquotes, line breaks, and safe links, with
+  Arabic/English bidirectional content. Preview and public rendering MUST use the same renderer
+  and produce the same output.
+- **FR-013b**: Rich-text content MUST be validated on the server on every create, update, draft
+  save, autosave, duplicate, version restore, and import path, against an explicit allow-list of
+  node types, formatting marks, node attributes, link fields, and URL protocols. Anything outside
+  the allow-list is rejected, not silently altered. Editor-side controls alone MUST NOT be relied
+  upon.
+- **FR-013c**: The public site and preview MUST render rich text through a safe renderer that
+  re-applies the URL and node allow-list at render time. Content stored before a policy change,
+  or written outside the application, cannot produce executable links or markup. A link with a
+  disallowed URL renders as plain text.
+- **FR-013d**: Every link MUST have non-empty visible text. Images MUST NOT be placed inline in
+  rich text; image sections require alternative text per FR-054.
 - **FR-014**: Links in content MUST be restricted to internal pages, web addresses, email, and
-  telephone schemes.
+  telephone schemes. `javascript:`, `vbscript:`, `data:`, `file:`, `ftp:`, `blob:`,
+  protocol-relative, malformed, and control-character-bearing URLs MUST be rejected.
 - **FR-015**: The CMS MUST prevent the second of two conflicting concurrent saves from silently
   overwriting the first.
 - **FR-017**: Services and Training courses MUST be dedicated structured content types, each item
@@ -564,6 +585,12 @@ the runbook and measure time and data loss.
   locales, including keyboard operation, visible focus, focus not obscured, target size,
   dragging alternatives, consistent help, accessible authentication (no cognitive tests), and
   redundant-entry avoidance.
+- **FR-080a**: Accessibility defects in the CMS admin interface that the project relies on
+  (including third-party admin views) MUST be tracked. Where a supported extension point or
+  upstream fix exists, they MUST be remediated for keyboard navigation, focus visibility,
+  validation focus and announcements, and reordering. An admin accessibility regression suite
+  MUST run on every release. No WCAG conformance claim is made for the admin without evidence,
+  and unresolved findings are documented.
 - **FR-081**: Motion MUST be purposeful and MUST respect reduced-motion preferences; no content may
   flash more than three times per second.
 - **FR-082**: Core content and navigation MUST be readable without client-side scripting.
@@ -736,6 +763,13 @@ None may be invented or inferred from the legacy site without evidence.
 - **SC-016**: 100% of published claim-bearing content has a recorded evidence reference.
 - **SC-017**: 100% of active CMS accounts have a second factor enrolled, and 0 CMS functions are
   reachable without completing it in automated and adversarial tests.
+- **SC-018**: 100% of the rich-text adversarial corpus (malicious links, stored-XSS payloads,
+  malformed URLs, unexpected node types and attributes, bypass attempts) is rejected on every
+  write path. 0 unsafe `href` values or disallowed elements appear in rendered pages, including
+  when malicious content is injected directly into storage.
+- **SC-019**: The admin accessibility regression suite reports no new serious or critical
+  findings against the recorded baseline, and every baseline finding is either remediated or
+  documented with its reason and upstream reference.
 
 ## Assumptions
 
@@ -777,9 +811,9 @@ None may be invented or inferred from the legacy site without evidence.
 - **A-14** No non-essential cookies in v1; analytics is cookieless (FR-084 to FR-087). Whether
   any consent mechanism is still required is decided by the legal review in CD-10.
 - **A-15** Arabic content entry (right-to-left fields, mixed-direction text) is required
-  regardless. Whether the admin interface itself is offered in Arabic is unresolved: a proof of
-  concept MUST verify right-to-left admin behaviour before the admin experience is finalised;
-  until then the admin interface is planned as English-language.
+  regardless. The proof of concept (R-A, 2026-10-16) found the Arabic-language admin UI not
+  ready, so v1 uses English-only CMS navigation and controls (D-23). Arabic content is fully
+  editable and previewable RTL.
 - **A-16** Typography candidates are confirmed (one family for English headings, one for English
   body and interface text, one for Arabic, per the constitution); final adoption follows specimen
   validation in both scripts. The visual system is decided in a design stage.

@@ -40,6 +40,8 @@ substitute is configured ([contracts/configuration.md](./contracts/configuration
 | V12 | Performance | `pnpm test:perf` | Budgets in [research.md](./research.md#performance-budgets-resolves-todoperf_budgets) met per template and locale |
 | V13 | Supply chain | `pnpm audit:deps && gitleaks detect` | 0 critical/high (or documented time-bound exception); 0 secrets |
 | V14 | Migrations | `pnpm test:migrations` | Each migration up → down → up on a disposable database |
+| V15 | Rich-text safety | `pnpm test:security --grep richtext` | Every corpus case rejected on all write paths; malicious JSON injected into the DB renders with no unsafe `href` (SC-018) |
+| V16 | Admin accessibility | `pnpm test:a11y --grep admin` | No serious/critical finding beyond `tests/a11y/admin/baseline.json`; reorder and editor focus checks pass (SC-019) |
 
 ## Release gate (local, before any commit checkpoint)
 
