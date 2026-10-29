@@ -23,6 +23,8 @@ export const en = {
   unitWeeks: 'weeks',
   provider: 'Provider',
   dismissBanner: 'Dismiss announcement',
+  announcement: 'Announcement',
+  validUntil: 'Valid until {date}',
   notFoundTitle: 'Page not found',
   notFoundBody: 'We could not find that page. It may have moved or been removed.',
   errorTitle: 'Something went wrong',

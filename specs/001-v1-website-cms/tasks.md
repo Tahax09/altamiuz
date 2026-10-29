@@ -334,8 +334,8 @@ publish-to-live wiring ready for T106 → commit checkpoint.
 - [X] T098 [US1] Implement typed route map `src/modules/i18n/routes.ts` (`href(routeKey, locale, params)`; Arabic segments `TODO(AR_ROUTE_VOCAB)` until CD-13) and `pnpm check:route-vocab` until T095 passes (FR-002, D-5)
 - [X] T099 [US1] Implement locale routing in `src/proxy.ts` (A-3 root redirect with `Vary`, cross-locale segment → 404) (FR-002, FR-003)
 - [X] T100 [US1] Implement UI strings `src/modules/i18n/messages/{ar,en}.ts` and formatters (one documented numeral convention per locale) (FR-005, FR-006)
-- [ ] T101 [US1] Self-host fonts `src/ui/fonts.ts` via `next/font/local` (Manrope, Inter, IBM Plex Sans Arabic ≤3 weights; unmodified OFL files; licences in `public/fonts/LICENSES/`) and failing-then-passing `tests/perf/fonts.test.ts` asserting ≤120 KB woff2 per locale first load (D-24)
-- [ ] T102 [US1] Implement design tokens and section renderers `src/ui/**` (server components, `clamp()` type scale, Arabic line-height 1.7, reduced-motion support, no flashing; every `link`-group `href` rendered via `safeHref`) (FR-014, FR-081)
+- [ ] T101 [US1] Self-host fonts `src/ui/fonts.ts` via `next/font/local` (Manrope, Inter, IBM Plex Sans Arabic ≤3 weights; unmodified OFL files; licences in `public/fonts/LICENSES/`) and failing-then-passing `tests/perf/fonts.test.ts` asserting ≤120 KB woff2 per locale first load (D-24). **Partly done 2026-10-29**: owner instruction to source the fonts from Google Fonts, so `src/ui/fonts.ts` uses `next/font/google` (files downloaded at build and served from this origin; no runtime Google requests; CSP `font-src 'self'` unchanged; the build needs network access to Google Fonts). Manrope 600/700, Inter 400/600, IBM Plex Sans Arabic 400/700 (two weights: 400/600/700 measured 146 KB on Arabic pages, over budget). Not preloaded, so a page fetches only its own script's faces. Measured first load: English 72,868 B, Arabic 95,292 B. Test: `tests/public/fonts.spec.ts` (planned as `tests/perf/fonts.test.ts`; downloads only exist in a browser): same-origin only, ≤120 KB per language, no other-script face, faces applied. **Open**: the OFL licence texts for the three families are not in the repository and the delivered files' licences are not re-confirmed (D-24)
+- [X] T102 [US1] Implement design tokens and section renderers `src/ui/**` (server components, `clamp()` type scale, Arabic line-height 1.7, reduced-motion support, no flashing; every `link`-group `href` rendered via `safeHref`) (FR-014, FR-081). Done 2026-10-29: `src/app/(site)/site.css` (tokens; brand values in one block, **provisional until CD-09**; logical properties only; Arabic line-height 1.7, headings 1.45, small text ≥15 px; nothing animates) and `src/ui/sections/Sections.tsx` / `src/ui/site/Chrome.tsx` (hero and CTA bands with buttons, card grids for features, credentials and service/course listings, stats, FAQ, contact panel, page header, banner, header, footer from published site settings only). Evidence: Chromium at 320/375/768/1440 px and WebKit at 375/1440 px, both languages, home, listings, details, missing-translation and 404 (66 page loads): no horizontal overflow, no failed requests, no axe serious/critical findings (WCAG 2.2 AA tags), no target under 24 px. Fixed on the way: the unavailable-language note rendered scrambled (it inherited the other language's `dir`; regression check in `tests/public/us1-locale.spec.ts`) and the missing-translation page had no `<title>`
 - [X] T103 [US1] Implement public routes `src/app/(site)/[locale]/` (home, `[slug]`, services and training listings/details from published, non-hidden items in editor order) (FR-018, FR-021)
 - [X] T104 [US1] Implement localized `not-found` and `error` pages without internal details (FR-008, FR-095). Document requests for missing public paths get a complete server-rendered 404 from the proxy (`src/ui/site/not-found-document.ts`); the in-app `not-found.tsx` serves client-side navigations
 - [ ] T105 [US1] Run T096–T097 green and record axe results for public templates in `tests/a11y/public/baseline.json` (FR-080)
@@ -362,9 +362,9 @@ publish-to-live wiring ready for T106 → commit checkpoint.
     admin-UI parts of T130 are split into T130a (done 2026-10-29, `tests/e2e/us7-nav.spec.ts`).
 - T096/T097: `tests/public/{us1-locale,no-js}.spec.ts` (Chromium and WebKit).
 - Not done:
-  - **T101 fonts**: system font stacks for now; the OFL woff2 files are not in the repository.
-  - **T102 design tokens**: provisional neutral tokens in `src/app/(site)/site.css`; brand assets
-    are pending (CD-09).
+  - **T101 fonts**: Google Fonts via `next/font/google` since 2026-10-29 (owner instruction);
+    licence records still open.
+  - **T102**: done 2026-10-29; brand values stay provisional until CD-09.
   - **T105 public axe baseline**.
   - **T139 Lighthouse CI**.
 - ~~Known limitation: without JavaScript the 404 body is empty~~ **resolved 2026-10-28**. Next
@@ -550,7 +550,7 @@ Generated from requirement IDs cited in task lines. Every FR/SC in spec.md maps 
 | FR-004 | T016, T074, T096 |
 | FR-005 | T063, T100 |
 | FR-006 | T100 |
-| FR-007 | T096 |
+| FR-007 | T096, T102 |
 | FR-008 | T097, T104 |
 | FR-010 | T087, T131 |
 | FR-011 | T085, T087 |

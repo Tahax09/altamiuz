@@ -5,6 +5,7 @@ import { headers } from 'next/headers'
 import type { ReactNode } from 'react'
 import { DEFAULT_LOCALE, href, LOCALES, matchRoute, type Locale } from '@/modules/i18n'
 import { SiteBanner, SiteFooter, SiteHeader } from '@/ui'
+import { fontVariables } from '@/ui/fonts'
 import { cachedAlternates, cachedGlobal, cachedPublished } from '../data'
 import '../site.css'
 
@@ -54,7 +55,7 @@ export default async function SiteLayout({
     isLocale(raw) ? alternatesFor(path) : Promise.resolve({}),
   ])
   return (
-    <html lang={locale} dir={locale === 'ar' ? 'rtl' : 'ltr'}>
+    <html lang={locale} dir={locale === 'ar' ? 'rtl' : 'ltr'} className={fontVariables}>
       <body>
         <SiteBanner locale={locale} banner={banner} />
         <SiteHeader

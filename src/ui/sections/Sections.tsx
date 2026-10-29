@@ -1,9 +1,9 @@
 // Section renderer shared by preview and the public site (T083/T102, FR-013d, FR-014, FR-018).
-// Semantic markup only. Hidden sections never render; every link goes through safeHref or the
-// typed route map. Internal links resolve only to published targets, so preview and public
-// produce the same markup for the same document.
+// Semantic markup with the design-system classes of src/app/(site)/site.css. Hidden sections
+// never render; every link goes through safeHref or the typed route map. Internal links resolve
+// only to published targets, so preview and public produce the same markup for the same document.
 import { safeHref } from '@/modules/content'
-import { href, type Locale } from '@/modules/i18n'
+import { formatDate, href, t, type Locale } from '@/modules/i18n'
 import { RichText, type InternalHref } from '../richtext/RichText'
 
 type Link =
@@ -52,7 +52,15 @@ export function internalHrefFor(locale: Locale): InternalHref {
   }
 }
 
-function LinkOut({ link, resolve }: { link: Link; resolve: InternalHref }) {
+function LinkOut({
+  link,
+  resolve,
+  className,
+}: {
+  link: Link
+  resolve: InternalHref
+  className?: string
+}) {
   if (!link?.label) return null
   const target =
     link.linkType === 'external'
@@ -67,7 +75,11 @@ function LinkOut({ link, resolve }: { link: Link; resolve: InternalHref }) {
   if (!target) return <span>{link.label}</span>
   const newTab = link.newTab === true && /^https?:/.test(target)
   return (
-    <a href={target} {...(newTab ? { target: '_blank', rel: 'noopener noreferrer' } : {})}>
+    <a
+      href={target}
+      className={className}
+      {...(newTab ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+    >
       {link.label}
     </a>
   )
@@ -75,14 +87,17 @@ function LinkOut({ link, resolve }: { link: Link; resolve: InternalHref }) {
 
 const str = (v: unknown) => (typeof v === 'string' ? v : '')
 
-function Listing({
+/** Published services or courses as linked cards (sections and the listing pages). */
+export function ListingCards({
   items,
   kind,
   locale,
+  headingLevel = 3,
 }: {
   items: ListItem[]
   kind: 'service' | 'course'
   locale: Locale
+  headingLevel?: 2 | 3
 }) {
   const visible = items.filter(
     (r) =>
@@ -92,16 +107,25 @@ function Listing({
       (r._status === undefined || r._status === 'published'),
   )
   if (!visible.length) return null
+  const Heading = headingLevel === 2 ? 'h2' : 'h3'
   return (
-    <ul className="listing">
+    <ul className="listing card-grid">
       {visible.map((r) => (
-        <li key={String(r.slug)}>
-          <a href={href(kind, locale, { slug: String(r.slug) })}>{str(r.title)}</a>
+        <li key={String(r.slug)} className="card card--link">
+          <Heading>
+            <a href={href(kind, locale, { slug: String(r.slug) })}>{str(r.title)}</a>
+          </Heading>
           {r.summary ? <p>{str(r.summary)}</p> : null}
         </li>
       ))}
     </ul>
   )
+}
+
+/** A credential's expiry date, or null when absent or not a valid date. */
+function validUntil(v: unknown, locale: Locale): string | null {
+  const d = typeof v === 'string' ? new Date(v) : null
+  return d && !Number.isNaN(d.getTime()) ? formatDate(locale, d) : null
 }
 
 export function Sections({
@@ -123,51 +147,99 @@ export function Sections({
         .map((b, i) => {
           const id = b.anchorId && /^[a-z0-9-]{1,64}$/.test(b.anchorId) ? b.anchorId : undefined
           const items = Array.isArray(b.items) ? (b.items as Record<string, unknown>[]) : []
+          const key = b.id ?? i
           switch (b.blockType) {
             case 'hero':
-            case 'cta':
+            case 'cta': {
+              const primary = (b.primaryCta ?? b.link) as Link
               return (
-                <section key={b.id ?? i} id={id} data-block={b.blockType}>
+                <section
+                  key={key}
+                  id={id}
+                  data-block={b.blockType}
+                  className={`section section--${b.blockType}`}
+                >
                   <h2>{str(b.heading)}</h2>
                   {b.subheading || b.text ? <p>{str(b.subheading ?? b.text)}</p> : null}
-                  <LinkOut link={(b.primaryCta ?? b.link) as Link} resolve={resolve} />
-                  <LinkOut link={b.secondaryCta as Link} resolve={resolve} />
+                  {primary?.label || (b.secondaryCta as Link)?.label ? (
+                    <div className="actions">
+                      <LinkOut link={primary} resolve={resolve} className="button" />
+                      <LinkOut
+                        link={b.secondaryCta as Link}
+                        resolve={resolve}
+                        className="button button--secondary"
+                      />
+                    </div>
+                  ) : null}
                 </section>
               )
+            }
             case 'richText':
               return (
-                <section key={b.id ?? i} id={id} data-block="richText">
+                <section key={key} id={id} data-block="richText" className="section prose">
                   <RichText value={b.content} dir={dir} internalHref={resolve} />
                 </section>
               )
             case 'faq':
               return (
-                <section key={b.id ?? i} id={id} data-block="faq">
-                  {items.map((q, j) => (
-                    <details key={j}>
-                      <summary>{str(q.question)}</summary>
-                      <RichText value={q.answer} dir={dir} internalHref={resolve} />
-                    </details>
-                  ))}
+                <section key={key} id={id} data-block="faq" className="section">
+                  <div className="faq">
+                    {items.map((q, j) => (
+                      <details key={j}>
+                        <summary>{str(q.question)}</summary>
+                        <div className="prose">
+                          <RichText value={q.answer} dir={dir} internalHref={resolve} />
+                        </div>
+                      </details>
+                    ))}
+                  </div>
                 </section>
               )
             case 'featureGrid':
-            case 'stats':
-            case 'credentials':
               return (
-                <section key={b.id ?? i} id={id} data-block={b.blockType}>
+                <section key={key} id={id} data-block="featureGrid" className="section">
                   {b.heading ? <h2>{str(b.heading)}</h2> : null}
-                  <ul>
+                  <ul className="card-grid">
                     {items.map((it, j) => (
-                      <li key={j}>
-                        {[
-                          str(it.title ?? it.name ?? it.value),
-                          str(it.text ?? it.label ?? it.issuer),
-                        ]
-                          .filter(Boolean)
-                          .join(' — ')}
+                      <li key={j} className="card">
+                        <h3>{str(it.title)}</h3>
+                        {it.text ? <p>{str(it.text)}</p> : null}
                       </li>
                     ))}
+                  </ul>
+                </section>
+              )
+            case 'stats':
+              return (
+                <section key={key} id={id} data-block="stats" className="section">
+                  {b.heading ? <h2>{str(b.heading)}</h2> : null}
+                  <ul className="stats">
+                    {items.map((it, j) => (
+                      <li key={j}>
+                        <span className="stats__value">{str(it.value)}</span>{' '}
+                        <span className="stats__label">{str(it.label)}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+              )
+            case 'credentials':
+              return (
+                <section key={key} id={id} data-block="credentials" className="section">
+                  {b.heading ? <h2>{str(b.heading)}</h2> : null}
+                  <ul className="card-grid">
+                    {items.map((it, j) => {
+                      const until = validUntil(it.validUntil, locale)
+                      return (
+                        <li key={j} className="card">
+                          <h3>{str(it.name)}</h3>
+                          {it.issuer ? <p>{str(it.issuer)}</p> : null}
+                          {until ? (
+                            <p className="meta">{t(locale, 'validUntil', { date: until })}</p>
+                          ) : null}
+                        </li>
+                      )
+                    })}
                   </ul>
                 </section>
               )
@@ -178,17 +250,24 @@ export function Sections({
               const all =
                 (kind === 'service' ? ctx?.listings?.services : ctx?.listings?.courses) ?? []
               return (
-                <section key={b.id ?? i} id={id} data-block={b.blockType}>
+                <section key={key} id={id} data-block={b.blockType} className="section">
                   {b.heading ? <h2>{str(b.heading)}</h2> : null}
-                  <Listing items={b.mode === 'all' ? all : selected} kind={kind} locale={locale} />
+                  <ListingCards
+                    items={b.mode === 'all' ? all : selected}
+                    kind={kind}
+                    locale={locale}
+                    headingLevel={b.heading ? 3 : 2}
+                  />
                 </section>
               )
             }
             case 'contactBlock':
               return (
-                <section key={b.id ?? i} id={id} data-block="contactBlock">
-                  <h2>{str(b.heading)}</h2>
-                  <p>{str(b.intro)}</p>
+                <section key={key} id={id} data-block="contactBlock" className="section">
+                  <div className="contact-panel">
+                    <h2>{str(b.heading)}</h2>
+                    {b.intro ? <p>{str(b.intro)}</p> : null}
+                  </div>
                 </section>
               )
             default:
@@ -209,10 +288,22 @@ export function DocumentView({
   ctx?: Omit<RenderContext, 'locale'>
 }) {
   const dir = locale === 'ar' ? 'rtl' : 'ltr'
+  // A home page that opens with a hero shows the hero as its visual title; the page title stays
+  // the document's h1 for assistive technology and outline.
+  const first = Array.isArray(doc.sections)
+    ? (doc.sections as Block[]).find((b) => b && !b.hidden)
+    : undefined
+  const heroLed = doc.template === 'home' && first?.blockType === 'hero'
   return (
     <article lang={locale} dir={dir}>
-      <h1>{str(doc.title)}</h1>
-      {doc.summary ? <p>{str(doc.summary)}</p> : null}
+      {heroLed ? (
+        <h1 className="sr-only">{str(doc.title)}</h1>
+      ) : (
+        <header className="page-header">
+          <h1>{str(doc.title)}</h1>
+          {doc.summary ? <p className="lead">{str(doc.summary)}</p> : null}
+        </header>
+      )}
       <Sections sections={doc.sections} dir={dir} ctx={{ ...ctx, locale }} />
     </article>
   )

@@ -26,6 +26,8 @@ export const ar: Record<keyof typeof en, string> = {
   unitWeeks: 'أسابيع',
   provider: 'الجهة المقدِّمة',
   dismissBanner: 'إغلاق الإعلان',
+  announcement: 'إعلان',
+  validUntil: 'صالحة حتى {date}',
   notFoundTitle: 'الصفحة غير موجودة',
   notFoundBody: 'لم نعثر على هذه الصفحة. ربما نُقلت أو أُزيلت.',
   errorTitle: 'حدث خطأ',

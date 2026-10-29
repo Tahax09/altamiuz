@@ -2,7 +2,7 @@
 // footer navigation from published globals, language switcher, banner. Server components; every
 // href comes from the typed route map or safeHref.
 import { safeHref } from '@/modules/content'
-import { href, LANGUAGE_NAMES, LOCALES, t, type Locale } from '@/modules/i18n'
+import { formatPhone, href, LANGUAGE_NAMES, LOCALES, t, type Locale } from '@/modules/i18n'
 import { internalHrefFor } from '../sections/Sections'
 import { BannerDismiss } from './BannerDismiss'
 
@@ -78,15 +78,19 @@ export function LanguageSwitcher({
     <ul className="language-switcher" aria-label={t(locale, 'switchLanguage')}>
       {LOCALES.filter((l) => l !== locale).map((l) => {
         const path = alternates[l]
+        const dir = l === 'ar' ? 'rtl' : 'ltr'
+        // Only the language name is in the other language; the note is in the page's language.
         return (
-          <li key={l} lang={l} dir={l === 'ar' ? 'rtl' : 'ltr'}>
+          <li key={l}>
             {path ? (
-              <a href={path} hrefLang={l}>
+              <a href={path} hrefLang={l} lang={l} dir={dir}>
                 {LANGUAGE_NAMES[l]}
               </a>
             ) : (
               <span aria-disabled="true" className="language-switcher__unavailable">
-                {LANGUAGE_NAMES[l]}
+                <span lang={l} dir={dir}>
+                  {LANGUAGE_NAMES[l]}
+                </span>
                 <span className="language-switcher__note">
                   {' '}
                   ({t(locale, 'languageUnavailable', { language: LANGUAGE_NAMES[l] })})
@@ -135,15 +139,31 @@ export function SiteFooter({
   settings: Record<string, unknown> | null
 }) {
   const str = (v: unknown) => (typeof v === 'string' ? v : '')
+  // Only published site-settings values; nothing is shown that the CMS does not hold.
+  const name = str(settings?.companyName)
+  const email = str(settings?.email)
+  const mail = email ? safeHref(`mailto:${email}`) : null
+  const phone = formatPhone(str(settings?.phone))
+  const tel = phone ? safeHref(`tel:${str(settings?.phone)}`) : null
   return (
     <footer className="site-footer">
-      <Menu items={nav?.items} locale={locale} label={t(locale, 'footerNavigation')} />
-      {settings?.email ? (
-        <p>
-          <a href={safeHref(`mailto:${str(settings.email)}`) ?? undefined}>
-            <bdi dir="ltr">{str(settings.email)}</bdi>
-          </a>
-        </p>
+      <div>
+        {name ? <p className="site-footer__name">{name}</p> : null}
+        <Menu items={nav?.items} locale={locale} label={t(locale, 'footerNavigation')} />
+      </div>
+      {mail || tel ? (
+        <address className="site-footer__contact">
+          {mail ? (
+            <a href={mail}>
+              <bdi dir="ltr">{email}</bdi>
+            </a>
+          ) : null}
+          {tel && phone ? (
+            <a href={tel}>
+              <bdi dir={phone.dir}>{phone.text}</bdi>
+            </a>
+          ) : null}
+        </address>
       ) : null}
     </footer>
   )
@@ -168,7 +188,7 @@ export function SiteBanner({
     <aside
       className="site-banner"
       role="region"
-      aria-label={t(locale, 'dismissBanner')}
+      aria-label={t(locale, 'announcement')}
       data-dismiss-key={key}
     >
       <p>

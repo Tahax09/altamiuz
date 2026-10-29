@@ -4,14 +4,14 @@
 import type { Metadata } from 'next'
 import { headers } from 'next/headers'
 import { notFound, permanentRedirect, redirect } from 'next/navigation'
-import { href, LANGUAGE_NAMES, t, type Locale, type RoutedCollection } from '@/modules/i18n'
+import { LANGUAGE_NAMES, t, type Locale, type RoutedCollection } from '@/modules/i18n'
 import {
   decodeSegments,
   resolvePublicPath,
   type PublicDoc,
   type PublicReaders,
 } from '@/modules/content'
-import { DocumentView } from '@/ui'
+import { DocumentView, ListingCards } from '@/ui'
 import {
   cachedAlternates,
   cachedListing,
@@ -42,7 +42,11 @@ async function resolve(params: Params): Promise<Resolved> {
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const r = await resolve(params)
   if (!r) return { robots: { index: false, follow: false } }
-  if (r.kind === 'missing') return { robots: { index: false, follow: true } }
+  if (r.kind === 'missing')
+    return {
+      title: t(r.locale, 'translationMissing', { language: LANGUAGE_NAMES[r.locale] }),
+      robots: { index: false, follow: true },
+    }
   if (r.kind === 'listing')
     return { title: t(r.locale, r.collection === 'services' ? 'services' : 'training') }
   const seo = (r.doc.seo ?? {}) as { title?: string; description?: string; noindex?: boolean }
@@ -107,32 +111,31 @@ export default async function PublicPage({ params }: { params: Params }) {
   if (r.kind === 'missing')
     return (
       <section className="missing-translation" lang={r.locale}>
-        <h1>{t(r.locale, 'translationMissing', { language: LANGUAGE_NAMES[r.locale] })}</h1>
-        <p lang={r.other} dir={r.other === 'ar' ? 'rtl' : 'ltr'}>
-          <a href={r.otherPath} hrefLang={r.other}>
-            {LANGUAGE_NAMES[r.other]}
-          </a>
-        </p>
+        <div className="notice">
+          <h1>{t(r.locale, 'translationMissing', { language: LANGUAGE_NAMES[r.locale] })}</h1>
+          <p lang={r.other} dir={r.other === 'ar' ? 'rtl' : 'ltr'}>
+            <a className="button" href={r.otherPath} hrefLang={r.other}>
+              {LANGUAGE_NAMES[r.other]}
+            </a>
+          </p>
+        </div>
       </section>
     )
   if (r.kind === 'listing') {
     const kind = r.collection === 'services' ? 'service' : 'course'
     return (
-      <section>
-        <h1>{t(r.locale, r.collection === 'services' ? 'services' : 'training')}</h1>
-        {r.items.length ? (
-          <ul className="listing">
-            {r.items.map((d) => (
-              <li key={String(d.id)}>
-                <a href={href(kind, r.locale, { slug: String(d.slug) })}>{str(d.title)}</a>
-                {d.summary ? <p>{str(d.summary)}</p> : null}
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p>{t(r.locale, r.collection === 'services' ? 'noServices' : 'noCourses')}</p>
-        )}
-      </section>
+      <>
+        <header className="page-header">
+          <h1>{t(r.locale, r.collection === 'services' ? 'services' : 'training')}</h1>
+        </header>
+        <section className="section">
+          {r.items.length ? (
+            <ListingCards items={r.items} kind={kind} locale={r.locale} headingLevel={2} />
+          ) : (
+            <p>{t(r.locale, r.collection === 'services' ? 'noServices' : 'noCourses')}</p>
+          )}
+        </section>
+      </>
     )
   }
   return (

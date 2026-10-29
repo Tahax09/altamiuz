@@ -1,25 +1,64 @@
-/* Public design tokens and base styles (T102, FR-007, FR-080, FR-081, D-24).
+/* Public design system (T102, FR-007, FR-080, FR-081, D-24).
    Direction (constitution): institutional precision, modern advisory, restrained, light-first.
-   Colours are PROVISIONAL neutrals until brand assets are supplied (CD-09).
-   Fonts: system stacks until the self-hosted OFL files land (T101). */
+   Logical properties throughout, so Arabic (rtl) and English (ltr) share one stylesheet.
+   Typefaces come from src/ui/fonts.ts (T101) through --font-* variables on <html>. */
+
+/* ------------------------------------------------------------------------------------------
+   Brand tokens: PROVISIONAL until the owner supplies brand assets (CD-09). Every
+   brand-dependent value lives in this block; nothing below hard-codes a brand colour.
+   ------------------------------------------------------------------------------------------ */
+:root {
+  --brand: #12355b; /* primary surfaces and buttons; 12.6:1 on white */
+  --brand-hover: #0c2642;
+  --brand-ink: #ffffff; /* text on --brand */
+  --brand-tint: #e9eef4; /* banner and quiet bands; --ink on it 15:1 */
+  --accent: #1d4ed8; /* links; 6.7:1 on white, 5.9:1 on --brand-tint */
+}
+
+/* ------------------------------------------------------------------------------------------
+   Neutral tokens, type scale and spacing
+   ------------------------------------------------------------------------------------------ */
 :root {
   --ink: #14181f;
-  --ink-muted: #4a5260;
+  --ink-muted: #4a5260; /* 7.9:1 on white */
   --paper: #ffffff;
   --paper-alt: #f5f6f8;
   --rule: #d9dde3;
-  --accent: #1d4ed8; /* provisional; contrast 6.7:1 on white */
-  --focus: #1d4ed8;
-  --font-latin: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-  --font-arabic: 'Segoe UI', Tahoma, 'Geeza Pro', system-ui, sans-serif;
+  --focus: var(--accent);
+
+  --font-heading: var(--font-manrope), system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-body: var(--font-inter), system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-arabic: var(--font-plex-arabic), 'Segoe UI', Tahoma, 'Geeza Pro', system-ui, sans-serif;
+
   --step--1: clamp(0.875rem, 0.85rem + 0.1vw, 0.95rem);
   --step-0: clamp(1rem, 0.96rem + 0.2vw, 1.125rem);
-  --step-1: clamp(1.25rem, 1.15rem + 0.5vw, 1.5rem);
-  --step-2: clamp(1.5rem, 1.3rem + 1vw, 2rem);
-  --step-3: clamp(1.875rem, 1.5rem + 1.8vw, 2.75rem);
-  --space: clamp(1rem, 0.8rem + 1vw, 1.5rem);
+  --step-1: clamp(1.2rem, 1.1rem + 0.45vw, 1.4rem);
+  --step-2: clamp(1.45rem, 1.25rem + 0.9vw, 1.9rem);
+  --step-3: clamp(1.8rem, 1.45rem + 1.7vw, 2.75rem);
+  --step-4: clamp(2.1rem, 1.6rem + 2.6vw, 3.5rem);
+
+  --gutter: clamp(1rem, 0.6rem + 2vw, 2rem);
+  --space-1: 0.5rem;
+  --space-2: 1rem;
+  --space-3: clamp(1.25rem, 1rem + 1vw, 2rem);
+  --space-4: clamp(2rem, 1.5rem + 2.5vw, 4rem);
+  --container: 72rem;
   --measure: 68ch;
+  --radius: 6px;
+  --rule-strong: 3px; /* accent rules on cards and stats */
+  --rule-notice: 4px;
+  --focus-width: 3px;
+  --focus-offset: 2px;
+  --button-border: 2px;
+  --target: 44px; /* comfortable touch target (WCAG 2.5.8 requires 24 px) */
+  --target-compact: 32px;
+  /* Inline padding that centres content in a full-width band (% of the band's width). */
+  --band-pad: max(var(--gutter), calc((100% - var(--container)) / 2));
 }
+
+/* ------------------------------------------------------------------------------------------
+   Base
+   ------------------------------------------------------------------------------------------ */
 *,
 *::before,
 *::after {
@@ -28,10 +67,11 @@
 html {
   color: var(--ink);
   background: var(--paper);
-  font-family: var(--font-latin);
+  font-family: var(--font-body);
   font-size: 100%;
-  line-height: 1.45;
+  line-height: 1.55;
   -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 html[lang='ar'] {
   font-family: var(--font-arabic);
@@ -41,24 +81,44 @@ body {
   margin: 0;
   font-size: var(--step-0);
   overflow-wrap: anywhere;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
-h1 {
-  font-size: var(--step-3);
-  line-height: 1.15;
-}
-h2 {
-  font-size: var(--step-2);
-  line-height: 1.2;
-}
-h3 {
-  font-size: var(--step-1);
+main {
+  flex: 1;
 }
 h1,
 h2,
 h3,
 h4 {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  line-height: 1.2;
   margin-block: 0 0.5em;
-  font-weight: 650;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+html[lang='ar'] :is(h1, h2, h3, h4) {
+  font-family: var(--font-arabic);
+  line-height: 1.45; /* D-24 */
+  letter-spacing: 0;
+}
+h1 {
+  font-size: var(--step-4);
+}
+h2 {
+  font-size: var(--step-3);
+}
+h3 {
+  font-size: var(--step-1);
+  font-weight: 600;
+}
+h4 {
+  font-size: var(--step-0);
+}
+p {
+  margin-block: 0 1em;
 }
 p,
 li,
@@ -67,48 +127,140 @@ dd {
 }
 a {
   color: var(--accent);
-  text-underline-offset: 0.15em;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.18em;
+}
+a:hover {
+  text-decoration-thickness: var(--button-border);
 }
 :focus-visible {
-  outline: 3px solid var(--focus);
-  outline-offset: 2px;
+  outline: var(--focus-width) solid var(--focus);
+  outline-offset: var(--focus-offset);
 }
-main,
-.site-header,
-.site-footer,
-.site-banner {
-  padding-inline: var(--space);
-  max-width: 72rem;
-  margin-inline: auto;
+img,
+svg {
+  max-width: 100%;
+  height: auto;
 }
-main {
-  padding-block: var(--space);
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
 }
-main:focus {
-  outline: none;
+html[lang='ar'] small,
+html[lang='ar'] .meta {
+  font-size: max(0.9375rem, var(--step--1)); /* D-24: Arabic small text ≥15 px */
 }
+
+/* ------------------------------------------------------------------------------------------
+   Buttons (links styled as actions; native buttons share the focus and target rules)
+   ------------------------------------------------------------------------------------------ */
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--target);
+  padding: 0.6rem 1.25rem;
+  border: var(--button-border) solid var(--brand);
+  border-radius: var(--radius);
+  background: var(--brand);
+  color: var(--brand-ink);
+  font-weight: 600;
+  line-height: 1.2;
+  text-decoration: none;
+  text-align: center;
+}
+.button:hover {
+  background: var(--brand-hover);
+  border-color: var(--brand-hover);
+}
+.button--secondary {
+  background: transparent;
+  color: var(--brand);
+}
+.button--secondary:hover {
+  background: var(--brand-tint);
+  color: var(--brand-hover);
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-block-start: var(--space-3);
+}
+
+/* ------------------------------------------------------------------------------------------
+   Banner, header and navigation
+   ------------------------------------------------------------------------------------------ */
 .skip-link {
   position: absolute;
   inset-inline-start: 0.5rem;
   top: -10rem;
+  z-index: 10;
   background: var(--paper);
   padding: 0.5rem 0.75rem;
+  border: var(--button-border) solid var(--brand);
+  border-radius: var(--radius);
 }
 .skip-link:focus {
   top: 0.5rem;
 }
-.site-header {
+.site-banner {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.75rem 1.5rem;
-  padding-block: 1rem;
+  justify-content: space-between;
+  gap: var(--space-1) var(--space-2);
+  padding-block: 0.6rem;
+  padding-inline: var(--band-pad);
+  background: var(--brand-tint);
+  font-size: var(--step--1);
+}
+.site-banner p {
+  margin: 0;
+}
+.site-banner[hidden] {
+  display: none;
+}
+.site-banner__dismiss {
+  font: inherit;
+  color: var(--brand);
+  background: transparent;
+  border: 1px solid currentColor;
+  border-radius: var(--radius);
+  padding: 0.25rem 0.75rem;
+  min-height: var(--target-compact);
+  cursor: pointer;
+}
+.site-header {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1) var(--space-3);
+  padding-block: var(--space-2);
+  padding-inline: var(--band-pad);
+  background: var(--paper);
   border-block-end: 1px solid var(--rule);
 }
 .site-header__home {
+  font-family: var(--font-heading);
+  font-size: var(--step-1);
   font-weight: 700;
-  color: var(--ink);
+  color: var(--brand);
   text-decoration: none;
+  min-height: var(--target);
+  display: inline-flex;
+  align-items: center;
+}
+html[lang='ar'] .site-header__home {
+  font-family: var(--font-arabic);
 }
 nav ul,
 .language-switcher,
@@ -120,20 +272,63 @@ nav ul,
 nav > ul {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem 1.25rem;
+  gap: 0 var(--space-3);
 }
-nav a,
+nav li {
+  max-width: none;
+}
+.site-header nav a,
 .language-switcher a,
-.site-footer a,
-.site-header__home,
-button {
-  display: inline-block;
-  min-height: 24px; /* WCAG 2.2 SC 2.5.8 */
-  min-width: 24px;
-  padding-block: 0.25rem;
+.site-footer nav a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--target);
+  color: var(--ink);
+  font-weight: 600;
+  text-decoration: none;
+}
+.site-header nav a:hover,
+.language-switcher a:hover,
+.site-footer nav a:hover {
+  color: var(--accent);
+  text-decoration: underline;
+}
+/* Second menu level: indented below its parent; a drop-down where hover exists. */
+nav li > ul {
+  padding-inline-start: var(--space-2);
+}
+nav li > ul a {
+  font-weight: 400;
+}
+@media (hover: hover) and (min-width: 64rem) {
+  .site-header nav li {
+    position: relative;
+  }
+  .site-header nav li > ul {
+    position: absolute;
+    inset-inline-start: 0;
+    top: 100%;
+    z-index: 5;
+    display: none;
+    min-width: 14rem;
+    padding: var(--space-1) var(--space-2);
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    border-radius: var(--radius);
+  }
+  .site-header nav li:hover > ul,
+  .site-header nav li:focus-within > ul {
+    display: block;
+  }
 }
 .language-switcher {
   margin-inline-start: auto;
+}
+.language-switcher a {
+  color: var(--brand);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  padding-inline: 0.75rem;
 }
 .language-switcher__unavailable {
   color: var(--ink-muted);
@@ -141,41 +336,289 @@ button {
 .language-switcher__note {
   font-size: var(--step--1);
 }
-.listing li {
-  padding-block: 0.75rem;
+
+/* ------------------------------------------------------------------------------------------
+   Page layout: full-width bands with centred content
+   ------------------------------------------------------------------------------------------ */
+main:focus {
+  outline: none;
+}
+main > :not(article),
+article > * {
+  padding-inline: var(--band-pad);
+}
+main > :not(article):not(.course-facts) {
+  padding-block: var(--space-4);
+}
+.page-header {
+  padding-block: var(--space-4) var(--space-3);
   border-block-end: 1px solid var(--rule);
 }
-.site-banner {
-  background: var(--paper-alt);
-  padding-block: 0.5rem;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem 1rem;
-  align-items: center;
+.page-header h1 {
+  margin: 0;
 }
-.site-banner[hidden] {
-  display: none;
-}
-.site-footer {
-  border-block-start: 1px solid var(--rule);
-  padding-block: 1.5rem;
+.lead {
+  margin-block: var(--space-2) 0;
+  font-size: var(--step-1);
   color: var(--ink-muted);
 }
-.course-facts dl div {
+.section {
+  padding-block: var(--space-4);
+}
+.section + .section {
+  border-block-start: 1px solid var(--rule);
+}
+.section > h2 {
+  margin-block-end: var(--space-3);
+}
+.section--hero {
+  background: var(--paper-alt);
+  padding-block: clamp(3rem, 2rem + 5vw, 6rem);
+  border-block-end: 1px solid var(--rule);
+}
+.section--hero h2 {
+  font-size: var(--step-4);
+  max-width: 22ch;
+}
+.section--hero p {
+  font-size: var(--step-1);
+  color: var(--ink-muted);
+}
+.section--hero + .section,
+.section--cta + .section {
+  border-block-start: 0;
+}
+.section--cta {
+  background: var(--brand);
+  color: var(--brand-ink);
+}
+.section--cta h2 {
+  font-size: var(--step-3);
+}
+.section--cta a:not(.button) {
+  color: var(--brand-ink);
+}
+.section--cta .button {
+  background: var(--brand-ink);
+  border-color: var(--brand-ink);
+  color: var(--brand);
+}
+.section--cta .button:hover {
+  background: var(--brand-tint);
+  border-color: var(--brand-tint);
+}
+.prose > :last-child {
+  margin-block-end: 0;
+}
+.prose :is(h2, h3, h4) {
+  margin-block-start: 1.4em;
+}
+.prose blockquote {
+  margin-inline: 0;
+  padding-inline-start: var(--space-2);
+  border-inline-start: var(--rule-strong) solid var(--rule);
+  color: var(--ink-muted);
+}
+
+/* Cards: feature grid, service and course listings, credentials */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr));
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.card {
   display: flex;
-  gap: 0.5rem;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-3);
+  max-width: none;
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-block-start: var(--rule-strong) solid var(--brand);
+  border-radius: var(--radius);
+}
+.card h2,
+.card h3 {
+  font-size: var(--step-1);
+  margin: 0;
+}
+.card p {
+  margin: 0;
+  color: var(--ink-muted);
+}
+.card a {
+  color: var(--ink);
+  text-decoration: none;
+}
+.card a:hover {
+  color: var(--accent);
+  text-decoration: underline;
+}
+/* Whole card is the link target for pointers; the heading link stays the accessible name. */
+.card--link {
+  position: relative;
+}
+.card--link a::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+}
+.card--link:hover {
+  border-color: var(--brand);
+}
+.card--link:focus-within {
+  outline: var(--focus-width) solid var(--focus);
+  outline-offset: var(--focus-offset);
+}
+.card--link a:focus-visible {
+  outline: none;
+}
+.meta {
+  font-size: var(--step--1);
+  color: var(--ink-muted);
+}
+
+/* Stats */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.stats li {
+  max-width: none;
+  padding-inline-start: var(--space-2);
+  border-inline-start: var(--rule-strong) solid var(--brand);
+}
+.stats__value {
+  display: block;
+  font-family: var(--font-heading);
+  font-size: var(--step-3);
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--brand);
+}
+html[lang='ar'] .stats__value {
+  font-family: var(--font-arabic);
+}
+.stats__label {
+  color: var(--ink-muted);
+}
+
+/* FAQ */
+.faq {
+  display: grid;
+  gap: var(--space-1);
+  max-width: 52rem;
+}
+.faq details {
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: var(--paper);
+}
+.faq summary {
+  cursor: pointer;
+  padding: var(--space-2);
+  min-height: var(--target);
+  font-weight: 600;
+}
+.faq details[open] summary {
+  border-block-end: 1px solid var(--rule);
+}
+.faq details > :not(summary) {
+  padding: var(--space-2);
+}
+
+/* Contact */
+.contact-panel {
+  max-width: 52rem;
+  padding: var(--space-3);
+  background: var(--paper-alt);
+  border-radius: var(--radius);
+}
+
+/* Course facts (training detail) */
+.course-facts {
+  padding-block-end: var(--space-4);
+}
+.course-facts dl {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+  gap: var(--space-2);
+  margin: 0;
+  padding: var(--space-3);
+  background: var(--paper-alt);
+  border-radius: var(--radius);
 }
 .course-facts dt {
-  font-weight: 600;
+  font-size: var(--step--1);
+  color: var(--ink-muted);
 }
 .course-facts dd {
   margin: 0;
+  font-weight: 600;
 }
-img,
-svg {
-  max-width: 100%;
-  height: auto;
+.course-facts > p {
+  margin-block-start: var(--space-2);
 }
+
+/* Notices and status pages */
+.status-page,
+.missing-translation {
+  text-align: start;
+}
+.status-page > *,
+.missing-translation > * {
+  max-width: 40rem;
+}
+.notice {
+  padding: var(--space-3);
+  background: var(--brand-tint);
+  border-inline-start: var(--rule-notice) solid var(--brand);
+  border-radius: var(--radius);
+}
+
+/* ------------------------------------------------------------------------------------------
+   Footer
+   ------------------------------------------------------------------------------------------ */
+.site-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-4);
+  padding-block: var(--space-4);
+  padding-inline: var(--band-pad);
+  background: var(--paper-alt);
+  border-block-start: 1px solid var(--rule);
+  color: var(--ink-muted);
+}
+.site-footer__name {
+  margin: 0;
+  font-weight: 700;
+  color: var(--ink);
+}
+.site-footer__contact {
+  font-style: normal;
+  display: grid;
+  gap: 0.25rem;
+  margin: 0;
+}
+.site-footer__contact a {
+  color: var(--ink);
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--target-compact);
+}
+
+/* ------------------------------------------------------------------------------------------
+   Motion (FR-081): nothing animates by default; respect reduced motion if any is added.
+   ------------------------------------------------------------------------------------------ */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -183,5 +626,19 @@ svg {
     animation: none !important;
     transition: none !important;
     scroll-behavior: auto !important;
+  }
+}
+
+/* Print: content only */
+@media print {
+  .site-banner,
+  .site-header nav,
+  .language-switcher,
+  .skip-link {
+    display: none;
+  }
+  .section--cta {
+    background: none;
+    color: inherit;
   }
 }

@@ -43,16 +43,23 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
         ctx={{ listings: await listingsFor(home, locale) }}
       />
     )
+  // No published home page in this language: the two entry points, as cards.
   return (
-    <nav aria-label={t(locale, 'mainNavigation')}>
-      <ul>
-        <li>
-          <a href={href('services', locale)}>{t(locale, 'services')}</a>
-        </li>
-        <li>
-          <a href={href('training', locale)}>{t(locale, 'training')}</a>
-        </li>
-      </ul>
-    </nav>
+    <>
+      <header className="page-header">
+        <h1>{t(locale, 'home')}</h1>
+      </header>
+      <section className="section">
+        <ul className="card-grid">
+          {(['services', 'training'] as const).map((key) => (
+            <li key={key} className="card card--link">
+              <h2>
+                <a href={href(key, locale)}>{t(locale, key)}</a>
+              </h2>
+            </li>
+          ))}
+        </ul>
+      </section>
+    </>
   )
 }

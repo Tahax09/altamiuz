@@ -75,6 +75,10 @@ Report: [research/typography-specimen/report.md](../../research/typography-speci
 - **D-24 (approved by owner, WS5) Typography**: adopt Manrope (EN headings), Inter (EN body/UI)
   and IBM Plex Sans Arabic (AR, ≤3 weights: 400/600/700).
   - Self-host unmodified OFL woff2 via `next/font/local`; no runtime Google requests.
+  - **Amended 2026-10-29 (owner instruction)**: fonts are sourced from Google Fonts through
+    `next/font/google`, which downloads them at build time and serves them from this origin, so
+    there are still no runtime Google requests. IBM Plex Sans Arabic uses 400/700 to stay within
+    the 120 KB budget (T101).
   - **Keep the ≤120 KB per-language initial-load target.** Phase 5 must measure the real
     self-hosted production files and re-confirm licences against the delivered files.
   - Arabic line-height 1.7 (headings 1.45); Arabic small text ≥15 px.

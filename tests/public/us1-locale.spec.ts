@@ -36,6 +36,18 @@ test('a document missing in one language: switcher disabled with an explanation'
   // The note is in the page's language and names the missing one.
   await expect(unavailable).toContainText('No العربية version of this page')
   await expect(page.locator('.language-switcher a[hreflang="ar"]')).toHaveCount(0)
+  // ...and it reads in the page's direction (it rendered scrambled inside the Arabic name's rtl).
+  for (const [path, dir] of [
+    ['/en/training/security-awareness', 'ltr'],
+    ['/ar/ar-vocab-pending-training/security-awareness', 'rtl'],
+  ] as const) {
+    await page.goto(path)
+    const note = page.locator('.language-switcher__note')
+    expect(await note.evaluate((e) => getComputedStyle(e).direction), path).toBe(dir)
+    expect(await note.evaluate((e) => e.closest('[lang]')?.getAttribute('lang')), path).toBe(
+      path.slice(1, 3),
+    )
+  }
 })
 
 test('visiting the missing language shows a localized notice, never the other text', async ({
