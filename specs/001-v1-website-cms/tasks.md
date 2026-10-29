@@ -359,7 +359,7 @@ publish-to-live wiring ready for T106 → commit checkpoint.
     after the Payload transaction commits. Scope: the tag manifest is per server process.
   - T130/T131 (pulled forward, required before T103): globals `site-settings`, `header-nav`,
     `footer-nav`, `banner`. Server tests are in `tests/integration/content/globals.test.ts`; the
-    admin-UI parts of T130 are split into T130a (open).
+    admin-UI parts of T130 are split into T130a (done 2026-10-29, `tests/e2e/us7-nav.spec.ts`).
 - T096/T097: `tests/public/{us1-locale,no-js}.spec.ts` (Chromium and WebKit).
 - Not done:
   - **T101 fonts**: system font stacks for now; the OFL woff2 files are not in the repository.
@@ -471,7 +471,7 @@ commit checkpoint.
 **Depends on**: US2, US3.
 
 - [X] T130 [P] [US7] Failing tests, server side only, in `tests/integration/content/globals.test.ts` (planned as `tests/e2e/us7-nav.spec.ts`): two-level menus; unpublished targets flagged on save; `javascript:` and other disallowed schemes rejected in menu links; banner schedule ordered on save; Publisher saves nav/banner drafts but publish/unpublish is denied via the Local API ("role × action on globals", "a Publisher cannot publish navigation by any route") and REST ("over REST (what the admin sends), …", added 2026-10-28); settings changes audited. Banner display window: `tests/unit/content/banner-schedule.test.ts`. Per-visitor banner dismissal: `tests/public/us1-locale.spec.ts`. The admin-UI part is T130a (FR-014, FR-036, FR-045)
-- [ ] T130a [US7] Failing tests, admin UI, `tests/e2e/us7-nav.spec.ts` (no Playwright project runs `tests/e2e/` yet: add one, or place the file under an existing admin project): Publisher edits and saves nav/banner drafts in the admin, publish/unpublish controls absent or refused in the UI; Editor read-only in the UI; unpublished-target flag visible to editors; keyboard reorder of menu items (FR-014, FR-036, FR-045). Split from T130 in WS11: the UI part was not done. Depends on T130–T131 (done) and the admin e2e accounts in `tests/support/e2e-seed.ts`; blocks Gate 8
+- [X] T130a [US7] Failing-then-passing admin UI tests in `tests/e2e/us7-nav.spec.ts` (Playwright project `e2e`, `pnpm test:e2e`, production build, disposable `altamiuz_e2e` database), all against the real admin: anonymous → login; password-only (MFA pending) → `/account/mfa`, API 403; Editor: navigation and banner fields, reorder controls and save/publish controls disabled or absent, API writes 403; Publisher: saves a menu draft (live menu unchanged), "Publish changes" refused with 403 and an error toast on navigation and banner, admin "Unpublish" request 403, public site unchanged; keyboard reorder of menu items (announced, focus kept, order saved); unpublished-target flag set on save and visible to Editors; validation (`javascript:`, protocol-relative and `data:` URLs, empty label, 281-character banner) refused with `aria-invalid` and nothing stored; Administrator and Owner publish navigation and the banner from the admin, visible on the public site and audited; banner schedule window (inside, not started, ended, open start, open end) and empty/inverted windows refused; a cross-origin write with a valid session and a save after sign-out are refused (FR-033 for these screens). Found and fixed: the admin sends an empty sub-menu as a row count (`children: 0`), which made every admin save of a menu with an empty sub-menu a 500, including a Publisher's publish attempt (regression test in `tests/integration/content/globals.test.ts`); the reorder controls ignored the read-only form (now disabled for Editors, lock holders elsewhere and trashed documents) (FR-014, FR-033, FR-036, FR-045). Test-only: the spec empties `rate_limit_buckets` in its disposable database before it starts, because a full run from one IP otherwise reaches the MFA limit (30 per IP per 15 min); the product limit is unchanged. The full-run failure of T079 seen once (MFA verify request hung) did not reproduce in 2 later runs
 - [X] T131 [US7] Implement globals `site-settings` (contact details + evidence, social links, default SEO, legal links, `enquiryRecipients`, `enquiryTopics`), `header-nav`, `footer-nav`, `banner` per data-model until T130 passes (FR-010, FR-075)
 
 **Checkpoint (Gate 8)** → commit checkpoint.
@@ -575,7 +575,7 @@ Generated from requirement IDs cited in task lines. Every FR/SC in spec.md maps 
 | FR-030 | T016, T042, T057 |
 | FR-031 | T043, T058 |
 | FR-032 | T044, T059 |
-| FR-033 | T045, T046, T061 |
+| FR-033 | T045, T046, T061, T130a |
 | FR-033a | T045, T060 |
 | FR-033b | T045, T060 |
 | FR-033c | T047, T060 |

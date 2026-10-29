@@ -36,6 +36,7 @@
     "prepare": "sh scripts/install-hooks.sh",
     "test:a11y": "playwright test --project a11y-admin",
     "test:public": "playwright test --project public --project public-webkit",
+    "test:e2e": "playwright test --project e2e",
     "bootstrap:owner": "payload run scripts/bootstrap-owner.ts",
     "scan:richtext": "payload run scripts/scan-richtext.ts",
     "check:route-vocab": "tsx scripts/check-route-vocab.ts",

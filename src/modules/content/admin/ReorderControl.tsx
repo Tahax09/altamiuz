@@ -71,14 +71,16 @@ export function ReorderRowLabel() {
   const { data, path, rowNumber = 0 } = useRowLabel<Record<string, unknown>>()
   const parentPath = path?.replace(/\.\d+$/, '') ?? ''
   const { rows } = useField<unknown>({ path: parentPath }) as unknown as { rows?: unknown[] }
-  const { moveFieldRow, setModified } = useForm()
+  // `disabled` is Payload's read-only form state: no save permission (Editor on navigation),
+  // read-only because another user holds the lock, or trashed (T130a).
+  const { disabled, moveFieldRow, setModified } = useForm()
   const total = rows?.length ?? 0
   const index = rowNumber
   const label = rowTitle(data, index + 1)
   useEffect(claimPendingFocus)
 
   const move = (to: number) => {
-    if (to < 0 || to >= total) return
+    if (disabled || to < 0 || to >= total) return
     moveFieldRow({ path: parentPath, moveFromIndex: index, moveToIndex: to })
     setModified(true)
     announce(`Moved ${label.replace(/ \d+$/, '')} to position ${to + 1} of ${total}`)
@@ -97,7 +99,7 @@ export function ReorderRowLabel() {
           type="button"
           id={`reorder-${parentPath}-${index}-up`}
           className="btn btn--size-small btn--style-secondary"
-          disabled={index === 0}
+          disabled={disabled || index === 0}
           onClick={() => move(index - 1)}
         >
           Move up<span className="altamiuz-sr-only"> {label}</span>
@@ -106,7 +108,7 @@ export function ReorderRowLabel() {
           type="button"
           id={`reorder-${parentPath}-${index}-down`}
           className="btn btn--size-small btn--style-secondary"
-          disabled={index >= total - 1}
+          disabled={disabled || index >= total - 1}
           onClick={() => move(index + 1)}
         >
           Move down<span className="altamiuz-sr-only"> {label}</span>

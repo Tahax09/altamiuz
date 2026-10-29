@@ -23,6 +23,12 @@ const ROLE_OF = {
   // tests/security/cache-invalidation.spec.ts only
   cachePublisher: 'publisher',
   cacheAdministrator: 'administrator',
+  // tests/e2e/us7-nav.spec.ts only (T130a)
+  navOwner: 'owner',
+  navAdministrator: 'administrator',
+  navPublisher: 'publisher',
+  navEditor: 'editor',
+  navPasswordOnly: 'publisher',
 } as const
 for (const role of Object.keys(ROLE_OF) as (keyof typeof ROLE_OF)[]) {
   const email = `e2e-${role.toLowerCase()}@example.invalid`
@@ -40,7 +46,7 @@ for (const role of Object.keys(ROLE_OF) as (keyof typeof ROLE_OF)[]) {
     context: { authSystem: true },
   })) as unknown as { id: number }
   const entry: Record<string, unknown> = { id: user.id, email, password }
-  if (role !== 'passwordOnly') {
+  if (role !== 'passwordOnly' && role !== 'navPasswordOnly') {
     const login = await signIn(payload, { email, password, ip: '127.0.0.1' })
     if (!login.ok) throw new Error(`seed login failed for ${role}`)
     const ctx = { payload, userId: user.id, email, sid: login.sid }

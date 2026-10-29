@@ -26,6 +26,7 @@ export default defineConfig({
     { name: 'a11y-admin', testDir: './tests/a11y/admin', use: { browserName: 'chromium' } },
     { name: 'public', testDir: './tests/public', use: { browserName: 'chromium' } },
     { name: 'public-webkit', testDir: './tests/public', use: { browserName: 'webkit' } },
+    { name: 'e2e', testDir: './tests/e2e', use: { browserName: 'chromium' } },
   ],
   webServer: {
     command: `pnpm start --port ${PORT} --hostname 127.0.0.1`,

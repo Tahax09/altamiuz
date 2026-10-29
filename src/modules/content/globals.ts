@@ -61,12 +61,17 @@ const captureGlobalOperation =
     return args
   }
 
+/** Array rows of a menu level. The admin form sends an array with no rows as its row count
+ * (`children: 0`), so anything that is not an array has no rows. */
+const rowsOf = (v: unknown): Record<string, unknown>[] =>
+  Array.isArray(v) ? (v as Record<string, unknown>[]) : []
+
 /** Menus are two levels; a third level is rejected rather than silently dropped. */
 function assertTwoLevels(data: unknown) {
   const items = (data as { items?: unknown } | undefined)?.items
   if (!Array.isArray(items)) return
   for (const item of items)
-    for (const child of ((item as { children?: unknown[] })?.children ?? []) as unknown[])
+    for (const child of rowsOf((item as { children?: unknown } | null)?.children))
       if (child && typeof child === 'object' && 'children' in child)
         throw publicError('Menus have two levels at most', 400, { reason: 'policy' })
 }
@@ -218,10 +223,9 @@ async function flagUnpublished(req: PayloadRequest, item: Record<string, unknown
 }
 
 const flagMenuTargets: GlobalBeforeChangeHook = async ({ data, req }) => {
-  for (const item of (data.items ?? []) as Record<string, unknown>[]) {
+  for (const item of rowsOf(data.items)) {
     await flagUnpublished(req, item)
-    for (const child of (item.children ?? []) as Record<string, unknown>[])
-      await flagUnpublished(req, child)
+    for (const child of rowsOf(item.children)) await flagUnpublished(req, child)
   }
   return data
 }

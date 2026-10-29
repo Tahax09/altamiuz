@@ -231,6 +231,34 @@ describe('content rules', () => {
       ).rejects.toMatchObject({ status: 400 })
   })
 
+  it('the admin form encodes an empty sub-menu as a row count; it saves (no 500)', async () => {
+    // Payload's admin sends array fields with no rows as `0` (T130a finding).
+    const items = [
+      {
+        link: { linkType: 'external', url: 'https://example.org/', label: 'Contact' },
+        children: 0,
+      },
+    ]
+    for (const [role, q] of [
+      ['publisher', 'locale=en&draft=true'],
+      ['administrator', 'depth=0&locale=en&publishAllLocales=true'],
+    ] as const) {
+      const r = await rest(t.payload, 'POST', `/api/globals/header-nav?${q}`, {
+        token: S[role].token,
+        body: { items, ...(role === 'administrator' ? { _status: 'published' } : {}) },
+      })
+      expect(r.status, `${role} ${r.raw.slice(0, 200)}`).toBe(200)
+    }
+    // ...and a Publisher's publish attempt in that shape is a clean 403, not a 500.
+    const denied = await rest(
+      t.payload,
+      'POST',
+      '/api/globals/header-nav?depth=0&locale=en&publishAllLocales=true',
+      { token: S.publisher.token, body: { items, _status: 'published' } },
+    )
+    expect(denied.status).toBe(403)
+  })
+
   it('menus are two levels at most', async () => {
     await expect(
       save('header-nav', 'owner', {
