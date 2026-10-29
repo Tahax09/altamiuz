@@ -1,0 +1,187 @@
+/* Public design tokens and base styles (T102, FR-007, FR-080, FR-081, D-24).
+   Direction (constitution): institutional precision, modern advisory, restrained, light-first.
+   Colours are PROVISIONAL neutrals until brand assets are supplied (CD-09).
+   Fonts: system stacks until the self-hosted OFL files land (T101). */
+:root {
+  --ink: #14181f;
+  --ink-muted: #4a5260;
+  --paper: #ffffff;
+  --paper-alt: #f5f6f8;
+  --rule: #d9dde3;
+  --accent: #1d4ed8; /* provisional; contrast 6.7:1 on white */
+  --focus: #1d4ed8;
+  --font-latin: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-arabic: 'Segoe UI', Tahoma, 'Geeza Pro', system-ui, sans-serif;
+  --step--1: clamp(0.875rem, 0.85rem + 0.1vw, 0.95rem);
+  --step-0: clamp(1rem, 0.96rem + 0.2vw, 1.125rem);
+  --step-1: clamp(1.25rem, 1.15rem + 0.5vw, 1.5rem);
+  --step-2: clamp(1.5rem, 1.3rem + 1vw, 2rem);
+  --step-3: clamp(1.875rem, 1.5rem + 1.8vw, 2.75rem);
+  --space: clamp(1rem, 0.8rem + 1vw, 1.5rem);
+  --measure: 68ch;
+}
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+html {
+  color: var(--ink);
+  background: var(--paper);
+  font-family: var(--font-latin);
+  font-size: 100%;
+  line-height: 1.45;
+  -webkit-text-size-adjust: 100%;
+}
+html[lang='ar'] {
+  font-family: var(--font-arabic);
+  line-height: 1.7; /* D-24 */
+}
+body {
+  margin: 0;
+  font-size: var(--step-0);
+  overflow-wrap: anywhere;
+}
+h1 {
+  font-size: var(--step-3);
+  line-height: 1.15;
+}
+h2 {
+  font-size: var(--step-2);
+  line-height: 1.2;
+}
+h3 {
+  font-size: var(--step-1);
+}
+h1,
+h2,
+h3,
+h4 {
+  margin-block: 0 0.5em;
+  font-weight: 650;
+}
+p,
+li,
+dd {
+  max-width: var(--measure);
+}
+a {
+  color: var(--accent);
+  text-underline-offset: 0.15em;
+}
+:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+main,
+.site-header,
+.site-footer,
+.site-banner {
+  padding-inline: var(--space);
+  max-width: 72rem;
+  margin-inline: auto;
+}
+main {
+  padding-block: var(--space);
+}
+main:focus {
+  outline: none;
+}
+.skip-link {
+  position: absolute;
+  inset-inline-start: 0.5rem;
+  top: -10rem;
+  background: var(--paper);
+  padding: 0.5rem 0.75rem;
+}
+.skip-link:focus {
+  top: 0.5rem;
+}
+.site-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1.5rem;
+  padding-block: 1rem;
+  border-block-end: 1px solid var(--rule);
+}
+.site-header__home {
+  font-weight: 700;
+  color: var(--ink);
+  text-decoration: none;
+}
+nav ul,
+.language-switcher,
+.listing {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+nav > ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.25rem;
+}
+nav a,
+.language-switcher a,
+.site-footer a,
+.site-header__home,
+button {
+  display: inline-block;
+  min-height: 24px; /* WCAG 2.2 SC 2.5.8 */
+  min-width: 24px;
+  padding-block: 0.25rem;
+}
+.language-switcher {
+  margin-inline-start: auto;
+}
+.language-switcher__unavailable {
+  color: var(--ink-muted);
+}
+.language-switcher__note {
+  font-size: var(--step--1);
+}
+.listing li {
+  padding-block: 0.75rem;
+  border-block-end: 1px solid var(--rule);
+}
+.site-banner {
+  background: var(--paper-alt);
+  padding-block: 0.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  align-items: center;
+}
+.site-banner[hidden] {
+  display: none;
+}
+.site-footer {
+  border-block-start: 1px solid var(--rule);
+  padding-block: 1.5rem;
+  color: var(--ink-muted);
+}
+.course-facts dl div {
+  display: flex;
+  gap: 0.5rem;
+}
+.course-facts dt {
+  font-weight: 600;
+}
+.course-facts dd {
+  margin: 0;
+}
+img,
+svg {
+  max-width: 100%;
+  height: auto;
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}

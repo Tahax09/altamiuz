@@ -32,6 +32,16 @@ Findings recorded during WS9 (Payload 3.91.0):
 5. A failed save under load can show only the error toast, without inline field errors.
    `ErrorFocus` also maps the toast's field list, so focus and `aria-invalid` still work.
 
+Findings recorded during WS10 (Payload 3.91.0):
+
+6. With draft validation on, `restoreVersion` validates only the default locale (`ar`).
+   Mitigated: restore is reimplemented as per-locale draft updates (ADR-006).
+7. The lock collection uses `defaultAccess`: password-only sessions could list and delete locks.
+   Mitigated by the lock route.
+8. Verified evidence: the verifier and time could be overwritten by an Editor, and the reference
+   swapped without verify rights. Mitigated: both are server-held once verified, and changing
+   the reference needs verify rights (`publish.test.ts`).
+
 Residual risks:
 
 - The rich-text policy covers the v1 feature set only. Each new editor feature needs a policy

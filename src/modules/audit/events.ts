@@ -20,7 +20,7 @@ export const AUDIT_ACTIONS = {
   'user.role_change': ['from', 'to'],
   'content.publish': ['collection', 'locale'],
   'content.unpublish': ['collection', 'locale'],
-  'content.restore': ['collection', 'version'],
+  'content.restore': ['collection', 'version', 'locales'],
   'content.delete': ['collection'],
   'media.delete': [],
   'redirect.change': ['operation'],

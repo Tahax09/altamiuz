@@ -1,8 +1,13 @@
 // FR-090, FR-095 and the Setup placeholder protection (no first-user registration).
 import { NextRequest } from 'next/server'
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import { buildCsp, staticSecurityHeaders } from '@/modules/security'
 import { proxy } from '../../../src/proxy'
+
+// Public paths are resolved against the database by the proxy; these tests only need headers.
+vi.mock('../../../src/app/(site)/route-status', () => ({
+  publicRouteStatus: async () => ({ kind: 'ok' }),
+}))
 
 const call = (path: string, method = 'GET') =>
   proxy(new NextRequest(new URL(path, 'http://localhost:3000'), { method }))
@@ -97,18 +102,18 @@ describe('upgrade-insecure-requests', () => {
 })
 
 describe('proxy', () => {
-  it('issues a fresh nonce per request and forwards it to rendering', () => {
-    const a = call('/en').headers.get('content-security-policy')!
-    const b = call('/en').headers.get('content-security-policy')!
+  it('issues a fresh nonce per request and forwards it to rendering', async () => {
+    const a = (await call('/en')).headers.get('content-security-policy')!
+    const b = (await call('/en')).headers.get('content-security-policy')!
     const nonce = (s: string) => /'nonce-([^']+)'/.exec(s)?.[1]
     expect(nonce(a)).toBeTruthy()
     expect(nonce(a)).not.toBe(nonce(b))
     expect(nonce(a)!.length).toBeGreaterThanOrEqual(22)
   })
 
-  it('selects the admin and api policies by path', () => {
-    expect(call('/admin/login').headers.get('content-security-policy')).toContain("'nonce-")
-    expect(call('/api/health').headers.get('content-security-policy')).toContain(
+  it('selects the admin and api policies by path', async () => {
+    expect((await call('/admin/login')).headers.get('content-security-policy')).toContain("'nonce-")
+    expect((await call('/api/health')).headers.get('content-security-policy')).toContain(
       "default-src 'none'",
     )
   })
@@ -121,8 +126,8 @@ describe('proxy', () => {
     ['/api/users/first-register/', 'POST'],
   ])(
     'blocks first-user registration %s %s with 404 (FR-030, Setup placeholder)',
-    (path, method) => {
-      expect(call(path, method).status).toBe(404)
+    async (path, method) => {
+      expect((await call(path, method)).status).toBe(404)
     },
   )
 })

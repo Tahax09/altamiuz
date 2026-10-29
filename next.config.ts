@@ -1,5 +1,7 @@
 import { withPayload } from '@payloadcms/next/withPayload'
 import type { NextConfig } from 'next'
+import { PHASE_PRODUCTION_BUILD } from 'next/constants'
+import { productionBuildGate } from './src/modules/i18n'
 import { staticSecurityHeaders } from './src/modules/security'
 
 // D-14: standalone output runs unchanged on a Vercel preview or in a container.
@@ -14,4 +16,8 @@ const nextConfig: NextConfig = {
   },
 }
 
-export default withPayload(nextConfig, { devBundleServerPackages: false })
+// CD-13 (Gate 4): a production build fails until the Arabic route vocabulary is approved.
+export default (phase: string) => {
+  if (phase === PHASE_PRODUCTION_BUILD) productionBuildGate(process.env.APP_ENV)
+  return withPayload(nextConfig, { devBundleServerPackages: false })
+}

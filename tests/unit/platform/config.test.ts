@@ -85,8 +85,16 @@ describe('loadConfig — development', () => {
 })
 
 describe('loadConfig — production refuses unsafe configuration (FR-105)', () => {
-  it('accepts a complete production configuration', () => {
-    expect(loadConfig(prodEnv()).appEnv).toBe('production')
+  const approved = { routeVocabularyPending: () => false }
+  it('accepts a complete production configuration once CD-13 is approved', () => {
+    expect(loadConfig(prodEnv(), approved).appEnv).toBe('production')
+  })
+
+  it('refuses production while the Arabic route vocabulary is a placeholder (CD-13)', () => {
+    expect(() => loadConfig(prodEnv())).toThrow(/ROUTE_VOCABULARY/)
+    expect(() => loadConfig(prodEnv(), { routeVocabularyPending: () => true })).toThrow(
+      /ROUTE_VOCABULARY/,
+    )
   })
 
   it.each([
@@ -164,8 +172,10 @@ describe('loadConfig — production refuses unsafe configuration (FR-105)', () =
       ),
     ).toBe(true)
     expect(
-      loadConfig({ ...prodEnv(), TRUSTED_PROXY_HOPS: '0', CLIENT_IP_HEADER: 'cf-connecting-ip' })
-        .rateLimit.clientIpHeader,
+      loadConfig(
+        { ...prodEnv(), TRUSTED_PROXY_HOPS: '0', CLIENT_IP_HEADER: 'cf-connecting-ip' },
+        { routeVocabularyPending: () => false },
+      ).rateLimit.clientIpHeader,
     ).toBe('cf-connecting-ip')
   })
 

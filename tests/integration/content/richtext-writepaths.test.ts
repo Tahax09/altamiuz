@@ -140,6 +140,7 @@ describe('Local API create/update (draft and autosave), both locales', () => {
             title: 'S',
             slug: slug(),
             summary: 's',
+            seo: { title: 'SEO title', description: 'SEO description' },
             sections: [{ blockType: 'richText', content: MALICIOUS_RICH_TEXT.dataUrl }],
           } as never,
           draft: true,
@@ -333,6 +334,9 @@ describe('paths that carry other locales or stored data', () => {
     })) as unknown as Record<string, unknown>
     const version = {
       ...full,
+      // The poisoned locale has real content, so restore will try to write it.
+      title: { ...(full.title as object), [locale]: 'Poisoned' },
+      slug: { ...(full.slug as object), [locale]: `poisoned-${Date.now()}` },
       sections: [{ blockType: 'richText', content: { [locale]: value } }],
     }
     await t.payload.db.createVersion({

@@ -3,6 +3,7 @@
 import type { CollectionConfig } from 'payload'
 import { allow } from '../../access'
 import { recordAudit } from '../../audit'
+import { expireCacheTags } from '../../platform'
 
 export const redirects: CollectionConfig = {
   slug: 'redirects',
@@ -60,8 +61,14 @@ export const redirects: CollectionConfig = {
           outcome: 'success',
           meta: { operation },
         })
+        revalidateRedirects()
         return doc
       },
     ],
+    afterDelete: [() => revalidateRedirects()],
   },
+}
+
+function revalidateRedirects() {
+  expireCacheTags('redirects')
 }

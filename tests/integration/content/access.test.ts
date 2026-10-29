@@ -49,6 +49,7 @@ const dataFor = (c: (typeof COLLECTIONS)[number]) =>
         title: 'T',
         slug: slug(),
         summary: 's',
+        seo: { title: 'SEO title', description: 'SEO description' },
         sections: [{ blockType: 'richText', content: rt('x') }],
       }
 

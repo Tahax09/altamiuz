@@ -58,7 +58,7 @@ test('login view: no new serious/critical findings', async ({ page }) => {
 // Authenticated views, measured with the seeded MFA-verified owner (tests/support/e2e-seed.ts).
 type Acct = { email: string; password: string; secret: string; enrolledAt: number; id: number }
 const owner = (): Acct =>
-  JSON.parse(fs.readFileSync('test-results/e2e-fixtures.json', 'utf8')).owner
+  JSON.parse(fs.readFileSync('test-results/e2e-fixtures.json', 'utf8')).a11yOwner
 
 async function analyse(page: import('@playwright/test').Page, key: string) {
   const r = await new AxeBuilder({ page }).withTags(TAGS).analyze()

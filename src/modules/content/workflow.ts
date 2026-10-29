@@ -2,34 +2,38 @@
 // restoring are separate permissions from draft editing; claims must be verified to publish; every
 // write is re-checked across ALL locales inside the transaction (defence in depth for restore,
 // duplicate and copy-to-locale, which carry other locales the field hooks do not see).
-import { revalidateTag } from 'next/cache'
 import type {
   CollectionAfterChangeHook,
   CollectionAfterDeleteHook,
   CollectionBeforeChangeHook,
   CollectionBeforeOperationHook,
   Endpoint,
+  Field,
   PayloadRequest,
 } from 'payload'
-import { APIError, restoreVersionOperation } from 'payload'
+import { commitTransaction, initTransaction, killTransaction, NotFound } from 'payload'
 import type { Resource } from '../access'
 import { recordAudit } from '../audit'
-import { type Locale, type RoutedCollection } from '../i18n'
+import { expireCacheTags } from '../platform'
+import { LOCALES, type Locale, type RoutedCollection } from '../i18n'
 import { createSlugChangeRedirect } from '../seo'
 import { mayDo } from './access'
 import { unverifiedClaims } from './evidence'
 import { findContentIssues } from './richtext/walk'
+import { publicError } from './errors'
 
 type Ctx = {
   contentOp?: 'restore' | 'update' | 'create'
   draftArg?: boolean
+  restoring?: boolean
+  baseUpdatedAt?: number
   unpublishAll?: boolean
   publishLocale?: string
   slugChange?: { from: string; to: string; locale: string }
 }
-const ctx = (req: PayloadRequest) => (req.context.content ??= {}) as Ctx
+export const ctx = (req: PayloadRequest) => (req.context.content ??= {}) as Ctx
 
-async function deny(
+export async function deny(
   req: PayloadRequest,
   collection: string,
   action: string,
@@ -43,25 +47,108 @@ async function deny(
       outcome: 'denied',
       meta: { resource: collection, action },
     })
-  throw new APIError('Forbidden', 403)
+  throw publicError('Forbidden', 403)
+}
+
+/**
+ * FR-015 optimistic concurrency: the admin form sends the `updatedAt` it loaded with every save.
+ * Payload resets updatedAt itself, so the client value is only used as a precondition.
+ */
+export function captureBaseUpdatedAt(req: PayloadRequest, data: unknown) {
+  const c = ctx(req)
+  c.baseUpdatedAt = undefined
+  const base = (data as { updatedAt?: unknown } | undefined)?.updatedAt
+  if (base === undefined || base === null) return
+  const ms = typeof base === 'string' && /^\d{4}-\d{2}-\d{2}T/.test(base) ? Date.parse(base) : NaN
+  if (Number.isNaN(ms)) throw publicError('Invalid updatedAt', 400, { reason: 'policy' })
+  c.baseUpdatedAt = ms
+}
+
+/** Second of two conflicting saves (FR-015): Payload deletes document locks on every save, so a
+ * stale form could otherwise overwrite a newer draft. originalDoc is the latest draft. */
+export function assertNotStale(
+  req: PayloadRequest,
+  originalDoc: { updatedAt?: unknown } | undefined,
+) {
+  const base = ctx(req).baseUpdatedAt
+  const currentMs = originalDoc?.updatedAt ? Date.parse(String(originalDoc.updatedAt)) : NaN
+  if (base !== undefined && !Number.isNaN(currentMs) && base < currentMs)
+    throw publicError(
+      'This document was changed by someone else after you opened it. Reload it to see their changes before saving.',
+      409,
+      { reason: 'stale' },
+    )
+}
+
+/** FR-004 + data-model `seo` group: title and description are required to publish a locale. */
+export function assertSeoComplete(seo: unknown, base = 'seo') {
+  const v = (seo ?? {}) as { title?: unknown; description?: unknown }
+  const missing = (['title', 'description'] as const).filter(
+    (k) => typeof v[k] !== 'string' || (v[k] as string).trim() === '',
+  )
+  if (missing.length)
+    throw publicError(`SEO ${missing.join(' and ')} required to publish`, 400, {
+      paths: missing.map((k) => `${base}.${k}`),
+    })
+}
+
+/** Publish/unpublish intent of a write (same rules for collections and globals). */
+export function publicationIntent(req: PayloadRequest, data: { _status?: unknown }) {
+  const c = ctx(req)
+  // Payload 3.91.0 publishes when `_status: 'published'` is sent even with `draft: true`, and a
+  // non-draft update without `_status` writes the live document. So: any non-draft update is a
+  // publish, or an unpublish when it asks for `draft`; `unpublishAllLocales` is an unpublish.
+  const liveWrite = c.contentOp === 'update' && !c.draftArg
+  const publishing = data._status === 'published' || (liveWrite && data._status !== 'draft')
+  const unpublishing = !publishing && (c.unpublishAll === true || liveWrite)
+  return { publishing, unpublishing }
+}
+
+/**
+ * WS11 M-2, other locales: `data._status` (above) only covers the request locale. With
+ * `localizeStatus`, Payload copies every other locale's `_status` from the source, so a duplicate
+ * of a page published in both languages was born published in the other one, for any role that
+ * may create. Payload merges this declaration into its own `_status` field (mergeBaseFields); the
+ * field-level beforeDuplicate hook runs per locale on the source copy before anything is written.
+ */
+export const statusDraftOnDuplicate: Field = {
+  name: '_status',
+  type: 'select',
+  options: [], // the base field's options are kept (arrays are concatenated on merge)
+  hooks: { beforeDuplicate: [() => 'draft'] },
 }
 
 export const captureOperation: CollectionBeforeOperationHook = ({ args, operation, req }) => {
   const c = ctx(req)
-  if (operation === 'restoreVersion') {
-    c.contentOp = 'restore'
-    c.draftArg = (args as { draft?: boolean }).draft === true
+  // Payload's restoreVersion is never used: it overwrites the live document unless `draft` is set
+  // (and the Local API drops `draft`), and it validates only the default locale. restoreAsDraft()
+  // is the only restore path; the HTTP route is replaced by restoreAsDraftEndpoint.
+  if (operation === 'restoreVersion')
+    throw publicError('Use the restore endpoint; versions are restored as drafts', 400, undefined)
+  // Duplicates are always drafts (WS11 M-2). Payload's duplicate is createOperation with
+  // `duplicateFromID`; non-draft, it copies the source's per-locale `_status`, which would publish
+  // the copy implicitly. Publishing stays an explicit, permission-checked and audited action.
+  if (operation === 'create' && (args as { duplicateFromID?: unknown }).duplicateFromID != null) {
+    const a = args as {
+      draft?: boolean
+      publishAllLocales?: boolean
+      data?: Record<string, unknown>
+    }
+    a.draft = true
+    a.publishAllLocales = false
+    a.data = { ...(a.data ?? {}), _status: 'draft' }
   }
   if (operation === 'update' || operation === 'create') {
-    c.contentOp = operation
+    c.contentOp = c.restoring && operation === 'update' ? 'restore' : operation
     c.draftArg = (args as { draft?: boolean }).draft === true
     c.publishLocale = (args as { publishSpecificLocale?: string }).publishSpecificLocale
     const all = (args as { unpublishAllLocales?: unknown }).unpublishAllLocales
     c.unpublishAll = all === true || all === 'true'
+    if (operation === 'update') captureBaseUpdatedAt(req, (args as { data?: unknown }).data)
     // Reject unsafe or malformed rich text before Payload's own lexical hooks walk it (a
     // non-array `children` otherwise surfaces as a 500 from inside the editor adapter).
     const issues = findContentIssues((args as { data?: unknown }).data)
-    if (issues.length) throw new APIError('Content rejected by policy', 400, { issues }, true)
+    if (issues.length) throw publicError('Content rejected by policy', 400, { issues })
   }
   return args
 }
@@ -71,13 +158,8 @@ export const enforceWorkflow =
   async ({ data, originalDoc, req }) => {
     const c = ctx(req)
     const resource = collection as Resource
-    // Payload 3.91.0 publishes when `_status: 'published'` is sent even with `draft: true`, and a
-    // non-draft update without `_status` writes the live document (non-localized fields are shared
-    // by every locale). So: any non-draft update is a publish, or an unpublish when it asks for
-    // `draft`; `unpublishAllLocales` is an unpublish even on a draft save.
-    const liveWrite = c.contentOp === 'update' && !c.draftArg
-    const publishing = data._status === 'published' || (liveWrite && data._status !== 'draft')
-    const unpublishing = !publishing && (c.unpublishAll === true || liveWrite)
+    const { publishing, unpublishing } = publicationIntent(req, data)
+    assertNotStale(req, originalDoc)
     if (req.user) {
       if (c.contentOp === 'restore' && !mayDo(req, resource, 'restore'))
         await deny(req, collection, 'restore', originalDoc?.id)
@@ -86,20 +168,13 @@ export const enforceWorkflow =
       if (unpublishing && !mayDo(req, resource, 'unpublish'))
         await deny(req, collection, 'unpublish', originalDoc?.id)
     }
-    // Payload's non-draft restore overwrites the live document (3.91.0). Restores must produce a
-    // new draft instead (data-model §states); HTTP restores are forced to drafts by
-    // restoreAsDraftEndpoint/restoreAsDraft, so this rejects payload.restoreVersion (Local API).
+    // Restores must produce a new draft and never write the live document (data-model §states).
     if (c.contentOp === 'restore' && !c.draftArg)
-      throw new APIError('Versions can only be restored as drafts', 400, undefined, true)
+      throw publicError('Versions can only be restored as drafts', 400, { reason: 'policy' })
     if (publishing) {
       const unverified = unverifiedClaims({ ...(originalDoc ?? {}), ...data })
       if (unverified.length)
-        throw new APIError(
-          'Unverified claims cannot be published',
-          400,
-          { paths: unverified },
-          true,
-        )
+        throw publicError('Unverified claims cannot be published', 400, { paths: unverified })
       // Compare with the live (published) document, not originalDoc: with drafts, originalDoc is
       // the latest draft, which already carries a slug edited before this publish.
       const live = originalDoc?.id
@@ -137,7 +212,22 @@ export const verifyStoredContent =
       req,
     })
     const issues = findContentIssues(full)
-    if (issues.length) throw new APIError('Content rejected by policy', 400, { issues }, true) // rolls back
+    if (issues.length) throw publicError('Content rejected by policy', 400, { issues }) // rolls back
+    // FR-004 backstop: every published locale has its SEO title and description (rolls back).
+    const status = (full as { _status?: unknown })._status
+    const seo = ((full as { seo?: unknown }).seo ?? {}) as Record<string, unknown>
+    if (status && typeof status === 'object')
+      for (const [locale, st] of Object.entries(status as Record<string, unknown>))
+        if (st === 'published')
+          assertSeoComplete(
+            Object.fromEntries(
+              ['title', 'description'].map((k) => [
+                k,
+                (seo[k] as Record<string, unknown> | undefined)?.[locale],
+              ]),
+            ),
+            `seo(${locale})`,
+          )
     return doc
   }
 
@@ -148,15 +238,9 @@ export const auditAndRevalidate =
     const actor = req.user ? `user:${req.user.id}` : 'system'
     const target = { type: collection, id: String(doc.id) }
     const locale = c.publishLocale ?? req.locale ?? 'ar'
-    if (c.contentOp === 'restore')
-      await recordAudit(req.payload, {
-        actor,
-        action: 'content.restore',
-        target,
-        outcome: 'success',
-        meta: { collection },
-      })
-    else if (doc._status === 'published')
+    if (c.contentOp === 'restore') {
+      // audited once by restoreAsDraft, after every locale has been written
+    } else if (doc._status === 'published')
       await recordAudit(req.payload, {
         actor,
         action: 'content.publish',
@@ -180,12 +264,7 @@ export const auditAndRevalidate =
         c.slugChange.from,
         c.slugChange.to,
       )
-    try {
-      revalidateTag(`${collection}:${doc.id}`, 'max')
-      revalidateTag(collection, 'max')
-    } catch {
-      // outside a Next request (scripts/tests): nothing cached to revalidate
-    }
+    expireCacheTags(`${collection}:${doc.id}`, collection)
     return doc
   }
 
@@ -199,26 +278,100 @@ export const auditDelete =
       outcome: 'success',
       meta: { collection },
     })
+    expireCacheTags(`${collection}:${id}`, collection)
   }
 
+const SYSTEM_KEYS = new Set(['id', '_status', 'createdAt', 'updatedAt', 'deletedAt'])
+
 /**
- * Restores a version as a new draft. Payload 3.91.0's Local API `restoreVersion` drops the `draft`
- * option (it always overwrites the live document), so this calls the exported operation directly.
+ * Restores a version as a new draft (FR-024, ADR-006). Each locale the version contains is written
+ * with a normal draft `update`, so every locale is validated (D-22) and checked by the rich-text
+ * policy. All of it runs in one transaction: any failure leaves the document untouched. Locales
+ * the version has no content for keep their current draft. Payload's own restoreVersion is not
+ * used (see captureOperation).
  */
 export async function restoreAsDraft(
   req: PayloadRequest,
   collection: RoutedCollection,
-  id: string | number,
+  versionId: string | number,
   depth = 0,
 ) {
-  return restoreVersionOperation({
-    id,
-    collection: req.payload.collections[collection],
-    depth,
+  if (!mayDo(req, collection as Resource, 'restore'))
+    await deny(req, collection, 'restore', versionId)
+  const version = await req.payload
+    .findVersionByID({
+      collection,
+      id: String(versionId),
+      locale: 'all',
+      depth: 0,
+      overrideAccess: false,
+      req,
+    })
+    .catch(() => null)
+  if (!version) throw new NotFound(req.t)
+  const parent = version.parent as unknown
+  const parentId =
+    typeof parent === 'object' && parent
+      ? (parent as { id: number | string }).id
+      : (parent as number)
+
+  const c = ctx(req)
+  const shouldCommit = await initTransaction(req)
+  const restored: Locale[] = []
+  try {
+    c.restoring = true
+    for (const locale of LOCALES) {
+      const v = await req.payload.findVersionByID({
+        collection,
+        id: String(versionId),
+        locale,
+        fallbackLocale: false,
+        depth: 0,
+        overrideAccess: true,
+        req,
+      })
+      const data = Object.fromEntries(
+        Object.entries(v.version as unknown as Record<string, unknown>).filter(
+          ([k]) => !SYSTEM_KEYS.has(k),
+        ),
+      )
+      if (typeof data.title !== 'string' || data.title.trim() === '') continue // locale not in version
+      await req.payload.update({
+        collection,
+        id: parentId,
+        locale,
+        draft: true,
+        data: data as never,
+        overrideAccess: false,
+        req,
+      })
+      restored.push(locale)
+    }
+    if (!restored.length)
+      throw publicError('This version has no content to restore', 400, { reason: 'policy' })
+    await recordAudit(req.payload, {
+      actor: req.user ? `user:${req.user.id}` : 'system',
+      action: 'content.restore',
+      target: { type: collection, id: String(parentId) },
+      outcome: 'success',
+      meta: { collection, version: String(versionId), locales: restored.join(',') },
+    })
+    if (shouldCommit) await commitTransaction(req)
+  } catch (e) {
+    if (shouldCommit) await killTransaction(req)
+    throw e
+  } finally {
+    c.restoring = false
+  }
+  return req.payload.findByID({
+    collection,
+    id: parentId,
     draft: true,
+    depth,
+    locale: req.locale ?? 'ar',
     overrideAccess: false,
     req,
-  } as Parameters<typeof restoreVersionOperation>[0])
+  })
 }
 
 /**

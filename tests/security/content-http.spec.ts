@@ -88,6 +88,7 @@ test('T077 preview for an MFA-verified user renders the draft with noindex and n
 })
 
 test('T073 preview markup equals the shared renderer output for the same document', async () => {
+  test.setTimeout(120_000) // includes a TOTP step wait and a tsx render process
   const ctx = await signedIn(F().publisher!, true)
   const html = await (await ctx.get(previewPath())).text()
   const article = /<article[\s\S]*<\/article>/.exec(html)?.[0]
@@ -267,11 +268,202 @@ test('T071 pasting hostile HTML into the admin rich-text editor never persists u
   const pg = (await import('pg')).default
   const c = new pg.Client({ connectionString: process.env.DATABASE_URL })
   await c.connect()
+  // Only this test's page (the seed deliberately stores a poisoned page elsewhere).
   const rows = await c.query(
-    `select content::text as c from _pages_v_blocks_rich_text_locales
-     union all select content::text from pages_blocks_rich_text_locales`,
+    `select l.content::text as c from _pages_v_blocks_rich_text_locales l
+       join _pages_v_blocks_rich_text b on b.id = l._parent_id
+       join _pages_v v on v.id = b._parent_id where v.parent_id = $1
+     union all
+     select l.content::text from pages_blocks_rich_text_locales l
+       join pages_blocks_rich_text b on b.id = l._parent_id where b._parent_id = $1`,
+    [pasteId],
   )
   await c.end()
   const stored = rows.rows.map((r) => r.c as string).join('\n')
   expect(stored).not.toMatch(/javascript:|data:text|onerror|background:url/i)
+})
+
+test.describe('WS10 document locks and concurrency', () => {
+  const db = async () => {
+    const pg = (await import('pg')).default
+    const c = new pg.Client({ connectionString: process.env.DATABASE_URL })
+    await c.connect()
+    return c
+  }
+  const lockFor = async (userId: number) => {
+    const c = await db()
+    await c.query('delete from payload_locked_documents')
+    const lock = await c.query(
+      `insert into payload_locked_documents (updated_at, created_at) values (now(), now()) returning id`,
+    )
+    const id = lock.rows[0].id as number
+    await c.query(
+      `insert into payload_locked_documents_rels (parent_id, path, pages_id) values ($1, 'document', $2)`,
+      [id, F().content.pageId],
+    )
+    await c.query(
+      `insert into payload_locked_documents_rels (parent_id, path, users_id) values ($1, 'user', $2)`,
+      [id, userId],
+    )
+    await c.end()
+    return id
+  }
+  const lockExists = async (id: number) => {
+    const c = await db()
+    const r = await c.query('select 1 from payload_locked_documents where id = $1', [id])
+    await c.end()
+    return r.rowCount === 1
+  }
+  const listPath = () =>
+    `/api/payload-locked-documents?where[document.relationTo][equals]=pages&where[document.value][equals]=${F().content.pageId}`
+
+  test('password-only and anonymous sessions cannot read, create, change or delete locks', async ({
+    request,
+  }) => {
+    const lockId = await lockFor(F().editor!.id)
+    const po = await signedIn(F().passwordOnly!, false)
+    for (const ctx of [po, request]) {
+      expect((await ctx.get(listPath(), { headers: ORIGIN })).status()).toBe(403)
+      expect(
+        (await ctx.delete(`/api/payload-locked-documents/${lockId}`, { headers: ORIGIN })).status(),
+      ).toBe(403)
+      expect(
+        (
+          await ctx.patch(`/api/payload-locked-documents/${lockId}`, {
+            headers: ORIGIN,
+            data: { user: { relationTo: 'users', value: F().passwordOnly!.id } },
+          })
+        ).status(),
+      ).toBe(403)
+      expect(
+        (await ctx.post('/api/payload-locked-documents', { headers: ORIGIN, data: {} })).status(),
+      ).toBe(403)
+    }
+    expect(await lockExists(lockId)).toBe(true)
+  })
+
+  test("verified users cannot delete someone else's lock or assign it to another user", async () => {
+    const lockId = await lockFor(F().editor!.id)
+    const pub = await signedIn(F().publisher!, true)
+    expect((await pub.delete(`/api/payload-locked-documents/${lockId}`)).status()).toBe(403)
+    expect(
+      (
+        await pub.patch(`/api/payload-locked-documents/${lockId}`, {
+          data: { user: { relationTo: 'users', value: F().owner!.id } },
+        })
+      ).status(),
+    ).toBe(403)
+    expect(
+      (
+        await pub.post('/api/payload-locked-documents', {
+          data: { document: { relationTo: 'pages', value: 1 } },
+        })
+      ).status(),
+    ).toBe(403)
+    expect(await lockExists(lockId)).toBe(true)
+    // Take-over (after Payload's warning dialog) assigns the lock to the requester only.
+    const take = await pub.patch(`/api/payload-locked-documents/${lockId}`, {
+      data: { user: { relationTo: 'users', value: F().publisher!.id } },
+    })
+    expect(take.status()).toBe(200)
+    // The owner of a lock can release it.
+    expect((await pub.delete(`/api/payload-locked-documents/${lockId}`)).status()).toBe(200)
+    expect(await lockExists(lockId)).toBe(false)
+  })
+
+  test('lock listings carry only what the lock dialog needs', async () => {
+    await lockFor(F().editor!.id)
+    const owner = await signedIn(F().owner!, true)
+    const ownerView = await (await owner.get(listPath())).json()
+    expect(ownerView.docs[0].user.value).toEqual({
+      id: F().editor!.id,
+      email: F().editor!.email,
+      collection: 'users',
+    })
+    const pub = await signedIn(F().publisher!, true)
+    const pubView = await (await pub.get(listPath())).text()
+    expect(JSON.parse(pubView).docs[0].user.value).toBe(F().editor!.id) // no directory access
+    for (const text of [JSON.stringify(ownerView), pubView])
+      expect(text).not.toMatch(/"role"|"status"|"name"|sessions|_sid|mfa|reauth/i)
+    const unfiltered = await (await owner.get('/api/payload-locked-documents?depth=2')).json()
+    expect(unfiltered.docs).toEqual([])
+  })
+
+  test('admin pages embed no session list, no other session ids and no session metadata', async () => {
+    const owner = await signedIn(F().owner!, true)
+    const html = await (await owner.get(`/admin/collections/pages/${F().content.pageId}`)).text()
+    const c = await db()
+    const rows = (await c.query('select id, _parent_id from users_sessions')).rows as {
+      id: string
+      _parent_id: number
+    }[]
+    await c.end()
+    const leaked = rows.filter((r) => html.includes(r.id))
+    // Accepted residual (Payload core, initReq → applyUserReadAccess): the viewer's own current
+    // session id is included. No other session (other users, other devices) ever is.
+    expect(leaked.length).toBeLessThanOrEqual(1)
+    for (const r of leaked) expect(r._parent_id).toBe(F().owner!.id)
+    expect(rows.filter((r) => r._parent_id === F().owner!.id).length).toBeGreaterThan(1)
+    expect(html).not.toMatch(/reauthAt|mfaVerified|"sessions"/)
+    // A lock holder's details reach a viewer only within the users-directory permission.
+    await lockFor(F().owner!.id)
+    const ed = await signedIn(F().editor!, true)
+    const edHtml = await (await ed.get(`/admin/collections/pages/${F().content.pageId}`)).text()
+    expect(edHtml).not.toContain(F().owner!.email)
+  })
+
+  test('FR-015 a stale save from the admin is refused and keeps the newer draft', async ({
+    browser,
+  }) => {
+    test.setTimeout(120_000)
+    const c0 = await db()
+    await c0.query('delete from payload_locked_documents')
+    await c0.end()
+    const context = await browser.newContext({ baseURL: BASE })
+    const page = await context.newPage()
+    const a = F().administrator!
+    await page.request.post('/api/users/login', {
+      data: { email: a.email, password: a.password },
+      headers: ORIGIN,
+    })
+    const v = await page.request.post('/api/users/mfa/verify', {
+      data: { code: await freshCode(a) },
+      headers: ORIGIN,
+    })
+    expect(v.status()).toBe(200)
+    await page.goto(`/admin/collections/pages/${F().content.pageId}?locale=ar`)
+    await page.waitForLoadState('networkidle')
+    // Meanwhile a Publisher saves a newer draft over REST.
+    const pub = await signedIn(F().publisher!, true)
+    const fresh = await (
+      await pub.get(`/api/pages/${F().content.pageId}?draft=true&locale=ar`)
+    ).json()
+    const newer = await pub.patch(`/api/pages/${F().content.pageId}?draft=true&locale=ar`, {
+      data: { title: 'Newer draft from publisher', updatedAt: fresh.updatedAt },
+    })
+    expect(newer.status(), await newer.text()).toBe(200)
+    // The administrator's form is now stale.
+    // Payload remembers each user's admin locale; Arabic is the default, so use it throughout.
+    await expect(page.locator('label[for="field-title"]')).toContainText('Arabic')
+    await page.locator('#field-title').fill('Stale admin edit')
+    await expect(page.locator('#field-title')).toHaveValue('Stale admin edit')
+    const saved = page.waitForResponse(
+      (r) =>
+        r.request().method() === 'PATCH' && r.url().includes(`/api/pages/${F().content.pageId}`),
+    )
+    // Payload's toast auto-dismisses, so start waiting for it before saving. Either our 409 message
+    // or Payload's own stale-view notice tells the editor; the server outcome is asserted below.
+    const toast = page
+      .getByText(/changed by someone else/i)
+      .first()
+      .waitFor({ state: 'visible', timeout: 15_000 })
+    await page.getByRole('button', { name: /save draft/i }).click()
+    const res = await saved
+    expect(res.status()).toBe(409)
+    await toast
+    const now = await (
+      await pub.get(`/api/pages/${F().content.pageId}?draft=true&locale=ar`)
+    ).json()
+    expect(now.title).toBe('Newer draft from publisher')
+  })
 })

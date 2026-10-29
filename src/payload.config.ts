@@ -7,7 +7,7 @@ import { buildConfig } from 'payload'
 import sharp from 'sharp'
 import { auditDeniedOperations, auditEvents } from '@/modules/audit'
 import { invitations, securitySettings, users } from '@/modules/auth'
-import { courses, pages, safeEditor, services } from '@/modules/content'
+import { courses, pages, safeEditor, services, siteGlobals } from '@/modules/content'
 import { redirects } from '@/modules/seo'
 import { getConfig } from '@/modules/platform'
 
@@ -64,7 +64,7 @@ export default buildConfig({
     courses,
     redirects,
   ],
-  globals: [securitySettings],
+  globals: [securitySettings, ...siteGlobals],
   hooks: { afterError: [auditDeniedOperations] },
   // __Host- prefix requires https; local http uses a plain name (ADR-005).
   cookiePrefix: cfg.siteUrl.startsWith('https://') ? '__Host-altamiuz' : 'altamiuz',

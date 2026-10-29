@@ -14,6 +14,13 @@ const F = () =>
   }
 const ORIGIN = { origin: process.env.SITE_URL! }
 test.describe.configure({ mode: 'serial' })
+// Earlier security specs leave document locks behind; Payload would show "currently editing".
+test.beforeEach(async () => {
+  const c = new pg.Client({ connectionString: process.env.DATABASE_URL })
+  await c.connect()
+  await c.query('delete from payload_locked_documents')
+  await c.end()
+})
 
 async function signIn(page: Page, a: Acct) {
   expect(
@@ -56,7 +63,7 @@ test('T078 sections reorder by keyboard, announce the move, keep focus and persi
   page,
 }) => {
   test.setTimeout(120_000)
-  await signIn(page, F().administrator!)
+  await signIn(page, F().a11yAdministrator!)
   await page.goto(`/admin/collections/pages/${F().content.pageId}`)
   const down = page.locator('#reorder-sections-0-down')
   await expect(down).toBeVisible({ timeout: 30_000 })
@@ -94,7 +101,7 @@ test('T078 sections reorder by keyboard, announce the move, keep focus and persi
 
 test('T079 rich-text editor: visible focus and keyboard-exit help text', async ({ page }) => {
   test.setTimeout(120_000)
-  await signIn(page, F().administrator!)
+  await signIn(page, F().a11yAdministrator!)
   await page.goto(`/admin/collections/pages/${F().content.pageId}`)
   const editor = page.locator('[contenteditable="true"]').first()
   await expect(editor).toBeVisible({ timeout: 30_000 })
@@ -113,7 +120,7 @@ test('T079 failed save focuses the first invalid field with aria-invalid and a d
   page,
 }) => {
   test.setTimeout(120_000)
-  await signIn(page, F().publisher!)
+  await signIn(page, F().a11yPublisher!)
   await page.goto('/admin/collections/pages/create')
   await expect(page.locator('#field-title')).toBeVisible({ timeout: 30_000 })
   await page.waitForLoadState('networkidle') // the button does nothing until hydrated

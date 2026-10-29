@@ -270,6 +270,10 @@ publishing, revisions, locking, preview, accessible reordering.
 - [X] T093 [US2] Admin a11y remediations via extension points: focus styles in `src/app/(payload)/custom.scss`, field help text, error-focus component; file upstream issues for core findings and record links in `docs/accessibility/admin-findings.md` until T079 passes (FR-080a)
 - [X] T094 [US2] Write `docs/security/TM-preview.md` and `docs/security/TM-admin.md`; update ASVS V1/V2/V4 rows (FR-097)
 
+- [X] T094a [US2] Corrective (WS10, D-22 / data-model "Drafts are validated (`versions.drafts.validate: true`)"): enable draft validation on `pages`, `services`, `courses`. Test first in `tests/integration/content/draft-validation.test.ts`: required fields, slug rules and limits on draft create/update via the Local API and REST (incl. autosave flag), per locale, with the rich-text policy still enforced. Reimplement restore as per-locale validated draft updates in one transaction (`restoreAsDraft`), because Payload's `restoreVersion` validates only the default locale (FR-004, FR-013b, FR-024)
+- [X] T094b [US2] Corrective (WS10, FR-015, FR-033): server-enforced optimistic concurrency (409 on a stale base `updatedAt`, `tests/integration/content/concurrency.test.ts` + admin e2e); lock REST hardening via a project route (MFA-verified, own-lock delete, take-over to self, minimal user data); admin server functions require completed MFA; session metadata non-enumerable (`tests/integration/auth/session-metadata.test.ts`); verified-evidence metadata server-held. Autosave stays off (ADR-006 §3)
+- [X] T094c [US2] Corrective (2026-10-28, WS11 M-2 follow-up, FR-020, FR-021): a duplicate is always an unpublished draft in **every** locale. With `localizeStatus`, Payload's duplicate copied the source's `_status` for every locale other than the request locale, so any role allowed to create (Editor included) could produce a page published in the other language, including through the admin Duplicate action. Fixed with a `beforeDuplicate` hook on Payload's own `_status` field (`statusDraftOnDuplicate`). Tests exercise the real operation in `tests/integration/content/duplicate.test.ts`: all four roles, Local API draft/non-draft, REST (admin action body, `selectedLocales`, `publishAllLocales`/`publishSpecificLocale`/`_status=published` bypass attempts), `services`, password-only session refused, `redirects` duplicate gated by its create permission (Administrator/Owner only)
+
 **Checkpoint (Gate 3)**: T071–T080 green; SC-018 green on write and render paths;
 publish-to-live wiring ready for T106 → commit checkpoint.
 
@@ -288,7 +292,8 @@ publish-to-live wiring ready for T106 → commit checkpoint.
   - Role matrix, IDOR, anonymous REST and locale confusion:
     `tests/integration/content/access.test.ts` (99 cases).
 - Deviations, all recorded in ADR-006:
-  - `drafts.validate: false`, not `true` (T082). Safety hooks still run on every draft.
+  - ~~`drafts.validate: false`, not `true` (T082)~~ **withdrawn in WS10 (T094a)**: drafts are
+    validated, as D-22 requires.
   - **Autosave off**: Payload 3.91.0 deletes the lock on every save, which defeats FR-015.
   - Restore always creates a draft, through an overridden `POST /versions/:id` and
     `restoreAsDraft()`, because the Local API drops `draft`.
@@ -323,18 +328,88 @@ publish-to-live wiring ready for T106 → commit checkpoint.
 **Independent Test**: quickstart V1; route-map and CD-13 gate tests.
 **Depends on**: US2 (content) and US7 globals T130–T131 (header/footer navigation and site settings are CMS-managed, FR-010). Execute T130–T131 before T103.
 
-- [ ] T095 [P] [US1] Failing tests `tests/unit/i18n/routes.test.ts`: `href()` for every route key × locale; no duplicate segment per locale; `pnpm check:route-vocab` fails while any `TODO(AR_ROUTE_VOCAB)` placeholder remains (CD-13 publication gate) (FR-002)
-- [ ] T096 [P] [US1] Failing tests `tests/e2e/us1-locale.spec.ts`: `<html lang dir>` per locale; switcher reaches the same document's other-locale slug; missing locale → localized notice, switcher disabled; `/` redirects per A-3; no horizontal scroll at 320/768/1440 px; touch targets ≥24×24 CSS px (FR-001, FR-003, FR-004, FR-007, SC-001)
-- [ ] T097 [P] [US1] Failing tests `tests/e2e/no-js.spec.ts`: content and navigation readable with JavaScript disabled (FR-082)
-- [ ] T098 [US1] Implement typed route map `src/modules/i18n/routes.ts` (`href(routeKey, locale, params)`; Arabic segments `TODO(AR_ROUTE_VOCAB)` until CD-13) and `pnpm check:route-vocab` until T095 passes (FR-002, D-5)
-- [ ] T099 [US1] Implement locale routing in `src/proxy.ts` (A-3 root redirect with `Vary`, cross-locale segment → 404) (FR-002, FR-003)
-- [ ] T100 [US1] Implement UI strings `src/modules/i18n/messages/{ar,en}.ts` and formatters (one documented numeral convention per locale) (FR-005, FR-006)
+- [X] T095 [P] [US1] Failing tests `tests/unit/i18n/routes.test.ts`: `href()` for every route key × locale; no duplicate segment per locale; `pnpm check:route-vocab` fails while any `TODO(AR_ROUTE_VOCAB)` placeholder remains (CD-13 publication gate) (FR-002)
+- [X] T096 [P] [US1] Failing tests `tests/public/us1-locale.spec.ts` (Playwright projects `public`, `public-webkit`; planned as `tests/e2e/us1-locale.spec.ts`): `<html lang dir>` per locale; switcher reaches the same document's other-locale slug; missing locale → localized notice, switcher disabled; `/` redirects per A-3; no horizontal scroll at 320/768/1440 px; touch targets ≥24×24 CSS px (FR-001, FR-003, FR-004, FR-007, SC-001)
+- [X] T097 [P] [US1] Failing tests `tests/public/no-js.spec.ts` (Playwright projects `public`, `public-webkit`; planned as `tests/e2e/no-js.spec.ts`): content and navigation readable with JavaScript disabled; the 404 for missing pages, unknown locales and malformed paths is server-rendered with status 404, `lang`/`dir`, heading and links home, and `/admin`, `/api`, previews and locale homes are unaffected (FR-008, FR-082)
+- [X] T098 [US1] Implement typed route map `src/modules/i18n/routes.ts` (`href(routeKey, locale, params)`; Arabic segments `TODO(AR_ROUTE_VOCAB)` until CD-13) and `pnpm check:route-vocab` until T095 passes (FR-002, D-5)
+- [X] T099 [US1] Implement locale routing in `src/proxy.ts` (A-3 root redirect with `Vary`, cross-locale segment → 404) (FR-002, FR-003)
+- [X] T100 [US1] Implement UI strings `src/modules/i18n/messages/{ar,en}.ts` and formatters (one documented numeral convention per locale) (FR-005, FR-006)
 - [ ] T101 [US1] Self-host fonts `src/ui/fonts.ts` via `next/font/local` (Manrope, Inter, IBM Plex Sans Arabic ≤3 weights; unmodified OFL files; licences in `public/fonts/LICENSES/`) and failing-then-passing `tests/perf/fonts.test.ts` asserting ≤120 KB woff2 per locale first load (D-24)
 - [ ] T102 [US1] Implement design tokens and section renderers `src/ui/**` (server components, `clamp()` type scale, Arabic line-height 1.7, reduced-motion support, no flashing; every `link`-group `href` rendered via `safeHref`) (FR-014, FR-081)
-- [ ] T103 [US1] Implement public routes `src/app/(site)/[locale]/` (home, `[slug]`, services and training listings/details from published, non-hidden items in editor order) (FR-018, FR-021)
-- [ ] T104 [US1] Implement localized `not-found` and `error` pages without internal details (FR-008, FR-095)
+- [X] T103 [US1] Implement public routes `src/app/(site)/[locale]/` (home, `[slug]`, services and training listings/details from published, non-hidden items in editor order) (FR-018, FR-021)
+- [X] T104 [US1] Implement localized `not-found` and `error` pages without internal details (FR-008, FR-095). Document requests for missing public paths get a complete server-rendered 404 from the proxy (`src/ui/site/not-found-document.ts`); the in-app `not-found.tsx` serves client-side navigations
 - [ ] T105 [US1] Run T096–T097 green and record axe results for public templates in `tests/a11y/public/baseline.json` (FR-080)
-- [ ] T106 [US1] Failing-then-passing `tests/integration/content/revalidate.test.ts`: published change visible ≤60 s (SC-009)
+- [X] T106 [US1] Failing-then-passing SC-009 checks in `tests/security/public-http.spec.ts` ("SC-009: …": published change visible ≤60 s, draft save never public) and `tests/security/cache-invalidation.spec.ts` (WS11 M-1: unpublish per locale and of all locales (the admin action), delete, replacing publish in `en` and `ar`, `en`/`ar` service listing and detail, language-switcher alternates, navigation and redirect changes take effect immediately, for document requests and client-side (RSC) navigations; public HTML is never shared-cacheable). Planned as `tests/integration/content/revalidate.test.ts`; the data cache only exists in a Next server, so these run over HTTP against a production build. With `revalidateTag(tag, 'max')` instead of `{ expire: 0 }`, 8 of the 9 write cases fail; the redirect case passes either way because missing paths are resolved uncached by the proxy (SC-009)
+
+**US1 implementation notes (WS10, 2026-10-17, partial — Gate 4 not reached)**:
+
+- Done:
+  - T095/T098: typed route map, `matchRoute`, `pnpm check:route-vocab`. Production config refuses
+    to start while CD-13 is pending.
+  - T099: A-3 root redirect (`Vary`, `private, no-store`) and remembered-language cookie.
+  - T100: messages ar/en and formatters (`docs/i18n/numerals.md`, proposed, pending owner
+    review).
+  - T103: public routes `src/app/(site)/[locale]/` over the published-only read path
+    `src/modules/content/public.ts`, plus runtime redirects.
+  - T104: localized not-found/error pages.
+  - T106: SC-009 covered by `tests/security/public-http.spec.ts`. Cache tags plus `revalidate: 60`.
+    Writes expire their tags with `revalidateTag(tag, { expire: 0 })` (`src/modules/platform/cache.ts`):
+    Next 16.3.8 `'max'` is stale-while-revalidate and would serve an unpublished or replaced
+    document at least once more. Route-handler revalidations run after the handler returns, i.e.
+    after the Payload transaction commits. Scope: the tag manifest is per server process.
+  - T130/T131 (pulled forward, required before T103): globals `site-settings`, `header-nav`,
+    `footer-nav`, `banner`. Server tests are in `tests/integration/content/globals.test.ts`; the
+    admin-UI parts of T130 are split into T130a (open).
+- T096/T097: `tests/public/{us1-locale,no-js}.spec.ts` (Chromium and WebKit).
+- Not done:
+  - **T101 fonts**: system font stacks for now; the OFL woff2 files are not in the repository.
+  - **T102 design tokens**: provisional neutral tokens in `src/app/(site)/site.css`; brand assets
+    are pending (CD-09).
+  - **T105 public axe baseline**.
+  - **T139 Lighthouse CI**.
+- ~~Known limitation: without JavaScript the 404 body is empty~~ **resolved 2026-10-28**. Next
+  16.3.8 renders any page that throws `notFound()` as an empty `__next_error__` recovery shell and
+  resets a proxy rewrite's status to 200. The proxy therefore resolves public document requests
+  with the page's own resolution (`src/modules/content/resolve.ts`, uncached reads in
+  `route-status.ts`) and answers a definite miss itself with the localized 404 document, or
+  follows a stored redirect. RSC navigations, `/admin`, `/api`, `/preview`, `/account` and other
+  reserved segments are never resolved there. Cost: one extra indexed query per public document
+  request. Tests: `tests/public/no-js.spec.ts`, `tests/unit/i18n/locale-proxy.test.ts`.
+- CD-13 (2026-10-28): the production build gate fails closed. Only an explicit
+  `APP_ENV=development|test|preview` skips it, so a host building without `APP_ENV` cannot ship
+  the placeholder vocabulary. `tests/unit/i18n/routes.test.ts` runs `pnpm check:route-vocab`
+  (fails on the placeholders, passes on an approved copy of the vocabulary) and a real
+  `next build` with `APP_ENV=production` (fails before compiling). CI runs the script in the
+  `publication-gate` job, which stays red until the owner approves the vocabulary.
+
+**Review findings (2026-10-28, low severity, open; not fixed in this change)**:
+
+- L-1 Evidence verification is not bound to the claim text: a role that may edit drafts can
+  change a verified claim (accreditation statement, company name, address, stats/credentials
+  values) and the evidence stays `verified`; a duplicate also keeps it. Publishing still needs
+  Publisher or above. Option: reset verification when the claim changes, or bind it to a hash.
+- L-2 The admin copy-to-locale action sends the source locale's `_status`; for a Publisher it can
+  publish the target locale implicitly (allowed by the matrix, audited as a publish); for an
+  Editor the whole copy is refused (403) instead of saved as a draft. Not exercised through the
+  admin UI by a test.
+- L-3 Tag expiry is per server process and only follows writes made inside a Next request.
+  Out-of-band writes (SQL restore, scripts) are invisible to a running server's data cache for
+  up to `revalidate: 60`; after a restore, restart and clear `.next/cache`. A multi-instance host
+  needs a shared cache handler (pending T132).
+- L-4 The proxy's 404 check adds one uncached indexed query per public document request (up to
+  four on a miss); public 404 probing is not rate limited.
+- L-5 The proxy's 404 document uses minimal inline styles, not the site stylesheet, and has no
+  header/footer chrome. Browsers without Fetch Metadata send no `Sec-Fetch-Dest`; their
+  client-side navigations to a missing page fall back to a full page load of the same 404.
+- L-6 (fixed) Test isolation: the cache spec's navigation case replaced the seeded `header-nav`
+  and never restored it, so `public` tests run after `security` lost their menu link (T097 and
+  the "published globals" check). It now restores the seeded menu. Separately, the users and pages
+  lists now exceed one page in a full e2e run, so Payload's unnamed pagination arrows (A-04
+  family, `docs/accessibility/admin-findings.md`) are baselined for `list:users` and
+  `list:pages`; the baseline is keyed by rule, so it cannot tell these from new unnamed buttons
+  on those lists.
+- L-7 Lint warnings that predate this change: anonymous default export in `next.config.ts`,
+  `window.location.assign` in `MfaGate.tsx` and `auth/ui/forms.tsx`.
 
 **Checkpoint (Gate 4)**: US1 green; Lighthouse CI budgets (T139) configured and passing for existing templates and enforced in CI from here on (Constitution XII); CD-13 gate active (fails production build until approved) → commit checkpoint.
 
@@ -395,8 +470,9 @@ commit checkpoint.
 
 **Depends on**: US2, US3.
 
-- [ ] T130 [P] [US7] Failing tests `tests/e2e/us7-nav.spec.ts`: two-level menus in both locales; unpublished targets flagged; `javascript:` and other disallowed schemes rejected in menu links; banner schedule window and per-visitor dismissal; Publisher saves nav/banner drafts but publish/unpublish denied via UI and REST; settings changes audited (FR-014, FR-036, FR-045)
-- [ ] T131 [US7] Implement globals `site-settings` (contact details + evidence, social links, default SEO, legal links, `enquiryRecipients`, `enquiryTopics`), `header-nav`, `footer-nav`, `banner` per data-model until T130 passes (FR-010, FR-075)
+- [X] T130 [P] [US7] Failing tests, server side only, in `tests/integration/content/globals.test.ts` (planned as `tests/e2e/us7-nav.spec.ts`): two-level menus; unpublished targets flagged on save; `javascript:` and other disallowed schemes rejected in menu links; banner schedule ordered on save; Publisher saves nav/banner drafts but publish/unpublish is denied via the Local API ("role × action on globals", "a Publisher cannot publish navigation by any route") and REST ("over REST (what the admin sends), …", added 2026-10-28); settings changes audited. Banner display window: `tests/unit/content/banner-schedule.test.ts`. Per-visitor banner dismissal: `tests/public/us1-locale.spec.ts`. The admin-UI part is T130a (FR-014, FR-036, FR-045)
+- [ ] T130a [US7] Failing tests, admin UI, `tests/e2e/us7-nav.spec.ts` (no Playwright project runs `tests/e2e/` yet: add one, or place the file under an existing admin project): Publisher edits and saves nav/banner drafts in the admin, publish/unpublish controls absent or refused in the UI; Editor read-only in the UI; unpublished-target flag visible to editors; keyboard reorder of menu items (FR-014, FR-036, FR-045). Split from T130 in WS11: the UI part was not done. Depends on T130–T131 (done) and the admin e2e accounts in `tests/support/e2e-seed.ts`; blocks Gate 8
+- [X] T131 [US7] Implement globals `site-settings` (contact details + evidence, social links, default SEO, legal links, `enquiryRecipients`, `enquiryTopics`), `header-nav`, `footer-nav`, `banner` per data-model until T130 passes (FR-010, FR-075)
 
 **Checkpoint (Gate 8)** → commit checkpoint.
 
@@ -475,7 +551,7 @@ Generated from requirement IDs cited in task lines. Every FR/SC in spec.md maps 
 | FR-005 | T063, T100 |
 | FR-006 | T100 |
 | FR-007 | T096 |
-| FR-008 | T104 |
+| FR-008 | T097, T104 |
 | FR-010 | T087, T131 |
 | FR-011 | T085, T087 |
 | FR-012 | T078, T085, T092 |
@@ -484,14 +560,14 @@ Generated from requirement IDs cited in task lines. Every FR/SC in spec.md maps 
 | FR-013b | T026, T027, T029, T071, T082 |
 | FR-013c | T028, T029, T072, T083, T084 |
 | FR-013d | T027, T073, T083 |
-| FR-014 | T026, T027, T028, T029, T071, T085, T102, T130 |
+| FR-014 | T026, T027, T028, T029, T071, T085, T102, T130, T130a |
 | FR-015 | T076 |
 | FR-017 | T088 |
 | FR-018 | T103 |
 | FR-019 | T085 |
 | FR-016 | T074, T086, T143 |
-| FR-020 | T074, T089 |
-| FR-021 | T074, T089, T103 |
+| FR-020 | T074, T089, T094c |
+| FR-021 | T074, T089, T094c, T103 |
 | FR-022 | T077, T091 |
 | FR-023 | T074, T089 |
 | FR-024 | T074, T089 |
@@ -505,11 +581,11 @@ Generated from requirement IDs cited in task lines. Every FR/SC in spec.md maps 
 | FR-033c | T047, T060 |
 | FR-034 | T048, T063 |
 | FR-035 | T049, T062, T065, T068 |
-| FR-036 | T031, T056, T068, T130 |
+| FR-036 | T031, T056, T068, T130, T130a |
 | FR-037 | T032, T052 |
 | FR-038 | T031, T032, T043, T051, T065 |
 | FR-039 | T050, T064 |
-| FR-045 | T035, T043, T045, T048, T052, T053, T066, T074, T089, T112, T118, T122, T130 |
+| FR-045 | T035, T043, T045, T048, T052, T053, T066, T074, T089, T112, T118, T122, T130, T130a |
 | FR-046 | T035, T053 |
 | FR-047 | T034, T036, T067 |
 | FR-048 | T034, T036 |

@@ -1,8 +1,8 @@
 // Evidence for claim-bearing content (T086, FR-016). Only administrators/owners may mark
 // `verified`; verifiedBy/verifiedAt are set by the server; a reference is required.
 import type { GroupField } from 'payload'
-import { APIError } from 'payload'
 import { can, isMfaVerified, roleOf } from '../access'
+import { publicError } from './errors'
 
 export function evidenceGroup(name = 'evidence'): GroupField {
   return {
@@ -24,17 +24,28 @@ export function evidenceGroup(name = 'evidence'): GroupField {
         ],
         hooks: {
           beforeChange: [
-            ({ value, previousValue, req, siblingData }) => {
+            ({ value, previousValue, previousSiblingDoc, req, siblingData }) => {
+              const prev = (previousSiblingDoc ?? {}) as Record<string, unknown>
+              const mayVerify = () => {
+                if (!req.user) return true // system paths (scripts, migrations)
+                const role = roleOf(req.user)
+                return isMfaVerified(req.user) && !!role && can(role, 'evidence', 'verify')
+              }
               if (value === 'verified' && previousValue !== 'verified') {
-                if (req.user) {
-                  const role = roleOf(req.user)
-                  if (!isMfaVerified(req.user) || !role || !can(role, 'evidence', 'verify'))
-                    throw new APIError('Only administrators can verify evidence', 403)
-                }
+                if (!mayVerify()) throw publicError('Only administrators can verify evidence', 403)
                 if (!siblingData?.reference)
-                  throw new APIError('An evidence reference is required to verify', 400)
+                  throw publicError('An evidence reference is required to verify', 400)
                 siblingData.verifiedBy = req.user?.id ?? null
                 siblingData.verifiedAt = new Date().toISOString()
+              } else if (value === 'verified' && siblingData) {
+                // Already verified: the reference is part of the verification, and the verifier
+                // and time are server-set — incoming values are never trusted.
+                if ((siblingData.reference ?? null) !== (prev.reference ?? null) && !mayVerify())
+                  throw publicError('Only administrators can change verified evidence', 403)
+                siblingData.verifiedBy = prev.verifiedBy ?? null
+                siblingData.verifiedAt = prev.verifiedAt ?? null
+                if (typeof siblingData.verifiedBy === 'object' && siblingData.verifiedBy)
+                  siblingData.verifiedBy = (siblingData.verifiedBy as { id?: unknown }).id ?? null
               }
               if (value !== 'verified' && siblingData) {
                 siblingData.verifiedBy = null
@@ -52,6 +63,13 @@ export function evidenceGroup(name = 'evidence'): GroupField {
   }
 }
 
+/** Claim-bearing text fields and the evidence group that must be verified to publish them. */
+const CLAIM_EVIDENCE = [
+  ['accreditationStatement', 'accreditationEvidence'],
+  ['companyName', 'companyNameEvidence'],
+  ['address', 'addressEvidence'],
+] as const
+
 /** Paths of claim evidence that is not verified (publish gate). */
 export function unverifiedClaims(data: unknown): string[] {
   const out: string[] = []
@@ -62,12 +80,15 @@ export function unverifiedClaims(data: unknown): string[] {
     const claimBlock = o.blockType === 'stats' || o.blockType === 'credentials'
     if (claimBlock && (o.evidence as { status?: string } | undefined)?.status !== 'verified')
       out.push(`${p}.evidence`)
-    if (
-      typeof o.accreditationStatement === 'string' &&
-      o.accreditationStatement.trim() &&
-      (o.accreditationEvidence as { status?: string } | undefined)?.status !== 'verified'
-    )
-      out.push(`${p}.accreditationEvidence`)
+    for (const [claim, evidence] of CLAIM_EVIDENCE) {
+      const value = o[claim]
+      if (
+        typeof value === 'string' &&
+        value.trim() &&
+        (o[evidence] as { status?: string } | undefined)?.status !== 'verified'
+      )
+        out.push(`${p}.${evidence}`)
+    }
     for (const [k, x] of Object.entries(o)) visit(x, `${p}.${k}`, depth + 1)
   }
   visit(data, '$', 0)

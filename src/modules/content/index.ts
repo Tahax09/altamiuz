@@ -21,3 +21,15 @@ export { normaliseSlug } from './slugs'
 export { pruneVersions } from './versions'
 export { contentRead, mayDo } from './access'
 export { restoreAsDraft } from './workflow'
+export { handleLockRequest } from './locks'
+export { banner, footerNav, headerNav, siteGlobals, siteSettings, type SiteGlobal } from './globals'
+export {
+  alternateSlugs,
+  getHome,
+  getPublicGlobal,
+  getPublished,
+  listPublished,
+  toPublic,
+  type PublicDoc,
+} from './public'
+export { decodeSegments, resolvePublicPath, type PublicReaders, type Resolution } from './resolve'

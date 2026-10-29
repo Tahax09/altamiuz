@@ -33,3 +33,20 @@ missing secret, or any placeholder value causes the app to **refuse to start** (
 
 Local services (`docker-compose.dev.yml`): `postgres:17` on `127.0.0.1:54320` and `axllent/mailpit:v1.27` (SMTP `1025`, UI `8025`). No paid accounts.
 Test runs use `memory` email and rate limit, Turnstile test keys, and a disposable database.
+
+## Neon development branch (WS10, owner-requested, 2026-10-17)
+
+A Neon project (`cold-breeze-87271910`, `aws-eu-central-1`, Postgres 18) is linked through `.neon`
+and `neon.ts` (Postgres only; Neon Auth is **not** used: authentication stays Payload sessions with
+mandatory TOTP, ADR-005). Work happens on the `dev` branch; the `production` branch is untouched
+and production hosting remains undecided.
+
+- `neon init` pulled `DATABASE_URL` (pooled), `DATABASE_URL_UNPOOLED` (direct) and `NEON_BRANCH`
+  into `.env.neon` (git-ignored). `.env.local`, local development and every test keep using the
+  local Docker Postgres.
+- `pnpm neon:migrate` / `neon:migrate:status` run Payload migrations on the **direct** endpoint;
+  `pnpm neon:start` runs the built app on the **pooled** endpoint (`scripts/with-neon.mjs`).
+- Driver: Payload's `@payloadcms/db-postgres` (node-postgres) is kept, per Neon's guidance for
+  long-running Node servers. Revisit if the host becomes serverless/edge.
+- Version note: Neon runs Postgres 18; the repository pins Postgres 17 for local and CI. All
+  migrations apply on 18; the version difference must be resolved when hosting is decided.

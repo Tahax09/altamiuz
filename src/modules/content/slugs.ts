@@ -4,7 +4,7 @@ import type { TextField } from 'payload'
 import {
   pathFor,
   RESERVED_SEGMENTS,
-  STATIC_SEGMENTS,
+  ALL_STATIC_SEGMENTS,
   type Locale,
   type RoutedCollection,
 } from '../i18n'
@@ -33,7 +33,8 @@ export function slugField(collection: RoutedCollection): TextField {
       const slug = normaliseSlug(value)
       if (!SLUG.test(slug)) return 'Use letters, digits and hyphens only.'
       const locale = (req.locale ?? 'ar') as Locale
-      const statics = [...RESERVED_SEGMENTS, ...Object.values(STATIC_SEGMENTS[locale] ?? {})]
+      // All locales' static segments: another locale's segment never resolves (matchRoute).
+      const statics = [...RESERVED_SEGMENTS, ...ALL_STATIC_SEGMENTS]
       // A slug is one path segment, so a path-prefix collision with a static segment is equality.
       if (collection === 'pages' && statics.includes(slug))
         return 'This address is reserved by the site structure.'

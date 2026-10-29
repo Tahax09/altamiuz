@@ -99,9 +99,17 @@ export interface Config {
   fallbackLocale: ('false' | 'none' | 'null') | false | null | ('ar' | 'en') | ('ar' | 'en')[];
   globals: {
     'security-settings': SecuritySetting;
+    'site-settings': SiteSetting;
+    'header-nav': HeaderNav;
+    'footer-nav': FooterNav;
+    banner: Banner;
   };
   globalsSelect: {
     'security-settings': SecuritySettingsSelect<false> | SecuritySettingsSelect<true>;
+    'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
+    'header-nav': HeaderNavSelect<false> | HeaderNavSelect<true>;
+    'footer-nav': FooterNavSelect<false> | FooterNavSelect<true>;
+    banner: BannerSelect<false> | BannerSelect<true>;
   };
   locale: 'ar' | 'en';
   widgets: {
@@ -503,7 +511,13 @@ export interface Page {
       )[]
     | null;
   seo?: {
+    /**
+     * Required to publish this language.
+     */
     title?: string | null;
+    /**
+     * Required to publish this language.
+     */
     description?: string | null;
     noindex?: boolean | null;
   };
@@ -789,7 +803,13 @@ export interface Service {
   order?: number | null;
   hidden?: boolean | null;
   seo?: {
+    /**
+     * Required to publish this language.
+     */
     title?: string | null;
+    /**
+     * Required to publish this language.
+     */
     description?: string | null;
     noindex?: boolean | null;
   };
@@ -1095,7 +1115,13 @@ export interface Course {
     verifiedAt?: string | null;
   };
   seo?: {
+    /**
+     * Required to publish this language.
+     */
     title?: string | null;
+    /**
+     * Required to publish this language.
+     */
     description?: string | null;
     noindex?: boolean | null;
   };
@@ -1938,6 +1964,293 @@ export interface SecuritySetting {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "site-settings".
+ */
+export interface SiteSetting {
+  id: number;
+  companyName?: string | null;
+  /**
+   * Claims are publishable only once verified by an administrator, with a recorded evidence reference.
+   */
+  companyNameEvidence: {
+    status: 'unverified' | 'verified';
+    reference?: string | null;
+    verifiedBy?: (number | null) | User;
+    verifiedAt?: string | null;
+  };
+  address?: string | null;
+  /**
+   * Claims are publishable only once verified by an administrator, with a recorded evidence reference.
+   */
+  addressEvidence: {
+    status: 'unverified' | 'verified';
+    reference?: string | null;
+    verifiedBy?: (number | null) | User;
+    verifiedAt?: string | null;
+  };
+  phone?: string | null;
+  email?: string | null;
+  hours?: string | null;
+  socialLinks?:
+    | {
+        link?: {
+          linkType?: ('internal' | 'external' | 'email' | 'tel') | null;
+          doc?:
+            | ({
+                relationTo: 'pages';
+                value: number | Page;
+              } | null)
+            | ({
+                relationTo: 'services';
+                value: number | Service;
+              } | null)
+            | ({
+                relationTo: 'courses';
+                value: number | Course;
+              } | null);
+          url?: string | null;
+          email?: string | null;
+          tel?: string | null;
+          label?: string | null;
+          newTab?: boolean | null;
+        };
+        id?: string | null;
+      }[]
+    | null;
+  defaultSeo?: {
+    title?: string | null;
+    description?: string | null;
+  };
+  legalLinks?:
+    | {
+        link?: {
+          linkType?: ('internal' | 'external' | 'email' | 'tel') | null;
+          doc?:
+            | ({
+                relationTo: 'pages';
+                value: number | Page;
+              } | null)
+            | ({
+                relationTo: 'services';
+                value: number | Service;
+              } | null)
+            | ({
+                relationTo: 'courses';
+                value: number | Course;
+              } | null);
+          url?: string | null;
+          email?: string | null;
+          tel?: string | null;
+          label?: string | null;
+          newTab?: boolean | null;
+        };
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Who receives contact enquiries. Visible to administrators only.
+   */
+  enquiryRecipients?:
+    | {
+        email: string;
+        id?: string | null;
+      }[]
+    | null;
+  enquiryTopics?:
+    | {
+        label: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Mirrors the server configuration (ANALYTICS_DRIVER).
+   */
+  analyticsEnabled?: boolean | null;
+  _status?: ('draft' | 'published') | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "header-nav".
+ */
+export interface HeaderNav {
+  id: number;
+  items?:
+    | {
+        link: {
+          linkType?: ('internal' | 'external' | 'email' | 'tel') | null;
+          doc?:
+            | ({
+                relationTo: 'pages';
+                value: number | Page;
+              } | null)
+            | ({
+                relationTo: 'services';
+                value: number | Service;
+              } | null)
+            | ({
+                relationTo: 'courses';
+                value: number | Course;
+              } | null);
+          url?: string | null;
+          email?: string | null;
+          tel?: string | null;
+          label: string;
+          newTab?: boolean | null;
+        };
+        /**
+         * Set on save: the linked page is not published in this language.
+         */
+        targetUnpublished?: boolean | null;
+        children?:
+          | {
+              link: {
+                linkType?: ('internal' | 'external' | 'email' | 'tel') | null;
+                doc?:
+                  | ({
+                      relationTo: 'pages';
+                      value: number | Page;
+                    } | null)
+                  | ({
+                      relationTo: 'services';
+                      value: number | Service;
+                    } | null)
+                  | ({
+                      relationTo: 'courses';
+                      value: number | Course;
+                    } | null);
+                url?: string | null;
+                email?: string | null;
+                tel?: string | null;
+                label: string;
+                newTab?: boolean | null;
+              };
+              /**
+               * Set on save: the linked page is not published in this language.
+               */
+              targetUnpublished?: boolean | null;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+      }[]
+    | null;
+  _status?: ('draft' | 'published') | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "footer-nav".
+ */
+export interface FooterNav {
+  id: number;
+  items?:
+    | {
+        link: {
+          linkType?: ('internal' | 'external' | 'email' | 'tel') | null;
+          doc?:
+            | ({
+                relationTo: 'pages';
+                value: number | Page;
+              } | null)
+            | ({
+                relationTo: 'services';
+                value: number | Service;
+              } | null)
+            | ({
+                relationTo: 'courses';
+                value: number | Course;
+              } | null);
+          url?: string | null;
+          email?: string | null;
+          tel?: string | null;
+          label: string;
+          newTab?: boolean | null;
+        };
+        /**
+         * Set on save: the linked page is not published in this language.
+         */
+        targetUnpublished?: boolean | null;
+        children?:
+          | {
+              link: {
+                linkType?: ('internal' | 'external' | 'email' | 'tel') | null;
+                doc?:
+                  | ({
+                      relationTo: 'pages';
+                      value: number | Page;
+                    } | null)
+                  | ({
+                      relationTo: 'services';
+                      value: number | Service;
+                    } | null)
+                  | ({
+                      relationTo: 'courses';
+                      value: number | Course;
+                    } | null);
+                url?: string | null;
+                email?: string | null;
+                tel?: string | null;
+                label: string;
+                newTab?: boolean | null;
+              };
+              /**
+               * Set on save: the linked page is not published in this language.
+               */
+              targetUnpublished?: boolean | null;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+      }[]
+    | null;
+  _status?: ('draft' | 'published') | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "banner".
+ */
+export interface Banner {
+  id: number;
+  enabled?: boolean | null;
+  /**
+   * Plain text only.
+   */
+  message?: string | null;
+  link?: {
+    linkType?: ('internal' | 'external' | 'email' | 'tel') | null;
+    doc?:
+      | ({
+          relationTo: 'pages';
+          value: number | Page;
+        } | null)
+      | ({
+          relationTo: 'services';
+          value: number | Service;
+        } | null)
+      | ({
+          relationTo: 'courses';
+          value: number | Course;
+        } | null);
+    url?: string | null;
+    email?: string | null;
+    tel?: string | null;
+    label?: string | null;
+    newTab?: boolean | null;
+  };
+  startsAt?: string | null;
+  endsAt?: string | null;
+  dismissKey?: string | null;
+  _status?: ('draft' | 'published') | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "security-settings_select".
  */
 export interface SecuritySettingsSelect<T extends boolean = true> {
@@ -1945,6 +2258,202 @@ export interface SecuritySettingsSelect<T extends boolean = true> {
   absoluteHours?: T;
   lockoutThreshold?: T;
   lockoutMinutes?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "site-settings_select".
+ */
+export interface SiteSettingsSelect<T extends boolean = true> {
+  companyName?: T;
+  companyNameEvidence?:
+    | T
+    | {
+        status?: T;
+        reference?: T;
+        verifiedBy?: T;
+        verifiedAt?: T;
+      };
+  address?: T;
+  addressEvidence?:
+    | T
+    | {
+        status?: T;
+        reference?: T;
+        verifiedBy?: T;
+        verifiedAt?: T;
+      };
+  phone?: T;
+  email?: T;
+  hours?: T;
+  socialLinks?:
+    | T
+    | {
+        link?:
+          | T
+          | {
+              linkType?: T;
+              doc?: T;
+              url?: T;
+              email?: T;
+              tel?: T;
+              label?: T;
+              newTab?: T;
+            };
+        id?: T;
+      };
+  defaultSeo?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+      };
+  legalLinks?:
+    | T
+    | {
+        link?:
+          | T
+          | {
+              linkType?: T;
+              doc?: T;
+              url?: T;
+              email?: T;
+              tel?: T;
+              label?: T;
+              newTab?: T;
+            };
+        id?: T;
+      };
+  enquiryRecipients?:
+    | T
+    | {
+        email?: T;
+        id?: T;
+      };
+  enquiryTopics?:
+    | T
+    | {
+        label?: T;
+        id?: T;
+      };
+  analyticsEnabled?: T;
+  _status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "header-nav_select".
+ */
+export interface HeaderNavSelect<T extends boolean = true> {
+  items?:
+    | T
+    | {
+        link?:
+          | T
+          | {
+              linkType?: T;
+              doc?: T;
+              url?: T;
+              email?: T;
+              tel?: T;
+              label?: T;
+              newTab?: T;
+            };
+        targetUnpublished?: T;
+        children?:
+          | T
+          | {
+              link?:
+                | T
+                | {
+                    linkType?: T;
+                    doc?: T;
+                    url?: T;
+                    email?: T;
+                    tel?: T;
+                    label?: T;
+                    newTab?: T;
+                  };
+              targetUnpublished?: T;
+              id?: T;
+            };
+        id?: T;
+      };
+  _status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "footer-nav_select".
+ */
+export interface FooterNavSelect<T extends boolean = true> {
+  items?:
+    | T
+    | {
+        link?:
+          | T
+          | {
+              linkType?: T;
+              doc?: T;
+              url?: T;
+              email?: T;
+              tel?: T;
+              label?: T;
+              newTab?: T;
+            };
+        targetUnpublished?: T;
+        children?:
+          | T
+          | {
+              link?:
+                | T
+                | {
+                    linkType?: T;
+                    doc?: T;
+                    url?: T;
+                    email?: T;
+                    tel?: T;
+                    label?: T;
+                    newTab?: T;
+                  };
+              targetUnpublished?: T;
+              id?: T;
+            };
+        id?: T;
+      };
+  _status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "banner_select".
+ */
+export interface BannerSelect<T extends boolean = true> {
+  enabled?: T;
+  message?: T;
+  link?:
+    | T
+    | {
+        linkType?: T;
+        doc?: T;
+        url?: T;
+        email?: T;
+        tel?: T;
+        label?: T;
+        newTab?: T;
+      };
+  startsAt?: T;
+  endsAt?: T;
+  dismissKey?: T;
+  _status?: T;
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

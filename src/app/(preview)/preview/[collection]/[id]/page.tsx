@@ -4,7 +4,7 @@ import config from '@payload-config'
 import { headers } from 'next/headers'
 import { notFound } from 'next/navigation'
 import { getPayload } from 'payload'
-import { mayDo } from '@/modules/content'
+import { listPublished, mayDo } from '@/modules/content'
 import { DocumentView } from '@/ui'
 
 export const dynamic = 'force-dynamic'
@@ -41,7 +41,17 @@ export default async function Preview({
   return (
     <main data-preview="true">
       <p role="note">Preview — draft content, not public.</p>
-      <DocumentView doc={doc as unknown as Record<string, unknown>} locale={locale} />
+      <DocumentView
+        doc={doc as unknown as Record<string, unknown>}
+        locale={locale}
+        ctx={{
+          // Same listing data as the public page (published items only), so output matches.
+          listings: {
+            services: await listPublished(payload, 'services', locale),
+            courses: await listPublished(payload, 'courses', locale),
+          },
+        }}
+      />
     </main>
   )
 }

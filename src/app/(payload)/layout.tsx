@@ -4,7 +4,10 @@ import config from '@payload-config'
 import '@payloadcms/next/css'
 import type { ServerFunctionClient } from 'payload'
 import { handleServerFunctions, RootLayout } from '@payloadcms/next/layouts'
+import { headers } from 'next/headers'
+import { getPayload } from 'payload'
 import React from 'react'
+import { assertAdminServerFunctionAllowed } from '@/modules/auth'
 
 import { importMap } from './admin/importMap.js'
 import './custom.scss'
@@ -15,6 +18,8 @@ type Args = {
 
 const serverFunction: ServerFunctionClient = async function (args) {
   'use server'
+  // Project addition (WS10): no admin server function runs without a completed-MFA session.
+  await assertAdminServerFunctionAllowed(await getPayload({ config }), await headers())
   return handleServerFunctions({
     ...args,
     config,

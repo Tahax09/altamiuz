@@ -121,7 +121,11 @@ describe('T074 per-locale publish and unpublish', () => {
       id: p.id,
       locale: 'ar',
       draft: true,
-      data: { title: 'عنوان', slug: `ar-${p.id}` } as never,
+      data: {
+        title: 'عنوان',
+        slug: `ar-${p.id}`,
+        seo: { title: 'عنوان', description: 'وصف' },
+      } as never,
       user: await u('editor'),
       overrideAccess: false,
     })
@@ -187,7 +191,11 @@ describe('T074 per-locale publish and unpublish', () => {
           id: p.id,
           locale,
           draft: true,
-          data: { title: 'عنوان', slug: `ar-un-${p.id}` } as never,
+          data: {
+            title: 'عنوان',
+            slug: `ar-un-${p.id}`,
+            seo: { title: 'عنوان', description: 'وصف' },
+          } as never,
           user: await u('editor'),
           overrideAccess: false,
         })
@@ -232,6 +240,26 @@ describe('T074 publishing requires complete locale fields', () => {
     ).rejects.toMatchObject({ status: 400 })
     expect(await publicFind('ar', p.id)).toEqual([])
     expect(await publicFind('en', p.id)).toEqual([])
+  })
+})
+
+describe('T074 SEO title and description are required to publish (data-model seo group)', () => {
+  it('publishing a locale without SEO title or description is refused; drafts may omit them', async () => {
+    for (const seo of [{ title: '', description: 'd' }, { title: 't', description: '' }, {}]) {
+      const p = await draftPage('editor', 'en', pageData(slug(), 'No SEO', { seo }))
+      await expect(
+        t.payload.update({
+          collection: 'pages',
+          id: p.id,
+          locale: 'en',
+          data: { _status: 'published' } as never,
+          user: await u('publisher'),
+          overrideAccess: false,
+        }),
+        JSON.stringify(seo),
+      ).rejects.toMatchObject({ status: 400 })
+      expect(await publicFind('en', p.id)).toEqual([])
+    }
   })
 })
 
@@ -397,18 +425,37 @@ describe('T074 unauthorized publication paths', () => {
     expect(await publicFind('en', p.id)).toEqual([])
   })
 
-  it('a Publisher can publish all locales at once only with publish permission', async () => {
+  it('publishing all locales needs every locale complete (FR-004)', async () => {
     const p = await draftPage()
+    const all = async () =>
+      t.payload.update({
+        collection: 'pages',
+        id: p.id,
+        locale: 'en',
+        data: { _status: 'published' } as never,
+        publishAllLocales: true,
+        user: await u('publisher'),
+        overrideAccess: false,
+      } as never)
+    // Arabic is empty: refused, nothing published (WS10 finding: it used to publish an empty locale).
+    await expect(all()).rejects.toMatchObject({ status: 400 })
+    expect(await publicFind('en', p.id)).toEqual([])
     await t.payload.update({
       collection: 'pages',
       id: p.id,
-      locale: 'en',
-      data: { _status: 'published' } as never,
-      publishAllLocales: true,
-      user: await u('publisher'),
+      locale: 'ar',
+      draft: true,
+      data: {
+        title: 'عنوان',
+        slug: `ar-all-${p.id}`,
+        seo: { title: 'عنوان', description: 'وصف' },
+      } as never,
+      user: await u('editor'),
       overrideAccess: false,
-    } as never)
+    })
+    await all()
     expect(await publicFind('en', p.id)).toHaveLength(1)
+    expect(await publicFind('ar', p.id)).toHaveLength(1)
   })
 })
 
@@ -474,6 +521,103 @@ describe('T074 versions and restore', () => {
   })
 })
 
+describe('T074 restore validates every restored locale in one transaction (D-22, ADR-006)', () => {
+  const versionWhere = async (id: number, title: string) =>
+    (
+      await t.payload.findVersions({
+        collection: 'pages',
+        where: { and: [{ parent: { equals: id } }, { 'version.title': { equals: title } }] },
+        overrideAccess: true,
+        locale: 'en',
+      })
+    ).docs[0]!.id as unknown as number
+  const draftOf = async (id: number, locale: 'ar' | 'en') =>
+    (await t.payload.findByID({
+      collection: 'pages',
+      id,
+      locale,
+      fallbackLocale: false,
+      draft: true,
+      overrideAccess: true,
+    })) as unknown as { title?: string | null; slug?: string | null; _status?: string }
+
+  it('an English-only version restores (Arabic is not required) and the audit names the locales', async () => {
+    const p = await draftPage('editor', 'en', pageData(slug(), 'English v1'))
+    await t.payload.update({
+      collection: 'pages',
+      id: p.id,
+      locale: 'en',
+      draft: true,
+      data: { title: 'English v2' } as never,
+      user: await u('editor'),
+      overrideAccess: false,
+    })
+    await restore('publisher', await versionWhere(p.id, 'English v1'))
+    expect((await draftOf(p.id, 'en')).title).toBe('English v1')
+    const audit = await t.sql.query(
+      `select meta from audit_events where action = 'content.restore' and target_id = $1`,
+      [String(p.id)],
+    )
+    expect(audit.rows.at(-1)!.meta).toMatchObject({ collection: 'pages', locales: 'en' })
+  })
+
+  it('locales the version has no content for keep their current draft', async () => {
+    const p = await draftPage('editor', 'en', pageData(slug(), 'Only English'))
+    const v1 = await versionWhere(p.id, 'Only English')
+    await t.payload.update({
+      collection: 'pages',
+      id: p.id,
+      locale: 'ar',
+      draft: true,
+      data: { title: 'عربي لاحق', slug: `ar-later-${p.id}` } as never,
+      user: await u('editor'),
+      overrideAccess: false,
+    })
+    await restore('publisher', v1)
+    expect((await draftOf(p.id, 'ar')).title).toBe('عربي لاحق')
+  })
+
+  it('an invalid locale in the version (slug now taken) rejects the whole restore', async () => {
+    const taken = slug()
+    const p = await draftPage('editor', 'en', pageData(taken, 'Has slug'))
+    const v1 = await versionWhere(p.id, 'Has slug')
+    await t.payload.update({
+      collection: 'pages',
+      id: p.id,
+      locale: 'en',
+      draft: true,
+      data: { title: 'Renamed', slug: `${taken}-moved` } as never,
+      user: await u('editor'),
+      overrideAccess: false,
+    })
+    await draftPage('editor', 'en', pageData(taken, 'Squatter')) // another page takes the old slug
+    const versionsBefore = Number(
+      (await t.sql.query('select count(*) from _pages_v where parent_id = $1', [p.id])).rows[0]
+        .count,
+    )
+    await expect(restore('publisher', v1)).rejects.toMatchObject({ status: 400 })
+    const versionsAfter = Number(
+      (await t.sql.query('select count(*) from _pages_v where parent_id = $1', [p.id])).rows[0]
+        .count,
+    )
+    expect(versionsAfter).toBe(versionsBefore)
+    expect((await draftOf(p.id, 'en')).title).toBe('Renamed')
+  })
+
+  it('a version id from another collection or that does not exist is not restorable', async () => {
+    await expect(restore('publisher', 999_999)).rejects.toMatchObject({ status: 404 })
+  })
+
+  it('denied restores are audited and change nothing', async () => {
+    const p = await draftPage('editor', 'en', pageData(slug(), 'Deny v1'))
+    const before = await auditCount('access.denied', 'denied')
+    await expect(restore('editor', await versionWhere(p.id, 'Deny v1'))).rejects.toMatchObject({
+      status: 403,
+    })
+    expect(await auditCount('access.denied', 'denied')).toBe(before + 1)
+  })
+})
+
 describe('T074 evidence gate (FR-016b)', () => {
   const stats = (status: 'verified' | 'unverified', reference = '') => ({
     blockType: 'stats',
@@ -524,6 +668,51 @@ describe('T074 evidence gate (FR-016b)', () => {
       overrideAccess: false,
     })
     expect(await publicFind('en', p.id)).toHaveLength(1)
+  })
+
+  it('verification metadata cannot be forged or the reference swapped without verify rights', async () => {
+    const adminUser = await u('administrator')
+    const p = await draftPage(
+      'administrator',
+      'en',
+      pageData(slug(), 'S', { sections: [stats('verified', 'Register 2026')] }),
+    )
+    const full = (await t.payload.findByID({
+      collection: 'pages',
+      id: p.id,
+      draft: true,
+      locale: 'en',
+      overrideAccess: true,
+    })) as unknown as { sections: { id: string; evidence: Record<string, unknown> }[] }
+    const block = full.sections[0]!
+    expect(block.evidence.verifiedBy).toBeTruthy()
+    const editorUser = (await u('editor')) as unknown as { id: number }
+    const tamper = async (evidence: Record<string, unknown>) =>
+      t.payload.update({
+        collection: 'pages',
+        id: p.id,
+        locale: 'en',
+        draft: true,
+        data: { sections: [{ ...block, evidence: { ...block.evidence, ...evidence } }] } as never,
+        user: await u('editor'),
+        overrideAccess: false,
+      })
+    // Forged verifier/time are ignored: the stored values stay the administrator's.
+    await tamper({ verifiedBy: editorUser.id, verifiedAt: '2000-01-01T00:00:00.000Z' }).catch(
+      () => null,
+    )
+    const after = (await t.payload.findByID({
+      collection: 'pages',
+      id: p.id,
+      draft: true,
+      locale: 'en',
+      overrideAccess: true,
+      depth: 0,
+    })) as unknown as { sections: { evidence: Record<string, unknown> }[] }
+    expect(after.sections[0]!.evidence.verifiedBy).toBe((adminUser as unknown as { id: number }).id)
+    expect(after.sections[0]!.evidence.verifiedAt).not.toBe('2000-01-01T00:00:00.000Z')
+    // Swapping the evidence reference on verified evidence needs verify rights.
+    await expect(tamper({ reference: 'Something else' })).rejects.toMatchObject({ status: 403 })
   })
 
   it('a course accreditation statement needs verified evidence before publishing', async () => {

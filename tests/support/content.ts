@@ -111,5 +111,6 @@ export const pageData = (slug: string, title = 'Title', extra: Record<string, un
   slug,
   template: 'default',
   sections: [{ blockType: 'richText', content: rt('Body') }],
+  seo: { title: `${title} | SEO`.slice(0, 60), description: 'Search description' },
   ...extra,
 })

@@ -19,6 +19,11 @@
   ],
   "list:users": [
     {
+      "rule": "button-name",
+      "impact": "critical",
+      "nodes": 2
+    },
+    {
       "rule": "color-contrast",
       "impact": "serious",
       "nodes": 5
@@ -63,6 +68,11 @@
   ],
   "list:audit-events": [
     {
+      "rule": "button-name",
+      "impact": "critical",
+      "nodes": 2
+    },
+    {
       "rule": "color-contrast",
       "impact": "serious",
       "nodes": 5
@@ -103,6 +113,16 @@
     }
   ],
   "list:pages": [
+    {
+      "rule": "aria-command-name",
+      "impact": "serious",
+      "nodes": 2
+    },
+    {
+      "rule": "button-name",
+      "impact": "critical",
+      "nodes": 2
+    },
     {
       "rule": "color-contrast",
       "impact": "serious",
@@ -198,6 +218,16 @@
       "rule": "color-contrast",
       "impact": "serious",
       "nodes": 1
+    },
+    {
+      "rule": "label",
+      "impact": "critical",
+      "nodes": 1
+    },
+    {
+      "rule": "target-size",
+      "impact": "serious",
+      "nodes": 8
     }
   ]
 }

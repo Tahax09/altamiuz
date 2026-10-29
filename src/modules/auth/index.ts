@@ -38,3 +38,7 @@ export { checkPassword, PASSWORD_MIN } from './password'
 export { getMailer, setLimiterForTests } from './services'
 export { clientIp, sameOrigin } from './endpoints'
 export { ApiForm, MfaFlow, RecoveryCodes, SecurityPanel, TokenForm } from './ui'
+export {
+  AdminServerFunctionDenied,
+  assertAdminServerFunctionAllowed,
+} from './admin/server-functions'

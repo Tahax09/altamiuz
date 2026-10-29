@@ -1,0 +1,35 @@
+// Arabic interface strings (FR-005). Same keys as en.ts. Pending native-speaker review before
+// launch (content dependency, alongside CD-13); not editor-managed content.
+import type { en } from './en'
+
+export const ar: Record<keyof typeof en, string> = {
+  skipToContent: 'تخطَّ إلى المحتوى',
+  mainNavigation: 'التنقل الرئيسي',
+  footerNavigation: 'روابط التذييل',
+  switchLanguage: 'تغيير اللغة',
+  translationMissing: 'هذه الصفحة غير متوفرة باللغة {language}.',
+  languageUnavailable: 'لا توجد نسخة {language} من هذه الصفحة',
+  home: 'الرئيسية',
+  services: 'الخدمات',
+  training: 'التدريب',
+  noServices: 'لا توجد خدمات منشورة حالياً.',
+  noCourses: 'لا توجد دورات منشورة حالياً.',
+  readMore: 'اقرأ المزيد',
+  audience: 'الفئة المستهدفة',
+  duration: 'المدة',
+  deliveryFormat: 'طريقة التقديم',
+  formatInPerson: 'حضوري',
+  formatOnline: 'عن بُعد',
+  formatHybrid: 'مدمج',
+  unitHours: 'ساعات',
+  unitDays: 'أيام',
+  unitWeeks: 'أسابيع',
+  provider: 'الجهة المقدِّمة',
+  dismissBanner: 'إغلاق الإعلان',
+  notFoundTitle: 'الصفحة غير موجودة',
+  notFoundBody: 'لم نعثر على هذه الصفحة. ربما نُقلت أو أُزيلت.',
+  errorTitle: 'حدث خطأ',
+  errorBody: 'تعذّر عرض هذه الصفحة الآن. يرجى المحاولة لاحقاً.',
+  backHome: 'العودة إلى الصفحة الرئيسية',
+  tryAgain: 'إعادة المحاولة',
+}

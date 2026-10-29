@@ -126,8 +126,20 @@ export const sessionStrategy: AuthStrategy = {
         new Date(),
       ])
     }
-    user.mfaVerified = state.mfa_verified_at !== null
-    user.reauthAt = state.reauth_at ? new Date(state.reauth_at).toISOString() : null
+    // Server-only session metadata: readable by our access checks, but non-enumerable so it is
+    // never serialised into admin page payloads, form state or lock responses (WS10 finding).
+    for (const [key, value] of [
+      ['_sid', user._sid],
+      ['mfaVerified', state.mfa_verified_at !== null],
+      ['reauthAt', state.reauth_at ? new Date(state.reauth_at).toISOString() : null],
+    ] as const)
+      Object.defineProperty(user, key, {
+        value,
+        enumerable: false,
+        writable: true,
+        configurable: true,
+      })
+    delete user.sessions // Payload re-reads sessions from the database when it needs them
     return { user: user as never }
   },
 }

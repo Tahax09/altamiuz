@@ -2,3 +2,4 @@ export { ConfigError, getConfig, loadConfig, type AppConfig, type AppEnv } from 
 export { createLogger, REDACTED, type Logger } from './logger'
 export * from './adapters'
 export { livenessResponse, readinessResponse } from './health'
+export { expireCacheTags } from './cache'

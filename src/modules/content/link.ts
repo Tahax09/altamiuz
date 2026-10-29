@@ -1,7 +1,7 @@
 // Shared `link` group (data-model; hero/CTA/nav/social/banner). URL, e-mail and phone are checked
 // with the rich-text URL policy on save; internal links reference documents, never free paths.
 import type { Field, GroupField } from 'payload'
-import { APIError } from 'payload'
+import { publicError } from './errors'
 import { INTERNAL_LINK_COLLECTIONS } from './richtext/editor'
 import { classifyUrl } from './richtext/policy'
 import { linkGroupIssues } from './richtext/walk'
@@ -61,12 +61,9 @@ export function linkGroup(
           if (value && typeof value === 'object') {
             const issues = linkGroupIssues(value as Record<string, unknown>, name)
             if (issues.length)
-              throw new APIError(
-                `Link rejected (${issues.map((i) => i.code).join(', ')})`,
-                400,
-                { issues },
-                true,
-              )
+              throw publicError(`Link rejected (${issues.map((i) => i.code).join(', ')})`, 400, {
+                issues,
+              })
           }
           return value
         },

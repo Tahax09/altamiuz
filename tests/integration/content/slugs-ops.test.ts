@@ -27,7 +27,15 @@ async function draft(
   collection: 'pages' | 'services' = 'pages',
 ) {
   const data =
-    collection === 'pages' ? pageData(slug) : { title: 'S', slug, summary: 's', sections: [] }
+    collection === 'pages'
+      ? pageData(slug)
+      : {
+          title: 'S',
+          slug,
+          summary: 's',
+          seo: { title: 'SEO title', description: 'SEO description' },
+          sections: [],
+        }
   return (await t.payload.create({
     collection,
     data: data as never,

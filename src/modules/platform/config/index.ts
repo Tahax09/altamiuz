@@ -2,6 +2,7 @@
 // Production refuses development substitutes, placeholders and missing secrets. Error messages
 // name variables only; values are never echoed.
 import { z } from 'zod'
+import { routeVocabularyPending } from '../../i18n'
 
 export type AppEnv = 'development' | 'test' | 'preview' | 'production'
 
@@ -228,7 +229,16 @@ function deepFreeze<T>(obj: T): T {
 
 export type EnvSource = Record<string, string | undefined>
 
-export function loadConfig(env: EnvSource = process.env): AppConfig {
+export type ConfigGates = {
+  /** CD-13: production refuses to start while the Arabic route vocabulary is a placeholder. */
+  routeVocabularyPending: () => boolean
+}
+const DEFAULT_GATES: ConfigGates = { routeVocabularyPending }
+
+export function loadConfig(
+  env: EnvSource = process.env,
+  gates: ConfigGates = DEFAULT_GATES,
+): AppConfig {
   const parsed = rawSchema.safeParse(env)
   if (!parsed.success) {
     throw new ConfigError(
@@ -239,6 +249,11 @@ export function loadConfig(env: EnvSource = process.env): AppConfig {
     )
   }
   const issues = crossChecks(parsed.data)
+  if (parsed.data.APP_ENV === 'production' && gates.routeVocabularyPending())
+    issues.push({
+      variable: 'ROUTE_VOCABULARY',
+      reason: 'Arabic route vocabulary is not approved (CD-13 publication gate)',
+    })
   if (issues.length) throw new ConfigError(issues)
   return deepFreeze(build(parsed.data))
 }

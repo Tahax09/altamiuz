@@ -53,8 +53,10 @@ yet.
 3. **Validation errors are not programmatically associated.** Error tooltips are not referenced
    by `aria-describedby`, the input gets no `aria-invalid`, and focus is not moved. Under load,
    a failed save can show only the toast, with no inline errors.
-4. **Unnamed icon buttons:** popup triggers, toolbar bold/italic/link and relationship
-   "add new" (axe `button-name`).
+4. **Unnamed icon buttons:** popup triggers, toolbar bold/italic/link, relationship "add new",
+   and the list pagination arrows (`button.clickable-arrow`, shown once a list has more than 10
+   rows; measured on the audit-events list in WS10 and on the users and pages lists on 2026-10-28, once
+   the e2e data exceeded 10 rows) (axe `button-name`).
 5. **Document lock is released by every save** (`checkDocumentLockStatus` deletes it), so
    autosave defeats locking. This is a security/integrity issue and also affects FR-015.
 6. **Local API `restoreVersion` ignores `draft`.** A non-draft restore overwrites the live

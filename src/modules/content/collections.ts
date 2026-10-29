@@ -11,15 +11,40 @@ import {
   captureOperation,
   enforceWorkflow,
   restoreAsDraftEndpoint,
+  statusDraftOnDuplicate,
   verifyStoredContent,
 } from './workflow'
+
+/** Inline validation (FR-004, data-model `seo`): optional on drafts, required to publish. The
+ * server backstop is verifyStoredContent, which rolls back a published locale without SEO. */
+const requiredToPublish =
+  (max: number) =>
+  (value: unknown, { data }: { data?: { _status?: unknown } }) => {
+    const v = typeof value === 'string' ? value.trim() : ''
+    if (typeof value === 'string' && value.length > max) return `Use at most ${max} characters.`
+    return data?._status === 'published' && !v ? 'Required to publish this language.' : true
+  }
 
 const seo: Field = {
   name: 'seo',
   type: 'group',
   fields: [
-    { name: 'title', type: 'text', localized: true, maxLength: 60 },
-    { name: 'description', type: 'textarea', localized: true, maxLength: 160 },
+    {
+      name: 'title',
+      type: 'text',
+      localized: true,
+      maxLength: 60,
+      validate: requiredToPublish(60),
+      admin: { description: 'Required to publish this language.' },
+    },
+    {
+      name: 'description',
+      type: 'textarea',
+      localized: true,
+      maxLength: 160,
+      validate: requiredToPublish(160),
+      admin: { description: 'Required to publish this language.' },
+    },
     { name: 'noindex', type: 'checkbox', defaultValue: false },
   ],
 }
@@ -40,12 +65,13 @@ function routed(
         `/preview/${slug}/${String(doc.id)}?locale=${locale === 'en' ? 'en' : 'ar'}`,
     },
     access: contentAccess(slug),
-    // localizeStatus: per-locale publish (experimental, D-4, regression-tested). Drafts are not
-    // validated for required fields (editors may save incomplete work); safety hooks always run.
+    // localizeStatus: per-locale publish (experimental, D-4, regression-tested). Drafts are fully
+    // validated (D-22, data-model): required fields, slug rules and limits apply to every save of
+    // the edited locale; the rich-text safety hooks run as well (T094a).
     // No autosave: Payload 3.91.0 deletes the document lock on every save, so autosave would
     // release the lock every few seconds and defeat FR-015 (verified by tests/security T076).
     versions: {
-      drafts: { localizeStatus: true, validate: false },
+      drafts: { localizeStatus: true, validate: true },
       maxPerDoc: 0,
     },
     endpoints: [restoreAsDraftEndpoint(slug)],
@@ -60,6 +86,7 @@ function routed(
       slugField(slug),
       ...fields,
       seo,
+      statusDraftOnDuplicate,
     ],
     ...extra,
   }
