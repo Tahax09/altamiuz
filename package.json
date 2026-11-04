@@ -34,7 +34,7 @@
     "audit:deps": "pnpm audit --audit-level high && sh scripts/osv-scan.sh",
     "ci:local": "sh scripts/ci-local.sh",
     "prepare": "sh scripts/install-hooks.sh",
-    "test:a11y": "playwright test --project a11y-admin",
+    "test:a11y": "playwright test --project a11y-admin --project a11y-public",
     "test:public": "playwright test --project public --project public-webkit",
     "test:e2e": "playwright test --project e2e",
     "bootstrap:owner": "payload run scripts/bootstrap-owner.ts",

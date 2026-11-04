@@ -6,5 +6,5 @@ export {
   Sections,
   type RenderContext,
 } from './sections/Sections'
-export { LanguageSwitcher, SiteBanner, SiteFooter, SiteHeader } from './site/Chrome'
+export { LanguageSwitcher, SiteBanner, SiteFooter, SiteHeader, SkipLink } from './site/Chrome'
 export { NotFoundView } from './site/NotFoundView'

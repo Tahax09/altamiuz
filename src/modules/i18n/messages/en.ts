@@ -26,6 +26,7 @@ export const en = {
   announcement: 'Announcement',
   validUntil: 'Valid until {date}',
   notFoundTitle: 'Page not found',
+  notFoundLinks: 'Where to go next',
   notFoundBody: 'We could not find that page. It may have moved or been removed.',
   errorTitle: 'Something went wrong',
   errorBody: 'This page cannot be shown right now. Please try again later.',

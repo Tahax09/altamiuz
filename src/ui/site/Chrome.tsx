@@ -104,6 +104,15 @@ export function LanguageSwitcher({
   )
 }
 
+/** First focusable element of every page (WCAG 2.4.1): before the banner and the header. */
+export function SkipLink({ locale }: { locale: Locale }) {
+  return (
+    <a className="skip-link" href="#main">
+      {t(locale, 'skipToContent')}
+    </a>
+  )
+}
+
 export function SiteHeader({
   locale,
   nav,
@@ -117,9 +126,6 @@ export function SiteHeader({
 }) {
   return (
     <header className="site-header">
-      <a className="skip-link" href="#main">
-        {t(locale, 'skipToContent')}
-      </a>
       <a className="site-header__home" href={href('home', locale)}>
         {siteName || t(locale, 'home')}
       </a>

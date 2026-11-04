@@ -29,6 +29,7 @@ export const ar: Record<keyof typeof en, string> = {
   announcement: 'إعلان',
   validUntil: 'صالحة حتى {date}',
   notFoundTitle: 'الصفحة غير موجودة',
+  notFoundLinks: 'إلى أين بعد ذلك',
   notFoundBody: 'لم نعثر على هذه الصفحة. ربما نُقلت أو أُزيلت.',
   errorTitle: 'حدث خطأ',
   errorBody: 'تعذّر عرض هذه الصفحة الآن. يرجى المحاولة لاحقاً.',

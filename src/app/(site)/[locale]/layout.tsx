@@ -4,7 +4,7 @@
 import { headers } from 'next/headers'
 import type { ReactNode } from 'react'
 import { DEFAULT_LOCALE, href, LOCALES, matchRoute, type Locale } from '@/modules/i18n'
-import { SiteBanner, SiteFooter, SiteHeader } from '@/ui'
+import { SiteBanner, SiteFooter, SiteHeader, SkipLink } from '@/ui'
 import { fontVariables } from '@/ui/fonts'
 import { cachedAlternates, cachedGlobal, cachedPublished } from '../data'
 import '../site.css'
@@ -58,6 +58,7 @@ export default async function SiteLayout({
   return (
     <html lang={locale} dir={locale === 'ar' ? 'rtl' : 'ltr'} className={fontVariables}>
       <body>
+        <SkipLink locale={locale} />
         <SiteBanner locale={locale} banner={banner} />
         <SiteHeader
           locale={locale}

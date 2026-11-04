@@ -16,7 +16,7 @@ export function NotFoundView({ locale }: { locale: Locale }) {
           </a>
         </p>
       </header>
-      <nav className="section" aria-label={t(locale, 'mainNavigation')}>
+      <nav className="section" aria-label={t(locale, 'notFoundLinks')}>
         <ul className="card-grid">
           {(['services', 'training'] as const).map((key) => (
             <li key={key} className="card card--link">

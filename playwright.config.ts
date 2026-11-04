@@ -24,6 +24,7 @@ export default defineConfig({
     { name: 'webkit-smoke', testDir: './tests/smoke', use: { browserName: 'webkit' } },
     { name: 'security', testDir: './tests/security', use: { browserName: 'chromium' } },
     { name: 'a11y-admin', testDir: './tests/a11y/admin', use: { browserName: 'chromium' } },
+    { name: 'a11y-public', testDir: './tests/a11y/public', use: { browserName: 'chromium' } },
     { name: 'public', testDir: './tests/public', use: { browserName: 'chromium' } },
     { name: 'public-webkit', testDir: './tests/public', use: { browserName: 'webkit' } },
     { name: 'e2e', testDir: './tests/e2e', use: { browserName: 'chromium' } },
