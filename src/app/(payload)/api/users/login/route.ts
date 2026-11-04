@@ -9,18 +9,31 @@ export const dynamic = 'force-dynamic'
 const FAILED = { errors: [{ message: 'Sign-in failed. Check your details or try again later.' }] }
 const noStore = { 'cache-control': 'no-store' }
 
+/**
+ * The admin login page (Payload's <Form>) posts multipart/form-data with the fields JSON-encoded
+ * in a `_payload` part; the account pages and API clients post JSON. Anything else, or anything
+ * malformed, yields no credentials and fails like any other sign-in. signIn() only accepts string
+ * values, so non-string fields cannot reach the account lookup.
+ */
+async function credentials(request: Request): Promise<Record<string, unknown>> {
+  const type = request.headers.get('content-type') ?? ''
+  try {
+    const parsed: unknown = type.startsWith('multipart/form-data')
+      ? JSON.parse(String((await request.formData()).get('_payload') ?? ''))
+      : await request.json()
+    return parsed && typeof parsed === 'object' ? (parsed as Record<string, unknown>) : {}
+  } catch {
+    return {}
+  }
+}
+
 export async function POST(request: Request): Promise<Response> {
   const started = performance.now()
   if (Number(request.headers.get('content-length') ?? 0) > 16_384)
     return Response.json(FAILED, { status: 413, headers: noStore })
   if (!sameOrigin(request.headers)) return Response.json(FAILED, { status: 403, headers: noStore })
   const payload = await getPayload({ config })
-  let body: Record<string, unknown> = {}
-  try {
-    body = (await request.json()) as Record<string, unknown>
-  } catch {
-    body = {}
-  }
+  const body = await credentials(request)
   const r = await signIn(payload, {
     email: body?.email,
     password: body?.password,

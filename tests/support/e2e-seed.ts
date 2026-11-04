@@ -29,6 +29,9 @@ const ROLE_OF = {
   navPublisher: 'publisher',
   navEditor: 'editor',
   navPasswordOnly: 'publisher',
+  // tests/e2e/admin-login.spec.ts only
+  loginOwner: 'owner',
+  loginNew: 'owner', // signed up, second factor not enrolled yet
 } as const
 for (const role of Object.keys(ROLE_OF) as (keyof typeof ROLE_OF)[]) {
   const email = `e2e-${role.toLowerCase()}@example.invalid`
@@ -46,7 +49,7 @@ for (const role of Object.keys(ROLE_OF) as (keyof typeof ROLE_OF)[]) {
     context: { authSystem: true },
   })) as unknown as { id: number }
   const entry: Record<string, unknown> = { id: user.id, email, password }
-  if (role !== 'passwordOnly' && role !== 'navPasswordOnly') {
+  if (role !== 'passwordOnly' && role !== 'navPasswordOnly' && role !== 'loginNew') {
     const login = await signIn(payload, { email, password, ip: '127.0.0.1' })
     if (!login.ok) throw new Error(`seed login failed for ${role}`)
     const ctx = { payload, userId: user.id, email, sid: login.sid }
