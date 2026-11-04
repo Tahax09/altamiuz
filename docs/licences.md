@@ -70,3 +70,30 @@ on 2026-10-16 after `pnpm install` (lockfile `pnpm-lock.yaml`). 640 packages in 
 - **Python-2.0, CC-BY-4.0, BlueOak-1.0.0, CC0-1.0, 0BSD, MIT-0**: permissive or attribution-only transitive tooling and data packages.
 
 No GPL/AGPL licence in the resolved tree. Re-run this check whenever dependencies change (Constitution I).
+
+## Fonts (T101, D-24)
+
+Served from this origin through `next/font/google` (`src/ui/fonts.ts`): the build downloads the
+files from Google Fonts and Next serves them unchanged from `/_next/static/media/`. Verified
+2026-11-04 against the exact files of the production build:
+
+| Family               | Weights used        | Font version (name table) | Copyright in the font files (nameID 0)                                              | Licence URL in the font files (nameID 14) | Licence                                |
+| -------------------- | ------------------- | ------------------------- | ----------------------------------------------------------------------------------- | ----------------------------------------- | -------------------------------------- |
+| Inter                | 400, 600 (variable) | 4.001                     | Copyright 2016 The Inter Project Authors (https://github.com/rsms/inter)            | https://openfontlicense.org               | SIL OFL 1.1                            |
+| Manrope              | 600, 700 (variable) | 4.505                     | Copyright 2019 The Manrope Project Authors (https://github.com/googlefonts/manrope) | https://openfontlicense.org               | SIL OFL 1.1                            |
+| IBM Plex Sans Arabic | 400, 700            | 1.101                     | Copyright 2019 IBM Corp. All rights reserved.                                       | http://scripts.sil.org/OFL                | SIL OFL 1.1, Reserved Font Name "Plex" |
+
+- **Unmodified**: all 21 `.woff2` files referenced by the build are byte-identical (SHA-256) to the
+  files Google Fonts served for the same request on 2026-11-04. The copyright strings above match
+  the `copyright` fields of the Google Fonts catalogue (`google/fonts`, `ofl/*/METADATA.pb`, licence
+  `OFL`). The subset files carry no licence description (nameID 13); the licence URL is present.
+- **Licence texts**: `public/fonts/LICENSES/{Inter,Manrope,IBMPlexSansArabic}-OFL.txt`, copied
+  byte-for-byte from `google/fonts` (`ofl/inter/OFL.txt` at b0928647, `ofl/manrope/OFL.txt` at
+  16c2976c, `ofl/ibmplexsansarabic/OFL.txt` at 121e596e), served at `/fonts/LICENSES/…`. Their
+  copyright header years (Inter 2020, Manrope 2018, IBM Plex 2017) differ from the years embedded
+  in the font files; both are upstream records and neither was edited.
+- **Reserved Font Name "Plex"**: OFL 1.1 forbids using it for a Modified Version. The files are
+  served exactly as Google Fonts distributes them (no subsetting or conversion here). Any future
+  self-processing (subsetting, conversion) of IBM Plex Sans Arabic must not keep the name "Plex".
+- `tests/public/fonts.spec.ts` re-checks on every run that each served font names its OFL licence
+  and the expected copyright, and that the licence files are served unchanged.

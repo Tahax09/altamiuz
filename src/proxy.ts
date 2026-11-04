@@ -228,7 +228,8 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
 export const config = {
   matcher: [
     {
-      source: '/((?!_next/static|_next/image|favicon.ico).*)',
+      // fonts/: licence texts for the self-hosted typefaces (public/fonts/LICENSES, T101).
+      source: '/((?!_next/static|_next/image|favicon.ico|fonts/).*)',
       missing: [{ type: 'header', key: 'next-router-prefetch' }],
     },
   ],
