@@ -54,8 +54,25 @@ for (const [path, locale] of [
     await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', /noindex/)
     // Static HTML, not a client shell waiting for a script to fill it in.
     expect(await res!.text()).toContain(NOT_FOUND[locale].title)
+    // L-5: the real site chrome and design system, not a bare page.
+    await expect(page.locator('header.site-header')).toBeVisible()
+    await expect(page.locator('footer.site-footer')).toBeAttached()
+    await expect(
+      page.getByRole('navigation', { name: (locale === 'ar' ? ar : en).mainNavigation }).first(),
+    ).toBeVisible()
+    const button = page.getByRole('link', { name: NOT_FOUND[locale].home })
+    expect(await button.evaluate((e) => getComputedStyle(e).backgroundColor)).toBe(
+      'rgb(18, 53, 91)',
+    )
+    expect(res!.headers()['x-robots-tag']).toBe('noindex, nofollow')
   })
 }
+
+test('the internal 404 page path is itself a 404 when requested directly', async ({ page }) => {
+  const res = await page.goto('/en/~404')
+  expect(res?.status()).toBe(404)
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText(en.notFoundTitle)
+})
 
 test('the localized 404 does not swallow the admin, the API or previews', async ({ request }) => {
   const api = await request.get('/api/no-such-collection', { maxRedirects: 0 })

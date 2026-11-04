@@ -14,9 +14,17 @@ const routeStatus = vi.hoisted(() => ({
 vi.mock('../../../src/app/(site)/route-status', () => ({
   publicRouteStatus: (path: string) => routeStatus.fn(path),
 }))
+// The styled 404 is fetched from SITE_URL (L-5). By default the fetch fails, so the proxy serves
+// its self-contained fallback document; tests below script the fetch where it matters.
+const fetchMock = vi.hoisted(() => vi.fn<typeof fetch>())
+vi.stubGlobal('fetch', fetchMock)
 beforeEach(() => {
   routeStatus.fn.mockReset()
   routeStatus.fn.mockImplementation(async () => ({ kind: 'ok' }))
+  fetchMock.mockReset()
+  fetchMock.mockImplementation(async () => {
+    throw new Error('no server in unit tests')
+  })
 })
 
 const call = (path: string, headers: Record<string, string> = {}, method = 'GET') =>
@@ -175,4 +183,105 @@ describe('server-rendered 404 for missing public paths (FR-008, FR-082)', () => 
     expect(r.headers.get('x-middleware-request-x-altamiuz-path')).toBe('/en/about')
     expect(r.headers.get('x-middleware-request-x-altamiuz-locale')).toBe('en')
   })
+})
+
+describe('styled 404 page (L-5)', () => {
+  const SITE = 'https://site.example'
+  const KEY_OF = async () => {
+    const { createHmac } = await import('node:crypto')
+    return createHmac('sha256', process.env.PAYLOAD_SECRET!)
+      .update('altamiuz:render-404')
+      .digest('hex')
+  }
+  const styled = (csp = "default-src 'self'; script-src 'nonce-INNER'") =>
+    new Response(
+      '<!doctype html><html lang="en" dir="ltr"><body><h1>Page not found</h1></body></html>',
+      {
+        status: 200,
+        headers: { 'content-type': 'text/html; charset=utf-8', 'content-security-policy': csp },
+      },
+    )
+  const withSite = async (fn: () => Promise<void>) => {
+    const before = process.env.SITE_URL
+    process.env.SITE_URL = SITE
+    try {
+      await fn()
+    } finally {
+      process.env.SITE_URL = before
+    }
+  }
+
+  it("serves the styled page from SITE_URL with status 404 and that page's CSP", () =>
+    withSite(async () => {
+      routeStatus.fn.mockImplementation(async () => ({ kind: 'notFound' }))
+      fetchMock.mockImplementation(async () => styled())
+      const r = await call('/en/no-such-page', { host: 'evil.example' })
+      expect(r.status).toBe(404)
+      expect(await r.text()).toContain('<h1>Page not found</h1>')
+      expect(r.headers.get('content-security-policy')).toBe(
+        "default-src 'self'; script-src 'nonce-INNER'",
+      )
+      expect(r.headers.get('cache-control')).toMatch(/no-store/)
+      expect(r.headers.get('x-robots-tag')).toBe('noindex, nofollow')
+      const [url, init] = fetchMock.mock.calls[0]!
+      // Never the request's Host: a spoofed Host header cannot redirect the internal fetch.
+      expect(String(url)).toBe(`${SITE}/en/~404`)
+      expect((init!.headers as Record<string, string>)['x-altamiuz-404']).toBe(await KEY_OF())
+      expect(init!.redirect).toBe('manual')
+    }))
+
+  it('unknown locales and malformed paths fetch the default-language page', () =>
+    withSite(async () => {
+      routeStatus.fn.mockImplementation(async () => ({ kind: 'notFound' }))
+      fetchMock.mockImplementation(async () => styled())
+      await call('/fr/x')
+      await call('/en/%E0%A4%A')
+      expect(fetchMock.mock.calls.map(([u]) => String(u))).toEqual([
+        `${SITE}/ar/~404`,
+        `${SITE}/en/~404`,
+      ])
+    }))
+
+  it('falls back to the self-contained document when the page cannot be fetched or looks wrong', () =>
+    withSite(async () => {
+      routeStatus.fn.mockImplementation(async () => ({ kind: 'notFound' }))
+      for (const answer of [
+        async () => {
+          throw new Error('down')
+        },
+        async () => new Response('x', { status: 500, headers: { 'content-type': 'text/html' } }),
+        async () => new Response('x', { status: 307, headers: { location: '/elsewhere' } }),
+        async () =>
+          new Response('{}', { status: 200, headers: { 'content-type': 'application/json' } }),
+        async () =>
+          new Response('<html>', { status: 200, headers: { 'content-type': 'text/html' } }), // no CSP
+      ]) {
+        fetchMock.mockImplementation(answer)
+        const r = await call('/en/no-such-page')
+        expect(r.status).toBe(404)
+        const html = await r.text()
+        expect(html).toContain('<html lang="en" dir="ltr">')
+        expect(html).not.toMatch(/<script/i)
+      }
+    }))
+
+  it('the internal page is reachable only with the key; otherwise /{locale}/~404 is just missing', () =>
+    withSite(async () => {
+      routeStatus.fn.mockImplementation(async () => ({ kind: 'notFound' }))
+      // With the key: passed to Next to render, no lookup and no further fetch.
+      const ok = await call('/en/~404', { 'x-altamiuz-404': await KEY_OF() })
+      expect(ok.status).toBe(200)
+      expect(routeStatus.fn).not.toHaveBeenCalled()
+      expect(fetchMock).not.toHaveBeenCalled()
+      // Wrong or missing key: an ordinary missing path. A request that already carries the header
+      // never triggers another fetch (no loop), it gets the self-contained document.
+      for (const headers of [{ 'x-altamiuz-404': 'f'.repeat(64) }, { 'x-altamiuz-404': 'x' }]) {
+        const r = await call('/en/~404', headers)
+        expect(r.status).toBe(404)
+        expect(fetchMock).not.toHaveBeenCalled()
+      }
+      const plain = await call('/en/~404')
+      expect(plain.status).toBe(404)
+      expect(fetchMock).toHaveBeenCalledTimes(1)
+    }))
 })

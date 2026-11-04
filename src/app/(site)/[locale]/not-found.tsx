@@ -1,19 +1,13 @@
-// Localized "not found" page (T104, FR-008): no internal details, links home in the same language.
+// Localized "not found" page for client-side navigations (T104, FR-008). Document requests get the
+// same view from /{locale}/~404 through the proxy, with status 404 (L-5).
 import { headers } from 'next/headers'
-import { href, LOCALES, t, type Locale } from '@/modules/i18n'
+import { LOCALES, type Locale } from '@/modules/i18n'
+import { NotFoundView } from '@/ui'
 
 export const metadata = { robots: { index: false, follow: false } }
 
 export default async function NotFound() {
   const raw = (await headers()).get('x-altamiuz-locale') ?? 'ar'
   const locale: Locale = (LOCALES as readonly string[]).includes(raw) ? (raw as Locale) : 'ar'
-  return (
-    <section className="status-page">
-      <h1>{t(locale, 'notFoundTitle')}</h1>
-      <p>{t(locale, 'notFoundBody')}</p>
-      <p>
-        <a href={href('home', locale)}>{t(locale, 'backHome')}</a>
-      </p>
-    </section>
-  )
+  return <NotFoundView locale={locale} />
 }

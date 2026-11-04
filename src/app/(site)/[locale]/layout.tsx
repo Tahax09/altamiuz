@@ -24,7 +24,8 @@ async function alternatesFor(path: string): Promise<Partial<Record<Locale, strin
       }
     })
   const m = matchRoute(segments)
-  if (m.key === 'notFound') return {}
+  // Not-found pages offer the other language's home page.
+  if (m.key === 'notFound') return Object.fromEntries(LOCALES.map((l) => [l, href('home', l)]))
   if (m.key === 'home' || m.key === 'services' || m.key === 'training')
     return Object.fromEntries(LOCALES.map((l) => [l, href(m.key as 'home', l)]))
   if (!('slug' in m)) return {}

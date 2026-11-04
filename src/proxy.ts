@@ -1,6 +1,7 @@
 // Request proxy (Next 16): per-request CSP nonce (FR-090), blocking of Payload built-in auth
 // routes replaced by project flows, A-3 root redirect, and the server-rendered 404 for missing
 // public paths (FR-008, FR-082).
+import { createHmac, timingSafeEqual } from 'node:crypto'
 import { NextResponse, type NextRequest } from 'next/server'
 import {
   DEFAULT_LOCALE,
@@ -66,20 +67,69 @@ function publicDocumentRequest(request: NextRequest): boolean {
   return dest === null || dest === 'document'
 }
 
+// L-5: the styled 404 is the page /{locale}/~404, fetched by the proxy from the configured site
+// origin (never from the request's Host header) and returned with status 404. The internal request
+// carries a key derived from PAYLOAD_SECRET; without it /{locale}/~404 is an ordinary missing path.
+const RENDER_404_HEADER = 'x-altamiuz-404'
+const RENDER_404_SEGMENT = '~404'
+function render404Key(): string | null {
+  const secret = process.env.PAYLOAD_SECRET
+  return secret ? createHmac('sha256', secret).update('altamiuz:render-404').digest('hex') : null
+}
+function isInternal404Request(request: NextRequest): boolean {
+  const key = render404Key()
+  const sent = request.headers.get(RENDER_404_HEADER)
+  if (!key || !sent || sent.length !== key.length) return false
+  return timingSafeEqual(Buffer.from(sent), Buffer.from(key))
+}
+
+const NOT_FOUND_HEADERS = {
+  'Content-Type': 'text/html; charset=utf-8',
+  'Cache-Control': 'private, no-cache, no-store, max-age=0, must-revalidate',
+  'X-Robots-Tag': 'noindex, nofollow',
+}
+
 /**
  * Next 16.3.8 renders a page that throws notFound() as an empty client-recovery shell (no body
  * without JavaScript), and resets a proxy rewrite's status to 200; only a proxy body response
- * keeps its status. So a missing public path gets its complete localized 404 from here.
+ * keeps its status. So a missing public path gets its complete localized 404 from here: the
+ * styled page when it can be fetched, else a self-contained document.
  */
-function notFoundResponse(locale: Locale, nonce: string, csp: string): NextResponse {
+async function notFoundResponse(
+  request: NextRequest,
+  locale: Locale,
+  nonce: string,
+  csp: string,
+): Promise<NextResponse> {
+  const key = render404Key()
+  const site = process.env.SITE_URL
+  // Never fetch on behalf of a request that is itself an internal 404 render (no loops).
+  if (key && site && !request.headers.has(RENDER_404_HEADER)) {
+    try {
+      const res = await fetch(new URL(`/${locale}/${RENDER_404_SEGMENT}`, site), {
+        headers: { [RENDER_404_HEADER]: key, 'sec-fetch-dest': 'document' },
+        redirect: 'manual',
+        cache: 'no-store',
+        signal: AbortSignal.timeout(3_000),
+      })
+      const innerCsp = res.headers.get('content-security-policy')
+      if (
+        res.status === 200 &&
+        innerCsp &&
+        /^text\/html/.test(res.headers.get('content-type') ?? '')
+      )
+        // The page's scripts and styles carry the inner request's nonce, so its CSP goes with it.
+        return new NextResponse(res.body, {
+          status: 404,
+          headers: { ...NOT_FOUND_HEADERS, 'Content-Security-Policy': innerCsp },
+        })
+    } catch {
+      // fall through to the self-contained document
+    }
+  }
   return new NextResponse(notFoundDocument(locale, nonce), {
     status: 404,
-    headers: {
-      'Content-Type': 'text/html; charset=utf-8',
-      'Content-Security-Policy': csp,
-      'Cache-Control': 'private, no-cache, no-store, max-age=0, must-revalidate',
-      'X-Robots-Tag': 'noindex, nofollow',
-    },
+    headers: { ...NOT_FOUND_HEADERS, 'Content-Security-Policy': csp },
   })
 }
 
@@ -106,14 +156,18 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
   const pathLocale = localeOfPath(request.nextUrl.pathname)
   // Malformed percent-encoding would make Next's parameter decoding throw (500): always a 404.
   if (!decodable(request.nextUrl.pathname))
-    return notFoundResponse(pathLocale ?? DEFAULT_LOCALE, nonce, csp)
-  if (publicDocumentRequest(request)) {
+    return notFoundResponse(request, pathLocale ?? DEFAULT_LOCALE, nonce, csp)
+  const internal404 =
+    pathLocale !== null &&
+    request.nextUrl.pathname === `/${pathLocale}/${RENDER_404_SEGMENT}` &&
+    isInternal404Request(request)
+  if (!internal404 && publicDocumentRequest(request)) {
     // Same question as the page, asked before rendering. If the lookup fails (database down),
     // the request falls through to the page, which reports its own error.
     const { publicRouteStatus } = await import('./app/(site)/route-status')
     const status = await publicRouteStatus(request.nextUrl.pathname).catch(() => null)
     if (status?.kind === 'notFound')
-      return notFoundResponse(pathLocale ?? DEFAULT_LOCALE, nonce, csp)
+      return notFoundResponse(request, pathLocale ?? DEFAULT_LOCALE, nonce, csp)
     if (status?.kind === 'redirect') {
       // Same origin only: stored targets are validated single-`/` site paths (findRedirect).
       // Never stored by shared caches: a stored redirect can be changed or deleted at any time.

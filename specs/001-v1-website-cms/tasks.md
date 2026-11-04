@@ -415,9 +415,22 @@ publish-to-live wiring ready for T106 → commit checkpoint.
   needs a shared cache handler (pending T132).
 - L-4 The proxy's 404 check adds one uncached indexed query per public document request (up to
   four on a miss); public 404 probing is not rate limited.
-- L-5 The proxy's 404 document uses minimal inline styles, not the site stylesheet, and has no
-  header/footer chrome. Browsers without Fetch Metadata send no `Sec-Fetch-Dest`; their
-  client-side navigations to a missing page fall back to a full page load of the same 404.
+- ~~L-5 The proxy's 404 document uses minimal inline styles~~ **fixed 2026-11-04**: a document
+  request for a missing public path gets the real styled 404 (site header, navigation, banner,
+  footer, design system, fonts, `lang`/`dir`) with status 404 and no JavaScript needed. The proxy
+  fetches `/{locale}/~404` (a page `~` keeps out of every content slug) from `SITE_URL`, never from
+  the request's Host header, with a key derived from `PAYLOAD_SECRET`, and returns it with that
+  page's own CSP (its nonce), `no-store` and `X-Robots-Tag: noindex`. Without the key
+  `/{locale}/~404` is itself an ordinary 404; a request already carrying the key header never
+  triggers another fetch (no loops). If the fetch fails, times out (3 s), redirects or lacks a CSP,
+  the self-contained document is served as before. Client-side navigations use the same
+  `NotFoundView`. Tests: `tests/unit/i18n/locale-proxy.test.ts` ("styled 404 page (L-5)": origin,
+  Host spoof, key, loop guard, fallbacks) and `tests/public/no-js.spec.ts` (11 missing-path cases
+  × Chromium/WebKit: header, footer, navigation, design-system button style, `X-Robots-Tag`).
+  Remaining: on a miss the server renders the 404 page through one extra internal request; behind
+  a CDN that request goes to `SITE_URL` (hosting decision, T132). Unchanged: browsers without Fetch
+  Metadata send no `Sec-Fetch-Dest`, so their client-side navigations to a missing page fall back
+  to a full page load of the same 404.
 - L-6 (fixed) Test isolation: the cache spec's navigation case replaced the seeded `header-nav`
   and never restored it, so `public` tests run after `security` lost their menu link (T097 and
   the "published globals" check). It now restores the seeded menu. Separately, the users and pages
