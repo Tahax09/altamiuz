@@ -18,7 +18,8 @@ import { expireCacheTags } from '../platform'
 import { LOCALES, type Locale, type RoutedCollection } from '../i18n'
 import { createSlugChangeRedirect } from '../seo'
 import { mayDo } from './access'
-import { unverifiedClaims } from './evidence'
+import { storedClaimProblems, unverifiedClaims } from './evidence'
+import { isLocaleCopy } from './locale-copy'
 import { findContentIssues } from './richtext/walk'
 import { publicError } from './errors'
 
@@ -28,6 +29,8 @@ type Ctx = {
   restoring?: boolean
   baseUpdatedAt?: number
   unpublishAll?: boolean
+  /** This write publishes (set by the workflow gate; read by the stored-claim backstop). */
+  publishing?: boolean
   publishLocale?: string
   slugChange?: { from: string; to: string; locale: string }
 }
@@ -118,6 +121,22 @@ export const statusDraftOnDuplicate: Field = {
   hooks: { beforeDuplicate: [() => 'draft'] },
 }
 
+/** Makes an update a plain draft save of the request locale. */
+export function forceDraft(args: unknown) {
+  const a = args as {
+    draft?: boolean
+    publishSpecificLocale?: string
+    publishAllLocales?: boolean
+    unpublishAllLocales?: unknown
+    data?: Record<string, unknown>
+  }
+  a.draft = true
+  a.publishSpecificLocale = undefined
+  a.publishAllLocales = false
+  a.unpublishAllLocales = false
+  a.data = { ...(a.data ?? {}), _status: 'draft' }
+}
+
 export const captureOperation: CollectionBeforeOperationHook = ({ args, operation, req }) => {
   const c = ctx(req)
   // Payload's restoreVersion is never used: it overwrites the live document unless `draft` is set
@@ -138,6 +157,10 @@ export const captureOperation: CollectionBeforeOperationHook = ({ args, operatio
     a.publishAllLocales = false
     a.data = { ...(a.data ?? {}), _status: 'draft' }
   }
+  // L-2: the admin "copy to locale" action writes the source language's content, including its
+  // publication status, into the target language. A copy is always a draft; publishing it is a
+  // separate, permission-checked and audited action.
+  if (operation === 'update' && isLocaleCopy()) forceDraft(args)
   if (operation === 'update' || operation === 'create') {
     c.contentOp = c.restoring && operation === 'update' ? 'restore' : operation
     c.draftArg = (args as { draft?: boolean }).draft === true
@@ -159,6 +182,7 @@ export const enforceWorkflow =
     const c = ctx(req)
     const resource = collection as Resource
     const { publishing, unpublishing } = publicationIntent(req, data)
+    c.publishing = publishing
     assertNotStale(req, originalDoc)
     if (req.user) {
       if (c.contentOp === 'restore' && !mayDo(req, resource, 'restore'))
@@ -213,6 +237,12 @@ export const verifyStoredContent =
     })
     const issues = findContentIssues(full)
     if (issues.length) throw publicError('Content rejected by policy', 400, { issues }) // rolls back
+    // L-1 backstop: a publish needs every claim verified for exactly what is stored (rolls back).
+    if (ctx(req).publishing) {
+      const unverified = storedClaimProblems(full as unknown as Record<string, unknown>)
+      if (unverified.length)
+        throw publicError('Unverified claims cannot be published', 400, { paths: unverified })
+    }
     // FR-004 backstop: every published locale has its SEO title and description (rolls back).
     const status = (full as { _status?: unknown })._status
     const seo = ((full as { seo?: unknown }).seo ?? {}) as Record<string, unknown>

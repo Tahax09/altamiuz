@@ -1,7 +1,7 @@
 // Block library (T085, FR-011, FR-012, data-model). Deferred until their dependencies exist:
 // mediaGallery and image fields (US4 media), testimonials/clientLogos (CD-08 permissions).
 import type { Block, Field } from 'payload'
-import { evidenceGroup } from '../evidence'
+import { CLAIM_BLOCKS, evidenceGroup } from '../evidence'
 import { linkGroup } from '../link'
 import { richTextField } from '../richtext/field'
 
@@ -122,7 +122,7 @@ const definitions: Block[] = [
         { name: 'value', type: 'text', maxLength: 40, required: true },
         text('label', 120, true),
       ]),
-      evidenceGroup(),
+      evidenceGroup('evidence', CLAIM_BLOCKS.stats!),
       ...common,
     ],
   },
@@ -134,7 +134,7 @@ const definitions: Block[] = [
         text('issuer', 200),
         { name: 'validUntil', type: 'date' },
       ]),
-      evidenceGroup(),
+      evidenceGroup('evidence', CLAIM_BLOCKS.credentials!),
       ...common,
     ],
   },

@@ -148,5 +148,5 @@ export const courses = routed('courses', [
     maxLength: 300,
     admin: { description: 'Claim-bearing: needs verified evidence to publish.' },
   },
-  evidenceGroup('accreditationEvidence'),
+  evidenceGroup('accreditationEvidence', { field: 'accreditationStatement' }),
 ])

@@ -14,6 +14,15 @@ const F = () =>
   }
 const ORIGIN = { origin: process.env.SITE_URL! }
 test.describe.configure({ mode: 'serial' })
+// Every project signs in from 127.0.0.1 and MFA verification allows 30 attempts per IP per 15
+// minutes; in a full run the earlier projects use most of it. Start with empty buckets in this
+// disposable database (the limits are covered by the auth suites).
+test.beforeAll(async () => {
+  const c = new pg.Client({ connectionString: process.env.DATABASE_URL })
+  await c.connect()
+  await c.query('delete from rate_limit_buckets')
+  await c.end()
+})
 // Earlier security specs leave document locks behind; Payload would show "currently editing".
 test.beforeEach(async () => {
   const c = new pg.Client({ connectionString: process.env.DATABASE_URL })

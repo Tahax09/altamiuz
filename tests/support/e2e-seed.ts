@@ -224,6 +224,30 @@ await payload.update({
   } as never,
   overrideAccess: true,
 })
+// Adding the Arabic statistics label changed the claim, which removes its verification (L-1);
+// re-verify the bilingual claim before publishing Arabic, as an administrator would.
+const homeAr = (await payload.findByID({
+  collection: 'pages',
+  id: home.id,
+  draft: true,
+  depth: 0,
+  locale: 'ar',
+  overrideAccess: true,
+})) as unknown as { sections: Record<string, unknown>[] }
+await payload.update({
+  collection: 'pages',
+  id: home.id,
+  locale: 'ar',
+  draft: true,
+  data: {
+    sections: homeAr.sections.map((sec) =>
+      sec.blockType === 'stats'
+        ? { ...sec, evidence: { status: 'verified', reference: 'E2E internal evidence ref' } }
+        : sec,
+    ),
+  } as never,
+  overrideAccess: true,
+})
 await payload.update({
   collection: 'pages',
   id: home.id,

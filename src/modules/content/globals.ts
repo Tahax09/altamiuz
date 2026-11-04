@@ -20,7 +20,8 @@ import { allow, can, isMfaVerified, roleOf, type Resource } from '../access'
 import { recordAudit } from '../audit'
 import { expireCacheTags, getConfig } from '../platform'
 import { contentRead, mayDo } from './access'
-import { evidenceGroup, unverifiedClaims } from './evidence'
+import { evidenceGroup, storedClaimProblems, unverifiedClaims } from './evidence'
+import { isLocaleCopy } from './locale-copy'
 import { linkGroup } from './link'
 import { findContentIssues } from './richtext/walk'
 import {
@@ -29,6 +30,7 @@ import {
   captureBaseUpdatedAt,
   ctx,
   deny,
+  forceDraft,
   publicationIntent,
 } from './workflow'
 import { publicError } from './errors'
@@ -46,6 +48,7 @@ const captureGlobalOperation =
   async ({ args, operation, req }) => {
     if (operation === 'restoreVersion') await deny(req, slug, 'restore')
     if (operation === 'update') {
+      if (isLocaleCopy()) forceDraft(args) // L-2: a copied language is always a draft
       const c = ctx(req)
       c.contentOp = 'update'
       c.draftArg = (args as { draft?: boolean }).draft === true
@@ -81,6 +84,7 @@ const enforceGlobalWorkflow =
   async ({ data, originalDoc, req }) => {
     const resource = RESOURCE[slug]
     const { publishing, unpublishing } = publicationIntent(req, data)
+    ctx(req).publishing = publishing
     // Compare with the latest version, never the frozen main row (see latestVersionAt).
     assertNotStale(req, { updatedAt: (await latestVersionAt(req, slug)) ?? originalDoc?.updatedAt })
     if (req.user) {
@@ -118,6 +122,25 @@ const auditGlobal =
         meta: slug === 'site-settings' ? { global: slug } : { global: slug, operation },
       })
     expireCacheTags(`global:${slug}`)
+    return doc
+  }
+
+/** L-1 backstop for globals: a publish needs every claim verified for what is stored. */
+const verifyStoredGlobalClaims =
+  (slug: SiteGlobal): GlobalAfterChangeHook =>
+  async ({ doc, req }) => {
+    if (!ctx(req).publishing) return doc
+    const full = (await req.payload.findGlobal({
+      slug,
+      locale: 'all',
+      draft: true,
+      depth: 0,
+      overrideAccess: true,
+      req,
+    })) as unknown as Record<string, unknown>
+    const unverified = storedClaimProblems(full)
+    if (unverified.length)
+      throw publicError('Unverified claims cannot be published', 400, { paths: unverified })
     return doc
   }
 
@@ -190,7 +213,7 @@ function versionedGlobal(
     hooks: {
       beforeOperation: [captureGlobalOperation(slug)],
       beforeChange: [enforceGlobalWorkflow(slug), ...(extra.beforeChange ?? [])],
-      afterChange: [auditGlobal(slug)],
+      afterChange: [verifyStoredGlobalClaims(slug), auditGlobal(slug)],
       afterRead: [exposeLatestVersionTimestamp(slug)],
     },
     fields,
@@ -330,9 +353,9 @@ const settingsAdminsOnly: FieldAccess = ({ req }) => {
 
 export const siteSettings = versionedGlobal('site-settings', 'Site settings', [
   { name: 'companyName', type: 'text', localized: true, maxLength: 160 },
-  evidenceGroup('companyNameEvidence'),
+  evidenceGroup('companyNameEvidence', { field: 'companyName' }),
   { name: 'address', type: 'textarea', localized: true, maxLength: 500 },
-  evidenceGroup('addressEvidence'),
+  evidenceGroup('addressEvidence', { field: 'address' }),
   {
     name: 'phone',
     type: 'text',

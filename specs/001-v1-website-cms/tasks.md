@@ -382,16 +382,33 @@ publish-to-live wiring ready for T106 → commit checkpoint.
   `next build` with `APP_ENV=production` (fails before compiling). CI runs the script in the
   `publication-gate` job, which stays red until the owner approves the vocabulary.
 
-**Review findings (2026-10-28, low severity, open; not fixed in this change)**:
+**Review findings (2026-10-28, low severity; L-1/L-2 fixed 2026-11-04, others open)**:
 
-- L-1 Evidence verification is not bound to the claim text: a role that may edit drafts can
-  change a verified claim (accreditation statement, company name, address, stats/credentials
-  values) and the evidence stays `verified`; a duplicate also keeps it. Publishing still needs
-  Publisher or above. Option: reset verification when the claim changes, or bind it to a hash.
-- L-2 The admin copy-to-locale action sends the source locale's `_status`; for a Publisher it can
-  publish the target locale implicitly (allowed by the matrix, audited as a publish); for an
-  Editor the whole copy is refused (403) instead of saved as a draft. Not exercised through the
-  admin UI by a test.
+- ~~L-1 Evidence verification is not bound to the claim text~~ **fixed 2026-11-04**: every
+  evidence group holds a server-set `claimDigest` (SHA-256 of the claim in every language, taken
+  at verification). Any write that changes the claim in any language (edit, restore, copy to
+  locale, including whitespace) resets the evidence to unverified; client-sent status, verifier,
+  time or digest are never trusted; a duplicate starts unverified. Collection/global hooks run
+  before field hooks, so an after-write backstop (`storedClaimProblems`) refuses any publish whose
+  stored claims are unverified or no longer match (rolls back). Existing verifications predating
+  the `claim_digest` column (migration `20261104_143748_evidence_claim_digest`) carry no digest
+  and must be re-verified before their next publish. Tests:
+  `tests/integration/content/evidence-binding.test.ts` (courses, stats/credentials blocks incl.
+  Arabic edits and dates, site settings, same-request change + publish, forged fields, duplicate
+  via Local API and REST); with the reset and backstop disabled 8 of its 10 L-1 tests fail.
+- ~~L-2 The admin copy-to-locale action can publish the target locale~~ **fixed 2026-11-04**: the
+  admin server-function wrapper runs Payload's `copy-data-from-locale` handler inside a scope
+  (`src/modules/content/locale-copy.ts`) in which the content and global workflow hooks force a
+  plain draft save of the target language. Publishing the copy stays a separate,
+  permission-checked, audited act under contracts/access-matrix.md (Publisher+ for pages,
+  services and courses; Administrator/Owner for navigation, banner and settings). An Editor's copy
+  now succeeds as a draft. Tests run Payload's real handler for all four roles (target language
+  never published, source untouched; without the scope all four fail); a copied claim loses its
+  verification. Upstream findings, not fixed here: in Payload 3.91 copy-to-locale for **globals**
+  throws before writing (`payload.globals[slug]` is undefined), for every role; and without the
+  drawer's "overwrite" option Payload copies only into fields that already exist in the target
+  language, so a first translation fails required-field validation. Still not exercised through
+  the admin UI drawer by a browser test.
 - L-3 Tag expiry is per server process and only follows writes made inside a Next request.
   Out-of-band writes (SQL restore, scripts) are invisible to a running server's data cache for
   up to `revalidate: 60`; after a restore, restart and clear `.next/cache`. A multi-instance host

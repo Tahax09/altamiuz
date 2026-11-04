@@ -452,13 +452,14 @@ export interface Page {
                 }[]
               | null;
             /**
-             * Claims are publishable only once verified by an administrator, with a recorded evidence reference.
+             * Claims are publishable only once verified by an administrator, with a recorded evidence reference. Changing the claim in any language removes the verification.
              */
             evidence: {
               status: 'unverified' | 'verified';
               reference?: string | null;
               verifiedBy?: (number | null) | User;
               verifiedAt?: string | null;
+              claimDigest?: string | null;
             };
             /**
              * Hidden sections stay editable but are not published.
@@ -479,13 +480,14 @@ export interface Page {
                 }[]
               | null;
             /**
-             * Claims are publishable only once verified by an administrator, with a recorded evidence reference.
+             * Claims are publishable only once verified by an administrator, with a recorded evidence reference. Changing the claim in any language removes the verification.
              */
             evidence: {
               status: 'unverified' | 'verified';
               reference?: string | null;
               verifiedBy?: (number | null) | User;
               verifiedAt?: string | null;
+              claimDigest?: string | null;
             };
             /**
              * Hidden sections stay editable but are not published.
@@ -739,13 +741,14 @@ export interface Service {
                 }[]
               | null;
             /**
-             * Claims are publishable only once verified by an administrator, with a recorded evidence reference.
+             * Claims are publishable only once verified by an administrator, with a recorded evidence reference. Changing the claim in any language removes the verification.
              */
             evidence: {
               status: 'unverified' | 'verified';
               reference?: string | null;
               verifiedBy?: (number | null) | User;
               verifiedAt?: string | null;
+              claimDigest?: string | null;
             };
             /**
              * Hidden sections stay editable but are not published.
@@ -766,13 +769,14 @@ export interface Service {
                 }[]
               | null;
             /**
-             * Claims are publishable only once verified by an administrator, with a recorded evidence reference.
+             * Claims are publishable only once verified by an administrator, with a recorded evidence reference. Changing the claim in any language removes the verification.
              */
             evidence: {
               status: 'unverified' | 'verified';
               reference?: string | null;
               verifiedBy?: (number | null) | User;
               verifiedAt?: string | null;
+              claimDigest?: string | null;
             };
             /**
              * Hidden sections stay editable but are not published.
@@ -1031,13 +1035,14 @@ export interface Course {
                 }[]
               | null;
             /**
-             * Claims are publishable only once verified by an administrator, with a recorded evidence reference.
+             * Claims are publishable only once verified by an administrator, with a recorded evidence reference. Changing the claim in any language removes the verification.
              */
             evidence: {
               status: 'unverified' | 'verified';
               reference?: string | null;
               verifiedBy?: (number | null) | User;
               verifiedAt?: string | null;
+              claimDigest?: string | null;
             };
             /**
              * Hidden sections stay editable but are not published.
@@ -1058,13 +1063,14 @@ export interface Course {
                 }[]
               | null;
             /**
-             * Claims are publishable only once verified by an administrator, with a recorded evidence reference.
+             * Claims are publishable only once verified by an administrator, with a recorded evidence reference. Changing the claim in any language removes the verification.
              */
             evidence: {
               status: 'unverified' | 'verified';
               reference?: string | null;
               verifiedBy?: (number | null) | User;
               verifiedAt?: string | null;
+              claimDigest?: string | null;
             };
             /**
              * Hidden sections stay editable but are not published.
@@ -1106,13 +1112,14 @@ export interface Course {
    */
   accreditationStatement?: string | null;
   /**
-   * Claims are publishable only once verified by an administrator, with a recorded evidence reference.
+   * Claims are publishable only once verified by an administrator, with a recorded evidence reference. Changing the claim in any language removes the verification.
    */
   accreditationEvidence: {
     status: 'unverified' | 'verified';
     reference?: string | null;
     verifiedBy?: (number | null) | User;
     verifiedAt?: string | null;
+    claimDigest?: string | null;
   };
   seo?: {
     /**
@@ -1430,6 +1437,7 @@ export interface PagesSelect<T extends boolean = true> {
                     reference?: T;
                     verifiedBy?: T;
                     verifiedAt?: T;
+                    claimDigest?: T;
                   };
               hidden?: T;
               anchorId?: T;
@@ -1454,6 +1462,7 @@ export interface PagesSelect<T extends boolean = true> {
                     reference?: T;
                     verifiedBy?: T;
                     verifiedAt?: T;
+                    claimDigest?: T;
                   };
               hidden?: T;
               anchorId?: T;
@@ -1626,6 +1635,7 @@ export interface ServicesSelect<T extends boolean = true> {
                     reference?: T;
                     verifiedBy?: T;
                     verifiedAt?: T;
+                    claimDigest?: T;
                   };
               hidden?: T;
               anchorId?: T;
@@ -1650,6 +1660,7 @@ export interface ServicesSelect<T extends boolean = true> {
                     reference?: T;
                     verifiedBy?: T;
                     verifiedAt?: T;
+                    claimDigest?: T;
                   };
               hidden?: T;
               anchorId?: T;
@@ -1824,6 +1835,7 @@ export interface CoursesSelect<T extends boolean = true> {
                     reference?: T;
                     verifiedBy?: T;
                     verifiedAt?: T;
+                    claimDigest?: T;
                   };
               hidden?: T;
               anchorId?: T;
@@ -1848,6 +1860,7 @@ export interface CoursesSelect<T extends boolean = true> {
                     reference?: T;
                     verifiedBy?: T;
                     verifiedAt?: T;
+                    claimDigest?: T;
                   };
               hidden?: T;
               anchorId?: T;
@@ -1884,6 +1897,7 @@ export interface CoursesSelect<T extends boolean = true> {
         reference?: T;
         verifiedBy?: T;
         verifiedAt?: T;
+        claimDigest?: T;
       };
   seo?:
     | T
@@ -1970,23 +1984,25 @@ export interface SiteSetting {
   id: number;
   companyName?: string | null;
   /**
-   * Claims are publishable only once verified by an administrator, with a recorded evidence reference.
+   * Claims are publishable only once verified by an administrator, with a recorded evidence reference. Changing the claim in any language removes the verification.
    */
   companyNameEvidence: {
     status: 'unverified' | 'verified';
     reference?: string | null;
     verifiedBy?: (number | null) | User;
     verifiedAt?: string | null;
+    claimDigest?: string | null;
   };
   address?: string | null;
   /**
-   * Claims are publishable only once verified by an administrator, with a recorded evidence reference.
+   * Claims are publishable only once verified by an administrator, with a recorded evidence reference. Changing the claim in any language removes the verification.
    */
   addressEvidence: {
     status: 'unverified' | 'verified';
     reference?: string | null;
     verifiedBy?: (number | null) | User;
     verifiedAt?: string | null;
+    claimDigest?: string | null;
   };
   phone?: string | null;
   email?: string | null;
@@ -2275,6 +2291,7 @@ export interface SiteSettingsSelect<T extends boolean = true> {
         reference?: T;
         verifiedBy?: T;
         verifiedAt?: T;
+        claimDigest?: T;
       };
   address?: T;
   addressEvidence?:
@@ -2284,6 +2301,7 @@ export interface SiteSettingsSelect<T extends boolean = true> {
         reference?: T;
         verifiedBy?: T;
         verifiedAt?: T;
+        claimDigest?: T;
       };
   phone?: T;
   email?: T;
