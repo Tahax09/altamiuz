@@ -50,6 +50,8 @@ jobs:
       - run: pnpm test:smoke
       - run: pnpm test:security
       - run: pnpm test:a11y
+      # T139: Lighthouse budgets on the production build and the seeded e2e database.
+      - run: pnpm perf:lighthouse
       - run: pnpm audit --audit-level high
       - name: Secret scan (full history)
         run: docker run --rm -v "$PWD:/repo" -w /repo ghcr.io/gitleaks/gitleaks:v8.30.1 git --config .gitleaks.toml --redact --no-banner .

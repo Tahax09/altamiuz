@@ -8,6 +8,7 @@ on 2026-10-16 after `pnpm install` (lockfile `pnpm-lock.yaml`). 640 packages in 
 | Package                      | Version | Licence    |
 | ---------------------------- | ------- | ---------- |
 | @axe-core/playwright         | 4.14.0  | MPL-2.0    |
+| @lhci/cli                    | 0.15.1  | Apache-2.0 |
 | @eslint/js                   | 9.39.5  | MIT        |
 | @payloadcms/db-postgres      | 3.91.0  | MIT        |
 | @payloadcms/next             | 3.91.0  | MIT        |
@@ -68,6 +69,9 @@ on 2026-10-16 after `pnpm install` (lockfile `pnpm-lock.yaml`). 640 packages in 
 - **WTFPL / (WTFPL OR ISC) / (WTFPL OR MIT)**: `truncate-utf8-bytes`, `sanitize-filename`, `utf8-byte-length` (Payload transitive). Permissive.
 - **MPL-2.0**: `axe-core` (via `@axe-core/playwright`, devDependency, accessibility testing only; not shipped).
 - **Python-2.0, CC-BY-4.0, BlueOak-1.0.0, CC0-1.0, 0BSD, MIT-0**: permissive or attribution-only transitive tooling and data packages.
+
+`@lhci/cli` (devDependency, T139, owner-approved 2026-11-04; Lighthouse 12.6.1) was added 2026-11-04;
+the re-scan of the full tree (857 packages) found no new copyleft licence.
 
 No GPL/AGPL licence in the resolved tree. Re-run this check whenever dependencies change (Constitution I).
 

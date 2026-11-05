@@ -179,3 +179,24 @@ test('SC-009: a newly published change is public within 60 s, and a draft save i
   }
   expect(seen).toBe(true)
 })
+
+test('public pages do not ask for client hints; only the admin does (T139)', async ({
+  request,
+}) => {
+  // Critical-CH on a public page makes browsers restart the first navigation (an extra round trip).
+  for (const path of ['/en', '/ar', '/en/services', '/en/no-such-page']) {
+    const h = (await request.get(path, { maxRedirects: 0 })).headers()
+    expect(h['critical-ch'], path).toBeUndefined()
+    expect(h['accept-ch'], path).toBeUndefined()
+    expect(h['vary'] ?? '', path).not.toMatch(/Sec-CH-Prefers-Color-Scheme/i)
+  }
+  const admin = (await request.get('/admin/login', { maxRedirects: 0 })).headers()
+  expect(admin['critical-ch']).toBe('Sec-CH-Prefers-Color-Scheme')
+})
+
+test('listing pages carry the site default meta description (T139 SEO)', async ({ request }) => {
+  for (const path of ['/en/services', '/en/training', '/ar/ar-vocab-pending-services']) {
+    const html = await (await request.get(path)).text()
+    expect(html, path).toMatch(/<meta name="description" content="[^"]+"/)
+  }
+})

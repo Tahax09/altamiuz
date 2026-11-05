@@ -21,6 +21,7 @@ next-env.d.ts
 # Test artefacts
 test-results/
 playwright-report/
+.lighthouseci/
 .pw-browsers/
 # Local media and logs
 media/

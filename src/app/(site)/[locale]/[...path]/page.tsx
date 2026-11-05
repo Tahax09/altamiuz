@@ -14,6 +14,7 @@ import {
 import { DocumentView, ListingCards } from '@/ui'
 import {
   cachedAlternates,
+  cachedGlobal,
   cachedListing,
   cachedPublished,
   cachedRedirect,
@@ -47,8 +48,15 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
       title: t(r.locale, 'translationMissing', { language: LANGUAGE_NAMES[r.locale] }),
       robots: { index: false, follow: true },
     }
-  if (r.kind === 'listing')
-    return { title: t(r.locale, r.collection === 'services' ? 'services' : 'training') }
+  if (r.kind === 'listing') {
+    // Listings have no document of their own: the site's default description (site settings).
+    const settings = await cachedGlobal('site-settings', r.locale)
+    const description = (settings?.defaultSeo as { description?: string } | undefined)?.description
+    return {
+      title: t(r.locale, r.collection === 'services' ? 'services' : 'training'),
+      description: description || undefined,
+    }
+  }
   const seo = (r.doc.seo ?? {}) as { title?: string; description?: string; noindex?: boolean }
   return {
     title: seo.title || r.doc.title,

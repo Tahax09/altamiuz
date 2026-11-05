@@ -15,6 +15,7 @@ export PLAYWRIGHT_BROWSERS_PATH="${PLAYWRIGHT_BROWSERS_PATH:-$PWD/.pw-browsers}"
 pnpm test:smoke
 pnpm test:security
 pnpm test:a11y
+pnpm perf:lighthouse
 pnpm audit --audit-level high
 sh scripts/gitleaks.sh detect
 sh scripts/osv-scan.sh
