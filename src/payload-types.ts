@@ -216,6 +216,7 @@ export interface AuditEvent {
     | 'redirect.change'
     | 'navigation.change'
     | 'settings.change'
+    | 'cache.expire'
     | 'enquiry.view'
     | 'enquiry.export'
     | 'enquiry.delete'

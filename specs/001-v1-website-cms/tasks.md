@@ -382,7 +382,7 @@ publish-to-live wiring ready for T106 → commit checkpoint.
   `next build` with `APP_ENV=production` (fails before compiling). CI runs the script in the
   `publication-gate` job, which stays red until the owner approves the vocabulary.
 
-**Review findings (2026-10-28, low severity; L-1/L-2 fixed 2026-11-04, others open)**:
+**Review findings (2026-10-28, low severity; L-1, L-2, L-5 fixed and L-3, L-4 partly fixed 2026-11-04; L-6 fixed; L-7 open)**:
 
 - ~~L-1 Evidence verification is not bound to the claim text~~ **fixed 2026-11-04**: every
   evidence group holds a server-set `claimDigest` (SHA-256 of the claim in every language, taken
@@ -409,12 +409,23 @@ publish-to-live wiring ready for T106 → commit checkpoint.
   drawer's "overwrite" option Payload copies only into fields that already exist in the target
   language, so a first translation fails required-field validation. Still not exercised through
   the admin UI drawer by a browser test.
-- L-3 Tag expiry is per server process and only follows writes made inside a Next request.
-  Out-of-band writes (SQL restore, scripts) are invisible to a running server's data cache for
-  up to `revalidate: 60`; after a restore, restart and clear `.next/cache`. A multi-instance host
-  needs a shared cache handler (pending T132).
-- L-4 The proxy's 404 check adds one uncached indexed query per public document request (up to
-  four on a miss); public 404 probing is not rate limited.
+- L-3 **partly fixed 2026-11-04**: out-of-band writes (SQL restore, scripts) still do not expire
+  cache tags, measured: visible after 62–64 s (`revalidate: 60`). New:
+  `POST /api/ops/expire-public-cache` (Administrator/Owner, completed MFA, same-origin, audited as
+  `cache.expire`, migration `20261105_171113_audit_cache_expire`) expires every public tag at once;
+  procedure in `docs/runbooks/cache.md`. Tests: `tests/integration/platform/cache-expire.test.ts`
+  (four roles, anonymous, password-only, cross-origin) and `tests/security/cache-invalidation.spec.ts`
+  (stale after a SQL write, fresh after the call). **Hosting-dependent, open**: the tag manifest is
+  per server process; a multi-instance host needs a shared cache handler (T132).
+- L-4 **partly fixed 2026-11-04**: public 404 probing is now limited per client (60 misses per
+  minute, then `429` with `Retry-After` and no database work; `src/modules/security/miss-limiter.ts`,
+  tests `tests/unit/platform/miss-limiter.test.ts` and `tests/unit/i18n/locale-proxy.test.ts`).
+  Shared fallback addresses (`unidentified`, `invalid`) are never limited, so one client cannot
+  block everyone behind them. **Hosting-dependent, open**: the client address is only known when
+  `TRUSTED_PROXY_HOPS`/`CLIENT_IP_HEADER` are set for the real edge (unset locally, so the limit is
+  inactive there); the counter is in memory per process; the per-request lookup cost (one indexed
+  query per public document request, up to four on a miss) remains, and edge rate limiting or
+  caching is the hosting-level control (T132).
 - ~~L-5 The proxy's 404 document uses minimal inline styles~~ **fixed 2026-11-04**: a document
   request for a missing public path gets the real styled 404 (site header, navigation, banner,
   footer, design system, fonts, `lang`/`dir`) with status 404 and no JavaScript needed. The proxy

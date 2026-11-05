@@ -12,7 +12,7 @@ import {
   RESERVED_SEGMENTS,
   type Locale,
 } from '@/modules/i18n'
-import { buildCsp, type CspKind } from '@/modules/security'
+import { buildCsp, createMissLimiter, type CspKind } from '@/modules/security'
 import { notFoundDocument } from '@/ui/site/not-found-document'
 
 // Payload built-ins replaced by project flows (FR-030, FR-034, ADR-005): no first-user
@@ -133,6 +133,16 @@ async function notFoundResponse(
   })
 }
 
+// L-4: clients probing missing public paths get a 429 after 60 misses a minute (per process).
+const misses = createMissLimiter()
+async function clientOf(request: NextRequest): Promise<string> {
+  const { resolveClientIp } = await import('@/modules/platform')
+  return resolveClientIp(request.headers, {
+    trustedProxyHops: Number(process.env.TRUSTED_PROXY_HOPS ?? 0) || 0,
+    clientIpHeader: process.env.CLIENT_IP_HEADER || undefined,
+  })
+}
+
 function newNonce(): string {
   const bytes = new Uint8Array(18)
   crypto.getRandomValues(bytes)
@@ -162,12 +172,26 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
     request.nextUrl.pathname === `/${pathLocale}/${RENDER_404_SEGMENT}` &&
     isInternal404Request(request)
   if (!internal404 && publicDocumentRequest(request)) {
+    const client = await clientOf(request)
+    const wait = misses.blockedFor(client)
+    if (wait > 0)
+      return new NextResponse('Too many requests for missing pages. Please try again shortly.', {
+        status: 429,
+        headers: {
+          'Content-Type': 'text/plain; charset=utf-8',
+          'Retry-After': String(wait),
+          'Cache-Control': 'private, no-store',
+          'Content-Security-Policy': csp,
+        },
+      })
     // Same question as the page, asked before rendering. If the lookup fails (database down),
     // the request falls through to the page, which reports its own error.
     const { publicRouteStatus } = await import('./app/(site)/route-status')
     const status = await publicRouteStatus(request.nextUrl.pathname).catch(() => null)
-    if (status?.kind === 'notFound')
+    if (status?.kind === 'notFound') {
+      misses.recordMiss(client)
       return notFoundResponse(request, pathLocale ?? DEFAULT_LOCALE, nonce, csp)
+    }
     if (status?.kind === 'redirect') {
       // Same origin only: stored targets are validated single-`/` site paths (findRedirect).
       // Never stored by shared caches: a stored redirect can be changed or deleted at any time.

@@ -6,6 +6,7 @@
 // also makes a client-side navigation (RSC) request, which is rendered from the data cache.
 import { expect, request as pwRequest, test, type APIRequestContext } from '@playwright/test'
 import fs from 'node:fs'
+import pg from 'pg'
 import { generate } from 'otplib'
 import { href } from '../../src/modules/i18n/routes'
 
@@ -364,4 +365,28 @@ test('an unpublished Arabic service leaves the Arabic listing and detail page im
   expect((await visit(listing)).html).not.toContain('AR-LISTED-SERVICE-MARKER')
   expect((await navigate(listing)).body).not.toContain('AR-LISTED-SERVICE-MARKER')
   await expectGone(detail, 'AR-LISTED-SERVICE-MARKER')
+})
+
+test('after an out-of-band database write, an Administrator can expire the public cache at once (L-3)', async () => {
+  test.setTimeout(120_000)
+  const p = await publishedPage('OOB-BEFORE-MARKER')
+  const path = `/en/${p.slug}`
+  await warm(path, 'OOB-BEFORE-MARKER')
+  // A write that bypasses the application (SQL restore, script): no cache tag is expired.
+  const c = new pg.Client({ connectionString: process.env.DATABASE_URL })
+  await c.connect()
+  await c.query(
+    "update pages_locales set title = 'OOB-AFTER-MARKER' where _parent_id = $1 and _locale = 'en'",
+    [p.id],
+  )
+  await c.end()
+  expect((await visit(path)).html).not.toContain('OOB-AFTER-MARKER') // still the cached copy
+  // Publishers cannot do it; an Administrator can, and the next read is fresh.
+  const denied = await (await publisher()).post('/api/ops/expire-public-cache')
+  expect(denied.status()).toBe(403)
+  const ok = await (await admin()).post('/api/ops/expire-public-cache')
+  expect(ok.status(), await ok.text()).toBe(200)
+  const after = await visit(path)
+  expect(after.html).toContain('OOB-AFTER-MARKER')
+  expect((await navigate(path)).body).toContain('OOB-AFTER-MARKER')
 })

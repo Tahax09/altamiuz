@@ -26,6 +26,7 @@ export const AUDIT_ACTIONS = {
   'redirect.change': ['operation'],
   'navigation.change': ['global', 'operation'],
   'settings.change': ['global'],
+  'cache.expire': ['scope'],
   'enquiry.view': [],
   'enquiry.export': ['count'],
   'enquiry.delete': [],

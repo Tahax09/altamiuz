@@ -285,3 +285,30 @@ describe('styled 404 page (L-5)', () => {
       expect(fetchMock).toHaveBeenCalledTimes(1)
     }))
 })
+
+describe('missing-path probing is limited per client (L-4)', () => {
+  it('a client with 60 misses a minute gets 429 without lookups; other clients and shared keys do not', async () => {
+    const before = process.env.CLIENT_IP_HEADER
+    process.env.CLIENT_IP_HEADER = 'x-test-client-ip'
+    try {
+      routeStatus.fn.mockImplementation(async () => ({ kind: 'notFound' }))
+      const probe = (ip: string) => call('/en/probe-' + Math.random(), { 'x-test-client-ip': ip })
+      for (let i = 0; i < 60; i++) expect((await probe('198.51.100.66')).status).toBe(404)
+      const lookups = routeStatus.fn.mock.calls.length
+      const blocked = await probe('198.51.100.66')
+      expect(blocked.status).toBe(429)
+      expect(Number(blocked.headers.get('retry-after'))).toBeGreaterThan(0)
+      expect(blocked.headers.get('cache-control')).toBe('private, no-store')
+      expect(routeStatus.fn.mock.calls.length).toBe(lookups) // no database work
+      expect((await probe('198.51.100.67')).status).toBe(404)
+      // Admin, API and client navigations are never limited.
+      expect((await call('/admin/login', { 'x-test-client-ip': '198.51.100.66' })).status).toBe(200)
+      // Without a resolvable client address nothing is counted.
+      delete process.env.CLIENT_IP_HEADER
+      for (let i = 0; i < 70; i++) expect((await call('/en/shared-' + i)).status).toBe(404)
+    } finally {
+      if (before === undefined) delete process.env.CLIENT_IP_HEADER
+      else process.env.CLIENT_IP_HEADER = before
+    }
+  })
+})

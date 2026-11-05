@@ -79,14 +79,18 @@ test('every served font file carries its OFL licence URL and copyright; licence 
 }) => {
   const families = new Set<string>()
   for (const path of ['/en', '/ar']) {
-    const bodies: Buffer[] = []
-    page.on('response', async (r) => {
-      if (r.request().resourceType() === 'font') bodies.push(await r.body())
-    })
+    // Collect the URLs the page loads, then download them (a response body can be gone once the
+    // page navigates on).
+    const urls: string[] = []
+    const onResponse = (r: import('@playwright/test').Response) => {
+      if (r.request().resourceType() === 'font') urls.push(r.url())
+    }
+    page.on('response', onResponse)
     await page.goto(path, { waitUntil: 'networkidle' })
     await page.evaluate(() => document.fonts.ready)
-    page.removeAllListeners('response')
-    expect(bodies.length, path).toBeGreaterThan(0)
+    page.off('response', onResponse)
+    expect(urls.length, path).toBeGreaterThan(0)
+    const bodies = await Promise.all(urls.map(async (u) => (await request.get(u)).body()))
     for (const body of bodies) {
       const names = woff2Names(body)
       const family = Object.keys(LICENCES).find((f) => names[1]?.startsWith(f))

@@ -8,6 +8,7 @@ import * as migration_20261016_150837_audit_export from './20261016_150837_audit
 import * as migration_20261016_201017_content from './20261016_201017_content'
 import * as migration_20261017_113440_globals from './20261017_113440_globals'
 import * as migration_20261104_143748_evidence_claim_digest from './20261104_143748_evidence_claim_digest'
+import * as migration_20261105_171113_audit_cache_expire from './20261105_171113_audit_cache_expire'
 
 export const migrations = [
   {
@@ -59,5 +60,10 @@ export const migrations = [
     up: migration_20261104_143748_evidence_claim_digest.up,
     down: migration_20261104_143748_evidence_claim_digest.down,
     name: '20261104_143748_evidence_claim_digest',
+  },
+  {
+    up: migration_20261105_171113_audit_cache_expire.up,
+    down: migration_20261105_171113_audit_cache_expire.down,
+    name: '20261105_171113_audit_cache_expire',
   },
 ]

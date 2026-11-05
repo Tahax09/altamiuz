@@ -33,3 +33,8 @@ against application code paths, not against a database administrator.
   The test "production role split" proves this with a temporary non-owner role.
 - Any genuine correction to an audit record needs a DBA, a written change record, and a new audit
   event describing the correction. Records are never edited in place.
+
+## Operations events
+
+`cache.expire` (meta `scope`): an Administrator or Owner expired the public data cache after an
+out-of-band write (`docs/runbooks/cache.md`, L-3).
