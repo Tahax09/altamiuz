@@ -28,7 +28,7 @@ Arabic/RTL admin proof of concept, and **R-B**, the typography specimen
 | Item | Value |
 |---|---|
 | **Language/Version** | TypeScript 5.x (strict), Node.js 22 LTS |
-| **Primary Dependencies** | Next.js 16.3.8 and Payload 3.91.0, pinned exactly (ADR-003 incl. Amendment 1 security bump; D-1) (`@payloadcms/next`, `db-postgres`, `richtext-lexical`, optional `storage-s3`), sharp, otplib, a content-type sniffer, pino, zod. Exact pins go in the lockfile; each new dependency gets a licence check and a lifecycle-script review |
+| **Primary Dependencies** | Next.js 16.4.5 and Payload 3.92.1, pinned exactly (ADR-003 incl. Amendments 1 and 2, security bumps; D-1) (`@payloadcms/next`, `db-postgres`, `richtext-lexical`, optional `storage-s3`), sharp, otplib, a content-type sniffer, pino, zod. Exact pins go in the lockfile; each new dependency gets a licence check and a lifecycle-script review |
 | **Storage** | PostgreSQL 17 (Payload Drizzle adapter, committed migrations); media on local disk in development, R2 proposed for production |
 | **Testing** | Vitest (unit, integration against real Postgres), Playwright (e2e, security, axe), Lighthouse CI, gitleaks, `pnpm audit` / osv-scanner |
 | **Target Platform** | Modern evergreen browsers (last 2 versions, iOS Safari 16+); server: Node 22 standalone build, local Docker and Vercel preview; production host undecided |

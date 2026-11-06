@@ -59,9 +59,9 @@ const auditCount = async (action: string, outcome?: string) =>
   )
 
 describe('T075 localizeStatus regression pin', () => {
-  it('runs against Payload 3.91.0 with experimental localizeStatus enabled', async () => {
+  it('runs against Payload 3.92.1 with experimental localizeStatus enabled', async () => {
     const pkg = JSON.parse(fs.readFileSync('node_modules/payload/package.json', 'utf8'))
-    expect(pkg.version).toBe('3.91.0')
+    expect(pkg.version).toBe('3.92.1')
     const cfg = t.payload.config
     expect(cfg.experimental?.localizeStatus).toBe(true)
     for (const c of ['pages', 'services', 'courses'] as const) {

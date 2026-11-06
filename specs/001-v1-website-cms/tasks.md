@@ -88,6 +88,31 @@ green; gitleaks clean → prepare commit for owner approval.
   critical + 3 high advisories in the original pins. ADR-003 Amendment 1 bumps `next` to 16.3.8
   and `sharp` to 0.35.5. The remaining dev-only/transitive advisories are time-bound exceptions
   in `docs/security/dependency-exceptions.md` (expire 2026-11-16).
+- **Dependency advisory remediation (2026-11-05, ADR-003 Amendment 2)**: `pnpm audit` went from
+  37 findings (3 critical, 14 high, 12 moderate, 8 low) to 9 (1 critical, 2 high, 2 moderate,
+  4 low); 26 advisories resolved. Resolved versions: `next` 16.3.8 → 16.4.5 (GHSA-2464-fhr4-w9xw,
+  GHSA-673q-mjm6-r5xr critical RCE; GHSA-p3m5-59mp-jv5r); Payload 3.91.0 → 3.92.1 with `undici`
+  7.29.1 → 7.30.1 (GHSA-2m5v-pch6-74hx, GHSA-4w7w-5xrc-9h26, GHSA-qrxm-fqhp-jwvm,
+  GHSA-xjj6-f33q-929c, GHSA-4qv8-2p9j-2685, GHSA-55wc-3pg8-jfw6, GHSA-9fm3-97px-rjf6,
+  GHSA-f72v-6w45-q472); `nodemailer` 10.1.1 → 10.1.7 (GHSA-8c8m-p3m8-cjg8, GHSA-85x2-q946-cp5h,
+  GHSA-m943-m63m-w62w); `@lhci/cli` 0.15.1 → 0.16.0 removes `extract-zip`, `tmp`, `zod` 3,
+  `uuid` 8 (GHSA-7pqw-9j4j-h8q3, GHSA-jmr9-qjv8-65gv, GHSA-ph9p-34f9-6g65, GHSA-52f5-9888-hmc6,
+  GHSA-mrhx-c7xc-m3w5, GHSA-w5hq-g745-h8pq); `fast-uri` 3.1.8 → 3.1.9 in range (4 advisories);
+  `happy-dom` 20.14.6 → 21.0.4 through the one scoped override `@lexical/headless>happy-dom`
+  (GHSA-834v-8h66-3h79, GHSA-c8p4-j97h-3vg8). `eslint-config-next` 16.4.5 follows `next`.
+  Remaining exposure: time-bound exceptions (owner: project owner; expire 2026-12-05) for
+  `dompurify` 3.4.15 vendored in `monaco-editor` 0.57.0 (latest stable; admin JSON-field editor
+  only; GHSA-cg2g-xh64-v4q7 critical, GHSA-mrv2-3pqr-j5jr high, three low), `basic-ftp` 5.x in
+  the Lighthouse CI proxy chain (GHSA-c475-qrg2-pj4r, dev-only), `minimatch` 10 in lint tooling
+  (GHSA-g3hv-75wg-m249) and `deepmerge` (GHSA-gcqx-w48m-w2h4, no fix published); `esbuild`
+  GHSA-67mh-4wv8-2f99 keeps its 2026-11-16 expiry. GHSA-vfj7-8cjw-p6xm (`braces`) no longer
+  matches and was retired. `pnpm audit --audit-level high` and osv-scanner pass. New FSL-1.1
+  licence (`sentry` CLI, Lighthouse dev tooling) noted in `docs/licences.md`. Verified: typecheck,
+  lint (0 errors; the same 3 warnings as before the upgrade), unit 373/373, integration
+  552/552 (incl. T075 and T071 write paths), production build, full Playwright suite 197/197
+  (incl. the T071 admin paste test); T072 runs in the unit suite. Lighthouse CI
+  (`pnpm perf:lighthouse`, lhci 0.16.0 / Lighthouse 13.6.0): all budgets pass; LCP 1.36–1.41 s,
+  TBT 64–84 ms, CLS 0, JS 143 KB, fonts 72/96 KB, a11y 1.00.
 
 ---
 

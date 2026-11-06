@@ -1,20 +1,45 @@
 # Time-bound, documented exceptions only. See docs/security/dependency-exceptions.md.
 [[IgnoredVulns]]
-id = "GHSA-vfj7-8cjw-p6xm"
-ignoreUntil = 2026-11-16
-reason = "braces via eslint-config-next (dev-only lint tooling, trusted inputs); no fixed release"
-
-[[IgnoredVulns]]
 id = "GHSA-67mh-4wv8-2f99"
 ignoreUntil = 2026-11-16
 reason = "esbuild via drizzle-kit CLI loader; dev-server-only issue, no dev server exposed"
 
 [[IgnoredVulns]]
+id = "GHSA-cg2g-xh64-v4q7"
+ignoreUntil = 2026-12-05
+reason = "dompurify 3.4.15 vendored inside monaco-editor 0.57.0 (latest stable, pins it); Payload admin JSON field editor only; no compatible fix"
+
+[[IgnoredVulns]]
+id = "GHSA-mrv2-3pqr-j5jr"
+ignoreUntil = 2026-12-05
+reason = "dompurify 3.4.15 vendored inside monaco-editor 0.57.0; see GHSA-cg2g-xh64-v4q7"
+
+[[IgnoredVulns]]
+id = "GHSA-c6gr-qvv4-5v3f"
+ignoreUntil = 2026-12-05
+reason = "dompurify 3.4.15 vendored inside monaco-editor 0.57.0; see GHSA-cg2g-xh64-v4q7"
+
+[[IgnoredVulns]]
 id = "GHSA-p98j-92pf-mc4p"
-ignoreUntil = 2026-11-16
-reason = "dompurify (low) inside Payload admin monaco editor; awaiting upstream bump to >=3.4.16"
+ignoreUntil = 2026-12-05
+reason = "dompurify 3.4.15 vendored inside monaco-editor 0.57.0; see GHSA-cg2g-xh64-v4q7"
 
 [[IgnoredVulns]]
 id = "GHSA-6688-9rhm-gjv2"
-ignoreUntil = 2026-11-16
-reason = "dompurify (low) inside Payload admin monaco editor; awaiting upstream bump to >=3.4.16"
+ignoreUntil = 2026-12-05
+reason = "dompurify 3.4.15 vendored inside monaco-editor 0.57.0; see GHSA-cg2g-xh64-v4q7"
+
+[[IgnoredVulns]]
+id = "GHSA-c475-qrg2-pj4r"
+ignoreUntil = 2026-12-05
+reason = "basic-ftp 5.x via @lhci/cli proxy-agent (dev-only); only reached with an ftp:// PAC URL, none configured; get-uri latest still requires ^5.3.1"
+
+[[IgnoredVulns]]
+id = "GHSA-gcqx-w48m-w2h4"
+ignoreUntil = 2026-12-05
+reason = "deepmerge 4.3.1 via payload (low); no fixed release published"
+
+[[IgnoredVulns]]
+id = "GHSA-g3hv-75wg-m249"
+ignoreUntil = 2026-12-05
+reason = "minimatch 10.x via eslint-config-next typescript-estree (dev-only lint, trusted globs); upstream requires ^10"

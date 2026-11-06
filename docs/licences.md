@@ -8,13 +8,13 @@ on 2026-10-16 after `pnpm install` (lockfile `pnpm-lock.yaml`). 640 packages in 
 | Package                      | Version | Licence    |
 | ---------------------------- | ------- | ---------- |
 | @axe-core/playwright         | 4.14.0  | MPL-2.0    |
-| @lhci/cli                    | 0.15.1  | Apache-2.0 |
+| @lhci/cli                    | 0.16.0  | Apache-2.0 |
 | @eslint/js                   | 9.39.5  | MIT        |
-| @payloadcms/db-postgres      | 3.91.0  | MIT        |
-| @payloadcms/next             | 3.91.0  | MIT        |
-| @payloadcms/richtext-lexical | 3.91.0  | MIT        |
-| @payloadcms/translations     | 3.91.0  | MIT        |
-| @payloadcms/ui               | 3.91.0  | MIT        |
+| @payloadcms/db-postgres      | 3.92.1  | MIT        |
+| @payloadcms/next             | 3.92.1  | MIT        |
+| @payloadcms/richtext-lexical | 3.92.1  | MIT        |
+| @payloadcms/translations     | 3.92.1  | MIT        |
+| @payloadcms/ui               | 3.92.1  | MIT        |
 | @playwright/test             | 1.64.1  | Apache-2.0 |
 | @types/node                  | 22.20.5 | MIT        |
 | @types/nodemailer            | 8.0.2   | MIT        |
@@ -22,11 +22,11 @@ on 2026-10-16 after `pnpm install` (lockfile `pnpm-lock.yaml`). 640 packages in 
 | @types/react                 | 19.2.18 | MIT        |
 | @types/react-dom             | 19.2.7  | MIT        |
 | eslint                       | 9.39.5  | MIT        |
-| eslint-config-next           | 16.3.3  | MIT        |
+| eslint-config-next           | 16.4.5  | MIT        |
 | graphql                      | 16.14.2 | MIT        |
-| next                         | 16.3.8  | MIT        |
-| nodemailer                   | 10.1.1  | MIT-0      |
-| payload                      | 3.91.0  | MIT        |
+| next                         | 16.4.5  | MIT        |
+| nodemailer                   | 10.1.7  | MIT-0      |
+| payload                      | 3.92.1  | MIT        |
 | pg                           | 8.20.0  | MIT        |
 | pino                         | 10.4.0  | MIT        |
 | prettier                     | 3.9.10  | MIT        |
@@ -42,24 +42,29 @@ on 2026-10-16 after `pnpm install` (lockfile `pnpm-lock.yaml`). 640 packages in 
 
 ## Licence distribution (full tree)
 
+`pnpm licenses list`, 2026-11-05 (after the dependency advisory remediation): 864 packages.
+
 | Licence                 | Packages |
 | ----------------------- | -------- |
-| MIT                     | 560      |
-| Apache-2.0              | 27       |
-| ISC                     | 19       |
-| BSD-3-Clause            | 13       |
-| BSD-2-Clause            | 8        |
-| BlueOak-1.0.0           | 2        |
+| MIT                     | 731      |
+| Apache-2.0              | 44       |
+| ISC                     | 36       |
+| BSD-3-Clause            | 18       |
+| BSD-2-Clause            | 13       |
+| BlueOak-1.0.0           | 7        |
+| MPL-2.0                 | 2        |
 | LGPL-3.0-or-later       | 1        |
 | Python-2.0              | 1        |
-| MPL-2.0                 | 1        |
+| PSF-2.0                 | 1        |
 | CC-BY-4.0               | 1        |
 | (MPL-2.0 OR Apache-2.0) | 1        |
 | CC0-1.0                 | 1        |
 | MIT-0                   | 1        |
 | WTFPL OR ISC            | 1        |
+| FSL-1.1-Apache-2.0      | 1        |
 | WTFPL                   | 1        |
 | 0BSD                    | 1        |
+| (MIT OR CC0-1.0)        | 1        |
 | (WTFPL OR MIT)          | 1        |
 
 ## Licences needing a note
@@ -68,10 +73,17 @@ on 2026-10-16 after `pnpm install` (lockfile `pnpm-lock.yaml`). 640 packages in 
 - **(MPL-2.0 OR Apache-2.0)**: `dompurify` (via Payload). Used under Apache-2.0.
 - **WTFPL / (WTFPL OR ISC) / (WTFPL OR MIT)**: `truncate-utf8-bytes`, `sanitize-filename`, `utf8-byte-length` (Payload transitive). Permissive.
 - **MPL-2.0**: `axe-core` (via `@axe-core/playwright`, devDependency, accessibility testing only; not shipped).
+- **FSL-1.1-Apache-2.0**: `sentry` 0.45.0, Sentry's CLI, pulled in by `@sentry/node` 11 ← `lighthouse` 13.6.0 ← `@lhci/cli` 0.16.0 (devDependency, Lighthouse CI only; not shipped; no install scripts). Functional Source License: use is permitted except in a product competing with Sentry, and each release becomes Apache-2.0 two years after publication. Local performance testing is a permitted use. Recorded 2026-11-05 with the `@lhci/cli` 0.16.0 security upgrade; Lighthouse sends error reports to Sentry only with `--enable-error-reporting`, which `lhci autorun` does not pass here.
+- **PSF-2.0, (MIT OR CC0-1.0)**: `argparse` 3, `type-fest` (dev tooling transitive). Permissive.
 - **Python-2.0, CC-BY-4.0, BlueOak-1.0.0, CC0-1.0, 0BSD, MIT-0**: permissive or attribution-only transitive tooling and data packages.
 
 `@lhci/cli` (devDependency, T139, owner-approved 2026-11-04; Lighthouse 12.6.1) was added 2026-11-04;
 the re-scan of the full tree (857 packages) found no new copyleft licence.
+
+2026-11-05 dependency advisory remediation (`next` 16.4.5, Payload 3.92.1, `nodemailer` 10.1.7,
+`@lhci/cli` 0.16.0 with Lighthouse 13.6.0, `happy-dom` 21.0.4): re-scan of 864 packages found no
+copyleft licence beyond the LGPL libvips binary above; one source-available licence (FSL-1.1, dev
+tooling only) is noted above.
 
 No GPL/AGPL licence in the resolved tree. Re-run this check whenever dependencies change (Constitution I).
 
