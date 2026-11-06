@@ -10,6 +10,7 @@ import * as migration_20261017_113440_globals from './20261017_113440_globals'
 import * as migration_20261104_143748_evidence_claim_digest from './20261104_143748_evidence_claim_digest'
 import * as migration_20261105_171113_audit_cache_expire from './20261105_171113_audit_cache_expire'
 import * as migration_20261106_100933_media from './20261106_100933_media'
+import * as migration_20261106_171836_enquiries from './20261106_171836_enquiries'
 
 export const migrations = [
   {
@@ -71,5 +72,10 @@ export const migrations = [
     up: migration_20261106_100933_media.up,
     down: migration_20261106_100933_media.down,
     name: '20261106_100933_media',
+  },
+  {
+    up: migration_20261106_171836_enquiries.up,
+    down: migration_20261106_171836_enquiries.down,
+    name: '20261106_171836_enquiries',
   },
 ]

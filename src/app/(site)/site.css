@@ -13,6 +13,8 @@
   --brand-ink: #ffffff; /* text on --brand */
   --brand-tint: #e9eef4; /* banner and quiet bands; --ink on it 15:1 */
   --accent: #1d4ed8; /* links; 6.7:1 on white, 5.9:1 on --brand-tint */
+  --danger: #a4161a; /* form errors; 7.3:1 on white */
+  --success: #14532d; /* confirmations; 9.9:1 on white */
 }
 
 /* ------------------------------------------------------------------------------------------
@@ -687,4 +689,92 @@ html[lang='ar'] .stats__value {
   margin-block-start: var(--space-1);
   color: var(--ink-muted);
   font-size: 0.9375rem;
+}
+
+/* Contact form (US5). Native controls only (works without JavaScript); errors are text plus a
+   border, never colour alone. */
+.enquiry {
+  display: grid;
+  gap: var(--space-2);
+  max-inline-size: 40rem;
+  margin-block-start: var(--space-3);
+}
+.enquiry .field {
+  display: grid;
+  gap: 0.375rem;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-inline-size: 0;
+}
+.enquiry label,
+.enquiry legend {
+  font-weight: 600;
+}
+.enquiry input:not([type='checkbox'], [type='radio']),
+.enquiry textarea {
+  inline-size: 100%;
+  min-height: var(--target);
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--ink-muted);
+  border-radius: var(--radius);
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+}
+.enquiry textarea {
+  resize: vertical;
+}
+.enquiry [aria-invalid='true'] {
+  border-color: var(--danger);
+  border-width: 2px;
+}
+.enquiry fieldset[aria-invalid='true'] {
+  padding-inline-start: var(--space-1);
+  border-inline-start: var(--rule-notice) solid var(--danger);
+}
+.enquiry .choice,
+.enquiry .field--check {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  min-height: var(--target);
+}
+.enquiry .field--check {
+  flex-wrap: wrap;
+}
+.enquiry input[type='checkbox'],
+.enquiry input[type='radio'] {
+  inline-size: 1.25rem;
+  block-size: 1.25rem;
+  margin: 0;
+  accent-color: var(--brand);
+}
+.enquiry .choice label,
+.enquiry .field--check label {
+  font-weight: 400;
+}
+.field__error {
+  flex-basis: 100%;
+  margin: 0;
+  color: var(--danger);
+  font-weight: 600;
+}
+.enquiry__note {
+  margin: 0;
+  color: var(--ink-muted);
+}
+.enquiry__notice {
+  margin: 0;
+  padding: var(--space-1) var(--space-2);
+  border-inline-start: var(--rule-notice) solid var(--danger);
+  background: var(--paper-alt);
+  font-weight: 600;
+}
+.enquiry__notice--sent {
+  border-inline-start-color: var(--success);
+  color: var(--success);
+}
+.enquiry .button {
+  justify-self: start;
 }

@@ -8,4 +8,5 @@ export {
 } from './events'
 export { AuditMetaError, recordAudit, type AuditEventInput } from './record'
 export { purgeExpiredAuditEvents } from './retention'
+export { csvCell } from './export'
 export { auditDeniedOperations } from './hooks'

@@ -20,8 +20,9 @@ the other locale (e.g. `/ar/services/…`) returns 404 unless an explicit redire
 
 ## Contact submission
 
-`POST` via a server action, or `POST /api/enquiries` (route handler); the choice is fixed in
-Phase 6.
+`POST` via a server action (fixed in Phase 6, 2026-11-06: `sendEnquiry` in
+`src/app/(site)/[locale]/enquiry-action.ts`; `/api/enquiries` stays the admin collection API).
+Turnstile's widget posts its token as `turnstileToken`.
 
 - **Input**: `name, email, phone?, organization?, topic, message, consent, locale, turnstileToken`
   (validated with a shared schema; limits in data-model.md).
@@ -42,7 +43,7 @@ Phase 6.
 |---|---|---|---|
 | `/api/health` | GET | public | `{ status }` liveness only, no versions or details |
 | `/api/health/ready` | GET | token from env or internal network | database ping |
-| `/api/jobs/run` | POST | signed request (host cron or QStash signature) | runs due jobs; 401 otherwise |
+| `/api/jobs/run` | POST | `Authorization: Bearer <JOBS_SIGNING_SECRET>` (constant-time; QStash signature when `JOBS_TRIGGER=qstash`, not built) | runs due jobs; `?retention=1` also purges expired enquiries and audit entries; 401 otherwise |
 
 ## Admin and CMS API (authenticated + MFA)
 

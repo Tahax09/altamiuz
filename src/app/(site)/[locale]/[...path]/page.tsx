@@ -11,6 +11,7 @@ import {
   type PublicDoc,
   type PublicReaders,
 } from '@/modules/content'
+import { contactFormFor } from '../../contact-form'
 import { DocumentView, ListingCards } from '@/ui'
 import {
   cachedAlternates,
@@ -151,7 +152,10 @@ export default async function PublicPage({ params }: { params: Params }) {
       <DocumentView
         doc={r.doc}
         locale={r.locale}
-        ctx={{ listings: await listingsFor(r.doc, r.locale) }}
+        ctx={{
+          listings: await listingsFor(r.doc, r.locale),
+          contactForm: await contactFormFor(r.doc, r.locale),
+        }}
       />
       {r.collection === 'courses' ? <CourseFacts doc={r.doc} locale={r.locale} /> : null}
     </>

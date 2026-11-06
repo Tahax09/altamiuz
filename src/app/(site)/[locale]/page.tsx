@@ -3,6 +3,7 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { href, LOCALES, t, type Locale } from '@/modules/i18n'
+import { contactFormFor } from '../contact-form'
 import { DocumentView } from '@/ui'
 import { cachedGlobal, cachedHome, listingsFor } from '../data'
 
@@ -40,7 +41,10 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
       <DocumentView
         doc={home}
         locale={locale}
-        ctx={{ listings: await listingsFor(home, locale) }}
+        ctx={{
+          listings: await listingsFor(home, locale),
+          contactForm: await contactFormFor(home, locale),
+        }}
       />
     )
   // No published home page in this language: the two entry points, as cards.

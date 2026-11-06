@@ -4,6 +4,7 @@
 import path from 'node:path'
 import { noAnalytics, type Analytics } from './analytics'
 import { createTestCaptcha, type CaptchaVerifier } from './captcha'
+import { createTurnstile } from './captcha/turnstile'
 import { createEmail, type EmailAdapter, type EmailConfig } from './email'
 import { createMemoryJobQueue, type JobQueue } from './jobs'
 import { createMemoryRateLimiter, type RateLimiter } from './ratelimit'
@@ -27,6 +28,8 @@ import { createLocalStorage, type StorageAdapter } from './storage'
 
 export { EmailValidationError } from './email'
 export { StorageKeyError } from './storage'
+export type { CaptchaContext, CaptchaResult } from './captcha'
+export { createTurnstile, SITEVERIFY_URL } from './captcha/turnstile'
 export type { Analytics, CaptchaVerifier, EmailAdapter, JobQueue, RateLimiter, StorageAdapter }
 
 class NotYetImplemented extends Error {
@@ -78,6 +81,10 @@ export function createCaptchaVerifier(cfg: {
   secretKey?: string
 }): CaptchaVerifier {
   if (cfg.driver === 'test') return createTestCaptcha(cfg.secretKey)
+  if (cfg.driver === 'turnstile') {
+    if (!cfg.secretKey) throw new Error('TURNSTILE_SECRET_KEY is required')
+    return createTurnstile(cfg.secretKey)
+  }
   throw new NotYetImplemented('captcha', cfg.driver)
 }
 

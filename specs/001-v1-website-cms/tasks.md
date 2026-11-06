@@ -629,19 +629,66 @@ publish-to-live wiring ready for T106 → commit checkpoint.
 
 **Depends on**: Foundational (limiter, audit), US1 (public pages).
 
-- [ ] T120 [P] [US5] Failing attack tests `tests/security/enquiry-abuse.spec.ts`: Turnstile always-fail key, missing, expired and reused tokens rejected; 6th submission in 10 min from one source → 429; CRLF/header injection in name/email inert; HTML/script in message inert in email and admin; captcha service unavailable → 503 fail-closed (FR-071, FR-072, FR-073, FR-094, SC-011)
-- [ ] T121 [P] [US5] Failing tests `tests/e2e/us5-enquiry.spec.ts`: enquiry persisted before confirmation; email in Mailpit; simulated email outage → retries then delivery, failure visible to Operator; localized field errors; consent required (FR-070, FR-074, SC-010)
-- [ ] T122 [P] [US5] Failing tests `tests/integration/enquiries/access-retention.test.ts`: read/export/delete owner/administrator only via UI and REST; every view/export/delete audited; retention deletes >12 months with content-free audit; enquiry content absent from logs and analytics (FR-045, FR-076, FR-077, FR-078)
-- [ ] T123 [US5] Implement `enquiries` collection ("name ≤100; email valid ≤254; phone optional ≤20; organization optional ≤150; topic select; message ≤5000 plain text; consent must be true; locale; delivery {status, attempts, lastError code, sentAt}; deleteAfter = createdAt + 12 months") and submit server action per `contracts/http-surface.md` check order (FR-070, FR-071, FR-078)
-- [ ] T124 [US5] Implement Turnstile server verification (hostname + action, single use) in `src/modules/platform/adapters/captcha/turnstile.ts` (FR-072)
-- [ ] T125 [US5] Implement `sendEnquiryEmail` job (retries with backoff, operator alert after final failure; plain-text body; escaped validated reply-to) and configurable recipients (FR-073, FR-074, FR-075)
-- [ ] T126 [US5] Implement enquiry inbox admin views, audited export, `purgeExpiredEnquiries` job until T122 passes (FR-076, FR-077)
+- [X] T120 [P] [US5] Failing attack tests `tests/security/enquiry-abuse.spec.ts`: Turnstile always-fail key, missing, expired and reused tokens rejected; 6th submission in 10 min from one source → 429; CRLF/header injection in name/email inert; HTML/script in message inert in email and admin; captcha service unavailable → 503 fail-closed (FR-071, FR-072, FR-073, FR-094, SC-011)
+- [X] T121 [P] [US5] Failing tests `tests/e2e/us5-enquiry.spec.ts`: enquiry persisted before confirmation; email in Mailpit; simulated email outage → retries then delivery, failure visible to Operator; localized field errors; consent required (FR-070, FR-074, SC-010)
+- [X] T122 [P] [US5] Failing tests `tests/integration/enquiries/access-retention.test.ts`: read/export/delete owner/administrator only via UI and REST; every view/export/delete audited; retention deletes >12 months with content-free audit; enquiry content absent from logs and analytics (FR-045, FR-076, FR-077, FR-078)
+- [X] T123 [US5] Implement `enquiries` collection ("name ≤100; email valid ≤254; phone optional ≤20; organization optional ≤150; topic select; message ≤5000 plain text; consent must be true; locale; delivery {status, attempts, lastError code, sentAt}; deleteAfter = createdAt + 12 months") and submit server action per `contracts/http-surface.md` check order (FR-070, FR-071, FR-078)
+- [X] T124 [US5] Implement Turnstile server verification (hostname + action, single use) in `src/modules/platform/adapters/captcha/turnstile.ts` (FR-072)
+- [X] T125 [US5] Implement `sendEnquiryEmail` job (retries with backoff, operator alert after final failure; plain-text body; escaped validated reply-to) and configurable recipients (FR-073, FR-074, FR-075)
+- [X] T126 [US5] Implement enquiry inbox admin views, audited export, `purgeExpiredEnquiries` job until T122 passes (FR-076, FR-077)
 - [ ] T127 [US5] R-F: evaluate analytics options, record `docs/adr/ADR-007-analytics.md`; implement cookieless adapter (page views per locale, successful enquiry conversion; no identifiers) disabled by default (FR-084, FR-085, FR-086, FR-087)
-- [ ] T128 [P] [US5] Write `docs/content/privacy-notice-requirements.md` listing FR-079 items for CD-10 legal review (FR-079)
-- [ ] T129 [US5] Write `docs/security/TM-enquiry.md`; update ASVS V14 (FR-097)
+- [X] T128 [P] [US5] Write `docs/content/privacy-notice-requirements.md` listing FR-079 items for CD-10 legal review (FR-079)
+- [X] T129 [US5] Write `docs/security/TM-enquiry.md`; update ASVS V14 (FR-097)
 
 **Checkpoint (Gate 7)**: US5 green; no delivery-guarantee statement until SC-010 + SC-013 pass →
 commit checkpoint.
+
+**US5 implementation notes (2026-11-06)**:
+
+- Submission is a Next server action (contract choice fixed): origin → rate limit (5 per source
+  per 10 min, Postgres, fail closed) → Turnstile (single use, hostname + action, fail closed with
+  a 503 outcome) → schema (FR-070 fields only; configured topics per locale) → one transaction
+  that stores the enquiry and queues its notification → confirmation. Works without JavaScript.
+- T123 `src/modules/enquiries/` (`collection.ts`, `schema.ts`, `submit.ts`), migration
+  `20261106_171836_enquiries` (also Payload's `payload_jobs` tables; `down` constraint drop made
+  `IF EXISTS`). Form `src/ui/enquiry/EnquiryForm.tsx` (native radio group for topics, linked
+  errors, input kept), rendered in `contactBlock` sections on public pages only.
+- T124 `src/modules/platform/adapters/captcha/turnstile.ts` (siteverify with timeout; no network in
+  tests). The test driver keeps Cloudflare's test secrets and adds token-selected outcomes
+  (`test-fail…`, `test-expired…`, `test-unavailable…`) and single use, so one server can exercise
+  every path; production refuses test keys (configuration).
+- T125 `delivery.ts`: Payload jobs task, 5 attempts with exponential backoff (1 min base); status,
+  attempts and an error code on the enquiry; final failure → `failed` + content-free
+  `alert: enquiry.delivery_failed` log. Plain text, fixed subject, validated Reply-To. Recipients
+  from site settings (FR-075). Runner `POST /api/jobs/run` (bearer `JOBS_SIGNING_SECRET`);
+  locally the queue also runs every minute in-process (`JOBS_TRIGGER=local-runner`, not in tests).
+- T126 inbox: read/export/delete for Administrator and Owner (MFA; export also needs re-auth),
+  create/update denied to all; `enquiry.view` per document shown, `enquiry.export`,
+  `enquiry.delete`, `enquiry.retention_delete` (counts only); CSV export formula-neutralised;
+  retention purge via `/api/jobs/run?retention=1`.
+- T120 `tests/security/enquiry-abuse.spec.ts` (5), T121 `tests/e2e/us5-enquiry.spec.ts` (4), T122
+  `tests/integration/enquiries/access-retention.test.ts` (17) + `mailpit.test.ts` (1, real SMTP to
+  the local Mailpit), `tests/unit/enquiries/turnstile.test.ts` (4). The "always-fail key" case runs
+  in integration (one server cannot switch secrets); CRLF injection runs in integration and over
+  real SMTP (a browser cannot submit raw CR/LF in single-line inputs).
+- T128 `docs/content/privacy-notice-requirements.md` (facts and open decisions for CD-10 review,
+  no notice wording). T129 `docs/security/TM-enquiry.md`; ASVS V14.2.1 verified, V14.1.1,
+  V14.2.3, V14.2.4, V14.3.2 partial.
+- **T127 not done**: R-F analytics evaluation and ADR-007 need an owner decision on a provider
+  and its disclosure (CD-10); `ANALYTICS_DRIVER=none` stays (no analytics, so no enquiry content
+  can reach one).
+- **Verified (2026-11-06)**: unit 395, integration 599 (18 new), full Playwright 222 passed (9
+  new), typecheck, lint, format. Lighthouse CI: the first run failed one budget (JS 150.14 KB >
+  150 KB): the form imported the i18n dictionaries into the shared client bundle. The server now
+  passes only the form's localized strings (`src/ui/enquiry/messages.ts`); rerun passes all
+  budgets: 30 runs, LCP 1.39–1.40 s, TBT 26–32 ms, CLS 0, JS 147.6 KB (was 143.0 KB before US5;
+  2.4 KB headroom left, because the form's client code ships with every page of the public routes),
+  CSS 6.4 KB, fonts 72/96 KB, a11y 1.00.
+- **Launch blockers for US5**: CD-10 privacy notice and its link at the consent checkbox; CD-11
+  Arabic copy review; T132 email provider, hosting, production Turnstile keys, host scheduler for
+  retention, database encryption at rest; T136 alert routing; SC-010 (2-minute delivery) and
+  SC-013 (backup/restore) not measured, so no delivery-guarantee statement.
+
 
 ---
 

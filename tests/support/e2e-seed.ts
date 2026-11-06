@@ -37,6 +37,10 @@ const ROLE_OF = {
   // tests/e2e/us4-media.spec.ts only (T109)
   mediaEditor: 'editor',
   mediaPublisher: 'publisher',
+  // tests/security/enquiry-abuse.spec.ts and tests/e2e/us5-enquiry.spec.ts only (US5)
+  enquiryOwner: 'owner',
+  enquiryEditor: 'editor',
+  enquiryInboxOwner: 'owner',
   // tests/e2e/admin-login.spec.ts only
   loginOwner: 'owner',
   loginNew: 'owner', // signed up, second factor not enrolled yet
@@ -395,7 +399,52 @@ for (const [slug, data] of [
       publishSpecificLocale: locale,
       overrideAccess: true,
     })
-out.public = { serviceId: svc.id, courseId: course.id, homeId: home.id, aboutId: about.id }
+// US5: enquiry topics (labels per locale on the same rows) and a contact page with the form.
+{
+  const en = (await payload.updateGlobal({
+    slug: 'site-settings',
+    locale: 'en',
+    data: {
+      enquiryTopics: [{ label: 'Penetration testing' }, { label: 'Training' }],
+      _status: 'published',
+    } as never,
+    publishSpecificLocale: 'en',
+    overrideAccess: true,
+  })) as unknown as { enquiryTopics: { id: string }[] }
+  await payload.updateGlobal({
+    slug: 'site-settings',
+    locale: 'ar',
+    data: {
+      enquiryTopics: en.enquiryTopics.map((r, i) => ({
+        id: r.id,
+        label: ['اختبار الاختراق', 'التدريب'][i],
+      })),
+      _status: 'published',
+    } as never,
+    publishSpecificLocale: 'ar',
+    overrideAccess: true,
+  })
+}
+const contact = await publishDoc(
+  'pages',
+  {
+    title: 'Contact',
+    slug: 'contact',
+    sections: [{ blockType: 'contactBlock', heading: 'Contact us', intro: 'Send us a message.' }],
+  },
+  {
+    title: 'تواصل معنا',
+    slug: 'تواصل',
+    sections: [{ blockType: 'contactBlock', heading: 'تواصل معنا', intro: 'أرسل إلينا رسالة.' }],
+  },
+)
+out.public = {
+  serviceId: svc.id,
+  courseId: course.id,
+  homeId: home.id,
+  aboutId: about.id,
+  contactId: contact.id,
+}
 fs.mkdirSync('test-results', { recursive: true })
 fs.writeFileSync('test-results/e2e-fixtures.json', JSON.stringify(out))
 process.exit(0)

@@ -2,6 +2,7 @@
 // Semantic markup with the design-system classes of src/app/(site)/site.css. Hidden sections
 // never render; every link goes through safeHref or the typed route map. Internal links resolve
 // only to published targets, so preview and public produce the same markup for the same document.
+import type { ReactNode } from 'react'
 import { safeHref } from '@/modules/content'
 import { formatDate, href, t, type Locale } from '@/modules/i18n'
 import { Picture } from '../media/Picture'
@@ -30,6 +31,8 @@ export type RenderContext = {
   locale: Locale
   /** Automatic listings (published, non-hidden, editor order) for `mode: all` blocks. */
   listings?: { services?: ListItem[]; courses?: ListItem[] }
+  /** The contact form for `contactBlock` sections (public pages only; preview shows none). */
+  contactForm?: ReactNode
 }
 
 const ROUTE_OF: Record<string, 'page' | 'service' | 'course'> = {
@@ -305,6 +308,7 @@ export function Sections({
                     <h2>{str(b.heading)}</h2>
                     {b.intro ? <p>{str(b.intro)}</p> : null}
                   </div>
+                  {ctx?.contactForm ?? null}
                 </section>
               )
             default:
