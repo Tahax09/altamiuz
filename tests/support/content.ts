@@ -75,13 +75,21 @@ export async function rest(
   payload: Payload,
   method: 'GET' | 'POST' | 'PATCH' | 'DELETE',
   path: string,
-  opts: { token?: string; body?: unknown; headers?: Record<string, string> } = {},
+  opts: {
+    token?: string
+    body?: unknown
+    /** Sent byte-for-byte (e.g. JSON with own `__proto__` keys that JSON.stringify cannot express). */
+    rawBody?: string
+    headers?: Record<string, string>
+  } = {},
 ) {
   const { handleEndpoints } = await import('payload')
   const config = (await import('../../src/payload.config')).default
   const headers = new Headers({ origin: ORIGIN, ...(opts.headers ?? {}) })
   if (opts.token) headers.set('authorization', `JWT ${opts.token}`)
-  if (opts.body !== undefined) headers.set('content-type', 'application/json')
+  const payloadBody =
+    opts.rawBody ?? (opts.body === undefined ? undefined : JSON.stringify(opts.body))
+  if (payloadBody !== undefined) headers.set('content-type', 'application/json')
   const url = `${ORIGIN}${path}`
   const res = await handleEndpoints({
     config,
@@ -89,7 +97,7 @@ export async function rest(
     request: new Request(url, {
       method,
       headers,
-      body: opts.body === undefined ? undefined : JSON.stringify(opts.body),
+      body: payloadBody,
     }),
   })
   const raw = await res.text()

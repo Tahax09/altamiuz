@@ -32,6 +32,10 @@ module.exports = {
         chromeFlags: '--headless=new --no-sandbox',
         throttlingMethod: 'devtools',
         onlyCategories: ['performance', 'accessibility', 'best-practices', 'seo'],
+        // Never send Lighthouse runtime errors to Sentry. Without this, Lighthouse reuses a
+        // developer's cached opt-in (~/.config/configstore/lighthouse.json) or prompts on a TTY.
+        // lhci passes settings to Lighthouse as a --cli-flags-path file (docs/licences.md, FSL).
+        enableErrorReporting: false,
       },
     },
     assert: {

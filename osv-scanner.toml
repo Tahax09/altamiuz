@@ -1,8 +1,8 @@
 # Time-bound, documented exceptions only. See docs/security/dependency-exceptions.md.
 [[IgnoredVulns]]
 id = "GHSA-67mh-4wv8-2f99"
-ignoreUntil = 2026-11-16
-reason = "esbuild via drizzle-kit CLI loader; dev-server-only issue, no dev server exposed"
+ignoreUntil = 2026-12-05
+reason = "esbuild 0.18 via drizzle-kit @esbuild-kit (installed, not loaded); dev-server-only issue, no dev server; extended 2026-11-06 by owner, review before expiry"
 
 [[IgnoredVulns]]
 id = "GHSA-cg2g-xh64-v4q7"

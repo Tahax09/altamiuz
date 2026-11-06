@@ -138,21 +138,44 @@ green; gitleaks clean → prepare commit for owner approval.
   - ASVS V15.1.1 and V15.2.1 moved to `partial` with evidence (`docs/security/asvs-l2.md`).
 - **Release blockers (as of 2026-11-06)**. Nothing here is a readiness claim; the full
   SC-001…SC-019 mapping is T146 (`docs/launch-readiness.md`, not yet written).
-  - Owner decisions: E-5 re-dating by 2026-11-16; FSL-1.1 acceptance; CD-13 Arabic route
-    vocabulary (production build gate); CD-12 (T119); CD-10 privacy notice; T132 hosting.
+  - Owner decisions: F-1 fix option (admin Monaco from CDN; E-1); CD-13 Arabic route vocabulary
+    (production build gate); CD-12 (T119); CD-10 privacy notice; T132 hosting. (E-5 re-dating and
+    FSL-1.1 acceptance decided 2026-11-06.)
   - Open stories: US4 media (T107–T113), US6 SEO and redirects (T114–T119), US5 enquiries
     (T120–T129), US8 operations (T132–T136).
   - Polish: T137 adversarial report (requires 0 open critical/high; E-1 is an excepted critical),
     T138 manual a11y, T140–T146 (T145 supply-chain pass, T146 ASVS and launch readiness).
   - Review findings: L-3 and L-4 partly fixed, L-7 open.
-  - Dependency follow-ups before 2026-12-05: E-1 browser check and `monaco-editor` 0.58.0,
-    E-4 prototype-key write test, E-2/E-3 upstream checks.
-- **Proposed next stage (smallest)**: one test-only change, no dependency upgrades: (1) a
-  Playwright check that opens an audit event's document view and records where Monaco loads from
-  and any CSP violations (settles E-1's exposure); (2) an integration test that writes carrying
-  `__proto__`/`constructor` keys neither change validation nor persist (E-4); (3) with owner
-  approval, set Lighthouse error reporting off explicitly in `tests/perf/lighthouserc.cjs`. The
-  E-5 and FSL decisions sit with the owner and need no code.
+  - Dependency follow-ups before 2026-12-05: E-1 F-1 fix and `monaco-editor` 0.58.0, E-5
+    mandatory review, E-2/E-3/E-4 upstream checks. (E-1 browser check and E-4 write test done
+    2026-11-06.)
+- **Tests-only security stage (2026-11-06, owner-approved; follows the proposal above)**:
+  - **E-1 / finding F-1** — `tests/security/admin-code-editor.spec.ts` (Playwright, production
+    build, audit event document view, own seeded account `monacoOwner`): the admin JSON field's
+    Monaco editor is **not** the installed `monaco-editor` 0.57.0. `@monaco-editor/loader`'s
+    default loads Monaco 0.55.1 from `cdn.jsdelivr.net` (15 scripts, 2 workers via `blob:`),
+    allowed by the admin CSP's `'strict-dynamic'`; the CSP blocks only the CDN stylesheet (one
+    `style-src-elem` violation). Runtime DOMPurify is 3.2.7 (1 high, 14 moderate, 6 low per OSV;
+    the critical GHSA-cg2g-xh64-v4q7 does not apply to 3.2.7). The spec checks the shipped CSP is
+    unchanged, pins the observed violation and third-party footprint, and keeps the intended rule
+    "no third-party script in the admin" as an expected failure (`test.fail`) until F-1 is fixed.
+    CSP not weakened. Fix options (owner decision) in `docs/security/dependency-exceptions.md` E-1;
+    `docs/security/TM-admin.md` and ASVS V3.4.3 record the gap.
+  - **E-4** — `tests/integration/security/prototype-keys.test.ts` (10 cases, raw JSON through the
+    REST router and the Local API; `rest()` gained a `rawBody` option): own `__proto__` and
+    `constructor.prototype` keys never satisfy a required field, never smuggle rich text past the
+    content policy, never publish (Editor) or change role/status (Administrator), are never
+    persisted, and leave `Object.prototype` clean. No sanitization or validation was changed.
+  - **Lighthouse** — `tests/perf/lighthouserc.cjs` sets `enableErrorReporting: false`
+    (Lighthouse's own flag parser reads the lhci flags file as `false`; unset it is `undefined`).
+  - **Owner decisions applied**: FSL-1.1 `sentry` CLI approved for local development tooling only
+    (`docs/licences.md`); E-5 esbuild extended 2026-11-16 → 2026-12-05 with a mandatory
+    pre-expiry review (`osv-scanner.toml`, exceptions doc). Advisory IDs unchanged.
+  - **Verified**: typecheck, lint (0 errors, 3 known warnings), format, unit 373/373, integration
+    562/562 (incl. the 10 new), full Playwright 201 passed (incl. the 4 new tests, one an expected
+    failure), Lighthouse CI all budgets pass (30 runs;
+    LCP 1.35–1.41 s, TBT 64–87 ms, CLS 0, a11y 1.00; two earlier attempts were invalidated by host
+    sleep, every run over 18 s). Commit: this entry's commit.
 
 ---
 
