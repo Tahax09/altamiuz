@@ -548,15 +548,48 @@ publish-to-live wiring ready for T106 → commit checkpoint.
 
 **Depends on**: US3 (auth), US2 (reorder control).
 
-- [ ] T107 [P] [US4] Create fixture generator `tests/fixtures/uploads/generate.ts`: JPEG/HTML polyglot, SVG with `<script>`, PNG decompression bomb, 21 MB file, 41 MP image, `.jpg` that is a PDF, EXIF-GPS JPEG, truncated file (FR-051)
-- [ ] T108 [P] [US4] Failing attack tests `tests/security/upload.spec.ts`: every malicious fixture rejected with localized message and nothing stored; unauthenticated/no-permission upload denied; EXIF absent from master and variants; random 128-bit filenames; draft-only media not anonymously retrievable; interrupted upload leaves no asset (FR-051, FR-052, FR-056)
-- [ ] T109 [P] [US4] Failing tests `tests/e2e/us4-media.spec.ts`: variants generated; focal point respected at 3 aspect ratios (numeric focal inputs usable by keyboard); alt per locale or `decorative` required to publish; usage panel; delete warning + permission; replace updates all uses; keyboard reorder of gallery via ReorderControl (FR-050, FR-053, FR-054, FR-055, FR-057)
-- [ ] T110 [US4] Implement `src/modules/media/` upload collection + validation hook (magic-byte allow-list "JPEG, PNG, WebP, AVIF; maximum 20 MB and 40 megapixels"; sharp re-encode without metadata; random names; variants 480/768/1024/1440/1920 in AVIF/WebP + JPEG fallback) until T108 passes (FR-050, FR-051, FR-052)
-- [ ] T111 [US4] Implement public-read rule (only media referenced by a published document) and storage adapter selection (`local` | `s3`) (FR-056)
-- [ ] T112 [US4] Implement usage tracking, replace, delete warning with media-deletion audit in `src/modules/media/usage.ts` until T109 passes (FR-045, FR-053, FR-054, FR-057)
-- [ ] T113 [US4] Write `docs/security/TM-media.md`; update ASVS V5 (FR-097)
+- [X] T107 [P] [US4] Create fixture generator `tests/fixtures/uploads/generate.ts`: JPEG/HTML polyglot, SVG with `<script>`, PNG decompression bomb, 21 MB file, 41 MP image, `.jpg` that is a PDF, EXIF-GPS JPEG, truncated file (FR-051)
+- [X] T108 [P] [US4] Failing attack tests `tests/security/upload.spec.ts`: every malicious fixture rejected with localized message and nothing stored; unauthenticated/no-permission upload denied; EXIF absent from master and variants; random 128-bit filenames; draft-only media not anonymously retrievable; interrupted upload leaves no asset (FR-051, FR-052, FR-056)
+- [X] T109 [P] [US4] Failing tests `tests/e2e/us4-media.spec.ts`: variants generated; focal point respected at 3 aspect ratios (numeric focal inputs usable by keyboard); alt per locale or `decorative` required to publish; usage panel; delete warning + permission; replace updates all uses; keyboard reorder of gallery via ReorderControl (FR-050, FR-053, FR-054, FR-055, FR-057)
+- [X] T110 [US4] Implement `src/modules/media/` upload collection + validation hook (magic-byte allow-list "JPEG, PNG, WebP, AVIF; maximum 20 MB and 40 megapixels"; sharp re-encode without metadata; random names; variants 480/768/1024/1440/1920 in AVIF/WebP + JPEG fallback) until T108 passes (FR-050, FR-051, FR-052)
+- [X] T111 [US4] Implement public-read rule (only media referenced by a published document) and storage adapter selection (`local` | `s3`) (FR-056)
+- [X] T112 [US4] Implement usage tracking, replace, delete warning with media-deletion audit in `src/modules/media/usage.ts` until T109 passes (FR-045, FR-053, FR-054, FR-057)
+- [X] T113 [US4] Write `docs/security/TM-media.md`; update ASVS V5 (FR-097)
 
 **Checkpoint (Gate 5)**: US4 green → commit checkpoint.
+
+**US4 implementation notes (2026-11-06)**:
+
+- T107 `tests/fixtures/uploads/generate.ts`: generated in memory (no hostile binaries committed);
+  adds a real-PNG-declared-as-JPEG case. T108 `tests/security/upload.spec.ts` (6, HTTP, production
+  build); T109 `tests/e2e/us4-media.spec.ts` (7, admin UI); plus
+  `tests/integration/media/upload.test.ts` (19) and `tests/unit/media/*.test.ts` (16).
+- T110 `src/modules/media/`: `sniff.ts` (leading bytes), `validate.ts` (size, active-content scan,
+  decoded format must match, 40 MP before decode, full decode, re-encode without metadata, random
+  128-bit name), `collection.ts` (15 variants 480–1920 × AVIF/WebP/JPEG without enlargement, focal
+  point as 0–100 numeric inputs, `pasteURL: false`, client file keys dropped), migration
+  `20261106_100933_media` (generated; its `down` constraint drops made `IF EXISTS` because the
+  `media` table drop cascades). Blocks: `hero.media`, new `mediaGallery` (ordered `{media,
+  caption}` with ReorderControl), `credentials.items.logo`. Public rendering `src/ui/media/Picture.tsx`.
+- T111 `access.ts`/`usage.ts`: anonymous file delivery and public population only for media used in
+  a visible section of a published document (any locale), cached ≤60 s per process and dropped on
+  every content/media write. Storage: `STORAGE_DRIVER=local` with `MEDIA_DIR`; `s3` is refused with
+  a clear error until the S3/R2 adapter dependency and hosting are approved (T132).
+- T112 usage panel (`admin/UsagePanel.tsx`, server component), delete warning, `media.delete`
+  audit, replace keeps the id and expires the public cache of every published use; FR-054 publish
+  gate in `workflow.verifyStoredContent` (`alt.ts`).
+- T113 `docs/security/TM-media.md`; ASVS V5.1.1–V5.4.1 verified, V5.4.2 partial, V5.4.3 not
+  addressed (no antivirus), V5.2.3 not applicable.
+- Defects found and fixed on the way: (1) Payload 3.92.1 turns its own 20 MB parser abort into a
+  500 (`addDataAndFileToRequest` re-throws without a status); the proxy now refuses oversize media
+  bodies with 413 (`src/modules/security/upload-limit.ts`). (2) ReorderControl ids kept the dotted
+  path for nested arrays (`reorder-sections.0.items-0-down`); now dashes, top-level ids unchanged.
+  (3) Admin server components must read `req.user` (the `user` prop lacks the server-set MFA flag).
+- Not done / blockers: production cannot use local disk (config refuses it) and the S3/R2 adapter
+  needs a new dependency plus the T132 hosting decision, so media cannot be deployed yet (Vercel
+  functions have no persistent disk). Drag-and-drop/touch reorder is Payload's own row drag;
+  keyboard and single-pointer reorder are the ReorderControl. Antivirus scanning not done.
+
 
 ---
 

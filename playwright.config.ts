@@ -11,6 +11,8 @@ if (process.env.DATABASE_URL && !process.env.E2E_ADMIN_DATABASE_URL) {
 }
 process.env.SITE_URL = `http://127.0.0.1:${PORT}`
 process.env.EMAIL_DRIVER = 'memory'
+// Uploads from browser suites go to a disposable directory, never the repository's media/.
+process.env.MEDIA_DIR = `${process.cwd()}/test-results/e2e-media`
 
 export default defineConfig({
   testDir: './tests',

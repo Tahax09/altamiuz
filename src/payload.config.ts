@@ -8,6 +8,7 @@ import sharp from 'sharp'
 import { auditDeniedOperations, auditEvents } from '@/modules/audit'
 import { invitations, securitySettings, users } from '@/modules/auth'
 import { courses, pages, safeEditor, services, siteGlobals } from '@/modules/content'
+import { mediaCollection } from '@/modules/media'
 import { redirects } from '@/modules/seo'
 import { getConfig } from '@/modules/platform'
 
@@ -62,6 +63,7 @@ export default buildConfig({
     pages,
     services,
     courses,
+    mediaCollection(),
     redirects,
   ],
   globals: [securitySettings, ...siteGlobals],
@@ -76,5 +78,8 @@ export default buildConfig({
   // Any rich-text field without its own editor still gets the allow-listed one (D-22).
   editor: safeEditor,
   sharp,
+  // A-7: the multipart parser stops at 20 MB (also its default; pinned here so a Payload upgrade
+  // cannot loosen it). The media hook re-checks the size and content (D-12).
+  upload: { limits: { fileSize: 20 * 1024 * 1024 }, abortOnLimit: true },
   typescript: { outputFile: path.resolve(dirname, 'payload-types.ts') },
 })

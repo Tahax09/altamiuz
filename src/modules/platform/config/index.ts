@@ -1,6 +1,7 @@
 // Typed, validated runtime configuration (contracts/configuration.md, FR-104, FR-105).
 // Production refuses development substitutes, placeholders and missing secrets. Error messages
 // name variables only; values are never echoed.
+import path from 'node:path'
 import { z } from 'zod'
 import { routeVocabularyPending } from '../../i18n'
 
@@ -38,6 +39,7 @@ const rawSchema = z.object({
   HEALTH_READY_TOKEN: z.string().min(16, 'must be at least 16 characters'),
   JOBS_SIGNING_SECRET: optional,
   STORAGE_DRIVER: z.enum(['local', 's3']).default('local'),
+  MEDIA_DIR: optional,
   S3_ENDPOINT: optional,
   S3_BUCKET: optional,
   S3_ACCESS_KEY_ID: optional,
@@ -193,7 +195,7 @@ function build(raw: Raw) {
             accessKeyId: raw.S3_ACCESS_KEY_ID!,
             secretAccessKey: raw.S3_SECRET_ACCESS_KEY!,
           }
-        : { driver: 'local' as const },
+        : { driver: 'local' as const, dir: path.resolve(raw.MEDIA_DIR || 'media') },
     email: {
       driver: raw.EMAIL_DRIVER,
       from: raw.EMAIL_FROM ?? 'no-reply@localhost',

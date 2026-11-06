@@ -14,6 +14,7 @@ import type {
 import { commitTransaction, initTransaction, killTransaction, NotFound } from 'payload'
 import type { Resource } from '../access'
 import { recordAudit } from '../audit'
+import { assertPublishableImages, invalidatePublicMedia } from '../media'
 import { expireCacheTags } from '../platform'
 import { LOCALES, type Locale, type RoutedCollection } from '../i18n'
 import { createSlugChangeRedirect } from '../seo'
@@ -258,6 +259,16 @@ export const verifyStoredContent =
             ),
             `seo(${locale})`,
           )
+    // FR-054 backstop: images shown in a published locale have alt text there or are decorative.
+    if (status && typeof status === 'object')
+      await assertPublishableImages(
+        req,
+        req.payload.collections[collection]!.config.fields,
+        full as unknown as Record<string, unknown>,
+        Object.entries(status as Record<string, unknown>)
+          .filter(([, st]) => st === 'published')
+          .map(([locale]) => locale),
+      )
     return doc
   }
 
@@ -295,6 +306,7 @@ export const auditAndRevalidate =
         c.slugChange.to,
       )
     expireCacheTags(`${collection}:${doc.id}`, collection)
+    invalidatePublicMedia() // published media set (FR-056) may have changed
     return doc
   }
 
@@ -309,6 +321,7 @@ export const auditDelete =
       meta: { collection },
     })
     expireCacheTags(`${collection}:${id}`, collection)
+    invalidatePublicMedia()
   }
 
 const SYSTEM_KEYS = new Set(['id', '_status', 'createdAt', 'updatedAt', 'deletedAt'])

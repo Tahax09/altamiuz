@@ -71,6 +71,8 @@ export function ReorderRowLabel() {
   const { data, path, rowNumber = 0 } = useRowLabel<Record<string, unknown>>()
   const parentPath = path?.replace(/\.\d+$/, '') ?? ''
   const { rows } = useField<unknown>({ path: parentPath }) as unknown as { rows?: unknown[] }
+  // Element ids use '-' for nesting dots, so `#reorder-…` selectors work for nested arrays too.
+  const idBase = `reorder-${parentPath.replace(/\./g, '-')}`
   // `disabled` is Payload's read-only form state: no save permission (Editor on navigation),
   // read-only because another user holds the lock, or trashed (T130a).
   const { disabled, moveFieldRow, setModified } = useForm()
@@ -87,7 +89,7 @@ export function ReorderRowLabel() {
     // Keep focus on the same control of the moved row; at an edge, use the one still enabled.
     const dir = to > index ? 'down' : 'up'
     const edge = (dir === 'down' && to === total - 1) || (dir === 'up' && to === 0)
-    focusWhenReady(`reorder-${parentPath}-${to}-${edge ? (dir === 'down' ? 'up' : 'down') : dir}`)
+    focusWhenReady(`${idBase}-${to}-${edge ? (dir === 'down' ? 'up' : 'down') : dir}`)
   }
 
   const stop = (e: React.SyntheticEvent) => e.stopPropagation()
@@ -97,7 +99,7 @@ export function ReorderRowLabel() {
       <span role="group" aria-label={`Reorder ${label}`} className="altamiuz-reorder">
         <button
           type="button"
-          id={`reorder-${parentPath}-${index}-up`}
+          id={`${idBase}-${index}-up`}
           className="btn btn--size-small btn--style-secondary"
           disabled={disabled || index === 0}
           onClick={() => move(index - 1)}
@@ -106,7 +108,7 @@ export function ReorderRowLabel() {
         </button>
         <button
           type="button"
-          id={`reorder-${parentPath}-${index}-down`}
+          id={`${idBase}-${index}-down`}
           className="btn btn--size-small btn--style-secondary"
           disabled={disabled || index >= total - 1}
           onClick={() => move(index + 1)}

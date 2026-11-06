@@ -1,6 +1,7 @@
 // Playwright global setup: a disposable altamiuz_e2e database, migrated and seeded through the
 // real account services. Credentials are synthetic and written only to test-results/ (ignored).
 import { execFileSync } from 'node:child_process'
+import fs from 'node:fs'
 import pg from 'pg'
 
 export default async function setup() {
@@ -11,6 +12,8 @@ export default async function setup() {
   await c.query(`DROP DATABASE IF EXISTS "${name}" WITH (FORCE)`)
   await c.query(`CREATE DATABASE "${name}"`)
   await c.end()
+  // Files from the previous run belong to the database just dropped.
+  fs.rmSync(process.env.MEDIA_DIR!, { recursive: true, force: true })
   const env = {
     ...process.env,
     APP_ENV: 'test',

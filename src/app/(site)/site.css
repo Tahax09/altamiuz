@@ -642,3 +642,49 @@ html[lang='ar'] .stats__value {
     color: inherit;
   }
 }
+
+/* Images (US4, FR-052–FR-054). Cropped images fill a fixed ratio and keep their focal point;
+   the focal point arrives as .fx-N/.fy-N classes (media.css) because the public CSP allows no
+   inline styles. */
+.media {
+  display: block;
+}
+.media img {
+  display: block;
+  inline-size: 100%;
+  block-size: auto;
+  border-radius: var(--radius);
+}
+.media--crop img {
+  block-size: 100%;
+  object-fit: cover;
+  object-position: var(--fx, 50%) var(--fy, 50%);
+}
+.media--contain img {
+  object-fit: contain;
+}
+.media--hero {
+  aspect-ratio: 16 / 9;
+  margin-block-end: var(--space-2);
+}
+.media--gallery {
+  aspect-ratio: 4 / 3;
+}
+.media--logo {
+  max-inline-size: 10rem;
+}
+.gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 16rem), 1fr));
+  gap: var(--space-2);
+  padding: 0;
+  list-style: none;
+}
+.gallery figure {
+  margin: 0;
+}
+.gallery figcaption {
+  margin-block-start: var(--space-1);
+  color: var(--ink-muted);
+  font-size: 0.9375rem;
+}

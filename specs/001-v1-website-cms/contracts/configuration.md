@@ -14,6 +14,7 @@ missing secret, or any placeholder value causes the app to **refuse to start** (
 | `PAYLOAD_SECRET` | Payload signing secret | generated locally, never committed | required (≥32 bytes) |
 | `MFA_ENCRYPTION_KEY` | TOTP secret encryption | generated locally | required (32 bytes) |
 | `STORAGE_DRIVER` | `local` / `s3` | `local` | `s3` (R2, proposed) |
+| `MEDIA_DIR` | directory for `STORAGE_DRIVER=local` media files | `media` (repository root, git-ignored) | not used with `s3` |
 | `S3_ENDPOINT`, `S3_BUCKET`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY` | object storage | — | required if `s3` |
 | `EMAIL_DRIVER` | `smtp` / `memory` / `resend` | `smtp` (Mailpit) | `resend` (proposed) |
 | `SMTP_URL` | local SMTP | `smtp://localhost:1025` | — |

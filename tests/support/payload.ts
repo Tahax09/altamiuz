@@ -1,6 +1,9 @@
 // Integration-test harness: a fresh database per test file, migrated with the real Payload CLI,
 // and a Payload instance built from the real src/payload.config.ts. Dropped in afterAll.
 import { execFileSync } from 'node:child_process'
+import fs from 'node:fs'
+import os from 'node:os'
+import path from 'node:path'
 import { randomBytes } from 'node:crypto'
 import pg from 'pg'
 import type { Payload } from 'payload'
@@ -8,6 +11,8 @@ import type { Payload } from 'payload'
 export type TestPayload = {
   payload: Payload
   databaseUrl: string
+  /** Per-file media directory (MEDIA_DIR), removed on close. */
+  mediaDir: string
   sql: pg.Pool
   close: () => Promise<void>
 }
@@ -55,7 +60,9 @@ export async function createMigratedDatabase(): Promise<{
 
 export async function bootPayload(): Promise<TestPayload> {
   const db = await createMigratedDatabase()
+  const mediaDir = fs.mkdtempSync(path.join(os.tmpdir(), 'altamiuz-media-'))
   Object.assign(process.env, {
+    MEDIA_DIR: mediaDir, // uploads never land in the repository's media/ directory
     APP_ENV: 'test',
     DATABASE_URL: db.url,
     DATABASE_ALLOW_PUSH: 'false',
@@ -69,6 +76,7 @@ export async function bootPayload(): Promise<TestPayload> {
   return {
     payload,
     databaseUrl: db.url,
+    mediaDir,
     sql,
     close: async () => {
       await sql.end()
@@ -80,6 +88,7 @@ export async function bootPayload(): Promise<TestPayload> {
         await Promise.race([pool.end(), new Promise((r) => setTimeout(r, 5_000))])
       }
       await db.drop()
+      fs.rmSync(mediaDir, { recursive: true, force: true })
     },
   }
 }

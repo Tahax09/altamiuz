@@ -37,3 +37,14 @@
   clip-path: inset(50%);
   white-space: nowrap;
 }
+
+// Media usage panel (FR-057).
+.altamiuz-usage {
+  margin-block: 1.5rem;
+}
+.altamiuz-usage__warn {
+  border-inline-start: 4px solid var(--theme-warning-500);
+  padding: 0.5rem 0.75rem;
+  background: var(--theme-warning-100);
+  color: var(--theme-elevation-1000);
+}

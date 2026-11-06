@@ -4,6 +4,7 @@
 // only to published targets, so preview and public produce the same markup for the same document.
 import { safeHref } from '@/modules/content'
 import { formatDate, href, t, type Locale } from '@/modules/i18n'
+import { Picture } from '../media/Picture'
 import { RichText, type InternalHref } from '../richtext/RichText'
 
 type Link =
@@ -159,6 +160,14 @@ export function Sections({
                   data-block={b.blockType}
                   className={`section section--${b.blockType}`}
                 >
+                  {b.blockType === 'hero' ? (
+                    <Picture
+                      media={b.media}
+                      className="media--hero"
+                      sizes="100vw"
+                      eager={i === 0}
+                    />
+                  ) : null}
                   <h2>{str(b.heading)}</h2>
                   {b.subheading || b.text ? <p>{str(b.subheading ?? b.text)}</p> : null}
                   {primary?.label || (b.secondaryCta as Link)?.label ? (
@@ -232,6 +241,12 @@ export function Sections({
                       const until = validUntil(it.validUntil, locale)
                       return (
                         <li key={j} className="card">
+                          <Picture
+                            media={it.logo}
+                            crop={false}
+                            className="media--logo"
+                            sizes="10rem"
+                          />
                           <h3>{str(it.name)}</h3>
                           {it.issuer ? <p>{str(it.issuer)}</p> : null}
                           {until ? (
@@ -240,6 +255,28 @@ export function Sections({
                         </li>
                       )
                     })}
+                  </ul>
+                </section>
+              )
+            case 'mediaGallery':
+              return (
+                <section key={key} id={id} data-block="mediaGallery" className="section">
+                  {b.heading ? <h2>{str(b.heading)}</h2> : null}
+                  <ul className="gallery">
+                    {items.map((it, j) =>
+                      it.media && typeof it.media === 'object' ? (
+                        <li key={(it.id as string | undefined) ?? j}>
+                          <figure>
+                            <Picture
+                              media={it.media}
+                              className="media--gallery"
+                              sizes="(min-width: 48rem) 33vw, 100vw"
+                            />
+                            {it.caption ? <figcaption>{str(it.caption)}</figcaption> : null}
+                          </figure>
+                        </li>
+                      ) : null,
+                    )}
                   </ul>
                 </section>
               )

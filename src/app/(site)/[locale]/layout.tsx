@@ -8,6 +8,7 @@ import { SiteBanner, SiteFooter, SiteHeader, SkipLink } from '@/ui'
 import { fontVariables } from '@/ui/fonts'
 import { cachedAlternates, cachedGlobal, cachedPublished } from '../data'
 import '../site.css'
+import '../media.css'
 
 const isLocale = (v: string): v is Locale => (LOCALES as readonly string[]).includes(v)
 

@@ -12,7 +12,7 @@ import {
   RESERVED_SEGMENTS,
   type Locale,
 } from '@/modules/i18n'
-import { buildCsp, createMissLimiter, type CspKind } from '@/modules/security'
+import { buildCsp, createMissLimiter, uploadSizeRefusal, type CspKind } from '@/modules/security'
 import { notFoundDocument } from '@/ui/site/not-found-document'
 
 // Payload built-ins replaced by project flows (FR-030, FR-034, ADR-005): no first-user
@@ -154,6 +154,19 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
   if (BLOCKED.has(path) || BLOCKED_PREFIXES.some((p) => path.startsWith(p)))
     return new NextResponse(null, { status: 404 })
   if (REDIRECTS[path]) return NextResponse.redirect(new URL(REDIRECTS[path], request.url), 307)
+  const tooBig = uploadSizeRefusal(request.method, path, request.headers)
+  if (tooBig)
+    return NextResponse.json(
+      {
+        errors: [
+          {
+            message: tooBig.message,
+            data: { reason: tooBig.status === 413 ? 'upload.tooLarge' : 'upload.length' },
+          },
+        ],
+      },
+      { status: tooBig.status, headers: { 'Cache-Control': 'no-store', Connection: 'close' } },
+    )
 
   const nonce = newNonce()
   const csp = buildCsp({

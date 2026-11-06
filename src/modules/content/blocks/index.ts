@@ -1,5 +1,5 @@
-// Block library (T085, FR-011, FR-012, data-model). Deferred until their dependencies exist:
-// mediaGallery and image fields (US4 media), testimonials/clientLogos (CD-08 permissions).
+// Block library (T085, FR-011, FR-012, data-model). Media fields and mediaGallery added with US4
+// (T110). Deferred until their dependencies exist: testimonials/clientLogos (CD-08 permissions).
 import type { Block, Field } from 'payload'
 import { CLAIM_BLOCKS, evidenceGroup } from '../evidence'
 import { linkGroup } from '../link'
@@ -43,6 +43,9 @@ const items = (name: string, fields: Field[]): Field => ({
   admin: { components: { RowLabel: REORDER_ROW_LABEL } },
 })
 
+/** An image from the media library (US4). Alt text lives on the image, per locale (FR-054). */
+const image = (name: string): Field => ({ name, type: 'upload', relationTo: 'media' })
+
 const withReorder = (block: Block): Block => ({
   ...block,
   admin: { ...block.admin, components: { ...block.admin?.components, Label: REORDER_ROW_LABEL } },
@@ -54,6 +57,7 @@ const definitions: Block[] = [
     fields: [
       text('heading', 160, true),
       textarea('subheading', 400),
+      image('media'),
       linkGroup('primaryCta'),
       linkGroup('secondaryCta'),
       ...common,
@@ -132,9 +136,19 @@ const definitions: Block[] = [
       items('items', [
         text('name', 200, true),
         text('issuer', 200),
+        image('logo'),
         { name: 'validUntil', type: 'date' },
       ]),
       evidenceGroup('evidence', CLAIM_BLOCKS.credentials!),
+      ...common,
+    ],
+  },
+  {
+    // FR-055: ordered items, keyboard/touch/drag reorder through ReorderControl (items()).
+    slug: 'mediaGallery',
+    fields: [
+      text('heading'),
+      items('items', [{ ...image('media'), required: true } as Field, text('caption', 300)]),
       ...common,
     ],
   },

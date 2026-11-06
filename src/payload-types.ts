@@ -73,6 +73,7 @@ export interface Config {
     pages: Page;
     services: Service;
     courses: Course;
+    media: Media;
     redirects: Redirect;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
@@ -87,6 +88,7 @@ export interface Config {
     pages: PagesSelect<false> | PagesSelect<true>;
     services: ServicesSelect<false> | ServicesSelect<true>;
     courses: CoursesSelect<false> | CoursesSelect<true>;
+    media: MediaSelect<false> | MediaSelect<true>;
     redirects: RedirectsSelect<false> | RedirectsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -253,6 +255,7 @@ export interface Page {
         | {
             heading: string;
             subheading?: string | null;
+            media?: (number | null) | Media;
             primaryCta?: {
               linkType?: ('internal' | 'external' | 'email' | 'tel') | null;
               doc?:
@@ -476,6 +479,7 @@ export interface Page {
               | {
                   name: string;
                   issuer?: string | null;
+                  logo?: (number | null) | Media;
                   validUntil?: string | null;
                   id?: string | null;
                 }[]
@@ -498,6 +502,24 @@ export interface Page {
             id?: string | null;
             blockName?: string | null;
             blockType: 'credentials';
+          }
+        | {
+            heading?: string | null;
+            items?:
+              | {
+                  media: number | Media;
+                  caption?: string | null;
+                  id?: string | null;
+                }[]
+              | null;
+            /**
+             * Hidden sections stay editable but are not published.
+             */
+            hidden?: boolean | null;
+            anchorId?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'mediaGallery';
           }
         | {
             heading?: string | null;
@@ -529,6 +551,162 @@ export interface Page {
   _status?: ('draft' | 'published') | null;
 }
 /**
+ * JPEG, PNG, WebP or AVIF, up to 20 MB and 40 megapixels. Images are re-encoded without metadata; responsive sizes are generated automatically.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media".
+ */
+export interface Media {
+  id: number;
+  /**
+   * Describe the image for people who cannot see it, in each language. Required to publish a page that uses it, unless the image is decorative.
+   */
+  alt?: string | null;
+  /**
+   * Decorative images carry no information and are hidden from screen readers.
+   */
+  decorative?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  /**
+   * Focal point, % from left.
+   */
+  focalX?: number | null;
+  /**
+   * Focal point, % from top.
+   */
+  focalY?: number | null;
+  sizes?: {
+    w480_avif?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    w480_webp?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    w480_jpeg?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    w768_avif?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    w768_webp?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    w768_jpeg?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    w1024_avif?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    w1024_webp?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    w1024_jpeg?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    w1440_avif?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    w1440_webp?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    w1440_jpeg?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    w1920_avif?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    w1920_webp?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    w1920_jpeg?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+  };
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "services".
  */
@@ -542,6 +720,7 @@ export interface Service {
         | {
             heading: string;
             subheading?: string | null;
+            media?: (number | null) | Media;
             primaryCta?: {
               linkType?: ('internal' | 'external' | 'email' | 'tel') | null;
               doc?:
@@ -765,6 +944,7 @@ export interface Service {
               | {
                   name: string;
                   issuer?: string | null;
+                  logo?: (number | null) | Media;
                   validUntil?: string | null;
                   id?: string | null;
                 }[]
@@ -787,6 +967,24 @@ export interface Service {
             id?: string | null;
             blockName?: string | null;
             blockType: 'credentials';
+          }
+        | {
+            heading?: string | null;
+            items?:
+              | {
+                  media: number | Media;
+                  caption?: string | null;
+                  id?: string | null;
+                }[]
+              | null;
+            /**
+             * Hidden sections stay editable but are not published.
+             */
+            hidden?: boolean | null;
+            anchorId?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'mediaGallery';
           }
         | {
             heading?: string | null;
@@ -836,6 +1034,7 @@ export interface Course {
         | {
             heading: string;
             subheading?: string | null;
+            media?: (number | null) | Media;
             primaryCta?: {
               linkType?: ('internal' | 'external' | 'email' | 'tel') | null;
               doc?:
@@ -1059,6 +1258,7 @@ export interface Course {
               | {
                   name: string;
                   issuer?: string | null;
+                  logo?: (number | null) | Media;
                   validUntil?: string | null;
                   id?: string | null;
                 }[]
@@ -1081,6 +1281,24 @@ export interface Course {
             id?: string | null;
             blockName?: string | null;
             blockType: 'credentials';
+          }
+        | {
+            heading?: string | null;
+            items?:
+              | {
+                  media: number | Media;
+                  caption?: string | null;
+                  id?: string | null;
+                }[]
+              | null;
+            /**
+             * Hidden sections stay editable but are not published.
+             */
+            hidden?: boolean | null;
+            anchorId?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'mediaGallery';
           }
         | {
             heading?: string | null;
@@ -1194,6 +1412,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'courses';
         value: number | Course;
+      } | null)
+    | ({
+        relationTo: 'media';
+        value: number | Media;
       } | null)
     | ({
         relationTo: 'redirects';
@@ -1310,6 +1532,7 @@ export interface PagesSelect<T extends boolean = true> {
           | {
               heading?: T;
               subheading?: T;
+              media?: T;
               primaryCta?:
                 | T
                 | {
@@ -1453,6 +1676,7 @@ export interface PagesSelect<T extends boolean = true> {
                 | {
                     name?: T;
                     issuer?: T;
+                    logo?: T;
                     validUntil?: T;
                     id?: T;
                   };
@@ -1464,6 +1688,22 @@ export interface PagesSelect<T extends boolean = true> {
                     verifiedBy?: T;
                     verifiedAt?: T;
                     claimDigest?: T;
+                  };
+              hidden?: T;
+              anchorId?: T;
+              id?: T;
+              blockName?: T;
+            };
+        mediaGallery?:
+          | T
+          | {
+              heading?: T;
+              items?:
+                | T
+                | {
+                    media?: T;
+                    caption?: T;
+                    id?: T;
                   };
               hidden?: T;
               anchorId?: T;
@@ -1508,6 +1748,7 @@ export interface ServicesSelect<T extends boolean = true> {
           | {
               heading?: T;
               subheading?: T;
+              media?: T;
               primaryCta?:
                 | T
                 | {
@@ -1651,6 +1892,7 @@ export interface ServicesSelect<T extends boolean = true> {
                 | {
                     name?: T;
                     issuer?: T;
+                    logo?: T;
                     validUntil?: T;
                     id?: T;
                   };
@@ -1662,6 +1904,22 @@ export interface ServicesSelect<T extends boolean = true> {
                     verifiedBy?: T;
                     verifiedAt?: T;
                     claimDigest?: T;
+                  };
+              hidden?: T;
+              anchorId?: T;
+              id?: T;
+              blockName?: T;
+            };
+        mediaGallery?:
+          | T
+          | {
+              heading?: T;
+              items?:
+                | T
+                | {
+                    media?: T;
+                    caption?: T;
+                    id?: T;
                   };
               hidden?: T;
               anchorId?: T;
@@ -1708,6 +1966,7 @@ export interface CoursesSelect<T extends boolean = true> {
           | {
               heading?: T;
               subheading?: T;
+              media?: T;
               primaryCta?:
                 | T
                 | {
@@ -1851,6 +2110,7 @@ export interface CoursesSelect<T extends boolean = true> {
                 | {
                     name?: T;
                     issuer?: T;
+                    logo?: T;
                     validUntil?: T;
                     id?: T;
                   };
@@ -1862,6 +2122,22 @@ export interface CoursesSelect<T extends boolean = true> {
                     verifiedBy?: T;
                     verifiedAt?: T;
                     claimDigest?: T;
+                  };
+              hidden?: T;
+              anchorId?: T;
+              id?: T;
+              blockName?: T;
+            };
+        mediaGallery?:
+          | T
+          | {
+              heading?: T;
+              items?:
+                | T
+                | {
+                    media?: T;
+                    caption?: T;
+                    id?: T;
                   };
               hidden?: T;
               anchorId?: T;
@@ -1910,6 +2186,179 @@ export interface CoursesSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media_select".
+ */
+export interface MediaSelect<T extends boolean = true> {
+  alt?: T;
+  decorative?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+  sizes?:
+    | T
+    | {
+        w480_avif?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        w480_webp?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        w480_jpeg?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        w768_avif?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        w768_webp?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        w768_jpeg?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        w1024_avif?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        w1024_webp?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        w1024_jpeg?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        w1440_avif?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        w1440_webp?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        w1440_jpeg?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        w1920_avif?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        w1920_webp?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        w1920_jpeg?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+      };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

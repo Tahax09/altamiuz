@@ -73,3 +73,9 @@ export function buildCsp({ kind, nonce, dev, upgradeInsecureRequests }: CspOptio
 }
 
 export { createMissLimiter, type MissLimiter } from './miss-limiter'
+export {
+  MAX_UPLOAD_BYTES,
+  MULTIPART_OVERHEAD_BYTES,
+  UPLOAD_TOO_LARGE_MESSAGE,
+  uploadSizeRefusal,
+} from './upload-limit'

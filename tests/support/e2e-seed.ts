@@ -31,6 +31,12 @@ const ROLE_OF = {
   navPasswordOnly: 'publisher',
   // tests/security/admin-code-editor.spec.ts only (E-1 Monaco/DOMPurify exposure)
   monacoOwner: 'owner',
+  // tests/security/upload.spec.ts only (T108)
+  uploadEditor: 'editor',
+  uploadPublisher: 'publisher',
+  // tests/e2e/us4-media.spec.ts only (T109)
+  mediaEditor: 'editor',
+  mediaPublisher: 'publisher',
   // tests/e2e/admin-login.spec.ts only
   loginOwner: 'owner',
   loginNew: 'owner', // signed up, second factor not enrolled yet
