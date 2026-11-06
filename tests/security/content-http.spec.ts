@@ -5,6 +5,7 @@
 import { expect, request as pwRequest, test, type APIRequestContext } from '@playwright/test'
 import fs from 'node:fs'
 import { generate } from 'otplib'
+import { sql } from '../support/e2e-session'
 
 type Acct = { id: number; email: string; password: string; secret?: string; enrolledAt?: number }
 type Fixtures = Record<string, Acct> & { content: { pageId: number } }
@@ -12,6 +13,10 @@ const F = () => JSON.parse(fs.readFileSync('test-results/e2e-fixtures.json', 'ut
 const BASE = process.env.SITE_URL!
 const ORIGIN = { origin: BASE }
 test.describe.configure({ mode: 'serial' })
+// Every project signs in from 127.0.0.1, and MFA verification allows 30 attempts per IP per 15
+// minutes; earlier specs in a full run use most of that budget (as in tests/e2e/us7-nav.spec.ts).
+// The limits themselves are tested in tests/security/auth-http.spec.ts.
+test.beforeAll(() => sql('delete from rate_limit_buckets'))
 
 const used = new Map<string, number>()
 async function freshCode(a: Acct) {

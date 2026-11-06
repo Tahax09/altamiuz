@@ -39,3 +39,17 @@
   - A restrictive `Permissions-Policy` and `Cross-Origin-Opener-Policy: same-origin`.
 - **Limitations**: measured on the login screen only. Authenticated admin views, the rich-text
   editor and live preview are re-measured in Phase 3/4.
+
+## Amendment 1 (2026-11-06): admin scripts without `'strict-dynamic'` (closes F-1)
+
+- **Trigger**: finding F-1 (`docs/security/dependency-exceptions.md` E-1). With
+  `'strict-dynamic'`, a script that a trusted script injects runs from any origin. Payload's JSON
+  field used it to load Monaco from `cdn.jsdelivr.net` into the authenticated admin.
+- **Change**: admin `script-src 'self' 'nonce-…'` (no `'strict-dynamic'`), `worker-src 'self'`
+  (no `blob:`, which only Monaco's workers used). Public and API policies unchanged.
+  `audit-events.meta` renders through a read-only viewer instead of Monaco.
+- **Measured** (production build, Chromium): 17 admin views (dashboard, every collection list,
+  user, page, media and audit-event edit views, create views, globals): 0 CSP violations, 0
+  requests to other origins; a jsDelivr `<script>` injected by page code is refused
+  (`script-src-elem`) and never fetched. `tests/security/admin-code-editor.spec.ts`; the full
+  Playwright suite (admin a11y, US4 and US7 admin e2e) passes under the new policy.

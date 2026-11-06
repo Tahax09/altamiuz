@@ -138,7 +138,7 @@ green; gitleaks clean → prepare commit for owner approval.
   - ASVS V15.1.1 and V15.2.1 moved to `partial` with evidence (`docs/security/asvs-l2.md`).
 - **Release blockers (as of 2026-11-06)**. Nothing here is a readiness claim; the full
   SC-001…SC-019 mapping is T146 (`docs/launch-readiness.md`, not yet written).
-  - Owner decisions: F-1 fix option (admin Monaco from CDN; E-1); CD-13 Arabic route vocabulary
+  - Owner decisions: CD-13 Arabic route vocabulary
     (production build gate); CD-12 (T119); CD-10 privacy notice; T132 hosting. (E-5 re-dating and
     FSL-1.1 acceptance decided 2026-11-06.)
   - Open stories: US4 media (T107–T113), US6 SEO and redirects (T114–T119), US5 enquiries
@@ -146,7 +146,7 @@ green; gitleaks clean → prepare commit for owner approval.
   - Polish: T137 adversarial report (requires 0 open critical/high; E-1 is an excepted critical),
     T138 manual a11y, T140–T146 (T145 supply-chain pass, T146 ASVS and launch readiness).
   - Review findings: L-3 and L-4 partly fixed, L-7 open.
-  - Dependency follow-ups before 2026-12-05: E-1 F-1 fix and `monaco-editor` 0.58.0, E-5
+  - Dependency follow-ups before 2026-12-05: `monaco-editor` 0.58.0 (E-1, F-1 closed), E-5
     mandatory review, E-2/E-3/E-4 upstream checks. (E-1 browser check and E-4 write test done
     2026-11-06.)
 - **Tests-only security stage (2026-11-06, owner-approved; follows the proposal above)**:
@@ -177,6 +177,23 @@ green; gitleaks clean → prepare commit for owner approval.
     LCP 1.35–1.41 s, TBT 64–87 ms, CLS 0, a11y 1.00; two earlier attempts were invalidated by host
     sleep, every run over 18 s). Commit: this entry's commit.
 
+- **F-1 closed (2026-11-06)**: `audit-events.meta` (the only JSON/code field) renders through a
+  read-only viewer (`src/modules/audit/admin/JsonViewer.tsx`); a unit guard
+  (`tests/unit/security/no-code-editor.test.ts`) fails if any visible JSON/code field uses
+  Payload's Monaco editor. Admin CSP without `'strict-dynamic'` and with `worker-src 'self'`
+  (ADR-004 Amendment 1), so third-party scripts are refused. Payload's prebuilt client chunk still
+  contains Monaco's CDN loader (a build alias cannot reach it); it never runs. The expected-failure
+  marker is gone: `tests/security/admin-code-editor.spec.ts` asserts JSON renders as escaped text
+  (HTML payload inert), 0 third-party requests and 0 CSP violations on 17 admin views, and an
+  injected jsDelivr script refused (`script-src-elem`, never fetched). E-1 now has no runtime
+  exposure; ASVS V3.4.3 verified.
+- **Reverification (2026-11-06, fresh measurements)**: Lighthouse CI on the post-US4 build: all
+  budgets pass, 30 runs (longest 18.3 s), LCP 1.38–1.40 s, TBT 27–57 ms, CLS 0, JS 143 KB, CSS
+  6.05 KB, fonts 72/96 KB, performance 1.00, a11y 1.00. The first full Playwright run of this stage
+  had 2 failures, both 429s from the shared per-IP MFA budget (30 per 15 min from 127.0.0.1) in
+  `content-http.spec.ts` and `public-http.spec.ts`; both now reset rate-limit buckets in
+  `beforeAll`, as `us7-nav.spec.ts` does (limits stay tested in `auth-http.spec.ts`). Rerun:
+  213 passed, 0 failed, 0 expected failures (8.3 min). Unit 391, typecheck, lint, format.
 ---
 
 ## Phase 2: Foundational (blocking prerequisites; plan Phase 2 part 1)

@@ -36,6 +36,10 @@ export function buildCsp({ kind, nonce, dev, upgradeInsecureRequests }: CspOptio
   // Development only: React needs eval for debugging (Next docs); never in production.
   const devEval = dev ? " 'unsafe-eval'" : ''
   const script = `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${devEval}`
+  // Admin (F-1, ADR-004 amendment): no 'strict-dynamic'. With it, any script a trusted script
+  // injects may run from any origin (Payload's prebuilt client bundle carries Monaco's CDN loader).
+  // Without it, external scripts must come from this origin, so third-party code cannot run.
+  const adminScript = `script-src 'self' 'nonce-${nonce}'${devEval}`
   const common = [
     "object-src 'none'",
     "base-uri 'self'",
@@ -50,13 +54,13 @@ export function buildCsp({ kind, nonce, dev, upgradeInsecureRequests }: CspOptio
     // Scripts stay nonce-only.
     return [
       "default-src 'self'",
-      script,
+      adminScript,
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob:",
       "font-src 'self' data:",
       "connect-src 'self'",
       "frame-src 'self'",
-      "worker-src 'self' blob:",
+      "worker-src 'self'",
       ...common,
     ].join('; ')
   }

@@ -69,6 +69,15 @@ describe('Content-Security-Policy', () => {
     expect(d['object-src']).toEqual(["'none'"])
   })
 
+  it("admin: scripts only from this origin or with the nonce; no 'strict-dynamic' (F-1)", () => {
+    const d = directives(
+      buildCsp({ kind: 'admin', nonce: 'n', dev: false, upgradeInsecureRequests: true }),
+    )
+    expect(d['script-src']).toEqual(["'self'", "'nonce-n'"])
+    expect(d['worker-src']).toEqual(["'self'"])
+    expect(d['connect-src']).toEqual(["'self'"])
+  })
+
   it('API responses get a deny-all policy', () => {
     const d = directives(
       buildCsp({ kind: 'api', nonce: 'n', dev: false, upgradeInsecureRequests: true }),

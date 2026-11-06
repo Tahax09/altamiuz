@@ -22,7 +22,7 @@ test.describe('security headers on a real server (FR-090)', () => {
 
   test('admin CSP is nonce-based with no unsafe-eval in production', async ({ request }) => {
     const csp = (await request.get('/admin/login')).headers()['content-security-policy']!
-    expect(csp).toMatch(/script-src 'self' 'nonce-[^']+' 'strict-dynamic'/)
+    expect(csp).toMatch(/script-src 'self' 'nonce-[^';]+'(;|$)/) // no 'strict-dynamic' (F-1)
     expect(csp).not.toContain('unsafe-eval')
   })
 })

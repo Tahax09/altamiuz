@@ -60,6 +60,11 @@ export const auditEvents: CollectionConfig = {
     },
     { name: 'ip', type: 'text', maxLength: 64 },
     { name: 'userAgent', type: 'text', maxLength: 256 },
-    { name: 'meta', type: 'json' },
+    {
+      name: 'meta',
+      type: 'json',
+      // F-1: read-only viewer instead of Payload's Monaco editor (no CDN code in the admin).
+      admin: { components: { Field: '/modules/audit/admin/JsonViewer#JsonViewer' } },
+    },
   ],
 }

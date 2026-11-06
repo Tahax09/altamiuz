@@ -1,4 +1,5 @@
 import { UserSecurityActions as UserSecurityActions_733fb7509ed325ac5881f7cf2b513e15 } from '../../../modules/auth/admin/UserSecurityActions'
+import { JsonViewer as JsonViewer_fa4e7c147096c41ec0aa747f26137cc6 } from '../../../modules/audit/admin/JsonViewer'
 import { ReorderRowLabel as ReorderRowLabel_7b591ec1d1e5b2c4c615e5e550c6685c } from '../../../modules/content/admin/ReorderControl'
 import { RscEntryLexicalCell as RscEntryLexicalCell_44fe37237e0ebf4470c9990d8cb7b07e } from '@payloadcms/richtext-lexical/rsc'
 import { RscEntryLexicalField as RscEntryLexicalField_44fe37237e0ebf4470c9990d8cb7b07e } from '@payloadcms/richtext-lexical/rsc'
@@ -21,6 +22,7 @@ import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } f
 /** @type import('payload').ImportMap */
 export const importMap = {
   "/modules/auth/admin/UserSecurityActions#UserSecurityActions": UserSecurityActions_733fb7509ed325ac5881f7cf2b513e15,
+  "/modules/audit/admin/JsonViewer#JsonViewer": JsonViewer_fa4e7c147096c41ec0aa747f26137cc6,
   "/modules/content/admin/ReorderControl#ReorderRowLabel": ReorderRowLabel_7b591ec1d1e5b2c4c615e5e550c6685c,
   "@payloadcms/richtext-lexical/rsc#RscEntryLexicalCell": RscEntryLexicalCell_44fe37237e0ebf4470c9990d8cb7b07e,
   "@payloadcms/richtext-lexical/rsc#RscEntryLexicalField": RscEntryLexicalField_44fe37237e0ebf4470c9990d8cb7b07e,

@@ -5,6 +5,7 @@
 import { expect, test } from '@playwright/test'
 import fs from 'node:fs'
 import { generate } from 'otplib'
+import { sql } from '../support/e2e-session'
 
 const F = () => JSON.parse(fs.readFileSync('test-results/e2e-fixtures.json', 'utf8'))
 const ORIGIN = { origin: process.env.SITE_URL! }
@@ -19,6 +20,11 @@ const NEVER_PUBLIC = [
   'verifiedBy',
   '"_status"',
 ]
+
+// Every project signs in from 127.0.0.1, and MFA verification allows 30 attempts per IP per 15
+// minutes; earlier specs in a full run use most of that budget (as in tests/e2e/us7-nav.spec.ts).
+// The limits themselves are tested in tests/security/auth-http.spec.ts.
+test.beforeAll(() => sql('delete from rate_limit_buckets'))
 
 test('public pages never contain drafts, hidden items or CMS-only data', async ({ request }) => {
   for (const path of [

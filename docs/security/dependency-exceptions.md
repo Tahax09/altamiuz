@@ -33,47 +33,33 @@ taken from `pnpm audit --json` on 2026-11-06.
   4.7.0 ← `@payloadcms/ui` 3.92.1. `monaco-editor` is not pinned by Payload: it is the
   auto-installed peer of `@monaco-editor/react` (`>= 0.25.0 < 1`). This installed copy is what
   pnpm audit and osv-scanner see.
-- **What actually runs (observed 2026-11-06, finding F-1)**: not the installed copy. Payload's
-  `CodeEditor` uses `@monaco-editor/react` with the default loader (`@monaco-editor/loader` 1.7.0,
-  also the latest release), which injects `loader.js` from
-  `https://cdn.jsdelivr.net/npm/monaco-editor@0.55.1/min/vs/`. The admin CSP's `'strict-dynamic'`
-  lets that script and the 14 further CDN scripts it loads run; two workers start from `blob:`
-  URLs and load more code from the same path. The CSP blocks only the CDN stylesheet (one
-  `style-src-elem` violation); the editor still renders read-only. Evidence:
-  `tests/security/admin-code-editor.spec.ts` (production build, audit event document view).
-  - The running Monaco 0.55.1 bundles **DOMPurify 3.2.7** (`editor.api-*.js`, header
-    `DOMPurify 3.2.7`). OSV lists 21 advisories for 3.2.7: 1 high (GHSA-mrv2-3pqr-j5jr), 14
-    moderate, 6 low (including GHSA-6688-9rhm-gjv2 and GHSA-c6gr-qvv4-5v3f). The critical
-    GHSA-cg2g-xh64-v4q7 (≥3.4.4) and GHSA-p98j-92pf-mc4p (≥3.4.13) do not apply to 3.2.7. None of
-    the runtime copy's advisories are visible to the scanners, because CDN code is not in the
-    lockfile.
-  - Separately from DOMPurify, F-1 means third-party JavaScript, fetched at run time without
-    integrity pinning, executes in the authenticated admin origin, and every admin who opens a
-    JSON field sends a request (IP, user agent) to jsDelivr. This contradicts the admin threat
-    model's "third-party data leak" row (`docs/security/TM-admin.md`).
+- **Finding F-1 (observed 2026-11-06, closed 2026-11-06)**: Payload's JSON field mounted Monaco
+  through `@monaco-editor/loader`, which loaded Monaco 0.55.1 (bundling DOMPurify 3.2.7) from
+  `cdn.jsdelivr.net`, allowed by the admin CSP's `'strict-dynamic'`. Closed by: (1) a read-only
+  JSON viewer for `audit-events.meta`, the only JSON/code field
+  (`src/modules/audit/admin/JsonViewer.tsx`), guarded by `tests/unit/security/no-code-editor.test.ts`;
+  (2) the admin CSP without `'strict-dynamic'` and with `worker-src 'self'` (ADR-004 Amendment 1),
+  so third-party scripts are refused even if something mounts an editor. Payload's prebuilt client
+  bundle still contains the loader code with the CDN URL (it cannot be aliased away); it never
+  runs, and if it did the CSP would refuse it. Evidence: `tests/security/admin-code-editor.spec.ts`
+  (17 admin views: 0 third-party requests, 0 CSP violations; an injected jsDelivr script is refused
+  with `script-src-elem` and never fetched).
+- **Remaining exposure**: none at run time. No Monaco runs in the admin, so neither the installed
+  DOMPurify 3.4.15 (not bundled: Payload loads Monaco from the CDN, never from `node_modules`) nor
+  the CDN's 3.2.7 executes. The five advisories stay excepted only because the scanners see the
+  installed package in the lockfile.
 - **Exposure**: admin only. v1 has one Monaco field, `audit-events.meta` (readable by roles with
   `audit-events:read`, after MFA). Inside Monaco, DOMPurify is used by
   `vs/base/browser/domSanitize.js`, which the markdown renderer (hovers, content widgets) and
   buttons call. The public site never loads Monaco.
-- **Mitigation**: admin requires authentication and MFA; the field holds server-written audit
-  metadata, not user HTML; public rendering does not use DOMPurify. No mitigation exists for F-1's
-  third-party script execution other than trust in jsDelivr and the npm package it serves.
+- **Mitigation**: no Monaco in the admin (above); admin requires authentication and MFA.
 - **Why no fix**: `monaco-editor` 0.57.0 is the latest stable release. It pins `dompurify`
-  3.4.15 exactly and **vendors** it (`esm/vs/base/browser/dompurify/dompurify.js`), so a pnpm
-  override would change the lockfile but not the shipped code. And the code that runs comes from
-  the CDN, which no dependency change in this repository alters.
+  3.4.15 exactly and vendors it, so a pnpm override would change the lockfile but not the code.
 - **Upstream remediation (tracked)**: `monaco-editor@0.58.0-dev-20261105` (dist-tag `next`)
-  depends on `dompurify` 3.4.17. A lockfile update to 0.58.0 clears the scanner findings but
-  **does not change the running code** while F-1 stands.
-- **Fix options for F-1 (owner decision; none implemented)**: (a) self-host Monaco: a
-  project-side `loader.config` pointing at the installed `monaco-editor` (served from this origin;
-  larger admin bundle; then the installed DOMPurify, currently 3.4.15 and in scope of the critical
-  GHSA-cg2g-xh64-v4q7, is what runs, until 0.58.0); (b) render `audit-events.meta` without Monaco
-  (a read-only `<pre>` field component), which removes Monaco from v1 entirely; (c) tighten the
-  admin CSP so third-party scripts cannot run, which breaks the JSON field until (a) or (b).
-  `tests/security/admin-code-editor.spec.ts` pins the intended rule (no third-party script) as an
-  expected failure; it will report an unexpected pass once F-1 is fixed.
-- **Before expiry**: owner chooses an F-1 fix; re-check `monaco-editor` 0.58.0.
+  depends on `dompurify` 3.4.17; a lockfile-only `pnpm update monaco-editor` clears the scanner
+  findings once 0.58.0 is stable.
+- **Before expiry**: re-check `monaco-editor` 0.58.0; with no runtime exposure, the owner decides
+  whether to re-date.
 
 ### E-2 basic-ftp in the Lighthouse CI proxy chain — expires 2026-12-05
 

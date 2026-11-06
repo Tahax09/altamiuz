@@ -1,75 +1,30 @@
-// E-1 (docs/security/dependency-exceptions.md): how the admin code editor (Monaco, used by
-// Payload for JSON/code fields) actually loads on an audit event's document view, against the
-// production build and the shipped admin CSP. Payload's CodeEditor uses @monaco-editor/react with
-// the default loader, which fetches Monaco from cdn.jsdelivr.net; 'strict-dynamic' lets the
-// injected loader's scripts run. Finding F-1 (2026-11-06): third-party JavaScript runs in the
-// authenticated admin. The CSP is not weakened here; the intended rule is pinned as an expected
-// failure until F-1 is fixed, and the current footprint is pinned so any change is noticed.
-import { expect, test, type Browser, type BrowserContext, type Page } from '@playwright/test'
-import fs from 'node:fs'
-import { generate } from 'otplib'
-import pg from 'pg'
+// F-1 closed (docs/security/dependency-exceptions.md E-1): the admin loads no third-party code.
+// Payload's JSON field mounted Monaco from cdn.jsdelivr.net; audit-events.meta (the only JSON/code
+// field) now uses a read-only viewer. Against the production build with the shipped admin CSP:
+// the audit event view shows the metadata as escaped text, and a sweep of admin views records
+// every request and every CSP violation: no request leaves the site's origin, no violation occurs.
+import { expect, test, type BrowserContext, type Page } from '@playwright/test'
+import { contextFor, fixturesFile, sql } from '../support/e2e-session'
 
-type Acct = { id: number; email: string; password: string; secret: string; enrolledAt: number }
-const BASE = process.env.SITE_URL!
-const ORIGIN = { origin: BASE }
-/** The only third-party origin observed (2026-11-06): Monaco 0.55.1 from jsDelivr. */
-const CDN = 'https://cdn.jsdelivr.net/npm/monaco-editor@0.55.1/min/vs/'
-
-type Observed = {
-  status: number
-  csp: string
+const BASE = () => process.env.SITE_URL!
+type Seen = {
   requests: { url: string; type: string }[]
   violations: { directive: string; blocked: string }[]
-  failed: string[]
-  editorVisible: boolean
-  monacoMounted: number
 }
 
 test.describe.configure({ mode: 'serial' })
-
 let ctx: BrowserContext
-let seen: Observed
+test.beforeAll(async ({ browser }) => {
+  test.setTimeout(120_000)
+  ctx = await contextFor(browser, 'monacoOwner')
+})
+test.afterAll(async () => ctx?.close())
 
-async function signIn(browser: Browser) {
-  const a = (
-    JSON.parse(fs.readFileSync('test-results/e2e-fixtures.json', 'utf8')) as Record<string, Acct>
-  ).monacoOwner!
-  const c = await browser.newContext({ baseURL: BASE })
-  const login = await c.request.post('/api/users/login', {
-    data: { email: a.email, password: a.password },
-    headers: ORIGIN,
-  })
-  expect(login.status()).toBe(200)
-  while (Math.floor(Date.now() / 30_000) <= Math.floor(a.enrolledAt / 30_000))
-    await new Promise((r) => setTimeout(r, 500))
-  const v = await c.request.post('/api/users/mfa/verify', {
-    data: { code: await generate({ secret: a.secret }) },
-    headers: ORIGIN,
-  })
-  expect(v.status(), await v.text()).toBe(200)
-  return c
-}
-
-async function auditEventWithMeta() {
-  const c = new pg.Client({ connectionString: process.env.DATABASE_URL })
-  await c.connect()
-  try {
-    const row = (
-      await c.query('select id from audit_events where meta is not null order by id desc limit 1')
-    ).rows[0] as { id: number } | undefined
-    expect(row, 'seeded runs record audit events with meta').toBeTruthy()
-    return row!.id
-  } finally {
-    await c.end()
-  }
-}
-
-async function observe(page: Page, id: number): Promise<Observed> {
-  const requests: Observed['requests'] = []
-  const failed: string[] = []
-  page.on('request', (r) => requests.push({ url: r.url(), type: r.resourceType() }))
-  page.on('requestfailed', (r) => failed.push(`${r.url()} ${r.failure()?.errorText ?? ''}`))
+async function visit(page: Page, path: string, ready?: (p: Page) => Promise<void>): Promise<Seen> {
+  const requests: Seen['requests'] = []
+  const onReq = (r: { url: () => string; resourceType: () => string }) =>
+    requests.push({ url: r.url(), type: r.resourceType() })
+  page.on('request', onReq)
   await page.addInitScript(() => {
     const w = window as unknown as { __csp: { directive: string; blocked: string }[] }
     w.__csp = []
@@ -77,81 +32,124 @@ async function observe(page: Page, id: number): Promise<Observed> {
       w.__csp.push({ directive: e.effectiveDirective, blocked: e.blockedURI }),
     )
   })
-  const res = await page.goto(`/admin/collections/audit-events/${id}`)
-  const editor = page.locator('.field-type.json-field .code-editor')
-  await expect(editor).toBeVisible()
-  // Monaco mounts asynchronously after the loader resolves.
-  await expect(page.locator('.code-editor .monaco-editor')).toHaveCount(1, { timeout: 30_000 })
+  const res = await page.goto(path)
+  expect(res?.status(), path).toBe(200)
+  expect(res?.headers()['content-security-policy'], path).toMatch(
+    /script-src 'self' 'nonce-[^';]+'(;|$)/, // no 'strict-dynamic': third-party scripts refused
+  )
+  if (ready) await ready(page)
   await page.waitForLoadState('networkidle')
-  return {
-    status: res!.status(),
-    csp: res!.headers()['content-security-policy'] ?? '',
-    requests,
-    violations: await page.evaluate(
-      () => (window as unknown as { __csp: Observed['violations'] }).__csp,
-    ),
-    failed,
-    editorVisible: await editor.isVisible(),
-    monacoMounted: await page.locator('.code-editor .monaco-editor').count(),
-  }
+  const violations = await page.evaluate(
+    () => (window as unknown as { __csp: Seen['violations'] }).__csp,
+  )
+  page.off('request', onReq)
+  return { requests, violations }
 }
 
-const crossOrigin = (o: Observed) =>
-  o.requests.filter(
-    (r) => !r.url.startsWith(BASE) && !r.url.startsWith('blob:') && !r.url.startsWith('data:'),
+const external = (s: Seen) =>
+  s.requests.filter(
+    (r) => !r.url.startsWith(BASE()) && !r.url.startsWith('blob:') && !r.url.startsWith('data:'),
   )
 
-test.beforeAll(async ({ browser }) => {
-  test.setTimeout(120_000)
-  ctx = await signIn(browser)
+test('audit event view: metadata renders as read-only text, no editor, nothing third-party', async () => {
+  const marker = `<img src=x onerror="window.__xss=1">"quoted" & </pre><script>window.__xss=2</script>`
+  const [row] = await sql<{ id: number }>(
+    `insert into audit_events (at, actor, action, outcome, meta)
+     values (now(), 'system', 'settings.change', 'success', $1::jsonb) returning id`,
+    [JSON.stringify({ global: marker, count: 3, nested: { ok: true } })],
+  )
   const page = await ctx.newPage()
-  seen = await observe(page, await auditEventWithMeta())
-})
-test.afterAll(async () => ctx?.close())
-
-test('audit event view: the shipped admin CSP is served unchanged', () => {
-  expect(seen.status).toBe(200)
-  // Same policy as buildCsp('admin') (ADR-004); no CDN host has been added to make Monaco work.
-  expect(seen.csp).toMatch(/script-src 'self' 'nonce-[^']+' 'strict-dynamic'(;|$)/)
-  expect(seen.csp).toContain("style-src 'self' 'unsafe-inline'")
-  expect(seen.csp).toContain("connect-src 'self'")
-  expect(seen.csp).toContain("worker-src 'self' blob:")
-  expect(seen.csp).toContain("object-src 'none'")
-  expect(seen.csp).not.toMatch(/jsdelivr|https:\/\/|\*/)
-})
-
-test('audit event view: the CSP blocks the CDN stylesheet and nothing else', () => {
-  // Proves the policy is enforced on this view: the only violation is Monaco's CDN stylesheet.
-  expect(seen.violations).toEqual([
-    { directive: 'style-src-elem', blocked: `${CDN}editor/editor.main.css` },
-  ])
-  expect(seen.failed).toEqual([`${CDN}editor/editor.main.css csp`])
-})
-
-test('audit event view: third-party requests are limited to the known Monaco CDN path (F-1)', () => {
-  const external = crossOrigin(seen)
-  test.info().annotations.push({
-    type: 'F-1 third-party requests',
-    description: external.map((r) => `${r.type} ${r.url}`).join('\n'),
+  const seen = await visit(page, `/admin/collections/audit-events/${row!.id}`, async (p) => {
+    await expect(p.getByTestId('json-viewer')).toBeVisible({ timeout: 30_000 })
   })
-  // Pins the current footprint: a new host, a new Monaco version or a non-script/style type fails.
-  expect(external.length).toBeGreaterThan(0)
-  for (const r of external) {
-    expect(r.url.startsWith(CDN), r.url).toBe(true)
-    expect(['script', 'stylesheet', 'other'], `${r.type} ${r.url}`).toContain(r.type)
-  }
-  // The JSON field still renders read-only.
-  expect(seen.editorVisible).toBe(true)
-  expect(seen.monacoMounted).toBe(1)
+  const viewer = page.getByTestId('json-viewer')
+  const text = await viewer.textContent()
+  expect(JSON.parse(text!)).toEqual({ global: marker, count: 3, nested: { ok: true } })
+  await expect(viewer).toHaveAttribute('aria-readonly', 'true')
+  expect(await page.evaluate(() => (window as unknown as { __xss?: number }).__xss)).toBeUndefined()
+  await expect(page.locator('.monaco-editor, .code-editor')).toHaveCount(0)
+  expect(external(seen)).toEqual([])
+  expect(seen.violations).toEqual([])
+  // Keyboard users can reach and scroll the viewer.
+  await viewer.focus()
+  await expect(viewer).toBeFocused()
+  await page.close()
 })
 
-test('audit event view: the admin runs no third-party script (intended rule; F-1 open)', () => {
-  // Expected to fail until F-1 is fixed (self-host Monaco or replace the field's editor). When the
-  // fix lands this test passes, Playwright reports the unexpected pass, and `test.fail` goes.
-  test.fail(
-    true,
-    'F-1: Monaco loads from cdn.jsdelivr.net (docs/security/dependency-exceptions.md E-1)',
+test('admin sweep: no third-party request and no CSP violation on any main view', async () => {
+  test.setTimeout(240_000)
+  const f = fixturesFile()
+  const [media] = await sql<{ id: number }>('select id from media order by id limit 1')
+  const [audit] = await sql<{ id: number }>('select id from audit_events order by id desc limit 1')
+  const paths = [
+    '/admin',
+    '/admin/collections/users',
+    `/admin/collections/users/${f.monacoOwner!.id}`,
+    '/admin/collections/audit-events',
+    `/admin/collections/audit-events/${audit!.id}`,
+    '/admin/collections/pages',
+    `/admin/collections/pages/${f.content.pageId}`,
+    '/admin/collections/pages/create',
+    '/admin/collections/services',
+    '/admin/collections/courses',
+    '/admin/collections/media',
+    '/admin/collections/media/create',
+    ...(media ? [`/admin/collections/media/${media.id}`] : []),
+    '/admin/collections/redirects',
+    '/admin/globals/site-settings',
+    '/admin/globals/header-nav',
+    '/admin/globals/banner',
+  ]
+  const report: Record<string, { external: string[]; violations: Seen['violations'] }> = {}
+  for (const p of paths) {
+    await sql('delete from payload_locked_documents')
+    const page = await ctx.newPage()
+    const seen = await visit(page, p)
+    report[p] = {
+      external: external(seen).map((r) => `${r.type} ${r.url}`),
+      violations: seen.violations,
+    }
+    await page.close()
+  }
+  test
+    .info()
+    .annotations.push({ type: 'admin sweep', description: JSON.stringify(report, null, 1) })
+  for (const [p, r] of Object.entries(report)) {
+    expect(r.external, `third-party requests on ${p}`).toEqual([])
+    expect(r.violations, `CSP violations on ${p}`).toEqual([])
+  }
+})
+
+test('the admin CSP refuses a third-party script even when page code injects it', async () => {
+  const page = await ctx.newPage()
+  const cdn = 'https://cdn.jsdelivr.net/npm/monaco-editor@0.55.1/min/vs/loader.js'
+  const responses: string[] = []
+  const failures: string[] = []
+  page.on('response', (r) => {
+    if (r.url().startsWith('https://cdn.jsdelivr.net')) responses.push(r.url())
+  })
+  page.on('requestfailed', (r) => {
+    if (r.url().startsWith('https://cdn.jsdelivr.net')) failures.push(r.failure()?.errorText ?? '')
+  })
+  await visit(page, '/admin')
+  const result = await page.evaluate(
+    (src) =>
+      new Promise<{ loaded: boolean; violation: string | null }>((resolve) => {
+        let violation: string | null = null
+        document.addEventListener('securitypolicyviolation', (e) => {
+          if (e.blockedURI.startsWith('https://cdn.jsdelivr.net')) violation = e.effectiveDirective
+        })
+        const s = document.createElement('script')
+        s.src = src
+        s.onload = () => resolve({ loaded: true, violation })
+        s.onerror = () => setTimeout(() => resolve({ loaded: false, violation }), 100)
+        document.head.appendChild(s)
+      }),
+    cdn,
   )
-  const scripts = crossOrigin(seen).filter((r) => r.type === 'script')
-  expect(scripts.map((r) => r.url)).toEqual([])
+  expect(result).toEqual({ loaded: false, violation: 'script-src-elem' })
+  // The browser cancels the request itself (no response ever arrives from the CDN).
+  expect(responses).toEqual([])
+  expect(failures).toEqual(['csp'])
+  await page.close()
 })
