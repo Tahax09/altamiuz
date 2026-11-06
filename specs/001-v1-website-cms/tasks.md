@@ -110,9 +110,49 @@ green; gitleaks clean → prepare commit for owner approval.
   licence (`sentry` CLI, Lighthouse dev tooling) noted in `docs/licences.md`. Verified: typecheck,
   lint (0 errors; the same 3 warnings as before the upgrade), unit 373/373, integration
   552/552 (incl. T075 and T071 write paths), production build, full Playwright suite 197/197
-  (incl. the T071 admin paste test); T072 runs in the unit suite. Lighthouse CI
+  (incl. the T071 admin paste test and the T072 public-page render test); T072's renderer cases
+  run in the unit suite. Commit `dcca936`. Lighthouse CI
   (`pnpm perf:lighthouse`, lhci 0.16.0 / Lighthouse 13.6.0): all budgets pass; LCP 1.36–1.41 s,
   TBT 64–84 ms, CLS 0, JS 143 KB, fonts 72/96 KB, a11y 1.00.
+- **Dependency exception review (2026-11-06, documentation only)**: every exception re-checked
+  against `pnpm audit --json` and the installed code; now one block per exception (E-1…E-5) in
+  `docs/security/dependency-exceptions.md` with advisory IDs, affected and fixed ranges, path,
+  exposure, mitigation, owner, expiry and the action due before expiry. Corrections:
+  - E-4 `deepmerge` (GHSA-gcqx-w48m-w2h4): the earlier "no request body reaches deepmerge" was
+    wrong. Payload's `beforeChange` hook deep-merges every write's data with the stored document
+    before validation, so authenticated writes reach it (impact limited to the merged object's
+    prototype, CVSS 5.3). A `__proto__`/`constructor` write test is proposed.
+  - E-1 DOMPurify/Monaco (GHSA-cg2g-xh64-v4q7 critical and four others): upstream fix tracked:
+    `monaco-editor@0.58.0-dev` already depends on `dompurify` 3.4.17; a lockfile-only
+    `pnpm update monaco-editor` applies it once 0.58.0 is stable. Which Monaco actually runs in
+    the admin (installed 0.57.0 or CDN 0.55.1 via `@monaco-editor/loader`) is unverified.
+  - E-5 esbuild (GHSA-67mh-4wv8-2f99): installed but not loaded (`drizzle-kit/api` and `bin.cjs`
+    never load `@esbuild-kit/*`); no upstream fix (Payload 3.93.0 still pins drizzle-kit 0.31.7).
+    **Owner decision due by 2026-11-16**: re-date (proposed 2026-12-05) or accept a failing
+    supply-chain gate from that date.
+  - FSL-1.1 `sentry` CLI (`docs/licences.md`): dependency path and the Lighthouse telemetry
+    statement corrected (Lighthouse reuses a cached opt-in answer; it is not off by default).
+    **Owner approval pending**; status not changed.
+  - T071/T072 task lines now name the real test files. T071 coverage gap recorded: admin
+    Copy/Paste Field and Paste Row have no dedicated test.
+  - ASVS V15.1.1 and V15.2.1 moved to `partial` with evidence (`docs/security/asvs-l2.md`).
+- **Release blockers (as of 2026-11-06)**. Nothing here is a readiness claim; the full
+  SC-001…SC-019 mapping is T146 (`docs/launch-readiness.md`, not yet written).
+  - Owner decisions: E-5 re-dating by 2026-11-16; FSL-1.1 acceptance; CD-13 Arabic route
+    vocabulary (production build gate); CD-12 (T119); CD-10 privacy notice; T132 hosting.
+  - Open stories: US4 media (T107–T113), US6 SEO and redirects (T114–T119), US5 enquiries
+    (T120–T129), US8 operations (T132–T136).
+  - Polish: T137 adversarial report (requires 0 open critical/high; E-1 is an excepted critical),
+    T138 manual a11y, T140–T146 (T145 supply-chain pass, T146 ASVS and launch readiness).
+  - Review findings: L-3 and L-4 partly fixed, L-7 open.
+  - Dependency follow-ups before 2026-12-05: E-1 browser check and `monaco-editor` 0.58.0,
+    E-4 prototype-key write test, E-2/E-3 upstream checks.
+- **Proposed next stage (smallest)**: one test-only change, no dependency upgrades: (1) a
+  Playwright check that opens an audit event's document view and records where Monaco loads from
+  and any CSP violations (settles E-1's exposure); (2) an integration test that writes carrying
+  `__proto__`/`constructor` keys neither change validation nor persist (E-4); (3) with owner
+  approval, set Lighthouse error reporting off explicitly in `tests/perf/lighthouserc.cjs`. The
+  E-5 and FSL decisions sit with the owner and need no code.
 
 ---
 
@@ -267,8 +307,8 @@ publishing, revisions, locking, preview, accessible reordering.
 
 ### Tests for US2 (write first)
 
-- [X] T071 [P] [US2] Failing attack tests `tests/security/richtext-writepaths.spec.ts`: T026 corpus submitted via admin paste (Playwright), REST create/update, Local API, draft save, autosave, duplicate, copy-to-locale, version restore of a malicious historical version inserted by SQL, admin bulk edit, admin Copy/Paste Field and Paste Row, nested rich text in blocks/arrays, `link`-group fields, both locales — all rejected with field path and code; nothing persisted (FR-013b, FR-014, SC-018)
-- [X] T072 [P] [US2] Failing tests `tests/security/richtext-render.spec.ts`: malicious Lexical JSON written directly to the DB renders on the public page and preview with no unsafe `href`, no unknown elements, no inline `style`; `newTab` links get `rel="noopener noreferrer"` (FR-013c, SC-018)
+- [X] T071 [P] [US2] Failing attack tests `tests/integration/content/richtext-writepaths.test.ts` (Local API, REST, draft/autosave, duplicate, copy-to-locale, version restore, bulk edit, nested and `link`-group fields) and the admin-paste Playwright test in `tests/security/content-http.spec.ts` (planned as `tests/security/richtext-writepaths.spec.ts`; corrected 2026-11-06): T026 corpus submitted via admin paste (Playwright), REST create/update, Local API, draft save, autosave, duplicate, copy-to-locale, version restore of a malicious historical version inserted by SQL, admin bulk edit, admin Copy/Paste Field and Paste Row, nested rich text in blocks/arrays, `link`-group fields, both locales — all rejected with field path and code; nothing persisted (FR-013b, FR-014, SC-018). **Coverage gap (found 2026-11-06)**: no test exercises admin Copy/Paste Field or Paste Row by name; both save through Payload's update operation, which the REST and Local API cases cover, but that is inferred, not tested
+- [X] T072 [P] [US2] Failing tests `tests/unit/content/render.test.ts` (renderer, all inert-output cases) and `tests/security/public-http.spec.ts` ("stored malicious rich text renders inert on the public page"; preview uses the same `DocumentView`, checked byte-for-byte by T073 in `tests/security/content-http.spec.ts`) (planned as `tests/security/richtext-render.spec.ts`; corrected 2026-11-06): malicious Lexical JSON written directly to the DB renders on the public page and preview with no unsafe `href`, no unknown elements, no inline `style`; `newTab` links get `rel="noopener noreferrer"` (FR-013c, SC-018)
 - [X] T073 [P] [US2] Failing tests `tests/e2e/richtext-bidi.spec.ts`: ar/en paragraphs honour `direction`; Latin identifiers isolated; preview HTML equals public HTML for the same document; every link has non-empty text (FR-013a, FR-013d)
 - [X] T074 [P] [US2] Failing tests `tests/integration/content/publish.test.ts`: publishing `ar` leaves `en` draft (`experimental.localizeStatus`); public queries never return drafts; unpublish per locale; restore creates a draft; publish blocked when required locale fields are incomplete or evidence is unverified; editor publish via REST denied and audited (FR-004, FR-016, FR-020, FR-021, FR-023, FR-024, FR-045)
 - [X] T075 [P] [US2] Failing tests `tests/integration/content/localize-status-regression.test.ts`: asserts installed Payload version equals ADR-003 pin and per-locale status semantics hold (D-4)

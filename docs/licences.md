@@ -73,7 +73,25 @@ on 2026-10-16 after `pnpm install` (lockfile `pnpm-lock.yaml`). 640 packages in 
 - **(MPL-2.0 OR Apache-2.0)**: `dompurify` (via Payload). Used under Apache-2.0.
 - **WTFPL / (WTFPL OR ISC) / (WTFPL OR MIT)**: `truncate-utf8-bytes`, `sanitize-filename`, `utf8-byte-length` (Payload transitive). Permissive.
 - **MPL-2.0**: `axe-core` (via `@axe-core/playwright`, devDependency, accessibility testing only; not shipped).
-- **FSL-1.1-Apache-2.0**: `sentry` 0.45.0, Sentry's CLI, pulled in by `@sentry/node` 11 ← `lighthouse` 13.6.0 ← `@lhci/cli` 0.16.0 (devDependency, Lighthouse CI only; not shipped; no install scripts). Functional Source License: use is permitted except in a product competing with Sentry, and each release becomes Apache-2.0 two years after publication. Local performance testing is a permitted use. Recorded 2026-11-05 with the `@lhci/cli` 0.16.0 security upgrade; Lighthouse sends error reports to Sentry only with `--enable-error-reporting`, which `lhci autorun` does not pass here.
+- **FSL-1.1-Apache-2.0** (source-available, not OSI open source): `sentry` 0.45.0, Sentry's CLI.
+  **Owner approval: pending.** Recorded 2026-11-05 with the `@lhci/cli` 0.16.0 security upgrade
+  (`dcca936`); reviewed 2026-11-06; nothing in this file approves it.
+  - Path (devDependency, not shipped): `sentry` ← `@sentry/bundler-plugins` 11.11.0 ← `@sentry/node`
+    11.11.0 ← `lighthouse` 13.6.0 ← `@lhci/cli` 0.16.0. No install scripts; its `bin` is not invoked by
+    any project script.
+  - Terms (from the package's `LICENSE.md`): use is permitted for any purpose other than a
+    "Competing Use" (making the software available in a commercial product or service that
+    substitutes for it or for a Sentry offering); internal use is a named permitted purpose. Each
+    release becomes Apache-2.0 on the second anniversary of its publication. Running Lighthouse CI
+    locally appears to be internal use; this is an engineering reading, not legal advice.
+  - Telemetry (corrected 2026-11-06): `lhci autorun` does not pass `--enable-error-reporting`, but
+    Lighthouse does not default to off. With the flag unset it uses the answer cached in
+    `~/.config/configstore/lighthouse.json`, or asks on an interactive terminal; it assumes "no"
+    only without a TTY or when `CI` is set. A developer who once answered "yes" would send
+    Lighthouse runtime errors to Sentry. On the machine that ran the 2026-11-05 checks the cached
+    value is `false`. Forcing it off in `tests/perf/lighthouserc.cjs` is proposed, not done.
+  - Owner decision: accept FSL-1.1 for local dev tooling, or ask for an alternative (for example
+    keeping `@lhci/cli` 0.15.1, which reintroduces six advisories).
 - **PSF-2.0, (MIT OR CC0-1.0)**: `argparse` 3, `type-fest` (dev tooling transitive). Permissive.
 - **Python-2.0, CC-BY-4.0, BlueOak-1.0.0, CC0-1.0, 0BSD, MIT-0**: permissive or attribution-only transitive tooling and data packages.
 
@@ -83,7 +101,7 @@ the re-scan of the full tree (857 packages) found no new copyleft licence.
 2026-11-05 dependency advisory remediation (`next` 16.4.5, Payload 3.92.1, `nodemailer` 10.1.7,
 `@lhci/cli` 0.16.0 with Lighthouse 13.6.0, `happy-dom` 21.0.4): re-scan of 864 packages found no
 copyleft licence beyond the LGPL libvips binary above; one source-available licence (FSL-1.1, dev
-tooling only) is noted above.
+tooling only) is noted above and awaits owner approval.
 
 No GPL/AGPL licence in the resolved tree. Re-run this check whenever dependencies change (Constitution I).
 

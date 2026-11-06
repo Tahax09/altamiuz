@@ -50,7 +50,8 @@
 - **Upgrade rule evidence**: the per-locale publish regression suite (T075,
   `tests/integration/content/publish.test.ts`, pin assertion now 3.92.1) and the rich-text
   adversarial suites (T071 `tests/integration/content/richtext-writepaths.test.ts` and the admin
-  paste test in `tests/security/content-http.spec.ts`; T072 `tests/unit/content/render.test.ts`)
+  paste test in `tests/security/content-http.spec.ts`; T072 `tests/unit/content/render.test.ts` and the public-page render test in
+  `tests/security/public-http.spec.ts`)
   pass, along with the full unit, integration and
   Playwright suites, typecheck, lint and the production build.
 - **Comments that cite 3.91.0 or 16.3.8** in source and tests record where a behaviour was found.
