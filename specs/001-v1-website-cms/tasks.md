@@ -614,14 +614,42 @@ publish-to-live wiring ready for T106 → commit checkpoint.
 
 **Depends on**: US1 (routes), US2 (content).
 
-- [ ] T114 [P] [US6] Failing tests `tests/e2e/us6-seo.spec.ts`: per-locale title/description/canonical/hreflang/`x-default`/Open Graph from route map; sitemap lists only published indexable pages with alternates; robots disallows admin/api/preview/auth; non-production `noindex` and protected; JSON-LD only from verified fields (FR-060, FR-061, FR-062, FR-063, FR-066, SC-012)
-- [ ] T115 [P] [US6] Failing attack tests `tests/security/redirects.spec.ts`: loop, chain, self and non-allow-listed external targets rejected; open-redirect payloads (`//evil`, `/\evil`, encoded) rejected; every legacy inventory URL (with/without trailing slash, percent-encoded Arabic slugs) redirects in one hop (FR-064, FR-065, SC-012)
-- [ ] T116 [US6] Implement `src/modules/seo/` metadata builder, hreflang from route map, JSON-LD builders (Organization, WebSite, BreadcrumbList, FAQPage, Service, Course) (FR-060, FR-061, FR-063)
-- [ ] T117 [US6] Implement `src/app/sitemap.ts` and `src/app/robots.ts` (FR-062, FR-066)
-- [ ] T118 [US6] Implement `redirects` collection (`from` normalised unique, `to` link, `type` 301/302, `source`, `createdBy`), graph validation, proxy lookup with cache, redirect-change audit until T115 passes (FR-045, FR-064)
+- [X] T114 [P] [US6] Failing tests `tests/e2e/us6-seo.spec.ts`: per-locale title/description/canonical/hreflang/`x-default`/Open Graph from route map; sitemap lists only published indexable pages with alternates; robots disallows admin/api/preview/auth; non-production `noindex` and protected; JSON-LD only from verified fields (FR-060, FR-061, FR-062, FR-063, FR-066, SC-012)
+- [X] T115 [P] [US6] Failing attack tests `tests/security/redirects.spec.ts`: loop, chain, self and non-allow-listed external targets rejected; open-redirect payloads (`//evil`, `/\evil`, encoded) rejected; every legacy inventory URL (with/without trailing slash, percent-encoded Arabic slugs) redirects in one hop (FR-064, FR-065, SC-012)
+- [X] T116 [US6] Implement `src/modules/seo/` metadata builder, hreflang from route map, JSON-LD builders (Organization, WebSite, BreadcrumbList, FAQPage, Service, Course) (FR-060, FR-061, FR-063)
+- [X] T117 [US6] Implement `src/app/sitemap.ts` and `src/app/robots.ts` (FR-062, FR-066)
+- [X] T118 [US6] Implement `redirects` collection (`from` normalised unique, `to` link, `type` 301/302, `source`, `createdBy`), graph validation, proxy lookup with cache, redirect-change audit until T115 passes (FR-045, FR-064)
 - [ ] T119 [US6] Implement idempotent `scripts/seed-legacy-redirects.ts` reading `docs/content/legacy-redirect-map.md`; **blocked until CD-12 approval** (FR-065)
 
 **Checkpoint (Gate 6)**: US6 green (legacy redirects pending CD-12) → commit checkpoint.
+
+**US6 implementation notes (2026-11-06)** (decisions: `docs/adr/ADR-008-seo-redirects.md`):
+
+- T116 `src/modules/seo/metadata.ts`, `jsonld.ts`, `src/app/(site)/seo.tsx`: per-locale title,
+  description, self-canonical, hreflang for published locales, `x-default` → `/`, Open Graph and
+  Twitter; JSON-LD (WebSite; Organization only from verified site settings; BreadcrumbList;
+  FAQPage; Service; Course). New `seo.ogImage` and `seo.canonicalOverride` (data model), migration
+  `20261106_220316_seo` (additive).
+- T117 `src/app/sitemap.ts` (per request), `src/app/robots.ts`; non-production `X-Robots-Tag:
+  noindex, nofollow` on every response (`next.config.ts`).
+- T118 redirects: path normalisation (`src/modules/seo/paths.ts`), self/loop/chain refusal on
+  create and update, internal targets only (no external allow-list approved), `createdBy`, audit
+  (existing). Defect fixed: Next's trailing-slash redirect ran before the proxy, so `/x/` took two
+  hops to a stored target; now `skipTrailingSlashRedirect` + the proxy (one hop).
+- Tests: `tests/unit/seo/seo.test.ts` (9), `tests/integration/seo/redirect-graph.test.ts` (6),
+  `sitemap.test.ts` (1), `tests/e2e/us6-seo.spec.ts` (5), `tests/security/redirects.spec.ts` (3).
+  The legacy inventory is tested with synthetic legacy-style paths (CD-12 pending).
+- Verified 2026-11-06: typecheck, lint, format, unit 404, integration 606, production build, full
+  Playwright 230 passed, Lighthouse CI budgets pass (30 runs; LCP 1.39–1.47 s, TBT 74–123 ms, CLS
+  0, JS 147.9 KB, a11y 1.00; Lighthouse's SEO category is 0.66 because this non-production build
+  is `noindex` by design).
+- **T119 blocked (CD-12)**: `docs/content/legacy-redirect-map.md` lists the FR-065 inventory with
+  every target PENDING and the exact owner input required; the seed script is not written until
+  the map is approved. Arabic targets also need CD-13.
+- Open: T141 non-production host protection (FR-066 "protected from public access"); a site-level
+  default social image (needs a public-use rule for media referenced by globals); Organization
+  JSON-LD stays absent until CD-01 company name evidence is verified.
+
 
 ---
 

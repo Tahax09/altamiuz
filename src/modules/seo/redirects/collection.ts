@@ -1,9 +1,54 @@
-// Minimal redirects collection: US2 prerequisite for slug-change redirects (T090) and collision
-// checks (T080). Graph validation (loops/chains/external targets) and proxy lookup are T118.
-import type { CollectionConfig } from 'payload'
+// Redirects (T118, FR-064, D-13): `from` and `to` are normalised site paths (paths.ts); external
+// targets are refused (no external allow-list has been approved, so every target is internal).
+// Graph rules on every write: no self-redirect, no loop, no chain: a target may not itself be
+// redirected, and a source may not be the target of another redirect. Every change is audited.
+import type {
+  CollectionBeforeChangeHook,
+  CollectionBeforeValidateHook,
+  CollectionConfig,
+  Where,
+} from 'payload'
+import { publicError } from '../../content/errors'
+import { normaliseSitePath } from '../paths'
 import { allow } from '../../access'
 import { recordAudit } from '../../audit'
 import { expireCacheTags } from '../../platform'
+
+/** Normalise both paths before validation, so equivalent spellings collide on `from` uniqueness. */
+const normalise: CollectionBeforeValidateHook = ({ data, operation, req }) => {
+  if (!data) return data
+  for (const k of ['from', 'to'] as const)
+    if (typeof data[k] === 'string') {
+      const n = normaliseSitePath(data[k])
+      if (n) data[k] = n // otherwise the field validator rejects the original value
+    }
+  if (operation === 'create' && req.user && !data.createdBy) data.createdBy = req.user.id
+  return data
+}
+
+const graphError = (message: string) => publicError(message, 400, { reason: 'redirectGraph' })
+
+const graphRules: CollectionBeforeChangeHook = async ({ data, originalDoc, req }) => {
+  const from = (data.from ?? originalDoc?.from) as string
+  const to = (data.to ?? originalDoc?.to) as string
+  if (from === to) throw graphError('A redirect cannot point to itself.')
+  const others = (where: Where) =>
+    req.payload.find({
+      collection: 'redirects',
+      where: originalDoc?.id ? { and: [where, { id: { not_equals: originalDoc.id } }] } : where,
+      limit: 1,
+      depth: 0,
+      overrideAccess: true,
+      req,
+    })
+  // Target is itself a redirect source: visitors would follow a chain (or a loop back to `from`).
+  if ((await others({ from: { equals: to } })).totalDocs)
+    throw graphError('The target is itself redirected. Point to the final page instead.')
+  // Some redirect already points at this source: that redirect would become a chain.
+  if ((await others({ to: { equals: from } })).totalDocs)
+    throw graphError('Another redirect points to this source. Update that redirect first.')
+  return data
+}
 
 export const redirects: CollectionConfig = {
   slug: 'redirects',
@@ -23,8 +68,7 @@ export const redirects: CollectionConfig = {
       index: true,
       maxLength: 512,
       validate: (v: unknown) =>
-        (typeof v === 'string' && /^\/[^\s\\]*$/.test(v) && !v.startsWith('//')) ||
-        'Use a site path starting with a single /.',
+        normaliseSitePath(v) === v || 'Use a site path starting with a single /.',
     },
     {
       name: 'to',
@@ -32,8 +76,7 @@ export const redirects: CollectionConfig = {
       required: true,
       maxLength: 512,
       validate: (v: unknown) =>
-        (typeof v === 'string' && /^\/[^\s\\]*$/.test(v) && !v.startsWith('//')) ||
-        'Use a site path starting with a single /.',
+        normaliseSitePath(v) === v || 'Use a site path starting with a single /.',
     },
     {
       name: 'type',
@@ -52,6 +95,8 @@ export const redirects: CollectionConfig = {
     { name: 'createdBy', type: 'relationship', relationTo: 'users', admin: { readOnly: true } },
   ],
   hooks: {
+    beforeValidate: [normalise],
+    beforeChange: [graphRules],
     afterChange: [
       async ({ doc, operation, req }) => {
         await recordAudit(req.payload, {

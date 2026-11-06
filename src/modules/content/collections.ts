@@ -45,7 +45,26 @@ const seo: Field = {
       validate: requiredToPublish(160),
       admin: { description: 'Required to publish this language.' },
     },
+    {
+      // FR-060: social preview image (Open Graph / Twitter). Becomes public with the document.
+      name: 'ogImage',
+      type: 'upload',
+      relationTo: 'media',
+      admin: { description: "Shown when the page is shared. Uses the image's alternative text." },
+    },
     { name: 'noindex', type: 'checkbox', defaultValue: false },
+    {
+      // data-model `seo.canonicalOverride`: internal path only.
+      name: 'canonicalOverride',
+      type: 'text',
+      localized: true,
+      maxLength: 512,
+      validate: (v: unknown) =>
+        !v ||
+        (typeof v === 'string' && /^\/(?!\/)[^\s\\?#]*$/.test(v)) ||
+        'Use a site path starting with a single /.',
+      admin: { description: 'Leave empty unless another page on this site is the original.' },
+    },
   ],
 }
 

@@ -41,6 +41,8 @@ const ROLE_OF = {
   enquiryOwner: 'owner',
   enquiryEditor: 'editor',
   enquiryInboxOwner: 'owner',
+  // tests/security/redirects.spec.ts only (US6)
+  seoAdmin: 'administrator',
   // tests/e2e/admin-login.spec.ts only
   loginOwner: 'owner',
   loginNew: 'owner', // signed up, second factor not enrolled yet

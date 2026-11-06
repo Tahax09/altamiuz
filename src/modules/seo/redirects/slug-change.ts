@@ -19,6 +19,13 @@ export async function createSlugChangeRedirect(
     overrideAccess: true,
     req,
   })
+  // A redirect from the new path would now shadow the document.
+  await req.payload.delete({
+    collection: 'redirects',
+    where: { from: { equals: to } },
+    overrideAccess: true,
+    req,
+  })
   // Re-point redirects that targeted the old path so visitors never follow a chain.
   const chained = await req.payload.find({
     collection: 'redirects',
@@ -36,13 +43,6 @@ export async function createSlugChangeRedirect(
       overrideAccess: true,
       req,
     })
-  // A redirect from the new path would now shadow the document.
-  await req.payload.delete({
-    collection: 'redirects',
-    where: { from: { equals: to } },
-    overrideAccess: true,
-    req,
-  })
   if (existing.totalDocs) {
     await req.payload.update({
       collection: 'redirects',

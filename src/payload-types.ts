@@ -554,7 +554,15 @@ export interface Page {
      * Required to publish this language.
      */
     description?: string | null;
+    /**
+     * Shown when the page is shared. Uses the image's alternative text.
+     */
+    ogImage?: (number | null) | Media;
     noindex?: boolean | null;
+    /**
+     * Leave empty unless another page on this site is the original.
+     */
+    canonicalOverride?: string | null;
   };
   updatedAt: string;
   createdAt: string;
@@ -1024,7 +1032,15 @@ export interface Service {
      * Required to publish this language.
      */
     description?: string | null;
+    /**
+     * Shown when the page is shared. Uses the image's alternative text.
+     */
+    ogImage?: (number | null) | Media;
     noindex?: boolean | null;
+    /**
+     * Leave empty unless another page on this site is the original.
+     */
+    canonicalOverride?: string | null;
   };
   updatedAt: string;
   createdAt: string;
@@ -1359,7 +1375,15 @@ export interface Course {
      * Required to publish this language.
      */
     description?: string | null;
+    /**
+     * Shown when the page is shared. Uses the image's alternative text.
+     */
+    ogImage?: (number | null) | Media;
     noindex?: boolean | null;
+    /**
+     * Leave empty unless another page on this site is the original.
+     */
+    canonicalOverride?: string | null;
   };
   updatedAt: string;
   createdAt: string;
@@ -1864,7 +1888,9 @@ export interface PagesSelect<T extends boolean = true> {
     | {
         title?: T;
         description?: T;
+        ogImage?: T;
         noindex?: T;
+        canonicalOverride?: T;
       };
   updatedAt?: T;
   createdAt?: T;
@@ -2082,7 +2108,9 @@ export interface ServicesSelect<T extends boolean = true> {
     | {
         title?: T;
         description?: T;
+        ogImage?: T;
         noindex?: T;
+        canonicalOverride?: T;
       };
   updatedAt?: T;
   createdAt?: T;
@@ -2319,7 +2347,9 @@ export interface CoursesSelect<T extends boolean = true> {
     | {
         title?: T;
         description?: T;
+        ogImage?: T;
         noindex?: T;
+        canonicalOverride?: T;
       };
   updatedAt?: T;
   createdAt?: T;

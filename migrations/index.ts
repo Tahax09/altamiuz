@@ -11,6 +11,7 @@ import * as migration_20261104_143748_evidence_claim_digest from './20261104_143
 import * as migration_20261105_171113_audit_cache_expire from './20261105_171113_audit_cache_expire'
 import * as migration_20261106_100933_media from './20261106_100933_media'
 import * as migration_20261106_171836_enquiries from './20261106_171836_enquiries'
+import * as migration_20261106_220316_seo from './20261106_220316_seo'
 
 export const migrations = [
   {
@@ -77,5 +78,10 @@ export const migrations = [
     up: migration_20261106_171836_enquiries.up,
     down: migration_20261106_171836_enquiries.down,
     name: '20261106_171836_enquiries',
+  },
+  {
+    up: migration_20261106_220316_seo.up,
+    down: migration_20261106_220316_seo.down,
+    name: '20261106_220316_seo',
   },
 ]

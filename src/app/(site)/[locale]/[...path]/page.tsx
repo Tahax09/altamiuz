@@ -13,9 +13,9 @@ import {
 } from '@/modules/content'
 import { contactFormFor } from '../../contact-form'
 import { DocumentView, ListingCards } from '@/ui'
+import { docMetadata, JsonLd, staticMetadata } from '../../seo'
 import {
   cachedAlternates,
-  cachedGlobal,
   cachedListing,
   cachedPublished,
   cachedRedirect,
@@ -49,21 +49,13 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
       title: t(r.locale, 'translationMissing', { language: LANGUAGE_NAMES[r.locale] }),
       robots: { index: false, follow: true },
     }
-  if (r.kind === 'listing') {
-    // Listings have no document of their own: the site's default description (site settings).
-    const settings = await cachedGlobal('site-settings', r.locale)
-    const description = (settings?.defaultSeo as { description?: string } | undefined)?.description
-    return {
-      title: t(r.locale, r.collection === 'services' ? 'services' : 'training'),
-      description: description || undefined,
-    }
-  }
-  const seo = (r.doc.seo ?? {}) as { title?: string; description?: string; noindex?: boolean }
-  return {
-    title: seo.title || r.doc.title,
-    description: seo.description || undefined,
-    robots: seo.noindex ? { index: false, follow: true } : undefined,
-  }
+  if (r.kind === 'listing')
+    return staticMetadata(
+      r.locale,
+      r.collection === 'services' ? 'services' : 'training',
+      t(r.locale, r.collection === 'services' ? 'services' : 'training'),
+    )
+  return docMetadata(r.locale, r.collection, r.doc)
 }
 
 const str = (v: unknown) => (typeof v === 'string' ? v : '')
@@ -134,6 +126,7 @@ export default async function PublicPage({ params }: { params: Params }) {
     const kind = r.collection === 'services' ? 'service' : 'course'
     return (
       <>
+        <JsonLd locale={r.locale} listing={r.collection === 'services' ? 'services' : 'training'} />
         <header className="page-header">
           <h1>{t(r.locale, r.collection === 'services' ? 'services' : 'training')}</h1>
         </header>
@@ -149,6 +142,7 @@ export default async function PublicPage({ params }: { params: Params }) {
   }
   return (
     <>
+      <JsonLd locale={r.locale} collection={r.collection} doc={r.doc} />
       <DocumentView
         doc={r.doc}
         locale={r.locale}

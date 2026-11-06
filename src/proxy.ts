@@ -154,6 +154,20 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
   if (BLOCKED.has(path) || BLOCKED_PREFIXES.some((p) => path.startsWith(p)))
     return new NextResponse(null, { status: 404 })
   if (REDIRECTS[path]) return NextResponse.redirect(new URL(REDIRECTS[path], request.url), 307)
+  // Trailing slashes outside the public site and the API: same 308 Next used to send.
+  {
+    const raw = request.nextUrl.pathname
+    if (
+      raw.length > 1 &&
+      raw.endsWith('/') &&
+      (request.method === 'GET' || request.method === 'HEAD') &&
+      !raw.startsWith('/api/') &&
+      !publicDocumentRequest(request)
+    ) {
+      const bare = raw.replace(/\/+$/, '') || '/'
+      return NextResponse.redirect(new URL(`${bare}${request.nextUrl.search}`, request.url), 308)
+    }
+  }
   const tooBig = uploadSizeRefusal(request.method, path, request.headers)
   if (tooBig)
     return NextResponse.json(
@@ -200,7 +214,22 @@ export async function proxy(request: NextRequest): Promise<NextResponse> {
     // Same question as the page, asked before rendering. If the lookup fails (database down),
     // the request falls through to the page, which reports its own error.
     const { publicRouteStatus } = await import('./app/(site)/route-status')
-    const status = await publicRouteStatus(request.nextUrl.pathname).catch(() => null)
+    // FR-065: `/x/` and `/x` are one URL. Next's own trailing-slash redirect is off
+    // (skipTrailingSlashRedirect) so a stored redirect for either spelling is followed in one hop;
+    // otherwise the slash is dropped with a 308 and the canonical path resolves normally.
+    const raw = request.nextUrl.pathname
+    if (raw.length > 1 && raw.endsWith('/')) {
+      const bare = raw.replace(/\/+$/, '') || '/'
+      const s = await publicRouteStatus(bare).catch(() => null)
+      const to = s?.kind === 'redirect' ? s.to : `${bare}${request.nextUrl.search}`
+      const res = NextResponse.redirect(
+        new URL(to, request.url),
+        s?.kind === 'redirect' && !s.permanent ? 307 : 308,
+      )
+      res.headers.set('Cache-Control', 'private, no-store')
+      return res
+    }
+    const status = await publicRouteStatus(raw).catch(() => null)
     if (status?.kind === 'notFound') {
       misses.recordMiss(client)
       return notFoundResponse(request, pathLocale ?? DEFAULT_LOCALE, nonce, csp)

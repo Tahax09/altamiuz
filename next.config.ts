@@ -11,8 +11,15 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   reactStrictMode: true,
   images: { unoptimized: true },
+  // FR-065: the proxy handles trailing slashes so stored redirects take one hop (src/proxy.ts).
+  skipTrailingSlashRedirect: true,
   async headers() {
-    return [{ source: '/:path*', headers: staticSecurityHeaders }]
+    // FR-066 / D-16: never index a non-production deployment (host protection is T141).
+    const noindex =
+      process.env.APP_ENV === 'production'
+        ? []
+        : [{ source: '/:path*', headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }] }]
+    return [{ source: '/:path*', headers: staticSecurityHeaders }, ...noindex]
   },
 }
 

@@ -2,13 +2,16 @@
 // on the normalised path; targets were validated as single-`/` site paths on save and are
 // re-checked here, so a redirect can never send visitors off-site.
 import type { Payload } from 'payload'
+import { normaliseSitePath } from '../paths'
 
 export type RedirectHit = { to: string; permanent: boolean }
 
 const SITE_PATH = /^\/(?!\/)[^\s\\]*$/
 
-export async function findRedirect(payload: Payload, path: string): Promise<RedirectHit | null> {
-  if (!SITE_PATH.test(path) || path.length > 512) return null
+export async function findRedirect(payload: Payload, raw: string): Promise<RedirectHit | null> {
+  // Same normalisation as stored `from` values: trailing slash, percent-encoding, NFC (FR-065).
+  const path = normaliseSitePath(raw)
+  if (!path || !SITE_PATH.test(path)) return null
   const res = await payload.find({
     collection: 'redirects',
     where: { from: { equals: path } },
