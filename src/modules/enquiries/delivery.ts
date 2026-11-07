@@ -2,11 +2,12 @@
 // task, never in the visitor's request: the enquiry is already stored. Retries with exponential
 // backoff; the attempt count, an error code and the status live on the enquiry, so a persistent
 // failure is visible in the inbox. After the last attempt the job raises an operator alert (an
-// error-level log entry `alert: enquiry.delivery_failed`, content-free) and stops.
+// error-level signal `enquiry.delivery_failed` with `alert: true`, content-free) and stops; the
+// readiness check also reports the failure from the database (docs/runbooks/monitoring.md).
 // The email is plain text. Submitted values never reach a header except the validated reply-to;
 // the subject is fixed.
 import type { Payload, TaskConfig } from 'payload'
-import { createEmailAdapter, getConfig, type EmailAdapter } from '../platform'
+import { createEmailAdapter, emitSignal, getConfig, type EmailAdapter } from '../platform'
 import { ENQUIRIES, SYSTEM_CONTEXT } from './collection'
 
 export const SEND_ENQUIRY_TASK = 'sendEnquiryEmail'
@@ -128,10 +129,7 @@ export async function deliverEnquiry(
   }
   if (attempts >= MAX_ATTEMPTS || code === 'invalid_message') {
     await setDelivery(payload, id, { status: 'failed', attempts, lastError: code })
-    payload.logger.error(
-      { alert: 'enquiry.delivery_failed', enquiry: id, attempts, code },
-      'enquiry notification failed permanently; staff must check the inbox',
-    )
+    emitSignal('enquiry.delivery_failed', { enquiry: id, attempts, reason: code })
     return 'failed'
   }
   await setDelivery(payload, id, { status: 'retrying', attempts, lastError: code })

@@ -35,3 +35,9 @@ Without action, each running server keeps serving the previous content for **up 
 
 Evidence: `tests/security/cache-invalidation.spec.ts` ("after an out-of-band database write…"),
 `tests/integration/platform/cache-expire.test.ts`.
+
+## Production (Vercel, ADR-009)
+
+The Data Cache behind `unstable_cache` is shared by all Vercel function instances, so one
+`POST /api/ops/expire-public-cache` expires every instance. Verify this on the first preview
+deployment by repeating the out-of-band write test above before relying on it.

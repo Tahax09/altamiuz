@@ -11,7 +11,13 @@ import {
   type Payload,
 } from 'payload'
 import { clientIp, getLimiter, sameOrigin } from '../auth'
-import { createCaptchaVerifier, getConfig, limitKey, type CaptchaVerifier } from '../platform'
+import {
+  createCaptchaVerifier,
+  emitSignal,
+  getConfig,
+  limitKey,
+  type CaptchaVerifier,
+} from '../platform'
 import { deleteAfterFor, ENQUIRIES } from './collection'
 import { SEND_ENQUIRY_TASK } from './delivery'
 import { validateEnquiry, type EnquiryField, type ErrorCode } from './schema'
@@ -73,8 +79,14 @@ export async function submitEnquiry(
     expectedAction: CAPTCHA_ACTION,
     expectedHostname: new URL(getConfig().siteUrl).hostname,
   })
-  if (result.unavailable) return { status: 503 }
-  if (!result.success) return { status: 403, reason: 'captcha' }
+  if (result.unavailable) {
+    emitSignal('captcha.unavailable', { scope: 'enquiry' })
+    return { status: 503 }
+  }
+  if (!result.success) {
+    emitSignal('captcha.failure', { scope: 'enquiry' })
+    return { status: 403, reason: 'captcha' }
+  }
   // 4. Schema (FR-071): only FR-070 fields, configured topics, server-side limits.
   const locale = raw.locale === 'en' ? 'en' : 'ar'
   const v = validateEnquiry(raw, await enquiryTopics(payload, locale))

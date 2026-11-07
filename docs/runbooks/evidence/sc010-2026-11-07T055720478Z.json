@@ -1,0 +1,34 @@
+{
+  "measurement": "SC-010 enquiry email delivery latency",
+  "environment": "local: production build not used; Payload Local API + jobs queue on Postgres 17 (Docker), SMTP to Mailpit, scheduler tick every 60 s",
+  "startedAt": "2026-11-07T05:57:20.478Z",
+  "finishedAt": "2026-11-07T06:05:22.779Z",
+  "schedulerTicks": 8,
+  "phaseA": {
+    "enquiries": 100,
+    "delivered": 100,
+    "within120s": 100,
+    "shareWithin120s": 1,
+    "seconds": {
+      "min": 0.593,
+      "p50": 33.767,
+      "p95": 57.783,
+      "p99": 60.158,
+      "max": 60.812
+    }
+  },
+  "phaseB": {
+    "outageStart": "2026-11-07T06:00:22.175Z",
+    "outageEnd": "2026-11-07T06:02:22.671Z",
+    "enquiriesDuringOutage": 10,
+    "storedInInbox": 10,
+    "deliveredAfterRecovery": 10,
+    "seconds": {
+      "min": 71.612,
+      "max": 240.203
+    },
+    "finalStatuses": {
+      "sent": 10
+    }
+  }
+}

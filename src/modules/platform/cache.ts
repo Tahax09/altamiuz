@@ -2,8 +2,8 @@
 // stale-while-revalidate: the old entry is served at least once more, so an unpublished, deleted or
 // replaced (possibly compromised) document stays public after the write succeeds. `{ expire: 0 }`
 // marks the tag expired immediately; the next read re-fetches before responding.
-// Scope: the tag manifest is per server process. A multi-instance deployment needs a shared
-// cache handler before scaling out (hosting decision pending).
+// Scope: self-hosted, the tag manifest is per server process. On Vercel (ADR-009) the Data Cache is
+// shared by all instances; to be verified on the first preview deployment (SC-009 re-test).
 import { revalidateTag } from 'next/cache'
 
 export function expireCacheTags(...tags: string[]): void {

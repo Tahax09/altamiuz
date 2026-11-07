@@ -1,0 +1,19 @@
+# Runbook: Secret rotation (FR-103, FR-104)
+
+Rotate on a schedule (yearly), on staff departure, and immediately on suspected exposure. Values
+are generated with `openssl rand -hex 32` and set only in the Vercel environment (and GitHub
+secrets for backups); never in the repository, tickets or chat. After each change: redeploy,
+readiness `ready`, record the date (not the value) in the incident/ops log.
+
+| Secret                                            | Effect of rotating                                                                                       | Procedure                                                                                                                 |
+| ------------------------------------------------- | -------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `PAYLOAD_SECRET`                                  | Signs sessions and derives the rate-limit key hash: every session ends; rate-limit windows reset.        | Set, redeploy, tell staff to sign in again.                                                                               |
+| `MFA_ENCRYPTION_KEY`                              | Encrypts TOTP secrets. A new key cannot read existing enrolments.                                        | Only with a planned MFA re-enrolment of every account (lockout-recovery.md), or a re-encryption migration written for it. |
+| `JOBS_SIGNING_SECRET` + `CRON_SECRET`             | Scheduler auth. They must stay equal, or every cron call is 401 and enquiry emails stop.                 | Set both to the new value in one change, redeploy, confirm a 200 for `/api/jobs/run` in the cron log within 2 minutes.    |
+| `HEALTH_READY_TOKEN`                              | Monitor auth.                                                                                            | Set, redeploy, update the monitor's header at once (it alerts until updated).                                             |
+| `SMTP_URL` (provider password)                    | Enquiry email.                                                                                           | Create the new credential at the provider, set, redeploy, submit a test enquiry, then revoke the old credential.          |
+| `TURNSTILE_SECRET_KEY`                            | Bot check.                                                                                               | Rotate in Cloudflare (keeps a grace period), set, redeploy, submit a test enquiry.                                        |
+| `S3_ACCESS_KEY_ID` / `S3_SECRET_ACCESS_KEY` (R2)  | Media.                                                                                                   | Create a new scoped token, set, redeploy, upload and view a test image, revoke the old token.                             |
+| Neon role passwords (`DATABASE_URL`, backup role) | Database access.                                                                                         | Reset in Neon, set the new URLs (app, migration, backup secret), redeploy; the old password stops working immediately.    |
+| Backup bucket token, R2 read token                | Backups.                                                                                                 | New token, update GitHub secrets, run the backup workflow manually, revoke the old token.                                 |
+| age backup key pair                               | New backups use the new public key; old backups still need the old private key until they expire (30 d). | Generate offline, update `BACKUP_AGE_RECIPIENTS`, keep the old private key 30 days, then destroy it.                      |

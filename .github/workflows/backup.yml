@@ -1,0 +1,52 @@
+# Daily encrypted off-site backup (FR-102, A-10, ADR-009, docs/runbooks/backup.md).
+# Inert until the owner sets the repository variable BACKUP_ENABLED=true and the secrets below.
+# Only the age PUBLIC key is here; the private key is held offline by the owner.
+name: backup
+on:
+  schedule:
+    - cron: '23 2 * * *'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: backup
+  cancel-in-progress: false
+jobs:
+  backup:
+    if: vars.BACKUP_ENABLED == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    env:
+      PG_BIN_DIR: /usr/lib/postgresql/17/bin
+      BACKUP_DIR: ${{ runner.temp }}/backups
+    steps:
+      - uses: actions/checkout@v4
+      - name: Tools (age, Postgres 17 client)
+        run: |
+          sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y
+          sudo apt-get install -y --no-install-recommends age postgresql-client-17
+      - name: Recipients
+        run: printf '%s\n' "${{ secrets.BACKUP_AGE_RECIPIENTS }}" > "$RUNNER_TEMP/recipients.txt"
+      - name: Database
+        env:
+          BACKUP_DATABASE_URL: ${{ secrets.BACKUP_DATABASE_URL }} # Neon DIRECT endpoint, read-only role
+          AGE_RECIPIENTS_FILE: ${{ runner.temp }}/recipients.txt
+        run: ops/backup/db.sh
+      - name: Media (mirror the R2 bucket with a read-only token, then archive)
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_MEDIA_READ_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_MEDIA_READ_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: auto
+          MEDIA_SOURCE_DIR: ${{ runner.temp }}/media
+          AGE_RECIPIENTS_FILE: ${{ runner.temp }}/recipients.txt
+        run: |
+          aws s3 sync "s3://${{ vars.R2_MEDIA_BUCKET }}" "$MEDIA_SOURCE_DIR" --endpoint-url "${{ vars.R2_ENDPOINT }}" --only-show-errors
+          ops/backup/media.sh
+      - name: Upload off-site (write-only token; 30-day lifecycle rule on the bucket)
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.BACKUP_BUCKET_WRITE_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.BACKUP_BUCKET_WRITE_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: auto
+        run: aws s3 cp "$BACKUP_DIR" "s3://${{ vars.BACKUP_BUCKET }}/$(date -u +%Y/%m/%d)/" --recursive --endpoint-url "${{ vars.BACKUP_ENDPOINT }}" --only-show-errors
+      - name: Heartbeat (a missing heartbeat alerts; docs/runbooks/monitoring.md)
+        run: curl -fsS -m 10 --retry 3 "${{ secrets.BACKUP_HEARTBEAT_URL }}" > /dev/null

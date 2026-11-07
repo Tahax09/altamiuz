@@ -26,7 +26,7 @@ const devEnv = (): EnvSource => ({
 const prodEnv = (): EnvSource => ({
   APP_ENV: 'production',
   SITE_URL: 'https://www.altamiuz.example',
-  DATABASE_URL: 'postgres://app:Zq8vT2mL9xR4@db.internal:5432/altamiuz',
+  DATABASE_URL: 'postgres://app:Zq8vT2mL9xR4@db.internal:5432/altamiuz?sslmode=require',
   PAYLOAD_SECRET: SECRET,
   MFA_ENCRYPTION_KEY: MFA_KEY,
   HEALTH_READY_TOKEN: 'b7e2c9d4a1f6e3b8c5d2a9f4', // gitleaks:allow (synthetic test fixture)
@@ -99,11 +99,12 @@ describe('loadConfig — production refuses unsafe configuration (FR-105)', () =
 
   it.each([
     ['STORAGE_DRIVER', 'local'],
-    ['EMAIL_DRIVER', 'smtp'],
     ['EMAIL_DRIVER', 'memory'],
+    ['JOBS_TRIGGER', 'local-runner'],
     ['RATELIMIT_DRIVER', 'memory'],
     ['CAPTCHA_DRIVER', 'test'],
   ])('rejects development substitute %s=%s', (variable, value) => {
+    // EMAIL_DRIVER=smtp is allowed only over smtps:// (see "production operations guards").
     const issues = errorFor({ ...prodEnv(), [variable]: value }).issues
     expect(issues.some((i) => i.variable === variable)).toBe(true)
   })
@@ -212,5 +213,71 @@ describe('loadConfig — production refuses unsafe configuration (FR-105)', () =
   it('reports every problem at once', () => {
     const err = errorFor({ ...prodEnv(), STORAGE_DRIVER: 'local', CAPTCHA_DRIVER: 'test' })
     expect(err.issues.length).toBeGreaterThanOrEqual(2)
+  })
+})
+
+describe('loadConfig — production operations guards (US8, ADR-009)', () => {
+  const approved = { routeVocabularyPending: () => false }
+  const issueVars = (env: EnvSource) => {
+    try {
+      loadConfig(env, approved)
+      return []
+    } catch (e) {
+      if (e instanceof ConfigError) return e.issues.map((i) => i.variable)
+      throw e
+    }
+  }
+
+  it('refuses the in-process job runner (no long-running process on serverless)', () => {
+    expect(issueVars({ ...prodEnv(), JOBS_TRIGGER: 'local-runner' })).toContain('JOBS_TRIGGER')
+    expect(issueVars({ ...prodEnv(), JOBS_TRIGGER: undefined })).toContain('JOBS_TRIGGER')
+  })
+
+  it('refuses a missing scheduler secret', () => {
+    expect(issueVars({ ...prodEnv(), JOBS_SIGNING_SECRET: '' })).toContain('JOBS_SIGNING_SECRET')
+  })
+
+  it('refuses a database URL without TLS, but not a loopback one', () => {
+    const plain = 'postgres://app:Zq8vT2mL9xR4@ep-x-pooler.eu-central-1.aws.neon.tech/db'
+    expect(issueVars({ ...prodEnv(), DATABASE_URL: plain })).toContain('DATABASE_URL')
+    expect(issueVars({ ...prodEnv(), DATABASE_URL: `${plain}?sslmode=disable` })).toContain(
+      'DATABASE_URL',
+    )
+    expect(issueVars({ ...prodEnv(), DATABASE_URL: `${plain}?sslmode=require` })).toEqual([])
+    expect(
+      issueVars({ ...prodEnv(), DATABASE_URL: 'postgres://app:Zq8vT2mL9xR4@127.0.0.1:5432/db' }),
+    ).toEqual([])
+  })
+
+  it.each([
+    ['plaintext smtp', 'smtp://user:Wq7Lp2Zr9Tx4@smtp.provider.example:587'],
+    ['no credentials', 'smtps://smtp.provider.example:465'],
+    ['loopback relay (Mailpit)', 'smtps://user:Wq7Lp2Zr9Tx4@127.0.0.1:1025'],
+    ['placeholder', 'smtps://user:replace-with-password@smtp.provider.example:465'],
+    ['not a URL', 'smtps//nonsense'],
+  ])('refuses production SMTP: %s', (_label, url) => {
+    expect(issueVars({ ...prodEnv(), EMAIL_DRIVER: 'smtp', SMTP_URL: url })).toContain('SMTP_URL')
+  })
+
+  it('accepts an SMTP relay over implicit TLS with credentials', () => {
+    expect(
+      issueVars({
+        ...prodEnv(),
+        EMAIL_DRIVER: 'smtp',
+        SMTP_URL: 'smtps://apikey:Wq7Lp2Zr9Tx4Kv8M@smtp.provider.example:465', // gitleaks:allow (synthetic)
+      }),
+    ).toEqual([])
+  })
+
+  it('names variables but never echoes secret values in the error', () => {
+    const secret = 'smtp://user:Wq7Lp2Zr9Tx4UniqueValue@smtp.provider.example:587'
+    let message = ''
+    try {
+      loadConfig({ ...prodEnv(), EMAIL_DRIVER: 'smtp', SMTP_URL: secret }, approved)
+    } catch (e) {
+      message = (e as Error).message
+    }
+    expect(message).toContain('SMTP_URL')
+    expect(message).not.toContain('Wq7Lp2Zr9Tx4UniqueValue')
   })
 })

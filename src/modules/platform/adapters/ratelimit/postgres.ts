@@ -2,7 +2,12 @@
 // only as HMAC-SHA256 digests. Database failures DENY the request (fail closed).
 import { createHmac } from 'node:crypto'
 import type pg from 'pg'
-import type { RateLimiter, RateLimitOptions, RateLimitResult } from './index'
+import {
+  withRateLimitSignals,
+  type RateLimiter,
+  type RateLimitOptions,
+  type RateLimitResult,
+} from './index'
 
 export type PostgresRateLimiterOptions = {
   pool: pg.Pool
@@ -27,7 +32,7 @@ function assertOptions(key: string, { limit, windowMs }: RateLimitOptions) {
 
 export function createPostgresRateLimiter(o: PostgresRateLimiterOptions): RateLimiter {
   const now = o.now ?? Date.now
-  return {
+  return withRateLimitSignals({
     async hit(key, options): Promise<RateLimitResult> {
       assertOptions(key, options)
       const t = now()
@@ -48,7 +53,7 @@ export function createPostgresRateLimiter(o: PostgresRateLimiterOptions): RateLi
         return { allowed: false, remaining: 0, retryAfterMs: options.windowMs, failed: true }
       }
     },
-  }
+  })
 }
 
 /** Deletes buckets whose window has ended. Returns the number removed. */

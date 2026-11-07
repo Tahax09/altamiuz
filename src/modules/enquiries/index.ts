@@ -16,7 +16,7 @@ export {
   setEnquiryMailerForTests,
   SUBJECT,
 } from './delivery'
-export { jobsAuthorised, jobsRunEndpoint, runJobs } from './jobs'
+export { jobsAuthorised, jobsRunEndpoints, runJobs } from './jobs'
 export { purgeExpiredEnquiries } from './retention'
 export { FIELDS, LIMITS, validateEnquiry, type EnquiryField, type ErrorCode } from './schema'
 export {
@@ -27,3 +27,4 @@ export {
   submitEnquiry,
   type SubmitResult,
 } from './submit'
+export { enquiryDeliveryCheck } from './health'

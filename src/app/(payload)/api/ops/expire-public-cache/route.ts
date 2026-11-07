@@ -2,7 +2,7 @@
 // Next request (SQL restore, scripts, imports) do not expire cache tags, so the public site could
 // show the pre-write content for up to 60 s (`revalidate: 60`). After such a write an
 // Administrator or Owner calls this (runbook: docs/runbooks/cache.md). Same-origin only, completed
-// MFA, audited. Per process: a multi-instance host needs a shared cache handler (T132).
+// MFA, audited. Self-hosted this is per process; on Vercel the Data Cache is shared (ADR-009).
 import config from '@payload-config'
 import { getPayload } from 'payload'
 import { can, isMfaVerified, roleOf } from '@/modules/access'

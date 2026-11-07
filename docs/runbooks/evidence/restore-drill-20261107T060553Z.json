@@ -1,0 +1,36 @@
+{
+  "drill": "restore",
+  "backupCompletedAt": "2026-11-07T06:05:46Z",
+  "verifiedAt": "2026-11-07T06:05:53Z",
+  "source": { "tables": 268, "rows": 1702, "mediaFiles": 120 },
+  "backup": {
+    "durationMs": 657,
+    "db": {
+      "kind": "db",
+      "file": "db-20261107T060545Z.dump.age",
+      "bytes": 1168502,
+      "startedAt": "2026-11-07T06:05:45Z",
+      "finishedAt": "2026-11-07T06:05:46Z"
+    },
+    "media": {
+      "kind": "media",
+      "file": "media-20261107T060546Z.tar.age",
+      "files": 120,
+      "bytes": 1229288,
+      "startedAt": "2026-11-07T06:05:46Z",
+      "finishedAt": "2026-11-07T06:05:46Z"
+    },
+    "plaintextFound": false
+  },
+  "restore": {
+    "environmentMs": 2904,
+    "restoreMs": 1637,
+    "verifyMs": 2423,
+    "rtoMeasuredMs": 6964,
+    "rowCountsMatch": true,
+    "mediaChecksumsMatch": true,
+    "pendingMigrations": 0,
+    "richtextScan": "pass"
+  },
+  "objectives": { "rpoHours": 24, "rtoHours": 4, "retentionDays": 30 }
+}

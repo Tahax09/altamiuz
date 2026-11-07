@@ -1,5 +1,6 @@
 // Rate-limit port (D-14). Memory for unit tests; Postgres (T039); Upstash (proposed).
 import { isIP } from 'node:net'
+import { emitSignal } from '../../signals'
 
 export type RateLimitOptions = { limit: number; windowMs: number }
 export type RateLimitResult = {
@@ -14,9 +15,24 @@ export interface RateLimiter {
   hit(key: string, options: RateLimitOptions): Promise<RateLimitResult>
 }
 
+/**
+ * FR-100: every denied hit is a `ratelimit.hit` signal carrying only the key's scope (never the
+ * identity part, which may be an IP address or account id). Store failures are logged by the
+ * limiter's own error handler instead.
+ */
+export function withRateLimitSignals(limiter: RateLimiter): RateLimiter {
+  return {
+    async hit(key, options) {
+      const r = await limiter.hit(key, options)
+      if (!r.allowed && !r.failed) emitSignal('ratelimit.hit', { scope: key.split('\u0000')[0]! })
+      return r
+    },
+  }
+}
+
 export function createMemoryRateLimiter(now: () => number = Date.now): RateLimiter {
   const windows = new Map<string, { start: number; count: number }>()
-  return {
+  return withRateLimitSignals({
     async hit(key, { limit, windowMs }) {
       const t = now()
       let w = windows.get(key)
@@ -32,7 +48,7 @@ export function createMemoryRateLimiter(now: () => number = Date.now): RateLimit
         retryAfterMs: allowed ? 0 : w.start + windowMs - t,
       }
     },
-  }
+  })
 }
 
 /** Builds a limiter key from a scope and an identity, normalising trivial evasions. */

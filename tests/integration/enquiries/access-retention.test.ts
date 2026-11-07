@@ -320,19 +320,15 @@ describe('notification (FR-073, FR-074)', () => {
       )) as { id: number }
     ).id
     failing = true
-    const logged: unknown[] = []
-    const logger = t.payload.logger
-    const orig = { error: logger.error, warn: logger.warn, info: logger.info }
-    for (const k of ['error', 'warn', 'info'] as const)
-      (logger as unknown as Record<string, unknown>)[k] = (...args: unknown[]) => {
-        logged.push(args)
-        return (orig[k] as (...a: unknown[]) => void).apply(logger, args)
-      }
+    // The alert is an ops signal (src/modules/platform/signals.ts, T133): capture its sink.
+    const logged: string[] = []
+    const { setSignalDestinationForTests } = await import('../../../src/modules/platform')
+    setSignalDestinationForTests({ write: (line: string) => logged.push(line) })
     try {
       await t.payload.jobs.run({ overrideAccess: true, silent: true })
       for (let i = 0; i < m.MAX_ATTEMPTS + 1; i++) await runDueNow()
     } finally {
-      Object.assign(logger, orig)
+      setSignalDestinationForTests(undefined)
     }
     const row = (await enquiry(id))!
     expect([row.delivery_status, Number(row.delivery_attempts), row.delivery_last_error]).toEqual([

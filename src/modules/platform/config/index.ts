@@ -81,7 +81,19 @@ const SECRET_VARS = [
   'UPSTASH_REDIS_REST_TOKEN',
   'QSTASH_TOKEN',
   'TURNSTILE_SECRET_KEY',
+  'SMTP_URL',
 ] as const
+
+function safeUrl(value: string): URL | undefined {
+  try {
+    return new URL(value)
+  } catch {
+    return undefined
+  }
+}
+
+const isLoopback = (host: string) =>
+  host === 'localhost' || host === '[::1]' || host.startsWith('127.')
 
 function lowEntropy(value: string): boolean {
   return new Set(value.toLowerCase()).size < 8
@@ -138,8 +150,9 @@ function crossChecks(raw: Raw): ConfigIssue[] {
   if (raw.APP_ENV === 'production') {
     const devOnly: [keyof Raw, string][] = [
       ['STORAGE_DRIVER', 'local'],
-      ['EMAIL_DRIVER', 'smtp'],
       ['EMAIL_DRIVER', 'memory'],
+      // ADR-009: serverless functions have no long-running process for the in-process runner.
+      ['JOBS_TRIGGER', 'local-runner'],
       ['RATELIMIT_DRIVER', 'memory'],
       ['CAPTCHA_DRIVER', 'test'],
     ]
@@ -156,6 +169,26 @@ function crossChecks(raw: Raw): ConfigIssue[] {
         variable: 'TRUSTED_PROXY_HOPS',
         reason: 'set TRUSTED_PROXY_HOPS or CLIENT_IP_HEADER so rate limits are per client',
       })
+    // ADR-009 email boundary: any provider's SMTP relay, but only over implicit TLS, with
+    // credentials, to a non-local host (Mailpit and plaintext SMTP stay development-only).
+    if (raw.EMAIL_DRIVER === 'smtp' && raw.SMTP_URL) {
+      const u = safeUrl(raw.SMTP_URL)
+      if (!u || u.protocol !== 'smtps:' || !u.username || !u.password || isLoopback(u.hostname))
+        issues.push({
+          variable: 'SMTP_URL',
+          reason: 'production SMTP must be smtps:// with credentials to a non-local host',
+        })
+    }
+    // ADR-009: the database (Neon) is reached over TLS; only a loopback host may omit it.
+    {
+      const u = safeUrl(raw.DATABASE_URL)
+      const mode = u?.searchParams.get('sslmode')
+      if (u && !isLoopback(u.hostname) && mode !== 'require' && mode !== 'verify-full')
+        issues.push({
+          variable: 'DATABASE_URL',
+          reason: 'must set sslmode=require or verify-full in production',
+        })
+    }
     if (new URL(raw.SITE_URL).protocol !== 'https:')
       issues.push({ variable: 'SITE_URL', reason: 'must use https in production' })
     for (const v of ['TURNSTILE_SITE_KEY', 'TURNSTILE_SECRET_KEY'] as const) {

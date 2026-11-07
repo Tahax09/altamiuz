@@ -36,25 +36,28 @@ stores the enquiry and queues its notification → confirmation.
 | Lost enquiry (stored but never notified)      | Enquiry and job are written in one transaction; retries with exponential backoff (5 attempts); final failure marks the enquiry `failed` and logs a content-free operator alert                          | integration (atomicity, retry then delivery, final failure)                                                                              |
 | Unauthorised reading or export (FR-076)       | Read, export and delete are separate permissions (Administrator, Owner) with MFA; export also needs re-authentication within 5 minutes; create and update are denied to everyone (system writes only)   | integration, `tests/e2e/us5-enquiry.spec.ts`                                                                                             |
 | Untraceable access                            | Every document shown to a user is audited (`enquiry.view`), exports (`enquiry.export`, count), deletions (`enquiry.delete`), retention (`enquiry.retention_delete`, count); no content in audit entries | integration                                                                                                                              |
-| Over-retention (FR-077)                       | `deleteAfter` = submission + 12 months; purge via `/api/jobs/run?retention=1`                                                                                                                           | integration (retention)                                                                                                                  |
-| Personal data in logs (FR-078)                | Logs carry ids, codes and counts only; tested by capturing the logger during a failing delivery                                                                                                         | integration                                                                                                                              |
+| Over-retention (FR-077)                       | `deleteAfter` = submission + 12 months; purge via `/api/jobs/retention` (daily Vercel Cron)                                                                                                             | integration (retention)                                                                                                                  |
+| Personal data in logs (FR-078)                | Logs carry ids, codes and counts only; signals are allow-listed per name (`src/modules/platform/signals.ts`); tested by capturing the signal sink during a failing delivery                             | integration                                                                                                                              |
 | CSV/formula injection in exports              | Cells quoted and formula-neutralised (`'=`)                                                                                                                                                             | integration (export)                                                                                                                     |
 | Abuse of the job runner                       | Bearer `JOBS_SIGNING_SECRET`, constant-time compare; refused without a configured secret; a CMS session is not enough; Payload's own job endpoints are closed                                           | integration (runner)                                                                                                                     |
 | Topic spoofing                                | Topic must equal a configured label for the submission's language                                                                                                                                       | integration                                                                                                                              |
 
 ## Residual risks and open items
 
-- **Encryption at rest (FR-078)** relies on the database host's storage encryption (decided with
-  hosting, T132). No application-level field encryption; the admin must display and search
+- **Encryption at rest (FR-078)** relies on Neon's storage encryption (ADR-009); the owner
+  verifies it for the chosen plan (O-7). Backups are age-encrypted (docs/runbooks/backup.md). No application-level field encryption; the admin must display and search
   enquiries.
-- **Operator alerting** is an error-level log entry (`alert: enquiry.delivery_failed`). Routing it
-  to a person needs T136 (monitoring and alert routing).
-- **Job scheduling**: locally the jobs queue runs every minute in-process (`JOBS_TRIGGER=
-local-runner`, not in tests); retention needs a daily `POST /api/jobs/run?retention=1` from the
-  host scheduler (T132). Delivery within 2 minutes (SC-010) is not yet measured end to end.
+- **Operator alerting** (T136, done 2026-11-07): the final failure emits the content-free signal
+  `enquiry.delivery_failed` (`alert: true`) and readiness reports `enquiryDelivery: fail` from the
+  database, which the external monitor turns into a page (docs/runbooks/monitoring.md). Paging a
+  person still needs the owner's monitoring account and recipient (O-9).
+- **Job scheduling** (ADR-009): Vercel Cron `GET /api/jobs/run` every minute and
+  `GET /api/jobs/retention` daily; the in-process runner is refused in production. SC-010 measured
+  locally at that cadence (docs/runbooks/monitoring.md#sc-010); to be re-measured on the preview
+  with the chosen provider (O-6).
 - **Real Turnstile** is unit-tested against Cloudflare's documented API with injected responses
   only; it is not exercised against Cloudflare (no external services in this stage).
 - **Rate limit identity**: behind a proxy the source address depends on `TRUSTED_PROXY_HOPS` /
   `CLIENT_IP_HEADER`; misconfiguration would put every visitor in one bucket (fail safe, but a
-  denial-of-service lever). To be set with hosting.
+  denial-of-service lever). On Vercel: `CLIENT_IP_HEADER=x-real-ip` (ADR-009, O-5).
 - **Privacy notice (CD-10)** missing: the form must not launch (`docs/content/privacy-notice-requirements.md`).

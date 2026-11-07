@@ -71,6 +71,9 @@ test.describe('health (FR-100)', () => {
     const ready = await request.get('/api/health/ready', {
       headers: { authorization: `Bearer ${process.env.HEALTH_READY_TOKEN}` },
     })
-    expect(await ready.json()).toEqual({ status: 'ready' })
+    expect(await ready.json()).toEqual({
+      status: 'ready',
+      checks: { database: 'ok', storage: 'ok', email: 'ok', enquiryDelivery: 'ok' },
+    })
   })
 })

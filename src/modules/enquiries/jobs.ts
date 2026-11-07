@@ -1,12 +1,17 @@
-// Job runner endpoint (contracts/http-surface.md: `POST /api/jobs/run`, D-14). Called by the host
-// scheduler (cron) or a local runner; not by people. Authorised by the JOBS_SIGNING_SECRET bearer
+// Job runner endpoint (contracts/http-surface.md: `/api/jobs/run`, D-14, ADR-009). Called by the
+// host scheduler or a local runner; not by people. Authorised by the JOBS_SIGNING_SECRET bearer
 // token, compared in constant time; without a configured secret every call is refused.
-// Runs due queue jobs (enquiry notifications with their retries) and, with `?retention=1`, the
-// retention purges (enquiries 12 months, audit log 24 months).
+// Vercel Cron sends `GET` with `Authorization: Bearer $CRON_SECRET` (CRON_SECRET is set to the
+// same value as JOBS_SIGNING_SECRET), so GET and POST behave the same; the bearer token, not a
+// cookie, authorises the call, so a cross-site GET cannot trigger it.
+// Runs due queue jobs (enquiry notifications with their retries) and, on `/api/jobs/retention`
+// (or `?retention=1`), the retention purges: enquiries 12 months, audit log 24 months, ended
+// rate-limit windows.
 import { createHash, timingSafeEqual } from 'node:crypto'
 import type { Endpoint, PayloadRequest } from 'payload'
 import { purgeExpiredAuditEvents } from '../audit'
-import { getConfig } from '../platform'
+import { poolOf } from '../auth/db'
+import { getConfig, purgeRateLimitBuckets } from '../platform'
 import { purgeExpiredEnquiries } from './retention'
 
 const digest = (s: string) => createHash('sha256').update(s).digest()
@@ -25,22 +30,26 @@ export async function runJobs(req: PayloadRequest, retention: boolean) {
   if (retention) {
     out.enquiriesDeleted = await purgeExpiredEnquiries(req.payload)
     out.auditDeleted = await purgeExpiredAuditEvents(req.payload)
+    out.rateLimitBucketsDeleted = await purgeRateLimitBuckets(poolOf(req.payload))
   }
   return out
 }
 
-export const jobsRunEndpoint: Endpoint = {
-  path: '/jobs/run',
-  method: 'post',
-  handler: async (req) => {
+const noStore = { 'cache-control': 'no-store' }
+
+const handler =
+  (alwaysRetention: boolean): Endpoint['handler'] =>
+  async (req) => {
     if (!jobsAuthorised(req.headers.get('authorization'), getConfig().secrets.jobsSigning))
-      return Response.json(
-        { error: 'unauthorized' },
-        { status: 401, headers: { 'cache-control': 'no-store' } },
-      )
-    const retention = new URL(req.url ?? 'http://x/').searchParams.get('retention') === '1'
-    return Response.json(await runJobs(req, retention), {
-      headers: { 'cache-control': 'no-store' },
-    })
-  },
-}
+      return Response.json({ error: 'unauthorized' }, { status: 401, headers: noStore })
+    const retention =
+      alwaysRetention || new URL(req.url ?? 'http://x/').searchParams.get('retention') === '1'
+    return Response.json(await runJobs(req, retention), { headers: noStore })
+  }
+
+export const jobsRunEndpoints: Endpoint[] = [
+  { path: '/jobs/run', method: 'post', handler: handler(false) },
+  { path: '/jobs/run', method: 'get', handler: handler(false) },
+  { path: '/jobs/retention', method: 'post', handler: handler(true) },
+  { path: '/jobs/retention', method: 'get', handler: handler(true) },
+]

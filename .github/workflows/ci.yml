@@ -26,6 +26,7 @@ jobs:
       PAYLOAD_SECRET: ci-only-throwaway-secret-0123456789abcdef
       MFA_ENCRYPTION_KEY: '0000000000000000000000000000000000000000000000000000000000000000'
       HEALTH_READY_TOKEN: ci-only-throwaway-token
+      JOBS_SIGNING_SECRET: ci-only-throwaway-jobs-secret
     steps:
       - uses: actions/checkout@v4
         with:
@@ -42,6 +43,11 @@ jobs:
       - run: pnpm lint
       - run: pnpm format
       - run: pnpm test
+      - name: Backup tools for tests/integration/ops (age, Postgres 17 client)
+        run: |
+          sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y
+          sudo apt-get install -y --no-install-recommends age postgresql-client-17
+          echo "PG_BIN_DIR=/usr/lib/postgresql/17/bin" >> "$GITHUB_ENV"
       - run: pnpm test:integration
       - run: pnpm test:migrations
       - run: pnpm build

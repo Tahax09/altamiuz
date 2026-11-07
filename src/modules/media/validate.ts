@@ -6,6 +6,7 @@
 import { randomBytes } from 'node:crypto'
 import sharp, { type Metadata, type OutputInfo, type Sharp } from 'sharp'
 import { publicError } from '../content/errors'
+import { emitSignal } from '../platform/signals'
 import { MAX_UPLOAD_BYTES, UPLOAD_TOO_LARGE_MESSAGE } from '../security'
 import { FORMATS, sniffImage, type ImageFormat } from './sniff'
 
@@ -24,8 +25,10 @@ export const UPLOAD_MESSAGES = {
 } as const
 export type UploadRejection = keyof typeof UPLOAD_MESSAGES
 
-export const uploadError = (reason: UploadRejection) =>
-  publicError(UPLOAD_MESSAGES[reason], 400, { reason: `upload.${reason}` })
+export const uploadError = (reason: UploadRejection) => {
+  emitSignal('upload.rejected', { reason }) // FR-100: every rejection is thrown right after this
+  return publicError(UPLOAD_MESSAGES[reason], 400, { reason: `upload.${reason}` })
+}
 
 /**
  * Markup or script signatures anywhere in the raw bytes (JPEG/HTML and similar polyglots, SVG or

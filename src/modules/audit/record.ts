@@ -1,5 +1,6 @@
 // The only write path into the audit log (FR-045, FR-046).
 import type { Payload } from 'payload'
+import { emitSignal } from '../platform/signals'
 import { AUDIT_ACTIONS, type AuditAction, type AuditOutcome } from './events'
 import { AUDIT_COLLECTION } from './collection'
 
@@ -40,6 +41,10 @@ export async function recordAudit(payload: Payload, e: AuditEventInput) {
   if (!Object.prototype.hasOwnProperty.call(AUDIT_ACTIONS, e.action))
     throw new AuditMetaError('unknown action')
   checkMeta(e.action, e.meta)
+  // FR-100: failed sign-ins and lockouts are also monitoring signals (content-free).
+  if (e.action === 'auth.login.failure')
+    emitSignal('auth.login_failure', { reason: e.meta?.reason ?? null })
+  else if (e.action === 'auth.lockout') emitSignal('auth.lockout')
   return payload.create({
     collection: AUDIT_COLLECTION as never,
     overrideAccess: true,

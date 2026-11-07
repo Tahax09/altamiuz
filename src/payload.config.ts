@@ -8,7 +8,7 @@ import sharp from 'sharp'
 import { auditDeniedOperations, auditEvents } from '@/modules/audit'
 import { invitations, securitySettings, users } from '@/modules/auth'
 import { courses, pages, safeEditor, services, siteGlobals } from '@/modules/content'
-import { enquiries, jobsRunEndpoint, sendEnquiryTask } from '@/modules/enquiries'
+import { enquiries, jobsRunEndpoints, sendEnquiryTask } from '@/modules/enquiries'
 import { mediaCollection } from '@/modules/media'
 import { redirects } from '@/modules/seo'
 import { getConfig } from '@/modules/platform'
@@ -71,14 +71,15 @@ export default buildConfig({
   globals: [securitySettings, ...siteGlobals],
   hooks: { afterError: [auditDeniedOperations] },
   // Jobs (D-14, D-15): enquiry notifications with retries. Only the signed runner endpoint
-  // (`POST /api/jobs/run`) and the local runner start jobs; Payload's own job endpoints are closed.
+  // (`/api/jobs/run`, `/api/jobs/retention`; Vercel Cron in production, ADR-009) and the local
+  // runner start jobs; Payload's own job endpoints are closed.
   jobs: {
     tasks: [sendEnquiryTask],
     access: { run: () => false, queue: () => false, cancel: () => false },
     autoRun: [{ cron: '* * * * *', queue: 'default', limit: 20 }],
     shouldAutoRun: () => cfg.jobs.trigger === 'local-runner' && cfg.appEnv !== 'test',
   },
-  endpoints: [jobsRunEndpoint],
+  endpoints: [...jobsRunEndpoints],
   // __Host- prefix requires https; local http uses a plain name (ADR-005).
   cookiePrefix: cfg.siteUrl.startsWith('https://') ? '__Host-altamiuz' : 'altamiuz',
   db: postgresAdapter({

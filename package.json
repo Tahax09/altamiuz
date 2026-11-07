@@ -40,6 +40,8 @@
     "perf:lighthouse": "sh scripts/lighthouse.sh",
     "bootstrap:owner": "payload run scripts/bootstrap-owner.ts",
     "scan:richtext": "payload run scripts/scan-richtext.ts",
+    "ops:restore-drill": "ops/restore-drill.sh",
+    "ops:measure-delivery": "ops/measure/delivery.sh",
     "check:route-vocab": "tsx scripts/check-route-vocab.ts",
     "neon:migrate": "node scripts/with-neon.mjs --direct -- pnpm -s payload migrate",
     "neon:migrate:status": "node scripts/with-neon.mjs --direct -- pnpm -s payload migrate:status",

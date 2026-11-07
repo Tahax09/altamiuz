@@ -42,8 +42,9 @@ Turnstile's widget posts its token as `turnstileToken`.
 | Path | Method | Access | Behaviour |
 |---|---|---|---|
 | `/api/health` | GET | public | `{ status }` liveness only, no versions or details |
-| `/api/health/ready` | GET | token from env or internal network | database ping |
-| `/api/jobs/run` | POST | `Authorization: Bearer <JOBS_SIGNING_SECRET>` (constant-time; QStash signature when `JOBS_TRIGGER=qstash`, not built) | runs due jobs; `?retention=1` also purges expired enquiries and audit entries; 401 otherwise |
+| `/api/health/ready` | GET | `Authorization: Bearer <HEALTH_READY_TOKEN>` (constant-time) | `{ status: ready \| degraded \| unavailable, checks: { database, storage, email, enquiryDelivery: ok \| fail } }`; 200 only when all ok; 503 otherwise; 3 s per check; no hosts, errors or counts (ADR-009, docs/runbooks/monitoring.md) |
+| `/api/jobs/run` | GET, POST | `Authorization: Bearer <JOBS_SIGNING_SECRET>` (constant-time; Vercel Cron sends `CRON_SECRET`, set to the same value; QStash not built) | runs due jobs (enquiry notifications and retries); `?retention=1` also purges |
+| `/api/jobs/retention` | GET, POST | same | runs due jobs and the retention purges: enquiries 12 months, audit log 24 months, ended rate-limit windows (daily Vercel Cron, `vercel.json`) |
 
 ## Admin and CMS API (authenticated + MFA)
 

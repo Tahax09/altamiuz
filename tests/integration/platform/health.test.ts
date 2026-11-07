@@ -33,7 +33,7 @@ describe('readiness', () => {
   it('reports ready when the database answers', async () => {
     const res = await readinessResponse(req(`Bearer ${TOKEN}`), opts)
     expect(res.status).toBe(200)
-    expect(await res.json()).toEqual({ status: 'ready' })
+    expect(await res.json()).toEqual({ status: 'ready', checks: { database: 'ok' } })
   })
 
   it('reports 503 without leaking connection details when the database is unreachable', async () => {
@@ -43,7 +43,7 @@ describe('readiness', () => {
     })
     expect(res.status).toBe(503)
     const text = await res.text()
-    expect(text).toBe(JSON.stringify({ status: 'unavailable' }))
+    expect(text).toBe(JSON.stringify({ status: 'unavailable', checks: { database: 'fail' } }))
     expect(text).not.toContain('secretpw')
   })
 })

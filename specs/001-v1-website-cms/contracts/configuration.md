@@ -8,7 +8,7 @@ missing secret, or any placeholder value causes the app to **refuse to start** (
 |---|---|---|---|
 | `APP_ENV` | `development` / `test` / `preview` / `production` | `development` | `production` |
 | `SITE_URL` | canonical origin | `http://localhost:3000` | required |
-| `DATABASE_URL` | Postgres | Docker Compose service | required |
+| `DATABASE_URL` | Postgres | Docker Compose service | required; Neon pooled endpoint with `sslmode=require` (refused without TLS for non-loopback hosts) |
 | `DATABASE_ALLOW_PUSH` | Payload schema push (throwaway DBs only) | `false` | must be `false` (refused otherwise; also refused in `preview`) |
 | `POSTGRES_DEV_PASSWORD` | password for the local compose Postgres | random, `.env.local` only | — |
 | `PAYLOAD_SECRET` | Payload signing secret | generated locally, never committed | required (≥32 bytes) |
@@ -16,14 +16,14 @@ missing secret, or any placeholder value causes the app to **refuse to start** (
 | `STORAGE_DRIVER` | `local` / `s3` | `local` | `s3` (R2, proposed) |
 | `MEDIA_DIR` | directory for `STORAGE_DRIVER=local` media files | `media` (repository root, git-ignored) | not used with `s3` |
 | `S3_ENDPOINT`, `S3_BUCKET`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY` | object storage | — | required if `s3` |
-| `EMAIL_DRIVER` | `smtp` / `memory` / `resend` | `smtp` (Mailpit) | `resend` (proposed) |
-| `SMTP_URL` | local SMTP | `smtp://localhost:1025` | — |
+| `EMAIL_DRIVER` | `smtp` / `memory` / `resend` | `smtp` (Mailpit) | `smtp` over `smtps://` to the chosen provider's relay (ADR-009); `resend` has no adapter |
+| `SMTP_URL` | local SMTP | `smtp://localhost:1025` | `smtps://user:pass@relay:465`, non-local host; secret (placeholder/entropy checked) |
 | `RESEND_API_KEY`, `EMAIL_FROM` | email | — | required if `resend` |
 | `RATELIMIT_DRIVER` | `memory` / `postgres` / `upstash` | `postgres` | `postgres` or `upstash` |
 | `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN` | Redis | — | required if `upstash` |
 | `TRUSTED_PROXY_HOPS` | trusted proxies appending to `X-Forwarded-For` (0–5) | `0` (header ignored) | ≥1, or set `CLIENT_IP_HEADER` |
 | `CLIENT_IP_HEADER` | single-value client-IP header set by the edge (e.g. `cf-connecting-ip`) | unset | per hosting decision |
-| `JOBS_TRIGGER` | `local-runner` / `cron` / `qstash` | `local-runner` | decided with hosting |
+| `JOBS_TRIGGER` | `local-runner` / `cron` / `qstash` | `local-runner` | `cron` (Vercel Cron, `vercel.json`); `local-runner` refused; set `CRON_SECRET` = `JOBS_SIGNING_SECRET` |
 | `JOBS_SIGNING_SECRET` / `QSTASH_*` | job endpoint auth | generated locally | required |
 | `CAPTCHA_DRIVER` | `test` / `turnstile` | `test` (emulates Cloudflare test secrets offline) | `turnstile` |
 | `TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY` | bot challenge | Cloudflare official test keys | required, real keys (test keys refused) |
