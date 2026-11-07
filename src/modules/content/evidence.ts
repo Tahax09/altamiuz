@@ -246,3 +246,21 @@ export function storedClaimProblems(doc: Obj): string[] {
   })
   return out
 }
+
+/**
+ * Publish gate (L-1, A-8): every claim must be verified for exactly what is stored in the draft
+ * AND in the published version, in every language. Paths are prefixed with `draft` or
+ * `published` so the refusal says which document failed. Throws 400 (rolls the write back).
+ */
+export function assertClaimsVerified(draft: unknown, published: unknown): void {
+  const paths = [
+    ...storedClaimProblems(draft as Obj).map((p) => `draft ${p}`),
+    ...storedClaimProblems(published as Obj).map((p) => `published ${p}`),
+  ]
+  if (paths.length)
+    throw publicError(
+      'Unverified claims cannot be published. Evidence must match the claim in every language as it will be published; publish all languages together after re-verifying.',
+      400,
+      { paths },
+    )
+}

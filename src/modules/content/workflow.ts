@@ -19,7 +19,7 @@ import { expireCacheTags } from '../platform'
 import { LOCALES, type Locale, type RoutedCollection } from '../i18n'
 import { createSlugChangeRedirect } from '../seo'
 import { mayDo } from './access'
-import { storedClaimProblems, unverifiedClaims } from './evidence'
+import { assertClaimsVerified, unverifiedClaims } from './evidence'
 import { isLocaleCopy } from './locale-copy'
 import { findContentIssues } from './richtext/walk'
 import { publicError } from './errors'
@@ -239,10 +239,21 @@ export const verifyStoredContent =
     const issues = findContentIssues(full)
     if (issues.length) throw publicError('Content rejected by policy', 400, { issues }) // rolls back
     // L-1 backstop: a publish needs every claim verified for exactly what is stored (rolls back).
+    // A-8: the authoritative document after a publish is the PUBLISHED version, not the draft. A
+    // per-language publish (`publishSpecificLocale`) publishes the publishing language from the
+    // draft and every other language from the previous published version, so the two can differ;
+    // both must match the verification, in every language.
     if (ctx(req).publishing) {
-      const unverified = storedClaimProblems(full as unknown as Record<string, unknown>)
-      if (unverified.length)
-        throw publicError('Unverified claims cannot be published', 400, { paths: unverified })
+      const published = await req.payload.findByID({
+        collection,
+        id: doc.id,
+        locale: 'all',
+        draft: false,
+        depth: 0,
+        overrideAccess: true,
+        req,
+      })
+      assertClaimsVerified(full, published)
     }
     // FR-004 backstop: every published locale has its SEO title and description (rolls back).
     const status = (full as { _status?: unknown })._status

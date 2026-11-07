@@ -45,11 +45,11 @@ accounts, contact enquiries).
 F-1 Monaco loaded from a CDN in the admin (closed `52f4e20`); WS11 M-1 stale-while-revalidate cache
 served replaced content (closed: `expire: 0`, `cache-invalidation.spec.ts`); WS11 M-2 duplicate
 published in some locales (closed T094c); L-3 out-of-band writes not expiring the cache (closed:
-`/api/ops/expire-public-cache`); US8: unscheduled rate-limit table growth (closed `5c04471`).
+`/api/ops/expire-public-cache`); US8: unscheduled rate-limit table growth (closed `5c04471`); **A-8** (medium) evidence digest could miss a published language: the publish backstop checked only the draft, while a per-language publish (`publishSpecificLocale`) publishes the draft language merged with the other languages' previous published text. Closed: the gate now checks the draft and the published version (collections and globals), the e2e seed no longer drops row ids, `pnpm check:evidence` on the reseeded data reports 0 problems (`tests/integration/content/evidence-publish.test.ts`, 10 cases incl. REST and globals; 7 failed before the fix).
 
 ## Conclusion
 
-Locally, **0 open critical or high findings** (one open medium, A-8, found after the security run by the T143 evidence check) apart from the excepted, unreachable E-1. This is
+Locally, **0 open critical or high findings**. Medium finding A-8 (found by the T143 evidence check) was closed on 2026-11-07 apart from the excepted, unreachable E-1. This is
 not a production security claim: A-1, A-2 and A-6 can only be closed against a deployed preview,
 which needs owner actions O-1–O-3 (`docs/runbooks/deploy.md`). Re-run this report on the preview
 and before launch, and whenever an exception is extended or retired.

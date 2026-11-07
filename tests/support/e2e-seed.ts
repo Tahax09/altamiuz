@@ -224,7 +224,7 @@ const homeDoc = (await payload.findByID({
   depth: 0,
   locale: 'en',
   overrideAccess: true,
-})) as unknown as { sections: { id: string }[] }
+})) as unknown as { sections: { id: string; items?: { id: string }[] }[] }
 await payload.update({
   collection: 'pages',
   id: home.id,
@@ -234,7 +234,18 @@ await payload.update({
     title: 'الرئيسية',
     slug: 'الرئيسية',
     seo: seoFor('ar', 'الرئيسية'),
-    sections: homeDoc.sections.map((sec, i) => ({ ...homeSections('ar')[i], id: sec.id })),
+    // Keep section AND row ids: rows sent without ids are new rows, which drops the English
+    // statistics label from the draft (the A-8 sequence; the publish gate now refuses it).
+    sections: homeDoc.sections.map((sec, i) => {
+      const ar = homeSections('ar')[i] as Record<string, unknown> & { items?: object[] }
+      return ar.items && sec.items
+        ? {
+            ...ar,
+            id: sec.id,
+            items: ar.items.map((row, j) => ({ ...row, id: sec.items![j]!.id })),
+          }
+        : { ...ar, id: sec.id }
+    }),
   } as never,
   overrideAccess: true,
 })

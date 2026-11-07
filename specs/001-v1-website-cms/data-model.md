@@ -171,7 +171,8 @@ Every block has `hidden` (bool) and `anchorId` (optional, slug-safe).
 ## State transitions (pages, services, courses, globals)
 
 ```text
-draft ──publish(locale) [publisher+, required fields L complete, evidence verified]──▶ published
+draft ──publish(locale) [publisher+, required fields L complete, evidence verified for the
+        stored draft AND the resulting published version, every language (A-8)]──▶ published
 published ──edit──▶ published + newer draft
 published ──unpublish(locale) [publisher+]──▶ draft
 any revision ──restore [publisher+]──▶ new draft (history unchanged)

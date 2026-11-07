@@ -20,7 +20,7 @@ import { allow, can, isMfaVerified, roleOf, type Resource } from '../access'
 import { recordAudit } from '../audit'
 import { expireCacheTags, getConfig } from '../platform'
 import { contentRead, mayDo } from './access'
-import { evidenceGroup, storedClaimProblems, unverifiedClaims } from './evidence'
+import { assertClaimsVerified, evidenceGroup, unverifiedClaims } from './evidence'
 import { isLocaleCopy } from './locale-copy'
 import { linkGroup } from './link'
 import { findContentIssues } from './richtext/walk'
@@ -125,22 +125,15 @@ const auditGlobal =
     return doc
   }
 
-/** L-1 backstop for globals: a publish needs every claim verified for what is stored. */
+/** L-1 backstop for globals: a publish needs every claim verified for what is stored and published. */
 const verifyStoredGlobalClaims =
   (slug: SiteGlobal): GlobalAfterChangeHook =>
   async ({ doc, req }) => {
     if (!ctx(req).publishing) return doc
-    const full = (await req.payload.findGlobal({
-      slug,
-      locale: 'all',
-      draft: true,
-      depth: 0,
-      overrideAccess: true,
-      req,
-    })) as unknown as Record<string, unknown>
-    const unverified = storedClaimProblems(full)
-    if (unverified.length)
-      throw publicError('Unverified claims cannot be published', 400, { paths: unverified })
+    // A-8: check the draft and the published version (a per-language publish merges them).
+    const read = (draft: boolean) =>
+      req.payload.findGlobal({ slug, locale: 'all', draft, depth: 0, overrideAccess: true, req })
+    assertClaimsVerified(await read(true), await read(false))
     return doc
   }
 

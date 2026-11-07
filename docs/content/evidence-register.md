@@ -35,7 +35,9 @@ must not be published until a decision adds one.
 ## Checks performed
 
 1. Every claim present in any language of a document published in any language has evidence
-   with status `verified` whose digest equals the digest of the claim **as published**.
+   with status `verified` whose digest equals the digest of the claim **as published**. The same
+   rule is enforced at publish time against both the draft and the resulting published version
+   (`assertClaimsVerified`, A-8).
 2. Every verified item has a non-empty `reference`.
 
 Tests: `tests/integration/content/evidence-register.test.ts` (listed with reference; drafts not
@@ -48,10 +50,9 @@ flagged). Publish-time gates: `tests/integration/content/publish.test.ts` (T074)
 - **Production content**: none entered. CD-01, CD-02, CD-05, CD-06, CD-07 are open
   (`docs/content/dependencies.md`), so there is no approved claim and no evidence to register.
   SC-016 cannot be verified until real content is published.
-- **Seeded e2e data** (`altamiuz_e2e`): `pnpm check:evidence` → 1 published claim, **1 problem**:
-  the home page statistics block is published with English and Arabic labels, but its verified
-  digest matches the stored draft row, which holds the Arabic label only. Finding **A-8**
-  (`docs/security/adversarial-report.md`): the publish-time backstop reads the draft document,
-  so a claim can be published in one language without its verified digest covering that
-  language's text when locales are edited in sequence. Open; root cause and fix are the next
-  content-integrity task. `pnpm check:evidence` is the launch gate that catches it.
+- **Seeded e2e data** (`altamiuz_e2e`, reseeded 2026-11-07): `pnpm check:evidence` → 1 published
+  claim, **0 problems**. The earlier problem (finding A-8: the home statistics block published
+  with an English label its verification did not cover) came from the seed sending Arabic rows
+  without ids and publishing Arabic only; the publish gate now checks the published version too
+  and refuses that sequence, and the seed keeps row ids. The fixture keeps its synthetic test
+  reference; no evidence was invented.

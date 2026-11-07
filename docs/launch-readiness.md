@@ -34,17 +34,16 @@ v1 until an owner decision.
 
 ## Engineering items still open
 
-| ID   | Item                                                   | Next action                                                          |
-| ---- | ------------------------------------------------------ | -------------------------------------------------------------------- |
-| A-8  | Evidence digest can miss a published language (medium) | root-cause and make the publish backstop check the published version |
-| A-1  | Media public-set cache per instance (low)              | verify on preview; shared invalidation if reproduced                 |
-| A-2  | Sign-in timing floor under load (low)                  | measure on preview                                                   |
-| A-6  | Security suite not yet run through the Vercel edge     | run `pnpm test:security` against the preview                         |
-| T127 | Analytics (OD-3)                                       | after decision                                                       |
-| T119 | Legacy redirect seeding                                | after CD-12                                                          |
-| T138 | Manual a11y walkthrough                                | after OD-5                                                           |
-| T141 | Preview protection checklist                           | after O-1                                                            |
-| T142 | Usability sessions                                     | after OD-5                                                           |
+| ID   | Item                                               | Next action                                          |
+| ---- | -------------------------------------------------- | ---------------------------------------------------- |
+| A-1  | Media public-set cache per instance (low)          | verify on preview; shared invalidation if reproduced |
+| A-2  | Sign-in timing floor under load (low)              | measure on preview                                   |
+| A-6  | Security suite not yet run through the Vercel edge | run `pnpm test:security` against the preview         |
+| T127 | Analytics (OD-3)                                   | after decision                                       |
+| T119 | Legacy redirect seeding                            | after CD-12                                          |
+| T138 | Manual a11y walkthrough                            | after OD-5                                           |
+| T141 | Preview protection checklist                       | after O-1                                            |
+| T142 | Usability sessions                                 | after OD-5                                           |
 
 ## Success criteria
 
@@ -53,7 +52,7 @@ v1 until an owner decision.
 | SC-001 | Pages in both locales or marked                                                            | **open**             | Mechanism verified locally (no silent fallback, missing-translation page); real content needs CD-04, CD-11                                                                                                     |
 | SC-002 | Editor publishes bilingual page <20 min (≥2 staff)                                         | **open**             | Protocol `docs/research/usability-sc002.md`; **not run** — needs two staff (OD-5)                                                                                                                              |
 | SC-003 | Permission matrix 100%                                                                     | **verified (local)** | `tests/integration/auth/authz.test.ts`, globals/content/media/enquiry access tests (integration 638/638 on `5c04471`)                                                                                          |
-| SC-004 | 0 open critical/high                                                                       | **verified (local)** | `docs/security/adversarial-report.md`: 0 open critical/high except excepted, unreachable E-1 (OD-1 before 2026-12-05); open medium A-8; re-run on preview (A-6)                                                |
+| SC-004 | 0 open critical/high                                                                       | **verified (local)** | `docs/security/adversarial-report.md`: 0 open critical/high except excepted, unreachable E-1 (OD-1 before 2026-12-05); medium A-8 closed 2026-11-07; re-run on preview (A-6)                                   |
 | SC-005 | FR-045 events fully audited                                                                | **verified (local)** | `tests/integration/audit/*`, `docs/security/audit-log.md`                                                                                                                                                      |
 | SC-006 | 0 serious/critical axe + manual walkthroughs                                               | **open**             | Automated part verified (public 32/32, admin project pages 0); manual keyboard/screen-reader **not executed** (`docs/runbooks/a11y-manual.md`, OD-5)                                                           |
 | SC-007 | p75 LCP ≤2.5 s, CLS <0.1, INP ≤200 ms on real devices                                      | **partial**          | Lab only, local: LCP 1.37–1.42 s, TBT 71–81 ms, CLS 0 (T139). Field p75 needs production traffic                                                                                                               |
@@ -65,7 +64,7 @@ v1 until an owner decision.
 | SC-013 | Full restore meets RPO 24 h / RTO 4 h                                                      | **partial**          | Local drill: RTO 7.0 s, row counts and media checksums equal (`docs/runbooks/restore.md#evidence`). Neon/R2 drill and scheduled backups need O-2, O-3, O-10                                                    |
 | SC-014 | 0 secrets in history at launch                                                             | **verified (local)** | gitleaks full history 27 commits, 0 leaks (T145, 2026-11-07); **re-run at launch**                                                                                                                             |
 | SC-015 | ≥99.5% monthly availability, external monitor                                              | **blocked**          | Method in `docs/runbooks/monitoring.md`; monitors and recipients **O-9**; needs a production month                                                                                                             |
-| SC-016 | 100% published claims have evidence reference                                              | **open**             | `pnpm check:evidence` built; finding A-8 open; no real claims yet (CD-01/02/05/07)                                                                                                                             |
+| SC-016 | 100% published claims have evidence reference                                              | **blocked**          | `pnpm check:evidence` and the publish gate verified (A-8 closed: draft and published version checked); no real claims yet (CD-01/02/05/07)                                                                     |
 | SC-017 | 100% accounts MFA; 0 functions without it                                                  | **verified (local)** | MFA required before any CMS data or action (`auth-http.spec.ts` T046, MFA integration tests, `us7-nav.spec.ts`)                                                                                                |
 | SC-018 | 100% rich-text adversarial corpus neutralised                                              | **verified (local)** | Rich-text corpus tests (T071, T082), `public-http.spec.ts` inert rendering, `pnpm scan:richtext` 0 violations on restored DB                                                                                   |
 | SC-019 | Admin a11y: no new findings; all baseline items remediated or documented with upstream ref | **partial**          | No new rule vs baseline (9/9, T138); all findings documented (A-05…A-12); upstream issues drafted, **not filed** (OD-4)                                                                                        |
@@ -98,7 +97,7 @@ Default rule: a requirement whose mapped tasks (tasks.md traceability) are all c
 | FR-017  | Services and Training courses MUST be dedicated structured content types, each item with l… | T088                                                                                | **verified (local)** | Tests of the mapped tasks                                                                                                                                                       |
 | FR-018  | Each of the two content types MUST have an automatically generated, localized listing page… | T103                                                                                | **verified (local)** | Tests of the mapped tasks                                                                                                                                                       |
 | FR-019  | Pages MUST be able to feature selected Services or Training courses through a section that… | T085                                                                                | **verified (local)** | Tests of the mapped tasks                                                                                                                                                       |
-| FR-016  | Claim-bearing content (credentials, registrations, partnerships, certifications, client na… | T074, T086, T143                                                                    | **open**             | Publish gate verified; **finding A-8** (digest can miss a published language) open; real claims need CD-01/02/05/07; `pnpm check:evidence`                                      |
+| FR-016  | Claim-bearing content (credentials, registrations, partnerships, certifications, client na… | T074, T086, T143                                                                    | **blocked**          | Publish gate verified; **finding A-8** (digest can miss a published language) open; real claims need CD-01/02/05/07; `pnpm check:evidence`                                      |
 | FR-020  | Pages, navigation, banners, and global settings MUST support draft and published states in… | T074, T089, T094c                                                                   | **verified (local)** | Tests of the mapped tasks                                                                                                                                                       |
 | FR-021  | Only the published version MUST ever be served to the public, crawlers, sitemaps, and feed… | T074, T089, T094c, T103                                                             | **verified (local)** | Tests of the mapped tasks                                                                                                                                                       |
 | FR-022  | Preview MUST render drafts exactly as published pages would appear and MUST require an aut… | T077, T091                                                                          | **verified (local)** | Tests of the mapped tasks                                                                                                                                                       |
@@ -172,7 +171,7 @@ Default rule: a requirement whose mapped tasks (tasks.md traceability) are all c
 | FR-104  | Configuration MUST be provided through environment settings with a placeholder-only exampl… | T005, T010                                                                          | **verified (local)** | Tests of the mapped tasks                                                                                                                                                       |
 | FR-105  | Local development and the automated test suite MUST run without paid services or external … | T006, T010, T011, T014, T015                                                        | **verified (local)** | Tests of the mapped tasks                                                                                                                                                       |
 
-FR totals: blocked: 6, deferred: 2, open: 3, partial: 12, verified (local): 71 (of 94).
+FR totals: blocked: 7, deferred: 2, open: 2, partial: 12, verified (local): 71 (of 94).
 
 ## Security verification
 
