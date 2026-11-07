@@ -31,7 +31,7 @@
     {
       "rule": "label",
       "impact": "critical",
-      "nodes": 6
+      "nodes": 10
     },
     {
       "rule": "target-size",
@@ -80,7 +80,7 @@
     {
       "rule": "label",
       "impact": "critical",
-      "nodes": 9
+      "nodes": 10
     },
     {
       "rule": "target-size",
@@ -114,16 +114,6 @@
   ],
   "list:pages": [
     {
-      "rule": "aria-command-name",
-      "impact": "serious",
-      "nodes": 2
-    },
-    {
-      "rule": "button-name",
-      "impact": "critical",
-      "nodes": 2
-    },
-    {
       "rule": "color-contrast",
       "impact": "serious",
       "nodes": 5
@@ -131,7 +121,7 @@
     {
       "rule": "label",
       "impact": "critical",
-      "nodes": 1
+      "nodes": 5
     },
     {
       "rule": "target-size",
@@ -163,7 +153,7 @@
     {
       "rule": "color-contrast",
       "impact": "serious",
-      "nodes": 8
+      "nodes": 13
     },
     {
       "rule": "label",
@@ -205,7 +195,7 @@
     {
       "rule": "color-contrast",
       "impact": "serious",
-      "nodes": 2
+      "nodes": 8
     },
     {
       "rule": "label",
@@ -217,7 +207,7 @@
     {
       "rule": "color-contrast",
       "impact": "serious",
-      "nodes": 1
+      "nodes": 5
     },
     {
       "rule": "label",
@@ -228,6 +218,133 @@
       "rule": "target-size",
       "impact": "serious",
       "nodes": 8
+    }
+  ],
+  "list:media": [
+    {
+      "rule": "color-contrast",
+      "impact": "serious",
+      "nodes": 1
+    }
+  ],
+  "create:media": [
+    {
+      "rule": "color-contrast",
+      "impact": "serious",
+      "nodes": 6
+    }
+  ],
+  "list:enquiries": [
+    {
+      "rule": "color-contrast",
+      "impact": "serious",
+      "nodes": 1
+    }
+  ],
+  "versions:pages": [
+    {
+      "rule": "color-contrast",
+      "impact": "serious",
+      "nodes": 4
+    },
+    {
+      "rule": "list",
+      "impact": "serious",
+      "nodes": 1
+    },
+    {
+      "rule": "target-size",
+      "impact": "serious",
+      "nodes": 2
+    }
+  ],
+  "global:site-settings": [
+    {
+      "rule": "aria-command-name",
+      "impact": "serious",
+      "nodes": 3
+    },
+    {
+      "rule": "aria-hidden-focus",
+      "impact": "serious",
+      "nodes": 6
+    },
+    {
+      "rule": "button-name",
+      "impact": "critical",
+      "nodes": 9
+    },
+    {
+      "rule": "color-contrast",
+      "impact": "serious",
+      "nodes": 9
+    },
+    {
+      "rule": "label",
+      "impact": "critical",
+      "nodes": 4
+    },
+    {
+      "rule": "label-content-name-mismatch",
+      "impact": "serious",
+      "nodes": 1
+    },
+    {
+      "rule": "list",
+      "impact": "serious",
+      "nodes": 1
+    },
+    {
+      "rule": "target-size",
+      "impact": "serious",
+      "nodes": 3
+    }
+  ],
+  "global:header-nav": [
+    {
+      "rule": "aria-command-name",
+      "impact": "serious",
+      "nodes": 2
+    },
+    {
+      "rule": "aria-hidden-focus",
+      "impact": "serious",
+      "nodes": 4
+    },
+    {
+      "rule": "button-name",
+      "impact": "critical",
+      "nodes": 6
+    },
+    {
+      "rule": "color-contrast",
+      "impact": "serious",
+      "nodes": 4
+    },
+    {
+      "rule": "label",
+      "impact": "critical",
+      "nodes": 2
+    },
+    {
+      "rule": "label-content-name-mismatch",
+      "impact": "serious",
+      "nodes": 1
+    },
+    {
+      "rule": "list",
+      "impact": "serious",
+      "nodes": 1
+    },
+    {
+      "rule": "nested-interactive",
+      "impact": "serious",
+      "nodes": 1
+    },
+    {
+      "rule": "target-size",
+      "impact": "serious",
+      "nodes": 2
     }
   ]
 }

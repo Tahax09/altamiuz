@@ -29,6 +29,9 @@ const TEMPLATES: [string, string][] = [
   ['training:en', '/en/training'],
   ['training:ar', '/ar/ar-vocab-pending-training'],
   ['course:en', '/en/training/security-awareness'],
+  // US5 contact form (T138): the form, consent and bot-check placeholder in both languages.
+  ['contact:en', '/en/contact'],
+  ['contact:ar', `/ar/${ar('تواصل')}`],
   ['missing-translation:ar', '/ar/ar-vocab-pending-training/security-awareness'],
   ['not-found:en', '/en/no-such-page'],
   ['not-found:ar', `/ar/${ar('لا-توجد')}`],

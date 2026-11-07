@@ -13,15 +13,15 @@ in `tests/a11y/admin/baseline.json`.
 
 ## Source of current evidence
 
-| Source                                                                                  | Scope                                                                           | Status                                                                                                                                            |
-| --------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| R-A POC, `research/payload-rtl-poc/evidence/results-chromium-C2-1440.json` (2026-10-16) | Payload 3.91.0 core views, English UI, **POC field config** (fields unlabelled) | reference only. POC config differs from the app                                                                                                   |
-| App baseline, `tests/a11y/admin/baseline.json` (WS7, 2026-10-16)                        | Login view, production build, English UI                                        | **0 serious/critical**                                                                                                                            |
-| App, WS8: dashboard, users list/edit, audit-events list, invitations list/create        | authenticated MFA-verified owner, production build                              | **baselined** (`baseline.json`): same rule families as R-A (`color-contrast`, `label`, `target-size`, `aria-hidden-focus`, `button-name`, `list`) |
-| Project-built account pages (`/account/*`)                                              | 4 pages                                                                         | **0 serious/critical** (asserted, not baselined)                                                                                                  |
-| App, WS9: pages list/edit/create, redirects list                                        | authenticated MFA-verified owner, production build                              | **baselined** (`baseline.json`). All flagged nodes are Payload core (drag handle, popup/toolbar buttons, doc tabs); none in project components    |
-| App, WS9: project reorder control, error focus, editor focus (T078/T079)                | `tests/a11y/admin/content-editing.spec.ts`                                      | **asserted** (keyboard move, announcement, focus, persistence, 24 px targets, focus ring, `aria-invalid` + focus after failed save)               |
-| App: versions, media views                                                              | versions view not yet measured; media is US4                                    | pending                                                                                                                                           |
+| Source                                                                                                         | Scope                                                                           | Status                                                                                                                                            |
+| -------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| R-A POC, `research/payload-rtl-poc/evidence/results-chromium-C2-1440.json` (2026-10-16)                        | Payload 3.91.0 core views, English UI, **POC field config** (fields unlabelled) | reference only. POC config differs from the app                                                                                                   |
+| App baseline, `tests/a11y/admin/baseline.json` (WS7, 2026-10-16)                                               | Login view, production build, English UI                                        | **0 serious/critical**                                                                                                                            |
+| App, WS8: dashboard, users list/edit, audit-events list, invitations list/create                               | authenticated MFA-verified owner, production build                              | **baselined** (`baseline.json`): same rule families as R-A (`color-contrast`, `label`, `target-size`, `aria-hidden-focus`, `button-name`, `list`) |
+| Project-built account pages (`/account/*`)                                                                     | 4 pages                                                                         | **0 serious/critical** (asserted, not baselined)                                                                                                  |
+| App, WS9: pages list/edit/create, redirects list                                                               | authenticated MFA-verified owner, production build                              | **baselined** (`baseline.json`). All flagged nodes are Payload core (drag handle, popup/toolbar buttons, doc tabs); none in project components    |
+| App, WS9: project reorder control, error focus, editor focus (T078/T079)                                       | `tests/a11y/admin/content-editing.spec.ts`                                      | **asserted** (keyboard move, announcement, focus, persistence, 24 px targets, focus ring, `aria-invalid` + focus after failed save)               |
+| App, T138 (2026-11-07): media list/create, enquiries list, page versions, site-settings and header-nav globals | authenticated MFA-verified owner, production build                              | **baselined** (`baseline.json`); every flagged node is Payload core (see A-10…A-12)                                                               |
 
 ## Findings (R-A, English UI; axe serious/critical rule → node count)
 
@@ -38,6 +38,26 @@ in `tests/a11y/admin/baseline.json`.
 | A-09 | Arabic admin UI (RTL) | ≈10,000 px horizontal overflow from Lexical floating controls                                                                                                                                          | core                        | **out of v1 scope** (D-23: English admin)              | —          | deferred                                                                                                                                                   |
 
 Counts in the table come from the POC configuration. App measurements are in `baseline.json`.
+
+## T138 regression run (2026-11-07, local production build, axe-core 4.14, WCAG 2.2 A/AA)
+
+- **SC-019 gate (rule level)**: no new serious/critical rule on any previously baselined view;
+  `pnpm test:a11y` admin project 9/9. Project-built `/account/*` pages: 0 serious/critical.
+- **Node counts grew on existing views** (same rules): `edit:pages` color-contrast 8 → 13,
+  `create:pages` 2 → 8, `list:redirects` 1 → 5, `label` on users/pages/audit lists (more rows
+  in the seed; `list:pages` dropped `aria-command-name` and `button-name`). Triage of node
+  targets (`test-results/a11y/admin-nodes.json`): all are core elements — `.field-description-*`
+  text (more described fields since US4/US6), `.localizer-button__label`, list sort-column
+  headers, row-selection checkboxes, react-select inputs, array add-row buttons, upload
+  drop-zone text. No project component is flagged.
+- One earlier full run hung (two tests timed out after 9.6 and 15 minutes, an environment
+  stall); not reproduced in the two re-runs.
+
+| ID   | View(s)                                                | Finding (core)                                                                                                                                                | Remediation path                                                                                      | Status |
+| ---- | ------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- | ------ |
+| A-10 | every edit/create view with descriptions; media create | `color-contrast` on field description text (`.field-description-*`) and drop-zone helper text                                                                 | **extension candidate**: darker description colour in `custom.scss` (then re-measure); upstream issue | open   |
+| A-11 | every list and versions view                           | `color-contrast` on sort-column headers and the locale switcher label; `label` on row-selection checkboxes; `target-size` on list controls                    | upstream (list view is core); no supported extension point for the row checkbox                       | open   |
+| A-12 | site-settings, header-nav, edit pages                  | `aria-hidden-focus`, `button-name`, `aria-command-name`, `nested-interactive` (array row drag handles/menus), `label` on date pickers and react-select inputs | upstream; A-06 project reorder control is the keyboard path                                           | open   |
 
 ## Upstream issues: drafted, not filed
 

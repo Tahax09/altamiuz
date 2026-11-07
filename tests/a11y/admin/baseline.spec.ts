@@ -67,6 +67,14 @@ async function analyse(page: import('@playwright/test').Page, key: string) {
     .map((v) => ({ rule: v.id, impact: v.impact!, nodes: v.nodes.length }))
     .sort((a, b) => a.rule.localeCompare(b.rule))
   measured[key] = findings
+  // Node targets for triage (core vs project origin), never compared: test-results only.
+  fs.mkdirSync('test-results/a11y', { recursive: true })
+  const nodesFile = 'test-results/a11y/admin-nodes.json'
+  const all = fs.existsSync(nodesFile) ? JSON.parse(fs.readFileSync(nodesFile, 'utf8')) : {}
+  all[key] = r.violations
+    .filter((v) => v.impact === 'serious' || v.impact === 'critical')
+    .map((v) => ({ rule: v.id, targets: v.nodes.map((n) => String(n.target[0])) }))
+  fs.writeFileSync(nodesFile, JSON.stringify(all, null, 2))
   const known = new Set((load()[key] ?? []).map((f) => f.rule))
   const fresh = findings.filter((f) => !known.has(f.rule))
   if (!UPDATE)
@@ -107,6 +115,17 @@ test('authenticated admin views: no new serious/critical findings', async ({ pag
     ],
     ['create:pages', '/admin/collections/pages/create'],
     ['list:redirects', '/admin/collections/redirects'],
+    // T138: views added after the WS8/WS9 baselines (US4 media, US5 enquiries, US7 globals,
+    // versions). Findings here are recorded in docs/accessibility/admin-findings.md.
+    ['list:media', '/admin/collections/media'],
+    ['create:media', '/admin/collections/media/create'],
+    ['list:enquiries', '/admin/collections/enquiries'],
+    [
+      'versions:pages',
+      `/admin/collections/pages/${JSON.parse(fs.readFileSync('test-results/e2e-fixtures.json', 'utf8')).content.pageId}/versions`,
+    ],
+    ['global:site-settings', '/admin/globals/site-settings'],
+    ['global:header-nav', '/admin/globals/header-nav'],
   ] as const) {
     await page.goto(path)
     await page.waitForLoadState('networkidle')
