@@ -49,7 +49,7 @@ published in some locales (closed T094c); L-3 out-of-band writes not expiring th
 
 ## Conclusion
 
-Locally, **0 open critical or high findings** apart from the excepted, unreachable E-1. This is
+Locally, **0 open critical or high findings** (one open medium, A-8, found after the security run by the T143 evidence check) apart from the excepted, unreachable E-1. This is
 not a production security claim: A-1, A-2 and A-6 can only be closed against a deployed preview,
 which needs owner actions O-1–O-3 (`docs/runbooks/deploy.md`). Re-run this report on the preview
 and before launch, and whenever an exception is extended or retired.

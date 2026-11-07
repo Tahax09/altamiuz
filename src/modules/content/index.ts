@@ -34,3 +34,4 @@ export {
   type PublicDoc,
 } from './public'
 export { decodeSegments, resolvePublicPath, type PublicReaders, type Resolution } from './resolve'
+export { evidenceRegister, type EvidenceRegister, type RegisterRow } from './evidence-register'
