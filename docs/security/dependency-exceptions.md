@@ -12,7 +12,14 @@ date in its row. After that date the scanners fail again until the exception is 
 Nothing here is a production-readiness claim. Re-run `pnpm audit:deps` whenever dependencies
 change.
 
-## Current exceptions (re-verified 2026-11-06)
+## Current exceptions (re-verified 2026-11-06; upstream re-checked 2026-11-07)
+
+**Upstream status 2026-11-07 (T145)**: no exception can be retired yet. E-1 `monaco-editor` latest
+0.57.0 still bundles `dompurify` 3.4.15 (fix is 3.4.17); E-2 `get-uri` latest still requires
+`basic-ftp` ^5.3.1 (fix is in 6.x); E-3 `@typescript-eslint/typescript-estree` latest requires
+`minimatch` ^10 (fix 11.0.1); E-4 `deepmerge` latest is the affected 4.3.1 and Payload 3.93.0
+pins it. **All five expire 2026-12-05; each needs an owner extend-or-lapse decision before then**
+(docs/launch-readiness.md, owner decision OD-1).
 
 Every exception has the same owner: **Taha Alabyad (project owner)**. All five expire on
 2026-12-05; only the owner may extend one (E-5 was extended on the owner's instruction on
@@ -132,6 +139,15 @@ taken from `pnpm audit --json` on 2026-11-06.
   `drizzle-kit/api.js`, `bin.cjs` or Payload load `@esbuild-kit/*`?); (2) check Payload and
   drizzle-kit for a release without `@esbuild-kit`; (3) record the result here. Without that
   review the exception lapses on 2026-12-05 and osv-scanner and CI fail.
+
+- **Review 2026-11-07 (T145), result recorded; expiry unchanged (2026-12-05)**: (1) load check
+  re-run: `drizzle-kit` 0.31.7 `api.js`, `api.mjs` and `bin.cjs` contain no `@esbuild-kit`
+  reference; requiring `drizzle-kit/api.js` with a `Module._load` hook recorded **0**
+  `@esbuild-kit/*` loads, and `pnpm migrate:status` run under the same hook (`NODE_OPTIONS
+--require`) recorded **0** loads. (2) upstream: `drizzle-kit` latest 0.31.11 still declares
+  `@esbuild-kit/esm-loader`; `@payloadcms/db-postgres` latest 3.93.0 still pins `drizzle-kit`
+  0.31.7. No fix is available. (3) Decision needed from the owner **before 2026-12-05**: extend
+  (the evidence above supports it) or let it lapse (CI fails from that date). Not extended here.
 
 Retired 2026-11-05: GHSA-vfj7-8cjw-p6xm (`braces`). Neither pnpm audit nor osv-scanner matches it
 in the current lockfile (`braces` 3.0.3), so it was removed from both configurations.

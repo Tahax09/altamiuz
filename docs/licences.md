@@ -107,6 +107,15 @@ the re-scan of the full tree (857 packages) found no new copyleft licence.
 copyleft licence beyond the LGPL libvips binary above; one source-available licence (FSL-1.1, dev
 tooling only) is noted above; approved 2026-11-06 for local development tooling only.
 
+2026-11-07 final supply-chain pass (T145): `pnpm licenses list` — 864 packages, identical
+licence distribution to 2026-11-05; production tree (`--prod`) 403 packages with no FSL, GPL or
+AGPL licence (only LGPL libvips, permissive and attribution licences). FSL-1.1 re-assessed:
+`sentry` 0.45.0 is reached only via `@lhci/cli` → `@lhci/utils` → `@sentry/node` →
+`@sentry/bundler-plugins` (devDependency) and is absent from the standalone build
+(`.next/standalone/node_modules`), so the 2026-11-06 approval scope (local development tooling
+only) still holds. The US8 tools `age`, the Postgres 17 client and the AWS CLI run only on CI
+runners and are not distributed.
+
 No GPL/AGPL licence in the resolved tree. Re-run this check whenever dependencies change (Constitution I).
 
 ## Fonts (T101, D-24)
