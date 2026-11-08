@@ -211,6 +211,43 @@ const homeSections = (l: 'ar' | 'en') => [
     items: [{ value: '10', label: l === 'ar' ? 'مشروع' : 'Engagements' }],
     evidence: { status: 'verified', reference: 'E2E internal evidence ref' },
   },
+  // Homepage sections (Direction A). Fixture text only, so layout, RTL and a11y checks cover them.
+  {
+    blockType: 'textMedia',
+    eyebrow: l === 'ar' ? 'من نحن' : 'About',
+    heading: l === 'ar' ? 'مقدمة اختبارية' : 'E2E introduction',
+    body: rt(l === 'ar' ? 'نص مقدمة اختباري' : 'E2E introduction body'),
+  },
+  {
+    blockType: 'featureGrid',
+    heading: l === 'ar' ? 'لماذا' : 'Why',
+    items: [{ icon: 'shield', title: l === 'ar' ? 'سبب' : 'E2E reason' }],
+  },
+  {
+    blockType: 'process',
+    heading: l === 'ar' ? 'المنهجية' : 'Approach',
+    steps: (l === 'ar' ? ['أ', 'ب', 'ج', 'د'] : ['A', 'B', 'C', 'D']).map((title) => ({
+      title,
+      text: l === 'ar' ? 'وصف الخطوة' : 'E2E step text',
+    })),
+  },
+  {
+    blockType: 'standards',
+    heading: l === 'ar' ? 'المعايير' : 'Standards',
+    items: [{ name: l === 'ar' ? 'إطار اختباري' : 'E2E framework' }],
+  },
+  {
+    blockType: 'resourceList',
+    heading: l === 'ar' ? 'رؤى' : 'Insights',
+    items: [
+      {
+        kind: l === 'ar' ? 'دليل' : 'Guide',
+        title: l === 'ar' ? 'مورد اختباري' : 'E2E resource',
+        link: { linkType: 'internal', doc: { relationTo: 'services', value: svc.id } },
+      },
+    ],
+  },
+  { blockType: 'cta', heading: l === 'ar' ? 'تواصل' : 'E2E contact' },
 ]
 const home = await publishDoc(
   'pages',
@@ -237,14 +274,14 @@ await payload.update({
     // Keep section AND row ids: rows sent without ids are new rows, which drops the English
     // statistics label from the draft (the A-8 sequence; the publish gate now refuses it).
     sections: homeDoc.sections.map((sec, i) => {
-      const ar = homeSections('ar')[i] as Record<string, unknown> & { items?: object[] }
-      return ar.items && sec.items
-        ? {
-            ...ar,
-            id: sec.id,
-            items: ar.items.map((row, j) => ({ ...row, id: sec.items![j]!.id })),
-          }
-        : { ...ar, id: sec.id }
+      const ar = homeSections('ar')[i] as Record<string, unknown>
+      const out: Record<string, unknown> = { ...ar, id: sec.id }
+      for (const list of ['items', 'steps'] as const) {
+        const rows = (sec as Record<string, unknown>)[list] as { id: string }[] | undefined
+        if (Array.isArray(ar[list]) && rows)
+          out[list] = (ar[list] as object[]).map((row, j) => ({ ...row, id: rows[j]!.id }))
+      }
+      return out
     }),
   } as never,
   overrideAccess: true,

@@ -155,16 +155,20 @@ Every block has `hidden` (bool) and `anchorId` (optional, slug-safe).
 
 | Block | Fields | Claim-bearing |
 |---|---|---|
-| hero | heading `L`, subheading `L`, media, primaryCta/secondaryCta (`link`) | no |
+| hero | eyebrow `L`, heading `L`, subheading `L`, media, primaryCta/secondaryCta (`link`) | no |
 | richText | content `L` (Lexical allow-list) | no |
-| featureGrid | heading `L`, items[] `{ icon (enum), title L, text L }` | no |
-| serviceList | heading `L`, mode (`all` / `selected`), services[] → services | no |
-| courseList | heading `L`, mode, courses[] → courses | no |
+| textMedia | eyebrow `L`, heading `L`, body `L` (rich text), media, mediaPosition (`end`/`start`), link (company introduction, expertise) | no |
+| process | eyebrow `L`, heading `L`, intro `L`, steps[] `{ title L, text L }` (ordered; homepage approach) | no |
+| standards | eyebrow `L`, heading `L`, intro `L`, items[] `{ name L, text L, logo media }` (frameworks followed; certifications held go in `credentials`) | no |
+| resourceList | eyebrow `L`, heading `L`, intro `L`, items[] `{ kind L, title L, summary L, link }`, moreLink (insights and resources) | no |
+| featureGrid | eyebrow `L`, heading `L`, intro `L`, items[] `{ icon (enum), title L, text L }` | no |
+| serviceList | eyebrow `L`, heading `L`, intro `L`, moreLink, mode (`all` / `selected`), services[] → services | no |
+| courseList | eyebrow `L`, heading `L`, intro `L`, moreLink, mode, courses[] → courses | no |
 | cta | heading `L`, text `L`, link | no |
 | faq | items[] `{ question L, answer L (rich text) }` → FAQPage JSON-LD | no |
-| mediaGallery | items[] `{ media, caption L }` (ordered) | no |
-| stats | items[] `{ value, label L }` + evidence | **yes** |
-| credentials | items[] `{ name L, issuer L, logo media, validUntil }` + evidence | **yes** |
+| mediaGallery | eyebrow `L`, heading `L`, intro `L`, items[] `{ media, caption L }` (ordered) | no |
+| stats | eyebrow `L`, heading `L`, intro `L`, items[] `{ value, label L }` + evidence (header fields are part of the verified claim) | **yes** |
+| credentials | eyebrow `L`, heading `L`, intro `L`, display (`cards`/`logos`: certifications, registrations, partnerships), items[] `{ name L, issuer L, logo media, validUntil }` + evidence (header fields and display are part of the verified claim) | **yes** |
 | testimonials / clientLogos | deferred: blocked until CD-08 permissions exist | **yes** |
 | contactBlock | heading `L`, intro `L` (renders the enquiry form) | no |
 

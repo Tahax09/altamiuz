@@ -91,6 +91,46 @@ function LinkOut({
 
 const str = (v: unknown) => (typeof v === 'string' ? v : '')
 
+/** Optional section header (eyebrow, heading, intro); renders nothing when all are empty. */
+function SectionHead({ b }: { b: Block }) {
+  if (!b.eyebrow && !b.heading && !b.intro) return null
+  return (
+    <div className="section__head">
+      {b.eyebrow ? <p className="eyebrow">{str(b.eyebrow)}</p> : null}
+      {b.heading ? <h2>{str(b.heading)}</h2> : null}
+      {b.intro ? <p className="section__intro">{str(b.intro)}</p> : null}
+    </div>
+  )
+}
+
+function More({ link, resolve }: { link: unknown; resolve: InternalHref }) {
+  if (!(link as Link)?.label) return null
+  return (
+    <p className="section__more">
+      <LinkOut link={link as Link} resolve={resolve} className="text-link" />
+    </p>
+  )
+}
+
+/** Line icons for feature items (decorative; the item title carries the meaning). */
+const ICON_PATHS: Record<string, string> = {
+  shield: 'M12 3l7 3v5c0 4.5-3 8.3-7 10-4-1.7-7-5.5-7-10V6l7-3z M9 12l2 2 4-4',
+  audit: 'M9 4h6v3H9z M7 5H5v16h14V5h-2 M8 12h8 M8 16h5',
+  policy: 'M6 3h9l4 4v14H6z M14 3v5h5 M9 12h7 M9 16h7',
+  training: 'M3 8l9-4 9 4-9 4-9-4z M7 10v5c0 1.7 2.2 3 5 3s5-1.3 5-3v-5',
+  risk: 'M12 4l9 16H3L12 4z M12 10v4 M12 17v.5',
+  response: 'M12 21a9 9 0 1 1 0-18 9 9 0 0 1 0 18z M12 7v5l3 2',
+}
+function Icon({ name }: { name: unknown }) {
+  const d = typeof name === 'string' ? ICON_PATHS[name] : undefined
+  if (!d) return null
+  return (
+    <svg className="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d={d} />
+    </svg>
+  )
+}
+
 /** Published services or courses as linked cards (sections and the listing pages). */
 export function ListingCards({
   items,
@@ -156,36 +196,138 @@ export function Sections({
             case 'hero':
             case 'cta': {
               const primary = (b.primaryCta ?? b.link) as Link
+              const hasMedia = b.blockType === 'hero' && !!b.media && typeof b.media === 'object'
               return (
                 <section
                   key={key}
                   id={id}
                   data-block={b.blockType}
-                  className={`section section--${b.blockType}`}
+                  className={`section section--${b.blockType}${hasMedia ? ' section--split' : ''}`}
                 >
-                  {b.blockType === 'hero' ? (
+                  <div className="split__text">
+                    {b.eyebrow ? <p className="eyebrow">{str(b.eyebrow)}</p> : null}
+                    <h2>{str(b.heading)}</h2>
+                    {b.subheading || b.text ? <p>{str(b.subheading ?? b.text)}</p> : null}
+                    {primary?.label || (b.secondaryCta as Link)?.label ? (
+                      <div className="actions">
+                        <LinkOut link={primary} resolve={resolve} className="button" />
+                        <LinkOut
+                          link={b.secondaryCta as Link}
+                          resolve={resolve}
+                          className="button button--secondary"
+                        />
+                      </div>
+                    ) : null}
+                  </div>
+                  {hasMedia ? (
                     <Picture
                       media={b.media}
                       className="media--hero"
-                      sizes="100vw"
+                      sizes="(min-width: 64rem) 45vw, 100vw"
                       eager={i === 0}
                     />
-                  ) : null}
-                  <h2>{str(b.heading)}</h2>
-                  {b.subheading || b.text ? <p>{str(b.subheading ?? b.text)}</p> : null}
-                  {primary?.label || (b.secondaryCta as Link)?.label ? (
-                    <div className="actions">
-                      <LinkOut link={primary} resolve={resolve} className="button" />
-                      <LinkOut
-                        link={b.secondaryCta as Link}
-                        resolve={resolve}
-                        className="button button--secondary"
-                      />
-                    </div>
                   ) : null}
                 </section>
               )
             }
+            case 'textMedia': {
+              const hasMedia = !!b.media && typeof b.media === 'object'
+              const cls = hasMedia
+                ? ` section--split${b.mediaPosition === 'start' ? ' section--media-start' : ''}`
+                : ''
+              return (
+                <section
+                  key={key}
+                  id={id}
+                  data-block="textMedia"
+                  className={`section section--text-media${cls}`}
+                >
+                  <div className="split__text">
+                    {b.eyebrow ? <p className="eyebrow">{str(b.eyebrow)}</p> : null}
+                    <h2>{str(b.heading)}</h2>
+                    <div className="prose">
+                      <RichText value={b.body} dir={dir} internalHref={resolve} />
+                    </div>
+                    <More link={b.link} resolve={resolve} />
+                  </div>
+                  {hasMedia ? (
+                    <Picture
+                      media={b.media}
+                      className="media--split"
+                      sizes="(min-width: 64rem) 40vw, 100vw"
+                    />
+                  ) : null}
+                </section>
+              )
+            }
+            case 'process': {
+              const steps = Array.isArray(b.steps) ? (b.steps as Record<string, unknown>[]) : []
+              return (
+                <section key={key} id={id} data-block="process" className="section section--band">
+                  <SectionHead b={b} />
+                  <ol className="process">
+                    {steps.map((s, j) => (
+                      <li key={(s.id as string | undefined) ?? j} className="process__step">
+                        <span className="process__index" aria-hidden="true">
+                          {String(j + 1).padStart(2, '0')}
+                        </span>
+                        {b.heading ? <h3>{str(s.title)}</h3> : <h2>{str(s.title)}</h2>}
+                        {s.text ? <p>{str(s.text)}</p> : null}
+                      </li>
+                    ))}
+                  </ol>
+                </section>
+              )
+            }
+            case 'standards':
+              return (
+                <section key={key} id={id} data-block="standards" className="section">
+                  <SectionHead b={b} />
+                  <ul className="standards">
+                    {items.map((it, j) => (
+                      <li key={(it.id as string | undefined) ?? j}>
+                        <Picture
+                          media={it.logo}
+                          crop={false}
+                          className="media--logo"
+                          sizes="8rem"
+                        />
+                        {b.heading ? <h3>{str(it.name)}</h3> : <h2>{str(it.name)}</h2>}
+                        {it.text ? <p>{str(it.text)}</p> : null}
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+              )
+            case 'resourceList':
+              return (
+                <section key={key} id={id} data-block="resourceList" className="section">
+                  <SectionHead b={b} />
+                  <ul className="card-grid">
+                    {items.map((it, j) => {
+                      const Heading = b.heading ? 'h3' : 'h2'
+                      const link = it.link as Link
+                      return (
+                        <li
+                          key={(it.id as string | undefined) ?? j}
+                          className={link?.linkType ? 'card card--link' : 'card'}
+                        >
+                          {it.kind ? <p className="eyebrow">{str(it.kind)}</p> : null}
+                          <Heading>
+                            {link?.linkType ? (
+                              <LinkOut link={{ ...link, label: str(it.title) }} resolve={resolve} />
+                            ) : (
+                              str(it.title)
+                            )}
+                          </Heading>
+                          {it.summary ? <p>{str(it.summary)}</p> : null}
+                        </li>
+                      )
+                    })}
+                  </ul>
+                  <More link={b.moreLink} resolve={resolve} />
+                </section>
+              )
             case 'richText':
               return (
                 <section key={key} id={id} data-block="richText" className="section prose">
@@ -210,10 +352,11 @@ export function Sections({
             case 'featureGrid':
               return (
                 <section key={key} id={id} data-block="featureGrid" className="section">
-                  {b.heading ? <h2>{str(b.heading)}</h2> : null}
+                  <SectionHead b={b} />
                   <ul className="card-grid">
                     {items.map((it, j) => (
                       <li key={j} className="card">
+                        <Icon name={it.icon} />
                         <h3>{str(it.title)}</h3>
                         {it.text ? <p>{str(it.text)}</p> : null}
                       </li>
@@ -224,7 +367,7 @@ export function Sections({
             case 'stats':
               return (
                 <section key={key} id={id} data-block="stats" className="section">
-                  {b.heading ? <h2>{str(b.heading)}</h2> : null}
+                  <SectionHead b={b} />
                   <ul className="stats">
                     {items.map((it, j) => (
                       <li key={j}>
@@ -238,33 +381,49 @@ export function Sections({
             case 'credentials':
               return (
                 <section key={key} id={id} data-block="credentials" className="section">
-                  {b.heading ? <h2>{str(b.heading)}</h2> : null}
-                  <ul className="card-grid">
-                    {items.map((it, j) => {
-                      const until = validUntil(it.validUntil, locale)
-                      return (
-                        <li key={j} className="card">
+                  <SectionHead b={b} />
+                  {b.display === 'logos' ? (
+                    <ul className="logo-wall">
+                      {items.map((it, j) => (
+                        <li key={(it.id as string | undefined) ?? j}>
                           <Picture
                             media={it.logo}
                             crop={false}
                             className="media--logo"
                             sizes="10rem"
                           />
-                          <h3>{str(it.name)}</h3>
-                          {it.issuer ? <p>{str(it.issuer)}</p> : null}
-                          {until ? (
-                            <p className="meta">{t(locale, 'validUntil', { date: until })}</p>
-                          ) : null}
+                          <span className="logo-wall__name">{str(it.name)}</span>
                         </li>
-                      )
-                    })}
-                  </ul>
+                      ))}
+                    </ul>
+                  ) : (
+                    <ul className="card-grid">
+                      {items.map((it, j) => {
+                        const until = validUntil(it.validUntil, locale)
+                        return (
+                          <li key={j} className="card">
+                            <Picture
+                              media={it.logo}
+                              crop={false}
+                              className="media--logo"
+                              sizes="10rem"
+                            />
+                            <h3>{str(it.name)}</h3>
+                            {it.issuer ? <p>{str(it.issuer)}</p> : null}
+                            {until ? (
+                              <p className="meta">{t(locale, 'validUntil', { date: until })}</p>
+                            ) : null}
+                          </li>
+                        )
+                      })}
+                    </ul>
+                  )}
                 </section>
               )
             case 'mediaGallery':
               return (
                 <section key={key} id={id} data-block="mediaGallery" className="section">
-                  {b.heading ? <h2>{str(b.heading)}</h2> : null}
+                  <SectionHead b={b} />
                   <ul className="gallery">
                     {items.map((it, j) =>
                       it.media && typeof it.media === 'object' ? (
@@ -290,14 +449,20 @@ export function Sections({
               const all =
                 (kind === 'service' ? ctx?.listings?.services : ctx?.listings?.courses) ?? []
               return (
-                <section key={key} id={id} data-block={b.blockType} className="section">
-                  {b.heading ? <h2>{str(b.heading)}</h2> : null}
+                <section
+                  key={key}
+                  id={id}
+                  data-block={b.blockType}
+                  className={`section${kind === 'service' ? ' section--band' : ''}`}
+                >
+                  <SectionHead b={b} />
                   <ListingCards
                     items={b.mode === 'all' ? all : selected}
                     kind={kind}
                     locale={locale}
                     headingLevel={b.heading ? 3 : 2}
                   />
+                  <More link={b.moreLink} resolve={resolve} />
                 </section>
               )
             }
@@ -336,7 +501,7 @@ export function DocumentView({
     : undefined
   const heroLed = doc.template === 'home' && first?.blockType === 'hero'
   return (
-    <article lang={locale} dir={dir}>
+    <article lang={locale} dir={dir} data-template={str(doc.template) || undefined}>
       {heroLed ? (
         <h1 className="sr-only">{str(doc.title)}</h1>
       ) : (

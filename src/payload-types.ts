@@ -263,6 +263,7 @@ export interface Page {
   sections?:
     | (
         | {
+            eyebrow?: string | null;
             heading: string;
             subheading?: string | null;
             media?: (number | null) | Media;
@@ -346,7 +347,172 @@ export interface Page {
             blockType: 'richText';
           }
         | {
+            eyebrow?: string | null;
+            heading: string;
+            /**
+             * Formatting: headings, bold, italic, lists, quotes and links. To leave the editor with the keyboard, press Escape, then Tab.
+             */
+            body?: {
+              root: {
+                type: string;
+                children: {
+                  type: any;
+                  version: number;
+                  [k: string]: unknown;
+                }[];
+                direction: ('ltr' | 'rtl') | null;
+                format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+                indent: number;
+                version: number;
+              };
+              [k: string]: unknown;
+            } | null;
+            media?: (number | null) | Media;
+            /**
+             * Side of the image (end = right in English).
+             */
+            mediaPosition?: ('end' | 'start') | null;
+            link?: {
+              linkType?: ('internal' | 'external' | 'email' | 'tel') | null;
+              doc?:
+                | ({
+                    relationTo: 'pages';
+                    value: number | Page;
+                  } | null)
+                | ({
+                    relationTo: 'services';
+                    value: number | Service;
+                  } | null)
+                | ({
+                    relationTo: 'courses';
+                    value: number | Course;
+                  } | null);
+              url?: string | null;
+              email?: string | null;
+              tel?: string | null;
+              label?: string | null;
+              newTab?: boolean | null;
+            };
+            /**
+             * Hidden sections stay editable but are not published.
+             */
+            hidden?: boolean | null;
+            anchorId?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'textMedia';
+          }
+        | {
+            eyebrow?: string | null;
             heading?: string | null;
+            intro?: string | null;
+            steps?:
+              | {
+                  title: string;
+                  text?: string | null;
+                  id?: string | null;
+                }[]
+              | null;
+            /**
+             * Hidden sections stay editable but are not published.
+             */
+            hidden?: boolean | null;
+            anchorId?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'process';
+          }
+        | {
+            eyebrow?: string | null;
+            heading?: string | null;
+            intro?: string | null;
+            items?:
+              | {
+                  /**
+                   * A framework the work follows. Certifications or accreditations held go in a Credentials block (evidence required).
+                   */
+                  name: string;
+                  text?: string | null;
+                  logo?: (number | null) | Media;
+                  id?: string | null;
+                }[]
+              | null;
+            /**
+             * Hidden sections stay editable but are not published.
+             */
+            hidden?: boolean | null;
+            anchorId?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'standards';
+          }
+        | {
+            eyebrow?: string | null;
+            heading?: string | null;
+            intro?: string | null;
+            items?:
+              | {
+                  kind?: string | null;
+                  title: string;
+                  summary?: string | null;
+                  link?: {
+                    linkType?: ('internal' | 'external' | 'email' | 'tel') | null;
+                    doc?:
+                      | ({
+                          relationTo: 'pages';
+                          value: number | Page;
+                        } | null)
+                      | ({
+                          relationTo: 'services';
+                          value: number | Service;
+                        } | null)
+                      | ({
+                          relationTo: 'courses';
+                          value: number | Course;
+                        } | null);
+                    url?: string | null;
+                    email?: string | null;
+                    tel?: string | null;
+                    label?: string | null;
+                    newTab?: boolean | null;
+                  };
+                  id?: string | null;
+                }[]
+              | null;
+            moreLink?: {
+              linkType?: ('internal' | 'external' | 'email' | 'tel') | null;
+              doc?:
+                | ({
+                    relationTo: 'pages';
+                    value: number | Page;
+                  } | null)
+                | ({
+                    relationTo: 'services';
+                    value: number | Service;
+                  } | null)
+                | ({
+                    relationTo: 'courses';
+                    value: number | Course;
+                  } | null);
+              url?: string | null;
+              email?: string | null;
+              tel?: string | null;
+              label?: string | null;
+              newTab?: boolean | null;
+            };
+            /**
+             * Hidden sections stay editable but are not published.
+             */
+            hidden?: boolean | null;
+            anchorId?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'resourceList';
+          }
+        | {
+            eyebrow?: string | null;
+            heading?: string | null;
+            intro?: string | null;
             items?:
               | {
                   icon?: ('shield' | 'audit' | 'policy' | 'training' | 'risk' | 'response') | null;
@@ -365,7 +531,30 @@ export interface Page {
             blockType: 'featureGrid';
           }
         | {
+            eyebrow?: string | null;
             heading?: string | null;
+            intro?: string | null;
+            moreLink?: {
+              linkType?: ('internal' | 'external' | 'email' | 'tel') | null;
+              doc?:
+                | ({
+                    relationTo: 'pages';
+                    value: number | Page;
+                  } | null)
+                | ({
+                    relationTo: 'services';
+                    value: number | Service;
+                  } | null)
+                | ({
+                    relationTo: 'courses';
+                    value: number | Course;
+                  } | null);
+              url?: string | null;
+              email?: string | null;
+              tel?: string | null;
+              label?: string | null;
+              newTab?: boolean | null;
+            };
             mode?: ('all' | 'selected') | null;
             services?: (number | Service)[] | null;
             /**
@@ -378,7 +567,30 @@ export interface Page {
             blockType: 'serviceList';
           }
         | {
+            eyebrow?: string | null;
             heading?: string | null;
+            intro?: string | null;
+            moreLink?: {
+              linkType?: ('internal' | 'external' | 'email' | 'tel') | null;
+              doc?:
+                | ({
+                    relationTo: 'pages';
+                    value: number | Page;
+                  } | null)
+                | ({
+                    relationTo: 'services';
+                    value: number | Service;
+                  } | null)
+                | ({
+                    relationTo: 'courses';
+                    value: number | Course;
+                  } | null);
+              url?: string | null;
+              email?: string | null;
+              tel?: string | null;
+              label?: string | null;
+              newTab?: boolean | null;
+            };
             mode?: ('all' | 'selected') | null;
             courses?: (number | Course)[] | null;
             /**
@@ -458,6 +670,9 @@ export interface Page {
             blockType: 'faq';
           }
         | {
+            eyebrow?: string | null;
+            heading?: string | null;
+            intro?: string | null;
             items?:
               | {
                   value: string;
@@ -485,6 +700,13 @@ export interface Page {
             blockType: 'stats';
           }
         | {
+            eyebrow?: string | null;
+            heading?: string | null;
+            intro?: string | null;
+            /**
+             * Cards with details, or a row of logos (partners).
+             */
+            display?: ('cards' | 'logos') | null;
             items?:
               | {
                   name: string;
@@ -514,7 +736,9 @@ export interface Page {
             blockType: 'credentials';
           }
         | {
+            eyebrow?: string | null;
             heading?: string | null;
+            intro?: string | null;
             items?:
               | {
                   media: number | Media;
@@ -736,6 +960,7 @@ export interface Service {
   sections?:
     | (
         | {
+            eyebrow?: string | null;
             heading: string;
             subheading?: string | null;
             media?: (number | null) | Media;
@@ -819,7 +1044,172 @@ export interface Service {
             blockType: 'richText';
           }
         | {
+            eyebrow?: string | null;
+            heading: string;
+            /**
+             * Formatting: headings, bold, italic, lists, quotes and links. To leave the editor with the keyboard, press Escape, then Tab.
+             */
+            body?: {
+              root: {
+                type: string;
+                children: {
+                  type: any;
+                  version: number;
+                  [k: string]: unknown;
+                }[];
+                direction: ('ltr' | 'rtl') | null;
+                format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+                indent: number;
+                version: number;
+              };
+              [k: string]: unknown;
+            } | null;
+            media?: (number | null) | Media;
+            /**
+             * Side of the image (end = right in English).
+             */
+            mediaPosition?: ('end' | 'start') | null;
+            link?: {
+              linkType?: ('internal' | 'external' | 'email' | 'tel') | null;
+              doc?:
+                | ({
+                    relationTo: 'pages';
+                    value: number | Page;
+                  } | null)
+                | ({
+                    relationTo: 'services';
+                    value: number | Service;
+                  } | null)
+                | ({
+                    relationTo: 'courses';
+                    value: number | Course;
+                  } | null);
+              url?: string | null;
+              email?: string | null;
+              tel?: string | null;
+              label?: string | null;
+              newTab?: boolean | null;
+            };
+            /**
+             * Hidden sections stay editable but are not published.
+             */
+            hidden?: boolean | null;
+            anchorId?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'textMedia';
+          }
+        | {
+            eyebrow?: string | null;
             heading?: string | null;
+            intro?: string | null;
+            steps?:
+              | {
+                  title: string;
+                  text?: string | null;
+                  id?: string | null;
+                }[]
+              | null;
+            /**
+             * Hidden sections stay editable but are not published.
+             */
+            hidden?: boolean | null;
+            anchorId?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'process';
+          }
+        | {
+            eyebrow?: string | null;
+            heading?: string | null;
+            intro?: string | null;
+            items?:
+              | {
+                  /**
+                   * A framework the work follows. Certifications or accreditations held go in a Credentials block (evidence required).
+                   */
+                  name: string;
+                  text?: string | null;
+                  logo?: (number | null) | Media;
+                  id?: string | null;
+                }[]
+              | null;
+            /**
+             * Hidden sections stay editable but are not published.
+             */
+            hidden?: boolean | null;
+            anchorId?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'standards';
+          }
+        | {
+            eyebrow?: string | null;
+            heading?: string | null;
+            intro?: string | null;
+            items?:
+              | {
+                  kind?: string | null;
+                  title: string;
+                  summary?: string | null;
+                  link?: {
+                    linkType?: ('internal' | 'external' | 'email' | 'tel') | null;
+                    doc?:
+                      | ({
+                          relationTo: 'pages';
+                          value: number | Page;
+                        } | null)
+                      | ({
+                          relationTo: 'services';
+                          value: number | Service;
+                        } | null)
+                      | ({
+                          relationTo: 'courses';
+                          value: number | Course;
+                        } | null);
+                    url?: string | null;
+                    email?: string | null;
+                    tel?: string | null;
+                    label?: string | null;
+                    newTab?: boolean | null;
+                  };
+                  id?: string | null;
+                }[]
+              | null;
+            moreLink?: {
+              linkType?: ('internal' | 'external' | 'email' | 'tel') | null;
+              doc?:
+                | ({
+                    relationTo: 'pages';
+                    value: number | Page;
+                  } | null)
+                | ({
+                    relationTo: 'services';
+                    value: number | Service;
+                  } | null)
+                | ({
+                    relationTo: 'courses';
+                    value: number | Course;
+                  } | null);
+              url?: string | null;
+              email?: string | null;
+              tel?: string | null;
+              label?: string | null;
+              newTab?: boolean | null;
+            };
+            /**
+             * Hidden sections stay editable but are not published.
+             */
+            hidden?: boolean | null;
+            anchorId?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'resourceList';
+          }
+        | {
+            eyebrow?: string | null;
+            heading?: string | null;
+            intro?: string | null;
             items?:
               | {
                   icon?: ('shield' | 'audit' | 'policy' | 'training' | 'risk' | 'response') | null;
@@ -838,7 +1228,30 @@ export interface Service {
             blockType: 'featureGrid';
           }
         | {
+            eyebrow?: string | null;
             heading?: string | null;
+            intro?: string | null;
+            moreLink?: {
+              linkType?: ('internal' | 'external' | 'email' | 'tel') | null;
+              doc?:
+                | ({
+                    relationTo: 'pages';
+                    value: number | Page;
+                  } | null)
+                | ({
+                    relationTo: 'services';
+                    value: number | Service;
+                  } | null)
+                | ({
+                    relationTo: 'courses';
+                    value: number | Course;
+                  } | null);
+              url?: string | null;
+              email?: string | null;
+              tel?: string | null;
+              label?: string | null;
+              newTab?: boolean | null;
+            };
             mode?: ('all' | 'selected') | null;
             services?: (number | Service)[] | null;
             /**
@@ -851,7 +1264,30 @@ export interface Service {
             blockType: 'serviceList';
           }
         | {
+            eyebrow?: string | null;
             heading?: string | null;
+            intro?: string | null;
+            moreLink?: {
+              linkType?: ('internal' | 'external' | 'email' | 'tel') | null;
+              doc?:
+                | ({
+                    relationTo: 'pages';
+                    value: number | Page;
+                  } | null)
+                | ({
+                    relationTo: 'services';
+                    value: number | Service;
+                  } | null)
+                | ({
+                    relationTo: 'courses';
+                    value: number | Course;
+                  } | null);
+              url?: string | null;
+              email?: string | null;
+              tel?: string | null;
+              label?: string | null;
+              newTab?: boolean | null;
+            };
             mode?: ('all' | 'selected') | null;
             courses?: (number | Course)[] | null;
             /**
@@ -931,6 +1367,9 @@ export interface Service {
             blockType: 'faq';
           }
         | {
+            eyebrow?: string | null;
+            heading?: string | null;
+            intro?: string | null;
             items?:
               | {
                   value: string;
@@ -958,6 +1397,13 @@ export interface Service {
             blockType: 'stats';
           }
         | {
+            eyebrow?: string | null;
+            heading?: string | null;
+            intro?: string | null;
+            /**
+             * Cards with details, or a row of logos (partners).
+             */
+            display?: ('cards' | 'logos') | null;
             items?:
               | {
                   name: string;
@@ -987,7 +1433,9 @@ export interface Service {
             blockType: 'credentials';
           }
         | {
+            eyebrow?: string | null;
             heading?: string | null;
+            intro?: string | null;
             items?:
               | {
                   media: number | Media;
@@ -1058,6 +1506,7 @@ export interface Course {
   sections?:
     | (
         | {
+            eyebrow?: string | null;
             heading: string;
             subheading?: string | null;
             media?: (number | null) | Media;
@@ -1141,7 +1590,172 @@ export interface Course {
             blockType: 'richText';
           }
         | {
+            eyebrow?: string | null;
+            heading: string;
+            /**
+             * Formatting: headings, bold, italic, lists, quotes and links. To leave the editor with the keyboard, press Escape, then Tab.
+             */
+            body?: {
+              root: {
+                type: string;
+                children: {
+                  type: any;
+                  version: number;
+                  [k: string]: unknown;
+                }[];
+                direction: ('ltr' | 'rtl') | null;
+                format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+                indent: number;
+                version: number;
+              };
+              [k: string]: unknown;
+            } | null;
+            media?: (number | null) | Media;
+            /**
+             * Side of the image (end = right in English).
+             */
+            mediaPosition?: ('end' | 'start') | null;
+            link?: {
+              linkType?: ('internal' | 'external' | 'email' | 'tel') | null;
+              doc?:
+                | ({
+                    relationTo: 'pages';
+                    value: number | Page;
+                  } | null)
+                | ({
+                    relationTo: 'services';
+                    value: number | Service;
+                  } | null)
+                | ({
+                    relationTo: 'courses';
+                    value: number | Course;
+                  } | null);
+              url?: string | null;
+              email?: string | null;
+              tel?: string | null;
+              label?: string | null;
+              newTab?: boolean | null;
+            };
+            /**
+             * Hidden sections stay editable but are not published.
+             */
+            hidden?: boolean | null;
+            anchorId?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'textMedia';
+          }
+        | {
+            eyebrow?: string | null;
             heading?: string | null;
+            intro?: string | null;
+            steps?:
+              | {
+                  title: string;
+                  text?: string | null;
+                  id?: string | null;
+                }[]
+              | null;
+            /**
+             * Hidden sections stay editable but are not published.
+             */
+            hidden?: boolean | null;
+            anchorId?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'process';
+          }
+        | {
+            eyebrow?: string | null;
+            heading?: string | null;
+            intro?: string | null;
+            items?:
+              | {
+                  /**
+                   * A framework the work follows. Certifications or accreditations held go in a Credentials block (evidence required).
+                   */
+                  name: string;
+                  text?: string | null;
+                  logo?: (number | null) | Media;
+                  id?: string | null;
+                }[]
+              | null;
+            /**
+             * Hidden sections stay editable but are not published.
+             */
+            hidden?: boolean | null;
+            anchorId?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'standards';
+          }
+        | {
+            eyebrow?: string | null;
+            heading?: string | null;
+            intro?: string | null;
+            items?:
+              | {
+                  kind?: string | null;
+                  title: string;
+                  summary?: string | null;
+                  link?: {
+                    linkType?: ('internal' | 'external' | 'email' | 'tel') | null;
+                    doc?:
+                      | ({
+                          relationTo: 'pages';
+                          value: number | Page;
+                        } | null)
+                      | ({
+                          relationTo: 'services';
+                          value: number | Service;
+                        } | null)
+                      | ({
+                          relationTo: 'courses';
+                          value: number | Course;
+                        } | null);
+                    url?: string | null;
+                    email?: string | null;
+                    tel?: string | null;
+                    label?: string | null;
+                    newTab?: boolean | null;
+                  };
+                  id?: string | null;
+                }[]
+              | null;
+            moreLink?: {
+              linkType?: ('internal' | 'external' | 'email' | 'tel') | null;
+              doc?:
+                | ({
+                    relationTo: 'pages';
+                    value: number | Page;
+                  } | null)
+                | ({
+                    relationTo: 'services';
+                    value: number | Service;
+                  } | null)
+                | ({
+                    relationTo: 'courses';
+                    value: number | Course;
+                  } | null);
+              url?: string | null;
+              email?: string | null;
+              tel?: string | null;
+              label?: string | null;
+              newTab?: boolean | null;
+            };
+            /**
+             * Hidden sections stay editable but are not published.
+             */
+            hidden?: boolean | null;
+            anchorId?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'resourceList';
+          }
+        | {
+            eyebrow?: string | null;
+            heading?: string | null;
+            intro?: string | null;
             items?:
               | {
                   icon?: ('shield' | 'audit' | 'policy' | 'training' | 'risk' | 'response') | null;
@@ -1160,7 +1774,30 @@ export interface Course {
             blockType: 'featureGrid';
           }
         | {
+            eyebrow?: string | null;
             heading?: string | null;
+            intro?: string | null;
+            moreLink?: {
+              linkType?: ('internal' | 'external' | 'email' | 'tel') | null;
+              doc?:
+                | ({
+                    relationTo: 'pages';
+                    value: number | Page;
+                  } | null)
+                | ({
+                    relationTo: 'services';
+                    value: number | Service;
+                  } | null)
+                | ({
+                    relationTo: 'courses';
+                    value: number | Course;
+                  } | null);
+              url?: string | null;
+              email?: string | null;
+              tel?: string | null;
+              label?: string | null;
+              newTab?: boolean | null;
+            };
             mode?: ('all' | 'selected') | null;
             services?: (number | Service)[] | null;
             /**
@@ -1173,7 +1810,30 @@ export interface Course {
             blockType: 'serviceList';
           }
         | {
+            eyebrow?: string | null;
             heading?: string | null;
+            intro?: string | null;
+            moreLink?: {
+              linkType?: ('internal' | 'external' | 'email' | 'tel') | null;
+              doc?:
+                | ({
+                    relationTo: 'pages';
+                    value: number | Page;
+                  } | null)
+                | ({
+                    relationTo: 'services';
+                    value: number | Service;
+                  } | null)
+                | ({
+                    relationTo: 'courses';
+                    value: number | Course;
+                  } | null);
+              url?: string | null;
+              email?: string | null;
+              tel?: string | null;
+              label?: string | null;
+              newTab?: boolean | null;
+            };
             mode?: ('all' | 'selected') | null;
             courses?: (number | Course)[] | null;
             /**
@@ -1253,6 +1913,9 @@ export interface Course {
             blockType: 'faq';
           }
         | {
+            eyebrow?: string | null;
+            heading?: string | null;
+            intro?: string | null;
             items?:
               | {
                   value: string;
@@ -1280,6 +1943,13 @@ export interface Course {
             blockType: 'stats';
           }
         | {
+            eyebrow?: string | null;
+            heading?: string | null;
+            intro?: string | null;
+            /**
+             * Cards with details, or a row of logos (partners).
+             */
+            display?: ('cards' | 'logos') | null;
             items?:
               | {
                   name: string;
@@ -1309,7 +1979,9 @@ export interface Course {
             blockType: 'credentials';
           }
         | {
+            eyebrow?: string | null;
             heading?: string | null;
+            intro?: string | null;
             items?:
               | {
                   media: number | Media;
@@ -1692,6 +2364,7 @@ export interface PagesSelect<T extends boolean = true> {
         hero?:
           | T
           | {
+              eyebrow?: T;
               heading?: T;
               subheading?: T;
               media?: T;
@@ -1731,10 +2404,114 @@ export interface PagesSelect<T extends boolean = true> {
               id?: T;
               blockName?: T;
             };
+        textMedia?:
+          | T
+          | {
+              eyebrow?: T;
+              heading?: T;
+              body?: T;
+              media?: T;
+              mediaPosition?: T;
+              link?:
+                | T
+                | {
+                    linkType?: T;
+                    doc?: T;
+                    url?: T;
+                    email?: T;
+                    tel?: T;
+                    label?: T;
+                    newTab?: T;
+                  };
+              hidden?: T;
+              anchorId?: T;
+              id?: T;
+              blockName?: T;
+            };
+        process?:
+          | T
+          | {
+              eyebrow?: T;
+              heading?: T;
+              intro?: T;
+              steps?:
+                | T
+                | {
+                    title?: T;
+                    text?: T;
+                    id?: T;
+                  };
+              hidden?: T;
+              anchorId?: T;
+              id?: T;
+              blockName?: T;
+            };
+        standards?:
+          | T
+          | {
+              eyebrow?: T;
+              heading?: T;
+              intro?: T;
+              items?:
+                | T
+                | {
+                    name?: T;
+                    text?: T;
+                    logo?: T;
+                    id?: T;
+                  };
+              hidden?: T;
+              anchorId?: T;
+              id?: T;
+              blockName?: T;
+            };
+        resourceList?:
+          | T
+          | {
+              eyebrow?: T;
+              heading?: T;
+              intro?: T;
+              items?:
+                | T
+                | {
+                    kind?: T;
+                    title?: T;
+                    summary?: T;
+                    link?:
+                      | T
+                      | {
+                          linkType?: T;
+                          doc?: T;
+                          url?: T;
+                          email?: T;
+                          tel?: T;
+                          label?: T;
+                          newTab?: T;
+                        };
+                    id?: T;
+                  };
+              moreLink?:
+                | T
+                | {
+                    linkType?: T;
+                    doc?: T;
+                    url?: T;
+                    email?: T;
+                    tel?: T;
+                    label?: T;
+                    newTab?: T;
+                  };
+              hidden?: T;
+              anchorId?: T;
+              id?: T;
+              blockName?: T;
+            };
         featureGrid?:
           | T
           | {
+              eyebrow?: T;
               heading?: T;
+              intro?: T;
               items?:
                 | T
                 | {
@@ -1751,7 +2528,20 @@ export interface PagesSelect<T extends boolean = true> {
         serviceList?:
           | T
           | {
+              eyebrow?: T;
               heading?: T;
+              intro?: T;
+              moreLink?:
+                | T
+                | {
+                    linkType?: T;
+                    doc?: T;
+                    url?: T;
+                    email?: T;
+                    tel?: T;
+                    label?: T;
+                    newTab?: T;
+                  };
               mode?: T;
               services?: T;
               hidden?: T;
@@ -1762,7 +2552,20 @@ export interface PagesSelect<T extends boolean = true> {
         courseList?:
           | T
           | {
+              eyebrow?: T;
               heading?: T;
+              intro?: T;
+              moreLink?:
+                | T
+                | {
+                    linkType?: T;
+                    doc?: T;
+                    url?: T;
+                    email?: T;
+                    tel?: T;
+                    label?: T;
+                    newTab?: T;
+                  };
               mode?: T;
               courses?: T;
               hidden?: T;
@@ -1809,6 +2612,9 @@ export interface PagesSelect<T extends boolean = true> {
         stats?:
           | T
           | {
+              eyebrow?: T;
+              heading?: T;
+              intro?: T;
               items?:
                 | T
                 | {
@@ -1833,6 +2639,10 @@ export interface PagesSelect<T extends boolean = true> {
         credentials?:
           | T
           | {
+              eyebrow?: T;
+              heading?: T;
+              intro?: T;
+              display?: T;
               items?:
                 | T
                 | {
@@ -1859,7 +2669,9 @@ export interface PagesSelect<T extends boolean = true> {
         mediaGallery?:
           | T
           | {
+              eyebrow?: T;
               heading?: T;
+              intro?: T;
               items?:
                 | T
                 | {
@@ -1910,6 +2722,7 @@ export interface ServicesSelect<T extends boolean = true> {
         hero?:
           | T
           | {
+              eyebrow?: T;
               heading?: T;
               subheading?: T;
               media?: T;
@@ -1949,10 +2762,114 @@ export interface ServicesSelect<T extends boolean = true> {
               id?: T;
               blockName?: T;
             };
+        textMedia?:
+          | T
+          | {
+              eyebrow?: T;
+              heading?: T;
+              body?: T;
+              media?: T;
+              mediaPosition?: T;
+              link?:
+                | T
+                | {
+                    linkType?: T;
+                    doc?: T;
+                    url?: T;
+                    email?: T;
+                    tel?: T;
+                    label?: T;
+                    newTab?: T;
+                  };
+              hidden?: T;
+              anchorId?: T;
+              id?: T;
+              blockName?: T;
+            };
+        process?:
+          | T
+          | {
+              eyebrow?: T;
+              heading?: T;
+              intro?: T;
+              steps?:
+                | T
+                | {
+                    title?: T;
+                    text?: T;
+                    id?: T;
+                  };
+              hidden?: T;
+              anchorId?: T;
+              id?: T;
+              blockName?: T;
+            };
+        standards?:
+          | T
+          | {
+              eyebrow?: T;
+              heading?: T;
+              intro?: T;
+              items?:
+                | T
+                | {
+                    name?: T;
+                    text?: T;
+                    logo?: T;
+                    id?: T;
+                  };
+              hidden?: T;
+              anchorId?: T;
+              id?: T;
+              blockName?: T;
+            };
+        resourceList?:
+          | T
+          | {
+              eyebrow?: T;
+              heading?: T;
+              intro?: T;
+              items?:
+                | T
+                | {
+                    kind?: T;
+                    title?: T;
+                    summary?: T;
+                    link?:
+                      | T
+                      | {
+                          linkType?: T;
+                          doc?: T;
+                          url?: T;
+                          email?: T;
+                          tel?: T;
+                          label?: T;
+                          newTab?: T;
+                        };
+                    id?: T;
+                  };
+              moreLink?:
+                | T
+                | {
+                    linkType?: T;
+                    doc?: T;
+                    url?: T;
+                    email?: T;
+                    tel?: T;
+                    label?: T;
+                    newTab?: T;
+                  };
+              hidden?: T;
+              anchorId?: T;
+              id?: T;
+              blockName?: T;
+            };
         featureGrid?:
           | T
           | {
+              eyebrow?: T;
               heading?: T;
+              intro?: T;
               items?:
                 | T
                 | {
@@ -1969,7 +2886,20 @@ export interface ServicesSelect<T extends boolean = true> {
         serviceList?:
           | T
           | {
+              eyebrow?: T;
               heading?: T;
+              intro?: T;
+              moreLink?:
+                | T
+                | {
+                    linkType?: T;
+                    doc?: T;
+                    url?: T;
+                    email?: T;
+                    tel?: T;
+                    label?: T;
+                    newTab?: T;
+                  };
               mode?: T;
               services?: T;
               hidden?: T;
@@ -1980,7 +2910,20 @@ export interface ServicesSelect<T extends boolean = true> {
         courseList?:
           | T
           | {
+              eyebrow?: T;
               heading?: T;
+              intro?: T;
+              moreLink?:
+                | T
+                | {
+                    linkType?: T;
+                    doc?: T;
+                    url?: T;
+                    email?: T;
+                    tel?: T;
+                    label?: T;
+                    newTab?: T;
+                  };
               mode?: T;
               courses?: T;
               hidden?: T;
@@ -2027,6 +2970,9 @@ export interface ServicesSelect<T extends boolean = true> {
         stats?:
           | T
           | {
+              eyebrow?: T;
+              heading?: T;
+              intro?: T;
               items?:
                 | T
                 | {
@@ -2051,6 +2997,10 @@ export interface ServicesSelect<T extends boolean = true> {
         credentials?:
           | T
           | {
+              eyebrow?: T;
+              heading?: T;
+              intro?: T;
+              display?: T;
               items?:
                 | T
                 | {
@@ -2077,7 +3027,9 @@ export interface ServicesSelect<T extends boolean = true> {
         mediaGallery?:
           | T
           | {
+              eyebrow?: T;
               heading?: T;
+              intro?: T;
               items?:
                 | T
                 | {
@@ -2130,6 +3082,7 @@ export interface CoursesSelect<T extends boolean = true> {
         hero?:
           | T
           | {
+              eyebrow?: T;
               heading?: T;
               subheading?: T;
               media?: T;
@@ -2169,10 +3122,114 @@ export interface CoursesSelect<T extends boolean = true> {
               id?: T;
               blockName?: T;
             };
+        textMedia?:
+          | T
+          | {
+              eyebrow?: T;
+              heading?: T;
+              body?: T;
+              media?: T;
+              mediaPosition?: T;
+              link?:
+                | T
+                | {
+                    linkType?: T;
+                    doc?: T;
+                    url?: T;
+                    email?: T;
+                    tel?: T;
+                    label?: T;
+                    newTab?: T;
+                  };
+              hidden?: T;
+              anchorId?: T;
+              id?: T;
+              blockName?: T;
+            };
+        process?:
+          | T
+          | {
+              eyebrow?: T;
+              heading?: T;
+              intro?: T;
+              steps?:
+                | T
+                | {
+                    title?: T;
+                    text?: T;
+                    id?: T;
+                  };
+              hidden?: T;
+              anchorId?: T;
+              id?: T;
+              blockName?: T;
+            };
+        standards?:
+          | T
+          | {
+              eyebrow?: T;
+              heading?: T;
+              intro?: T;
+              items?:
+                | T
+                | {
+                    name?: T;
+                    text?: T;
+                    logo?: T;
+                    id?: T;
+                  };
+              hidden?: T;
+              anchorId?: T;
+              id?: T;
+              blockName?: T;
+            };
+        resourceList?:
+          | T
+          | {
+              eyebrow?: T;
+              heading?: T;
+              intro?: T;
+              items?:
+                | T
+                | {
+                    kind?: T;
+                    title?: T;
+                    summary?: T;
+                    link?:
+                      | T
+                      | {
+                          linkType?: T;
+                          doc?: T;
+                          url?: T;
+                          email?: T;
+                          tel?: T;
+                          label?: T;
+                          newTab?: T;
+                        };
+                    id?: T;
+                  };
+              moreLink?:
+                | T
+                | {
+                    linkType?: T;
+                    doc?: T;
+                    url?: T;
+                    email?: T;
+                    tel?: T;
+                    label?: T;
+                    newTab?: T;
+                  };
+              hidden?: T;
+              anchorId?: T;
+              id?: T;
+              blockName?: T;
+            };
         featureGrid?:
           | T
           | {
+              eyebrow?: T;
               heading?: T;
+              intro?: T;
               items?:
                 | T
                 | {
@@ -2189,7 +3246,20 @@ export interface CoursesSelect<T extends boolean = true> {
         serviceList?:
           | T
           | {
+              eyebrow?: T;
               heading?: T;
+              intro?: T;
+              moreLink?:
+                | T
+                | {
+                    linkType?: T;
+                    doc?: T;
+                    url?: T;
+                    email?: T;
+                    tel?: T;
+                    label?: T;
+                    newTab?: T;
+                  };
               mode?: T;
               services?: T;
               hidden?: T;
@@ -2200,7 +3270,20 @@ export interface CoursesSelect<T extends boolean = true> {
         courseList?:
           | T
           | {
+              eyebrow?: T;
               heading?: T;
+              intro?: T;
+              moreLink?:
+                | T
+                | {
+                    linkType?: T;
+                    doc?: T;
+                    url?: T;
+                    email?: T;
+                    tel?: T;
+                    label?: T;
+                    newTab?: T;
+                  };
               mode?: T;
               courses?: T;
               hidden?: T;
@@ -2247,6 +3330,9 @@ export interface CoursesSelect<T extends boolean = true> {
         stats?:
           | T
           | {
+              eyebrow?: T;
+              heading?: T;
+              intro?: T;
               items?:
                 | T
                 | {
@@ -2271,6 +3357,10 @@ export interface CoursesSelect<T extends boolean = true> {
         credentials?:
           | T
           | {
+              eyebrow?: T;
+              heading?: T;
+              intro?: T;
+              display?: T;
               items?:
                 | T
                 | {
@@ -2297,7 +3387,9 @@ export interface CoursesSelect<T extends boolean = true> {
         mediaGallery?:
           | T
           | {
+              eyebrow?: T;
               heading?: T;
+              intro?: T;
               items?:
                 | T
                 | {

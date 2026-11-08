@@ -11,10 +11,18 @@ import { can, isMfaVerified, roleOf } from '../access'
 import { LOCALES } from '../i18n'
 import { publicError } from './errors'
 
-/** What an evidence group verifies: a localized text field, or the rows of an `items` array. */
+/**
+ * What an evidence group verifies: a localized text field, or the rows of an `items` array plus
+ * the block-level fields that frame them (`context`: a heading such as "Our partners" is part of
+ * the claim, so changing it also removes the verification).
+ */
 export type ClaimSpec =
   | { field: string }
-  | { field: string; rows: { name: string; localized?: boolean; date?: boolean }[] }
+  | {
+      field: string
+      rows: { name: string; localized?: boolean; date?: boolean }[]
+      context?: { name: string; localized?: boolean }[]
+    }
 
 type Obj = Record<string, unknown>
 const isObj = (v: unknown): v is Obj => !!v && typeof v === 'object' && !Array.isArray(v)
@@ -50,7 +58,7 @@ function claimView(spec: ClaimSpec, current: Obj | null, withLocales: Obj | null
         ? (current[spec.field] as Obj[])
         : []
       : stored
-    out[l] = rows.map((row) => {
+    const rowViews = rows.map((row) => {
       const saved = current
         ? (stored.find((r) => r.id !== undefined && r.id === row.id) ?? {})
         : row
@@ -61,6 +69,21 @@ function claimView(spec: ClaimSpec, current: Obj | null, withLocales: Obj | null
         }),
       )
     })
+    if (!spec.context) {
+      out[l] = rowViews
+      continue
+    }
+    const context = Object.fromEntries(
+      spec.context.map((f) => {
+        const v = !f.localized
+          ? (current ?? withLocales)?.[f.name]
+          : writing
+            ? current[f.name]
+            : mapOf(withLocales?.[f.name], l)
+        return [f.name, norm(v)]
+      }),
+    )
+    out[l] = { rows: rowViews, context }
   }
   return out
 }
@@ -185,11 +208,23 @@ export const CLAIM_EVIDENCE = [
   ['address', 'addressEvidence'],
 ] as const
 
+/** Block-level text framing a claim block's rows (section header fields, every language). */
+const CLAIM_FRAME = [
+  { name: 'eyebrow', localized: true },
+  { name: 'heading', localized: true },
+  { name: 'intro', localized: true },
+]
+
 /** Block types whose `items` are claims, with how their rows are compared. */
 export const CLAIM_BLOCKS: Record<string, ClaimSpec> = {
-  stats: { field: 'items', rows: [{ name: 'value' }, { name: 'label', localized: true }] },
+  stats: {
+    field: 'items',
+    rows: [{ name: 'value' }, { name: 'label', localized: true }],
+    context: CLAIM_FRAME,
+  },
   credentials: {
     field: 'items',
+    context: [...CLAIM_FRAME, { name: 'display' }],
     rows: [
       { name: 'name', localized: true },
       { name: 'issuer', localized: true },

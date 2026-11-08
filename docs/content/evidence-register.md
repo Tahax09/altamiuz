@@ -21,13 +21,13 @@ record. The supporting documents themselves are held by the owner outside the CM
 
 ## Claim types (code: `src/modules/content/evidence.ts`)
 
-| Claim                                           | Where                                   | Content dependency  |
-| ----------------------------------------------- | --------------------------------------- | ------------------- |
-| Company legal name (`companyName`)              | site settings → `companyNameEvidence`   | CD-01               |
-| Address (`address`)                             | site settings → `addressEvidence`       | CD-02               |
-| Course accreditation (`accreditationStatement`) | each course → `accreditationEvidence`   | CD-05               |
-| Statistics block (values and labels)            | any page/service/course section `stats` | CD-07               |
-| Credentials block (name, issuer, valid until)   | any section `credentials`               | CD-01, CD-05, CD-06 |
+| Claim                                                               | Where                                                                   | Content dependency  |
+| ------------------------------------------------------------------- | ----------------------------------------------------------------------- | ------------------- |
+| Company legal name (`companyName`)                                  | site settings → `companyNameEvidence`                                   | CD-01               |
+| Address (`address`)                                                 | site settings → `addressEvidence`                                       | CD-02               |
+| Course accreditation (`accreditationStatement`)                     | each course → `accreditationEvidence`                                   | CD-05               |
+| Statistics block (values, labels, header text)                      | any page/service/course section `stats`                                 | CD-07               |
+| Credentials block (name, issuer, valid until, header text, display) | any section `credentials` (certifications, registrations, partnerships) | CD-01, CD-05, CD-06 |
 
 Client names, logos, testimonials (CD-08) and biographies (CD-03) have no claim block in v1 and
 must not be published until a decision adds one.

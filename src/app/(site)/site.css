@@ -23,8 +23,8 @@
 :root {
   --ink: #14181f;
   --ink-muted: #4a5260; /* 7.9:1 on white */
-  --paper: #ffffff;
-  --paper-alt: #f5f6f8;
+  --paper: #fdfcf9; /* warm white */
+  --paper-alt: #f5f3ee; /* warm band; --ink-muted on it 7.2:1 */
   --rule: #d9dde3;
   --focus: var(--accent);
 
@@ -54,6 +54,7 @@
   --button-border: 2px;
   --target: 44px; /* comfortable touch target (WCAG 2.5.8 requires 24 px) */
   --target-compact: 32px;
+  --motion: 160ms ease-out; /* state feedback only (hover, focus) */
   /* Inline padding that centres content in a full-width band (% of the band's width). */
   --band-pad: max(var(--gutter), calc((100% - var(--container)) / 2));
 }
@@ -373,6 +374,83 @@ main > :not(article):not(.course-facts) {
 .section > h2 {
   margin-block-end: var(--space-3);
 }
+/* Section header: eyebrow label, heading, intro line (homepage editorial rhythm). */
+.section__head {
+  max-width: 48rem;
+  margin-block-end: var(--space-3);
+}
+.section__head h2 {
+  margin: 0;
+}
+.section__intro {
+  margin-block: var(--space-2) 0;
+  font-size: var(--step-1);
+  color: var(--ink-muted);
+}
+.eyebrow {
+  margin-block: 0 var(--space-1);
+  font-size: var(--step--1);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--brand);
+}
+html[lang='ar'] .eyebrow {
+  letter-spacing: 0;
+  font-size: max(0.9375rem, var(--step--1)); /* D-24 */
+}
+.section__more {
+  margin-block: var(--space-3) 0;
+}
+.text-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  min-height: var(--target);
+  font-weight: 600;
+  color: var(--brand);
+}
+.text-link::after {
+  content: '→';
+  transition: transform var(--motion);
+}
+[dir='rtl'] .text-link::after {
+  content: '←';
+}
+.text-link:hover::after {
+  transform: translateX(0.2em);
+}
+[dir='rtl'] .text-link:hover::after {
+  transform: translateX(-0.2em);
+}
+.section--band {
+  background: var(--paper-alt);
+}
+.section--band + .section,
+.section + .section--band {
+  border-block-start: 0;
+}
+/* Text beside an image (hero with media, text and media). */
+.section--split {
+  display: grid;
+  gap: var(--space-3) var(--space-4);
+  align-items: center;
+}
+.split__text > :last-child {
+  margin-block-end: 0;
+}
+@media (min-width: 64rem) {
+  .section--split {
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+  }
+  .section--media-start > .split__text {
+    order: 2;
+  }
+}
+.media--split {
+  border-radius: var(--radius);
+  overflow: hidden;
+}
 .section--hero {
   background: var(--paper-alt);
   padding-block: clamp(3rem, 2rem + 5vw, 6rem);
@@ -512,6 +590,105 @@ html[lang='ar'] .stats__value {
   color: var(--ink-muted);
 }
 
+/* Feature icons */
+.icon {
+  width: 2rem;
+  height: 2rem;
+  margin-block-end: var(--space-1);
+  fill: none;
+  stroke: var(--brand);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Approach: numbered steps joined by a rule (reading order follows the language). */
+.process {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.process__step {
+  position: relative;
+  max-width: none;
+  padding-block-start: var(--space-3);
+  border-block-start: var(--rule-strong) solid var(--brand);
+}
+.process__step h2,
+.process__step h3 {
+  font-size: var(--step-1);
+  margin-block: var(--space-1) var(--space-1);
+}
+.process__step p {
+  margin: 0;
+  color: var(--ink-muted);
+}
+.process__index {
+  font-family: var(--font-heading);
+  font-size: var(--step--1);
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+html[lang='ar'] .process__index {
+  font-family: var(--font-arabic); /* no Latin face download on Arabic pages (D-24) */
+  letter-spacing: 0;
+}
+
+/* Standards and frameworks: quiet tiles, logo optional. */
+.standards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 15rem), 1fr));
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-block-start: 1px solid var(--rule);
+  border-inline-start: 1px solid var(--rule);
+}
+.standards li {
+  max-width: none;
+  padding: var(--space-3);
+  border-block-end: 1px solid var(--rule);
+  border-inline-end: 1px solid var(--rule);
+}
+.standards h2,
+.standards h3 {
+  font-size: var(--step-0);
+  margin-block: 0 0.25rem;
+}
+.standards p {
+  margin: 0;
+  font-size: var(--step--1);
+  color: var(--ink-muted);
+}
+
+/* Partners and memberships shown as logos (evidence-gated credentials block). */
+.logo-wall {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 10rem), 1fr));
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  align-items: center;
+}
+.logo-wall li {
+  display: grid;
+  gap: var(--space-1);
+  justify-items: center;
+  text-align: center;
+  max-width: none;
+}
+.logo-wall__name {
+  font-size: var(--step--1);
+  color: var(--ink-muted);
+}
+
 /* FAQ */
 .faq {
   display: grid;
@@ -619,8 +796,16 @@ html[lang='ar'] .stats__value {
 }
 
 /* ------------------------------------------------------------------------------------------
-   Motion (FR-081): nothing animates by default; respect reduced motion if any is added.
+   Motion (FR-081): short state feedback only (hover/focus on cards and links, no autoplay,
+   no scroll effects, nothing flashes); none at all under reduced motion.
    ------------------------------------------------------------------------------------------ */
+.card--link,
+.button {
+  transition:
+    border-color var(--motion),
+    background-color var(--motion),
+    color var(--motion);
+}
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

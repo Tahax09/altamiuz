@@ -46,6 +46,21 @@ const items = (name: string, fields: Field[]): Field => ({
 /** An image from the media library (US4). Alt text lives on the image, per locale (FR-054). */
 const image = (name: string): Field => ({ name, type: 'upload', relationTo: 'media' })
 
+/** Optional section header: a short label above the heading, the heading and an intro line. */
+const header = (headingRequired = false): Field[] => [
+  text('eyebrow', 80),
+  text('heading', 160, headingRequired),
+  textarea('intro', 600),
+]
+
+const select = (name: string, values: string[], description: string): Field => ({
+  name,
+  type: 'select',
+  defaultValue: values[0],
+  options: values.map((v) => ({ label: v, value: v })),
+  admin: { description },
+})
+
 const withReorder = (block: Block): Block => ({
   ...block,
   admin: { ...block.admin, components: { ...block.admin?.components, Label: REORDER_ROW_LABEL } },
@@ -55,6 +70,7 @@ const definitions: Block[] = [
   {
     slug: 'hero',
     fields: [
+      text('eyebrow', 80),
       text('heading', 160, true),
       textarea('subheading', 400),
       image('media'),
@@ -65,9 +81,70 @@ const definitions: Block[] = [
   },
   { slug: 'richText', fields: [richTextField('content'), ...common] },
   {
+    // Company introduction, expertise and experience: text beside an optional illustration.
+    slug: 'textMedia',
+    labels: { singular: 'Text and media', plural: 'Text and media' },
+    fields: [
+      text('eyebrow', 80),
+      text('heading', 160, true),
+      richTextField('body'),
+      image('media'),
+      select('mediaPosition', ['end', 'start'], 'Side of the image (end = right in English).'),
+      linkGroup('link'),
+      ...common,
+    ],
+  },
+  {
+    // Approach: an ordered sequence of steps (e.g. Understand → Assess → Plan → Support).
+    slug: 'process',
+    labels: { singular: 'Process steps', plural: 'Process steps' },
+    fields: [
+      ...header(),
+      items('steps', [text('title', 120, true), textarea('text', 400)]),
+      ...common,
+    ],
+  },
+  {
+    // Standards and frameworks the work follows. Certifications held belong in a Credentials
+    // block, which needs verified evidence before it can be published.
+    slug: 'standards',
+    labels: { singular: 'Standards and frameworks', plural: 'Standards and frameworks' },
+    fields: [
+      ...header(),
+      items('items', [
+        {
+          ...text('name', 120, true),
+          admin: {
+            description:
+              'A framework the work follows. Certifications or accreditations held go in a Credentials block (evidence required).',
+          },
+        } as Field,
+        textarea('text', 400),
+        image('logo'),
+      ]),
+      ...common,
+    ],
+  },
+  {
+    // Insights and resources: linked cards to published pages or external publications.
+    slug: 'resourceList',
+    labels: { singular: 'Insights and resources', plural: 'Insights and resources' },
+    fields: [
+      ...header(),
+      items('items', [
+        text('kind', 60),
+        text('title', 200, true),
+        textarea('summary', 400),
+        linkGroup('link'),
+      ]),
+      linkGroup('moreLink'),
+      ...common,
+    ],
+  },
+  {
     slug: 'featureGrid',
     fields: [
-      text('heading'),
+      ...header(),
       items('items', [
         {
           name: 'icon',
@@ -86,7 +163,8 @@ const definitions: Block[] = [
   {
     slug: 'serviceList',
     fields: [
-      text('heading'),
+      ...header(),
+      linkGroup('moreLink'),
       {
         name: 'mode',
         type: 'select',
@@ -100,7 +178,8 @@ const definitions: Block[] = [
   {
     slug: 'courseList',
     fields: [
-      text('heading'),
+      ...header(),
+      linkGroup('moreLink'),
       {
         name: 'mode',
         type: 'select',
@@ -122,6 +201,7 @@ const definitions: Block[] = [
   {
     slug: 'stats',
     fields: [
+      ...header(),
       items('items', [
         { name: 'value', type: 'text', maxLength: 40, required: true },
         text('label', 120, true),
@@ -131,8 +211,12 @@ const definitions: Block[] = [
     ],
   },
   {
+    // Credentials, certifications, registrations and partnerships. Heading, intro and display are
+    // part of the verified claim (CLAIM_BLOCKS), so retitling a block needs re-verification.
     slug: 'credentials',
     fields: [
+      ...header(),
+      select('display', ['cards', 'logos'], 'Cards with details, or a row of logos (partners).'),
       items('items', [
         text('name', 200, true),
         text('issuer', 200),
@@ -147,7 +231,7 @@ const definitions: Block[] = [
     // FR-055: ordered items, keyboard/touch/drag reorder through ReorderControl (items()).
     slug: 'mediaGallery',
     fields: [
-      text('heading'),
+      ...header(),
       items('items', [{ ...image('media'), required: true } as Field, text('caption', 300)]),
       ...common,
     ],
