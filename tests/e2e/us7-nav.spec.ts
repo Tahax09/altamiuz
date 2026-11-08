@@ -4,7 +4,14 @@
 // (Local API, REST, audit) are in tests/integration/content/globals.test.ts; this spec checks what
 // the admin actually sends and shows. The seeded globals are restored afterwards, because the
 // `public` projects read them.
-import { expect, test, type APIRequestContext, type Browser, type Page } from '@playwright/test'
+import {
+  expect,
+  test,
+  type APIRequestContext,
+  type Browser,
+  type BrowserContext,
+  type Page,
+} from '@playwright/test'
 import fs from 'node:fs'
 import { generate } from 'otplib'
 import pg from 'pg'
@@ -60,6 +67,15 @@ async function signIn(request: APIRequestContext, a: Acct, mfa = true) {
 
 // One MFA-verified browser session per role for the whole file (per-account login limits).
 const states = new Map<Role, string>()
+// Every context a test opens is closed after it: an admin edit page left open keeps sending
+// form-state requests, and Payload re-creates the document lock on each one when none exists
+// (handleFormStateLocking), so a lingering page from one test could lock a global for the next
+// ("Document locked" dialog), depending only on server timing.
+const open: BrowserContext[] = []
+test.afterEach(async () => {
+  await Promise.all(open.splice(0).map((c) => c.close()))
+  await sql('delete from payload_locked_documents')
+})
 async function as(browser: Browser, role: Role): Promise<Page> {
   if (!states.has(role)) {
     const ctx = await browser.newContext({ baseURL: BASE })
@@ -70,6 +86,7 @@ async function as(browser: Browser, role: Role): Promise<Page> {
     states.set(role, file)
   }
   const ctx = await browser.newContext({ baseURL: BASE, storageState: states.get(role) })
+  open.push(ctx)
   return ctx.newPage()
 }
 
@@ -141,6 +158,8 @@ async function restoreSeed(page: Page) {
 test.afterAll(async ({ browser }) => {
   await sql('delete from payload_locked_documents')
   await restoreSeed(await as(browser, 'navAdministrator'))
+  await Promise.all(open.splice(0).map((c) => c.close()))
+  await sql('delete from payload_locked_documents')
   const home = await publicHome()
   expect(home).toContain('Penetration testing')
   expect(home).toContain('E2E banner notice')

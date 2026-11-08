@@ -6,6 +6,7 @@ import AxeBuilder from '@axe-core/playwright'
 import { expect, test } from '@playwright/test'
 import fs from 'node:fs'
 import pg from 'pg'
+import { validPng } from '../../fixtures/uploads/generate'
 
 const BASELINE = 'tests/a11y/admin/baseline.json'
 const TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa']
@@ -101,6 +102,29 @@ test('authenticated admin views: no new serious/critical findings', async ({ pag
     headers: origin,
   })
   expect(v.status(), await v.text()).toBe(200)
+  // Every list is measured with rows in it, as in use: an empty list has no row checkboxes or
+  // sort controls, so its findings depended on what earlier suites had left in the shared
+  // database. One media item through the real upload path:
+  const upload = await page.request.post('/api/media?locale=en', {
+    headers: origin,
+    multipart: {
+      file: { name: 'a11y.png', mimeType: 'image/png', buffer: await validPng(64, 48) },
+      _payload: JSON.stringify({ alt: 'Accessibility baseline sample' }),
+    },
+  })
+  expect(upload.status(), await upload.text()).toBe(201)
+  // Likewise one enquiry and one invitation, which the seed does not create but other suites may.
+  const c = db()
+  await c.connect()
+  await c.query(
+    `insert into enquiries (name, email, topic, message, locale, delete_after)
+     values ('A11y baseline', 'a11y-enquiry@example.invalid', 'general', 'Baseline row', 'en', now() + interval '1 day')`,
+  )
+  await c.query(
+    `insert into invitations (email, role, expires_at)
+     values ('a11y-invite@example.invalid', 'editor', now() + interval '1 day')`,
+  )
+  await c.end()
   for (const [key, path] of [
     ['dashboard', '/admin'],
     ['list:users', '/admin/collections/users'],
@@ -108,7 +132,9 @@ test('authenticated admin views: no new serious/critical findings', async ({ pag
     ['list:audit-events', '/admin/collections/audit-events'],
     ['list:invitations', '/admin/collections/invitations'],
     ['create:invitations', '/admin/collections/invitations/create'],
-    ['list:pages', '/admin/collections/pages'],
+    // Two rows per page, so the pagination controls are always measured (A-13), whatever number
+    // of pages earlier suites created in the shared e2e database.
+    ['list:pages', '/admin/collections/pages?limit=2'],
     [
       'edit:pages',
       `/admin/collections/pages/${JSON.parse(fs.readFileSync('test-results/e2e-fixtures.json', 'utf8')).content.pageId}`,
@@ -129,6 +155,17 @@ test('authenticated admin views: no new serious/critical findings', async ({ pag
   ] as const) {
     await page.goto(path)
     await page.waitForLoadState('networkidle')
+    if (key === 'list:pages') {
+      // A-13: the previous/next controls exist and carry names (PaginationLabels provider).
+      await expect(page.locator('button.clickable-arrow--left')).toHaveAttribute(
+        'aria-label',
+        'Previous page',
+      )
+      await expect(page.locator('button.clickable-arrow--right')).toHaveAttribute(
+        'aria-label',
+        'Next page',
+      )
+    }
     await analyse(page, key)
   }
 })

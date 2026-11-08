@@ -17,6 +17,7 @@ import { ParagraphFeatureClient as ParagraphFeatureClient_e70f5e05f09f93e00b997e
 import { UsagePanel as UsagePanel_717a04ac31ada38ec27aa71889f67dab } from '../../../modules/media/admin/UsagePanel'
 import { MfaGate as MfaGate_70254aeaba4de181b1550c5ba47223af } from '../../../modules/auth/admin/MfaGate'
 import { ErrorFocus as ErrorFocus_fbfccf8b6b14bcbe7e0147b71f2b0490 } from '../../../modules/content/admin/ErrorFocus'
+import { PaginationLabels as PaginationLabels_7c7e19976b3a3866f68b79ada26b0d40 } from '../../../modules/content/admin/PaginationLabels'
 import { CollectionCards as CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1 } from '@payloadcms/next/rsc'
 
 /** @type import('payload').ImportMap */
@@ -40,5 +41,6 @@ export const importMap = {
   "/modules/media/admin/UsagePanel#UsagePanel": UsagePanel_717a04ac31ada38ec27aa71889f67dab,
   "/modules/auth/admin/MfaGate#MfaGate": MfaGate_70254aeaba4de181b1550c5ba47223af,
   "/modules/content/admin/ErrorFocus#ErrorFocus": ErrorFocus_fbfccf8b6b14bcbe7e0147b71f2b0490,
+  "/modules/content/admin/PaginationLabels#PaginationLabels": PaginationLabels_7c7e19976b3a3866f68b79ada26b0d40,
   "@payloadcms/next/rsc#CollectionCards": CollectionCards_f9c02e79a4aed9a3924487c0cd4cafb1
 }

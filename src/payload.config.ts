@@ -30,6 +30,7 @@ export default buildConfig({
       providers: [
         '/modules/auth/admin/MfaGate#MfaGate',
         '/modules/content/admin/ErrorFocus#ErrorFocus',
+        '/modules/content/admin/PaginationLabels#PaginationLabels',
       ],
     },
     importMap: { baseDir: dirname },
