@@ -406,6 +406,7 @@ export interface Page {
             eyebrow?: string | null;
             heading?: string | null;
             intro?: string | null;
+            media?: (number | null) | Media;
             steps?:
               | {
                   title: string;
@@ -1103,6 +1104,7 @@ export interface Service {
             eyebrow?: string | null;
             heading?: string | null;
             intro?: string | null;
+            media?: (number | null) | Media;
             steps?:
               | {
                   title: string;
@@ -1649,6 +1651,7 @@ export interface Course {
             eyebrow?: string | null;
             heading?: string | null;
             intro?: string | null;
+            media?: (number | null) | Media;
             steps?:
               | {
                   title: string;
@@ -2434,6 +2437,7 @@ export interface PagesSelect<T extends boolean = true> {
               eyebrow?: T;
               heading?: T;
               intro?: T;
+              media?: T;
               steps?:
                 | T
                 | {
@@ -2792,6 +2796,7 @@ export interface ServicesSelect<T extends boolean = true> {
               eyebrow?: T;
               heading?: T;
               intro?: T;
+              media?: T;
               steps?:
                 | T
                 | {
@@ -3152,6 +3157,7 @@ export interface CoursesSelect<T extends boolean = true> {
               eyebrow?: T;
               heading?: T;
               intro?: T;
+              media?: T;
               steps?:
                 | T
                 | {

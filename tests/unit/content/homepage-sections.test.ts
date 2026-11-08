@@ -69,6 +69,26 @@ describe('homepage sections', () => {
     }
   })
 
+  it('an approach illustration renders between the header and the steps, with its alt text', () => {
+    const id = 'b'.repeat(32)
+    const media = {
+      id: 7,
+      filename: `${id}.png`,
+      alt: 'Fixture sequence illustration',
+      width: 2400,
+      height: 800,
+      sizes: { w768_avif: { filename: `${id}-768x256.avif`, width: 768 } },
+    }
+    const out = render([{ blockType: 'process', heading: 'H', media, steps: [{ title: 'One' }] }])
+    expect(out).toContain('media--process')
+    expect(out).toContain('alt="Fixture sequence illustration"')
+    expect(out.indexOf('media--process')).toBeGreaterThan(out.indexOf('<h2>H</h2>'))
+    expect(out.indexOf('media--process')).toBeLessThan(out.indexOf('<ol class="process">'))
+    expect(render([{ blockType: 'process', steps: [{ title: 'One' }] }])).not.toContain(
+      'media--process',
+    )
+  })
+
   it('section header fields render as eyebrow, h2 and intro', () => {
     const out = render([
       { blockType: 'standards', eyebrow: 'E', heading: 'H', intro: 'I', items: [{ name: 'N' }] },

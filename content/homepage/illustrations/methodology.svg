@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2400 800" width="2400" height="800">
+  <!-- Methodology: four stages on one baseline, symmetric so it reads in either direction
+       (the numbered steps beside it carry the order). Understand: focus on a mapped area.
+       Assess: a measured grid with marked cells. Plan: stepped sequence. Support: a closed loop.
+       Original line illustration for Altamiuz, Direction A; design-system palette. -->
+  <rect width="2400" height="800" fill="#f5f3ee"/>
+  <path d="M120 640 H2280" stroke="#12355b" stroke-width="4"/>
+  <g fill="#12355b">
+    <circle cx="420" cy="640" r="12"/><circle cx="940" cy="640" r="12"/>
+    <circle cx="1460" cy="640" r="12"/><circle cx="1980" cy="640" r="12"/>
+  </g>
+  <g stroke="#12355b" stroke-width="3">
+    <path d="M420 640 V560 M940 640 V560 M1460 640 V560 M1980 640 V560"/>
+  </g>
+
+  <!-- Understand: mapped area with focus rings -->
+  <g transform="translate(420 330)">
+    <rect x="-200" y="-200" width="400" height="400" fill="#fdfcf9" stroke="#d9dde3" stroke-width="3"/>
+    <g stroke="#d9dde3" stroke-width="2"><path d="M-100 -200 V200 M0 -200 V200 M100 -200 V200 M-200 -100 H200 M-200 0 H200 M-200 100 H200"/></g>
+    <g fill="#e9eef4" stroke="#12355b" stroke-width="3">
+      <rect x="-170" y="-170" width="120" height="60"/><rect x="60" y="-150" width="110" height="80"/>
+      <rect x="-160" y="80" width="90" height="90"/><rect x="40" y="70" width="130" height="70"/>
+    </g>
+    <circle r="120" fill="none" stroke="#1d4ed8" stroke-width="5"/>
+    <circle r="70" fill="none" stroke="#1d4ed8" stroke-width="3"/>
+    <circle r="12" fill="#1d4ed8"/>
+  </g>
+
+  <!-- Assess: measured grid, some cells marked -->
+  <g transform="translate(940 330)">
+    <rect x="-200" y="-200" width="400" height="400" fill="#fdfcf9" stroke="#12355b" stroke-width="4"/>
+    <g stroke="#d9dde3" stroke-width="3"><path d="M-120 -200 V200 M-40 -200 V200 M40 -200 V200 M120 -200 V200 M-200 -120 H200 M-200 -40 H200 M-200 40 H200 M-200 120 H200"/></g>
+    <g fill="#12355b">
+      <rect x="-196" y="-196" width="72" height="72"/><rect x="-36" y="-116" width="72" height="72"/>
+      <rect x="44" y="-196" width="72" height="72"/><rect x="-116" y="44" width="72" height="72"/>
+      <rect x="124" y="124" width="72" height="72"/>
+    </g>
+    <g fill="none" stroke="#1d4ed8" stroke-width="5">
+      <rect x="44" y="44" width="72" height="72"/><rect x="-196" y="124" width="72" height="72"/>
+    </g>
+  </g>
+
+  <!-- Plan: stepped sequence of bars on a timeline -->
+  <g transform="translate(1460 330)">
+    <rect x="-200" y="-200" width="400" height="400" fill="#fdfcf9" stroke="#d9dde3" stroke-width="3"/>
+    <g stroke="#d9dde3" stroke-width="2"><path d="M-100 -200 V200 M0 -200 V200 M100 -200 V200"/></g>
+    <g fill="#12355b">
+      <rect x="-170" y="-150" width="160" height="40"/>
+      <rect x="-90" y="-70" width="180" height="40"/>
+      <rect x="-20" y="10" width="160" height="40"/>
+    </g>
+    <rect x="40" y="90" width="130" height="40" fill="none" stroke="#1d4ed8" stroke-width="5"/>
+    <g fill="none" stroke="#14181f" stroke-width="3">
+      <path d="M-10 -110 V-70 M90 -30 V10 M140 50 V90"/>
+    </g>
+  </g>
+
+  <!-- Support: continuous loop around a maintained core -->
+  <g transform="translate(1980 330)">
+    <rect x="-200" y="-200" width="400" height="400" fill="#fdfcf9" stroke="#d9dde3" stroke-width="3"/>
+    <circle r="130" fill="none" stroke="#12355b" stroke-width="6" stroke-dasharray="150 54"/>
+    <rect x="-55" y="-55" width="110" height="110" fill="#12355b"/>
+    <g fill="#1d4ed8">
+      <circle cx="0" cy="-130" r="14"/><circle cx="130" cy="0" r="14"/>
+      <circle cx="0" cy="130" r="14"/><circle cx="-130" cy="0" r="14"/>
+    </g>
+  </g>
+</svg>

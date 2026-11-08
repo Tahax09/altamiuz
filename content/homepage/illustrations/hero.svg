@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1200" width="1600" height="1200">
+  <!-- Hero: layered boundaries around connected systems (defence in depth), plan view.
+       Original line illustration for Altamiuz, Direction A. Palette: design-system tokens
+       (paper #f5f3ee, navy #12355b, charcoal #14181f, accent #1d4ed8, rule #d9dde3). -->
+  <rect width="1600" height="1200" fill="#f5f3ee"/>
+  <!-- measurement grid -->
+  <g fill="#c9ced6">
+    <circle cx="100" cy="100" r="3"/><circle cx="300" cy="100" r="3"/><circle cx="500" cy="100" r="3"/><circle cx="700" cy="100" r="3"/><circle cx="900" cy="100" r="3"/><circle cx="1100" cy="100" r="3"/><circle cx="1300" cy="100" r="3"/><circle cx="1500" cy="100" r="3"/>
+    <circle cx="100" cy="1100" r="3"/><circle cx="300" cy="1100" r="3"/><circle cx="500" cy="1100" r="3"/><circle cx="700" cy="1100" r="3"/><circle cx="900" cy="1100" r="3"/><circle cx="1100" cy="1100" r="3"/><circle cx="1300" cy="1100" r="3"/><circle cx="1500" cy="1100" r="3"/>
+    <circle cx="100" cy="300" r="3"/><circle cx="100" cy="500" r="3"/><circle cx="100" cy="700" r="3"/><circle cx="100" cy="900" r="3"/>
+    <circle cx="1500" cy="300" r="3"/><circle cx="1500" cy="500" r="3"/><circle cx="1500" cy="700" r="3"/><circle cx="1500" cy="900" r="3"/>
+  </g>
+  <!-- outer boundary (perimeter), dashed -->
+  <rect x="220" y="160" width="1160" height="880" fill="none" stroke="#12355b" stroke-width="4" stroke-dasharray="18 14"/>
+  <!-- middle boundary (network zones) -->
+  <rect x="380" y="290" width="840" height="620" fill="#fdfcf9" stroke="#12355b" stroke-width="5"/>
+  <!-- inner boundary (critical assets) -->
+  <rect x="580" y="440" width="440" height="320" fill="#e9eef4" stroke="#12355b" stroke-width="6"/>
+  <!-- controlled entry points on each boundary -->
+  <g fill="#fdfcf9" stroke="#14181f" stroke-width="4">
+    <rect x="786" y="146" width="28" height="28"/>
+    <rect x="786" y="276" width="28" height="28"/>
+    <rect x="786" y="426" width="28" height="28"/>
+    <rect x="1366" y="586" width="28" height="28"/>
+    <rect x="1206" y="586" width="28" height="28"/>
+  </g>
+  <!-- routes through entry points -->
+  <g fill="none" stroke="#14181f" stroke-width="3">
+    <path d="M800 60 V146 M800 174 V276 M800 304 V426"/>
+    <path d="M1540 600 H1394 M1366 600 H1234 M1206 600 H1020"/>
+  </g>
+  <!-- systems inside zones -->
+  <g fill="#fdfcf9" stroke="#12355b" stroke-width="4">
+    <rect x="450" y="360" width="120" height="80"/>
+    <rect x="450" y="760" width="120" height="80"/>
+    <rect x="1030" y="360" width="120" height="80"/>
+    <rect x="1030" y="790" width="120" height="80"/>
+  </g>
+  <!-- connections between systems and the core -->
+  <g fill="none" stroke="#12355b" stroke-width="3">
+    <path d="M570 400 H640 V480"/>
+    <path d="M570 800 H640 V720"/>
+    <path d="M1030 400 H960 V480"/>
+    <path d="M1030 830 H960 V720"/>
+  </g>
+  <!-- core assets -->
+  <g fill="#12355b">
+    <rect x="660" y="510" width="110" height="80"/>
+    <rect x="830" y="510" width="110" height="80"/>
+    <rect x="745" y="630" width="110" height="80"/>
+  </g>
+  <!-- monitored points (accent) -->
+  <g fill="#1d4ed8">
+    <circle cx="640" cy="480" r="11"/>
+    <circle cx="960" cy="480" r="11"/>
+    <circle cx="640" cy="720" r="11"/>
+    <circle cx="960" cy="720" r="11"/>
+  </g>
+  <g fill="none" stroke="#1d4ed8" stroke-width="3">
+    <circle cx="800" cy="440" r="34"/>
+    <circle cx="1220" cy="600" r="34"/>
+  </g>
+  <!-- dimension line -->
+  <g stroke="#4a5260" stroke-width="2" fill="none">
+    <path d="M220 1080 H1380 M220 1066 V1094 M1380 1066 V1094"/>
+    <path d="M380 975 H1220 M380 963 V987 M1220 963 V987"/>
+  </g>
+</svg>

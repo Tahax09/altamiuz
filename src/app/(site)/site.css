@@ -509,6 +509,10 @@ html[lang='ar'] .eyebrow {
   padding: 0;
   list-style: none;
 }
+/* Feature reasons are short: four fit one row on wide screens, two on tablets (no orphan card). */
+[data-block='featureGrid'] .card-grid {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
+}
 .card {
   display: flex;
   flex-direction: column;
@@ -637,6 +641,17 @@ html[lang='ar'] .stats__value {
 html[lang='ar'] .process__index {
   font-family: var(--font-arabic); /* no Latin face download on Arabic pages (D-24) */
   letter-spacing: 0;
+}
+
+.media--process {
+  margin-block-end: var(--space-3);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+/* The sequence illustration has no text: mirrored in Arabic so its first panel sits above
+   step 01 at the start (right) edge, like the steps below it. */
+[dir='rtl'] .media--process img {
+  transform: scaleX(-1);
 }
 
 /* Standards and frameworks: quiet tiles, logo optional. */

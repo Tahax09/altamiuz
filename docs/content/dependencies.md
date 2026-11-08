@@ -4,7 +4,7 @@ The content dependencies CD-01…CD-13 (spec.md "Content Dependencies") must be 
 verified by Altamiuz**. None may be invented or inferred from the legacy site. Status below is
 what the repository records as of **2026-11-07**; "open" means no approved input has been
 received in the repository. Only the owner changes a status, by supplying the item and naming who
-approved it.
+approved it. What each dependency holds back on the homepage: `homepage.md`.
 
 | CD    | Item                                                                                   | Status | What it blocks (enforcement)                                                                                                                                      | Owner action                                                      |
 | ----- | -------------------------------------------------------------------------------------- | ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------- |

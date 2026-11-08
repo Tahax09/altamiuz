@@ -100,6 +100,8 @@ const definitions: Block[] = [
     labels: { singular: 'Process steps', plural: 'Process steps' },
     fields: [
       ...header(),
+      // Optional illustration of the whole sequence, shown between the header and the steps.
+      image('media'),
       items('steps', [text('title', 120, true), textarea('text', 400)]),
       ...common,
     ],

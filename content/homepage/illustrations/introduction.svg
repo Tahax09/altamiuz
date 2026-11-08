@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1200" width="1600" height="1200">
+  <!-- Company introduction: architectural plan of an organisation under structured review
+       (rooms as functions, marked access points, dimensioned walls). Original line illustration
+       for Altamiuz, Direction A; design-system palette, no text, no gradients. -->
+  <rect width="1600" height="1200" fill="#f5f3ee"/>
+  <!-- drafting grid -->
+  <g stroke="#e1e4e9" stroke-width="2">
+    <path d="M160 0 V1200 M320 0 V1200 M480 0 V1200 M640 0 V1200 M800 0 V1200 M960 0 V1200 M1120 0 V1200 M1280 0 V1200 M1440 0 V1200"/>
+    <path d="M0 160 H1600 M0 320 H1600 M0 480 H1600 M0 640 H1600 M0 800 H1600 M0 960 H1600"/>
+  </g>
+  <!-- outer walls -->
+  <path d="M240 200 H1360 V1000 H240 Z" fill="#fdfcf9" stroke="#14181f" stroke-width="10"/>
+  <!-- inner walls with door openings -->
+  <g fill="none" stroke="#14181f" stroke-width="6">
+    <path d="M720 200 V430 M720 510 V700"/>
+    <path d="M240 700 H520 M600 700 H1000 M1080 700 H1360"/>
+    <path d="M1040 200 V350 M1040 430 V700"/>
+    <path d="M720 700 V1000"/>
+  </g>
+  <!-- door swings -->
+  <g fill="none" stroke="#4a5260" stroke-width="3">
+    <path d="M720 430 A80 80 0 0 1 800 510"/>
+    <path d="M520 700 A80 80 0 0 0 600 620"/>
+    <path d="M1000 700 A80 80 0 0 1 1080 620"/>
+    <path d="M1040 350 A80 80 0 0 0 960 430"/>
+  </g>
+  <!-- functions (tinted rooms) -->
+  <rect x="246" y="206" width="468" height="488" fill="#e9eef4"/>
+  <rect x="1046" y="206" width="308" height="488" fill="#e9eef4"/>
+  <!-- equipment and records -->
+  <g fill="#12355b">
+    <rect x="300" y="260" width="140" height="56"/>
+    <rect x="300" y="350" width="140" height="56"/>
+    <rect x="300" y="440" width="140" height="56"/>
+    <rect x="1110" y="270" width="180" height="90"/>
+  </g>
+  <g fill="none" stroke="#12355b" stroke-width="4">
+    <rect x="800" y="780" width="220" height="140"/>
+    <rect x="320" y="790" width="300" height="120"/>
+    <rect x="1120" y="790" width="160" height="120"/>
+  </g>
+  <!-- review markers at access points (accent) -->
+  <g fill="#fdfcf9" stroke="#1d4ed8" stroke-width="5">
+    <circle cx="720" cy="470" r="26"/>
+    <circle cx="560" cy="700" r="26"/>
+    <circle cx="1040" cy="700" r="26"/>
+    <circle cx="1040" cy="390" r="26"/>
+    <circle cx="800" cy="1000" r="26"/>
+  </g>
+  <g fill="#1d4ed8">
+    <circle cx="720" cy="470" r="8"/>
+    <circle cx="560" cy="700" r="8"/>
+    <circle cx="1040" cy="700" r="8"/>
+    <circle cx="1040" cy="390" r="8"/>
+    <circle cx="800" cy="1000" r="8"/>
+  </g>
+  <!-- main entrance -->
+  <path d="M760 1000 H840" stroke="#f5f3ee" stroke-width="12"/>
+  <path d="M800 1000 V1110" stroke="#14181f" stroke-width="3" fill="none" stroke-dasharray="10 8"/>
+  <!-- dimension lines -->
+  <g stroke="#4a5260" stroke-width="2" fill="none">
+    <path d="M240 130 H1360 M240 116 V144 M1360 116 V144 M720 120 V140 M1040 120 V140"/>
+    <path d="M1440 200 V1000 M1426 200 H1454 M1426 1000 H1454 M1430 700 H1450"/>
+  </g>
+</svg>

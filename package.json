@@ -41,6 +41,7 @@
     "bootstrap:owner": "payload run scripts/bootstrap-owner.ts",
     "scan:richtext": "payload run scripts/scan-richtext.ts",
     "check:evidence": "payload run scripts/check-evidence.ts",
+    "seed:homepage": "payload run scripts/seed-homepage.ts",
     "docs:api": "payload run scripts/write-api-docs.ts",
     "ops:restore-drill": "ops/restore-drill.sh",
     "ops:measure-delivery": "ops/measure/delivery.sh",

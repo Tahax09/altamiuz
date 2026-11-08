@@ -158,7 +158,7 @@ Every block has `hidden` (bool) and `anchorId` (optional, slug-safe).
 | hero | eyebrow `L`, heading `L`, subheading `L`, media, primaryCta/secondaryCta (`link`) | no |
 | richText | content `L` (Lexical allow-list) | no |
 | textMedia | eyebrow `L`, heading `L`, body `L` (rich text), media, mediaPosition (`end`/`start`), link (company introduction, expertise) | no |
-| process | eyebrow `L`, heading `L`, intro `L`, steps[] `{ title L, text L }` (ordered; homepage approach) | no |
+| process | eyebrow `L`, heading `L`, intro `L`, media (optional illustration), steps[] `{ title L, text L }` (ordered; homepage approach) | no |
 | standards | eyebrow `L`, heading `L`, intro `L`, items[] `{ name L, text L, logo media }` (frameworks followed; certifications held go in `credentials`) | no |
 | resourceList | eyebrow `L`, heading `L`, intro `L`, items[] `{ kind L, title L, summary L, link }`, moreLink (insights and resources) | no |
 | featureGrid | eyebrow `L`, heading `L`, intro `L`, items[] `{ icon (enum), title L, text L }` | no |

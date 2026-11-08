@@ -13,6 +13,7 @@ import * as migration_20261106_100933_media from './20261106_100933_media'
 import * as migration_20261106_171836_enquiries from './20261106_171836_enquiries'
 import * as migration_20261106_220316_seo from './20261106_220316_seo'
 import * as migration_20261108_111257_homepage_sections from './20261108_111257_homepage_sections'
+import * as migration_20261108_211314_process_media from './20261108_211314_process_media'
 
 export const migrations = [
   {
@@ -89,5 +90,10 @@ export const migrations = [
     up: migration_20261108_111257_homepage_sections.up,
     down: migration_20261108_111257_homepage_sections.down,
     name: '20261108_111257_homepage_sections',
+  },
+  {
+    up: migration_20261108_211314_process_media.up,
+    down: migration_20261108_211314_process_media.down,
+    name: '20261108_211314_process_media',
   },
 ]

@@ -265,6 +265,13 @@ export function Sections({
               return (
                 <section key={key} id={id} data-block="process" className="section section--band">
                   <SectionHead b={b} />
+                  {b.media && typeof b.media === 'object' ? (
+                    <Picture
+                      media={b.media}
+                      className="media--process"
+                      sizes="(min-width: 72rem) 72rem, 100vw"
+                    />
+                  ) : null}
                   <ol className="process">
                     {steps.map((s, j) => (
                       <li key={(s.id as string | undefined) ?? j} className="process__step">
