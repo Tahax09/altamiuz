@@ -85,6 +85,27 @@ export function assertNotStale(
 }
 
 /** FR-004 + data-model `seo` group: title and description are required to publish a locale. */
+/** Admin label prefix that marks a section waiting for an owner or legal decision. */
+export const PENDING_LABEL = /^\s*pending\b/i
+
+/**
+ * CD-10: legal pages (template `legal`) are published only once every open decision is resolved.
+ * A section whose admin label starts with "Pending" blocks the publish, hidden or not.
+ */
+export function assertNoPendingLegalSections(doc: unknown) {
+  const d = doc as { template?: unknown; sections?: unknown }
+  if (d?.template !== 'legal' || !Array.isArray(d.sections)) return
+  const pending = (d.sections as { blockName?: unknown }[])
+    .map((s, i) => (typeof s?.blockName === 'string' && PENDING_LABEL.test(s.blockName) ? i : -1))
+    .filter((i) => i >= 0)
+  if (pending.length)
+    throw publicError(
+      'This legal page still has sections marked "Pending". Resolve each open decision and remove the section or its label before publishing.',
+      400,
+      { paths: pending.map((i) => `$.sections.${i}`) },
+    )
+}
+
 export function assertSeoComplete(seo: unknown, base = 'seo') {
   const v = (seo ?? {}) as { title?: unknown; description?: unknown }
   const missing = (['title', 'description'] as const).filter(
@@ -254,6 +275,9 @@ export const verifyStoredContent =
         req,
       })
       assertClaimsVerified(full, published)
+      // CD-10: a legal page (privacy notice, terms) cannot go public while any section still marks
+      // an open legal decision ("Pending …" admin label), even a hidden one. Rolls back.
+      assertNoPendingLegalSections(full)
     }
     // FR-004 backstop: every published locale has its SEO title and description (rolls back).
     const status = (full as { _status?: unknown })._status

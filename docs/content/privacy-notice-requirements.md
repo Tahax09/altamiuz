@@ -21,8 +21,9 @@ and what is still undecided.
 
 ## Launch blockers (US5)
 
-- CD-10: approved privacy notice, published as a page, and its link next to the consent checkbox
-  (the form currently shows only "I have read the privacy notice.").
+- CD-10: approved privacy notice, published as a page. Since H-3 (2026-11-08) the link next to
+  the consent checkbox and the fail-closed gates exist, and a draft notice built only from the
+  behaviour above is in the CMS: `privacy-notice.md`.
 - CD-11: native-speaker review of the Arabic form strings (`src/modules/i18n/messages/ar.ts`).
 - T132: email provider and hosting decisions; production Turnstile keys.
 - SC-010 and SC-013: no delivery-guarantee statement may be made until both pass (tasks.md Gate 7).

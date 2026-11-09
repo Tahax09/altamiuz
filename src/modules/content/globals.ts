@@ -377,6 +377,36 @@ export const siteSettings = versionedGlobal('site-settings', 'Site settings', [
     fields: [{ name: 'email', type: 'email', required: true }],
   },
   {
+    // CD-10 / FR-079: the contact form links its consent checkbox to this page and is not shown
+    // in a language where the page is not published (the form never launches without the notice).
+    name: 'privacyNotice',
+    type: 'relationship',
+    relationTo: 'pages',
+    // A draft notice may be linked before it is published (the form stays closed until it is);
+    // it must be a legal-template page. Checked against the stored draft, not the published copy.
+    validate: async (value: unknown, { req }: { req: PayloadRequest }) => {
+      const id = typeof value === 'object' && value ? (value as { id?: unknown }).id : value
+      if (id === null || id === undefined || id === '') return true
+      const page = await req.payload
+        .findByID({
+          collection: 'pages',
+          id: id as number,
+          draft: true,
+          depth: 0,
+          overrideAccess: true,
+          req,
+        })
+        .catch(() => null)
+      return (page as { template?: unknown } | null)?.template === 'legal'
+        ? true
+        : 'Choose a page that uses the legal template.'
+    },
+    admin: {
+      description:
+        'The privacy notice (a page with the legal template). The contact form is shown only in languages where this page is published.',
+    },
+  },
+  {
     name: 'enquiryTopics',
     type: 'array',
     maxRows: 20,

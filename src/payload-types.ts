@@ -3844,6 +3844,10 @@ export interface SiteSetting {
         id?: string | null;
       }[]
     | null;
+  /**
+   * The privacy notice (a page with the legal template). The contact form is shown only in languages where this page is published.
+   */
+  privacyNotice?: (number | null) | Page;
   enquiryTopics?:
     | {
         label: string;
@@ -4122,6 +4126,7 @@ export interface SiteSettingsSelect<T extends boolean = true> {
         email?: T;
         id?: T;
       };
+  privacyNotice?: T;
   enquiryTopics?:
     | T
     | {

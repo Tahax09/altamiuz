@@ -11,6 +11,8 @@ export const ENQUIRY_MESSAGE_KEYS = [
   'enquiryTopic',
   'enquiryMessage',
   'enquiryConsent',
+  'enquiryPrivacyLink',
+  'opensNewTab',
   'enquirySensitive',
   'enquiryRequired',
   'enquirySubmit',

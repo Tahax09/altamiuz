@@ -940,6 +940,14 @@ html[lang='ar'] .process__index {
   gap: 0.625rem;
   min-height: var(--target);
 }
+.enquiry__privacy {
+  flex-basis: 100%;
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--target);
+  padding-inline-start: calc(1.25rem + 0.625rem); /* under the label text, past the checkbox */
+  color: var(--accent);
+}
 .enquiry .field--check {
   flex-wrap: wrap;
 }

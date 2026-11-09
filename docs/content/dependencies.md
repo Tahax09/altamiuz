@@ -25,7 +25,28 @@ approved it. What each dependency holds back on the homepage: `homepage.md`.
 ## Enforcement summary
 
 - **Hard gates in code**: CD-13 (production start), CD-01/02/05/07 claims (publish gate and
-  `pnpm check:evidence`), CD-10 (launch blocker for the contact form — procedural; the form is
-  built, the notice is content).
+  `pnpm check:evidence`), CD-10 (since H-3, 2026-11-08: the contact form is neither shown nor
+  accepted in a language without a published privacy notice, and a legal page with "Pending"
+  sections cannot be published; `docs/content/privacy-notice.md`).
 - **Procedural gates**: everything else blocks the content that depends on it; the launch
   checklist (`docs/launch-readiness.md`) lists each as a blocker until supplied.
+
+## Reference corrections and gaps (2026-11-08)
+
+The CD numbers above are canonical (spec.md, "Content Dependencies"); nothing has been renumbered
+or reassigned. Records that cited them wrongly are corrected in place with a note:
+
+| Where                                        | Cited                                | Correct                                                                                       |
+| -------------------------------------------- | ------------------------------------ | --------------------------------------------------------------------------------------------- |
+| `tasks.md` H-1 (and the H-1 stage report)    | homepage text depends on CD-03/CD-04 | homepage copy approval is **CD-11**; CD-03/CD-04 apply only to the team and services sections |
+| `homepage.md` section 4 (and the H-2 report) | CD-06 as "certifications"            | CD-06 is the **standards cited and their editions**; certifications are not CD-06             |
+
+Unresolved (owner decision needed; no CD is assumed):
+
+- **G-1**: no CD covers certifications held by Altamiuz itself (e.g. an ISO/IEC 27001
+  certificate of the company) or partnerships other than training-provider relationships
+  (CD-05). Until the owner assigns them to an existing CD or adds a new one, no such claim can be
+  sourced, and the homepage credentials section stays absent.
+- **G-2**: the privacy notice needs decisions outside CD-10's wording: email and hosting
+  providers and data locations (T132) and backup retention (T134). They are tracked as "Pending"
+  sections of the notice, not as new CDs.

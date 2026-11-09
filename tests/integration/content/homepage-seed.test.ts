@@ -114,7 +114,7 @@ describe('homepage content seed', () => {
       expect(svg, file).not.toMatch(/<text|Gradient|<filter|<script|<image|href=|url\(/)
   })
 
-  it('a re-run never overwrites an existing home page without --replace-draft', async () => {
+  it('a re-run never overwrites an existing home page without `replace-draft`', async () => {
     await expect(seedHomepage(t.payload)).rejects.toBeInstanceOf(HomepageSeedError)
     const again = await seedHomepage(t.payload, { replaceDraft: true })
     expect(again.id).toBe(seeded.id)

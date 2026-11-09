@@ -6,7 +6,7 @@
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
 import { bootPayload, type TestPayload } from '../../support/payload'
 import { reauth, userFor, verifiedSession, type Session } from '../../support/auth'
-import { rest } from '../../support/content'
+import { rest, publishedPrivacyNotice } from '../../support/content'
 import { createTestCaptcha } from '../../../src/modules/platform/adapters/captcha'
 import type { EmailAdapter, SentEmail } from '../../../src/modules/platform/adapters/email'
 
@@ -45,6 +45,7 @@ beforeAll(async () => {
     locale: 'en',
     data: {
       defaultSeo: { title: 'Site', description: 'Site description' },
+      privacyNotice: await publishedPrivacyNotice(t.payload),
       enquiryRecipients: [{ email: 'staff@example.org' }],
       enquiryTopics: [{ label: 'Penetration testing' }, { label: 'Training' }],
       _status: 'published',

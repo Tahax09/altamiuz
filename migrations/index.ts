@@ -14,6 +14,7 @@ import * as migration_20261106_171836_enquiries from './20261106_171836_enquirie
 import * as migration_20261106_220316_seo from './20261106_220316_seo'
 import * as migration_20261108_111257_homepage_sections from './20261108_111257_homepage_sections'
 import * as migration_20261108_211314_process_media from './20261108_211314_process_media'
+import * as migration_20261108_222428_privacy_notice_setting from './20261108_222428_privacy_notice_setting'
 
 export const migrations = [
   {
@@ -95,5 +96,10 @@ export const migrations = [
     up: migration_20261108_211314_process_media.up,
     down: migration_20261108_211314_process_media.down,
     name: '20261108_211314_process_media',
+  },
+  {
+    up: migration_20261108_222428_privacy_notice_setting.up,
+    down: migration_20261108_222428_privacy_notice_setting.down,
+    name: '20261108_222428_privacy_notice_setting',
   },
 ]

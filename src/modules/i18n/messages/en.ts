@@ -39,6 +39,8 @@ export const en = {
   enquiryTopic: 'Subject',
   enquiryMessage: 'Message',
   enquiryConsent: 'I have read the privacy notice.',
+  enquiryPrivacyLink: 'Read the privacy notice',
+  opensNewTab: '(opens in a new tab)',
   enquirySensitive:
     'Please do not include passwords, incident evidence or other sensitive information.',
   enquiryRequired: 'Required fields are marked with *.',

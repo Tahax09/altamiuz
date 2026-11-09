@@ -60,6 +60,43 @@ export async function enquiryTopics(payload: Payload, locale: 'ar' | 'en'): Prom
     .filter(Boolean)
 }
 
+/**
+ * The published privacy notice for this language (CD-10, FR-079): the page that site settings
+ * name as `privacyNotice`, read through the public, published-only path. Null when unset or not
+ * published in this language; the contact form is then neither shown nor accepted.
+ */
+export async function privacyNoticeFor(
+  payload: Payload,
+  locale: 'ar' | 'en',
+): Promise<{ id: number; slug: string } | null> {
+  const s = (await payload.findGlobal({
+    slug: 'site-settings' as never,
+    locale,
+    fallbackLocale: false as never,
+    depth: 0,
+    draft: false,
+    overrideAccess: true,
+  })) as { privacyNotice?: unknown }
+  const id =
+    typeof s.privacyNotice === 'number'
+      ? s.privacyNotice
+      : (s.privacyNotice as { id?: unknown } | null)?.id
+  if (typeof id !== 'number') return null
+  const res = await payload.find({
+    collection: 'pages',
+    where: { and: [{ id: { equals: id } }, { template: { equals: 'legal' } }] },
+    locale,
+    fallbackLocale: false,
+    draft: false,
+    depth: 0,
+    limit: 1,
+    overrideAccess: false,
+    context: { publicSite: true },
+  })
+  const doc = res.docs[0] as { id: number; slug?: unknown } | undefined
+  return doc && typeof doc.slug === 'string' ? { id: doc.id, slug: doc.slug } : null
+}
+
 export async function submitEnquiry(
   payload: Payload,
   raw: Record<string, unknown>,
@@ -89,6 +126,9 @@ export async function submitEnquiry(
   }
   // 4. Schema (FR-071): only FR-070 fields, configured topics, server-side limits.
   const locale = raw.locale === 'en' ? 'en' : 'ar'
+  // CD-10: no enquiry is accepted in a language without a published privacy notice (fail closed,
+  // also for direct posts that never saw the form).
+  if (!(await privacyNoticeFor(payload, locale))) return { status: 503 }
   const v = validateEnquiry(raw, await enquiryTopics(payload, locale))
   if (!v.ok) return { status: 400, errors: v.errors }
   // 5. Persist (before any confirmation) and 6. enqueue the staff notification in one

@@ -3,6 +3,7 @@
 // plain-text body. Requires the local Mailpit (SMTP 1025, API 8025); fails if it is not running.
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { bootPayload, type TestPayload } from '../../support/payload'
+import { publishedPrivacyNotice } from '../../support/content'
 import { createEmail } from '../../../src/modules/platform/adapters/email'
 import { createTestCaptcha } from '../../../src/modules/platform/adapters/captcha'
 
@@ -23,6 +24,7 @@ beforeAll(async () => {
     locale: 'en',
     data: {
       defaultSeo: { title: 'Site', description: 'Site description' },
+      privacyNotice: await publishedPrivacyNotice(t.payload),
       enquiryRecipients: [{ email: 'staff-mailpit@example.org' }],
       enquiryTopics: [{ label: 'Training' }],
       _status: 'published',

@@ -5,8 +5,8 @@ import config from '@payload-config'
 import { randomUUID } from 'node:crypto'
 import { headers } from 'next/headers'
 import { getPayload } from 'payload'
-import { enquiryTopics } from '@/modules/enquiries'
-import { t, type Locale } from '@/modules/i18n'
+import { enquiryTopics, privacyNoticeFor } from '@/modules/enquiries'
+import { href, t, type Locale } from '@/modules/i18n'
 import { getConfig } from '@/modules/platform'
 import { EnquiryForm } from '@/ui/enquiry/EnquiryForm'
 import { ENQUIRY_MESSAGE_KEYS, type EnquiryMessages } from '@/ui/enquiry/messages'
@@ -18,7 +18,11 @@ export async function contactFormFor(doc: Record<string, unknown> | null, locale
     ? (doc!.sections as { blockType?: string; hidden?: boolean }[])
     : []
   if (!sections.some((s) => s?.blockType === 'contactBlock' && !s.hidden)) return undefined
-  const topics = await enquiryTopics(await getPayload({ config }), locale)
+  const payload = await getPayload({ config })
+  // CD-10 / FR-079: without a published privacy notice in this language the form never launches.
+  const notice = await privacyNoticeFor(payload, locale)
+  if (!notice) return <p className="enquiry__note">{t(locale, 'enquiryNotConfigured')}</p>
+  const topics = await enquiryTopics(payload, locale)
   const c = getConfig().captcha
   const turnstile = c.driver === 'turnstile'
   const nonce = turnstile ? ((await headers()).get('x-nonce') ?? undefined) : undefined
@@ -27,6 +31,7 @@ export async function contactFormFor(doc: Record<string, unknown> | null, locale
       <EnquiryForm
         locale={locale}
         topics={topics}
+        privacyHref={href('page', locale, { slug: notice.slug })}
         messages={
           Object.fromEntries(ENQUIRY_MESSAGE_KEYS.map((k) => [k, t(locale, k)])) as EnquiryMessages
         }

@@ -6,7 +6,7 @@ import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
 import { createTestCaptcha } from '../../../src/modules/platform/adapters/captcha'
 import type { EmailAdapter } from '../../../src/modules/platform/adapters/email'
 import { createUser, routeLogin } from '../../support/auth'
-import { rest } from '../../support/content'
+import { rest, publishedPrivacyNotice } from '../../support/content'
 import { bootPayload, type TestPayload } from '../../support/payload'
 
 type Line = Record<string, unknown>
@@ -49,6 +49,7 @@ beforeAll(async () => {
     locale: 'en',
     data: {
       defaultSeo: { title: 'Site', description: 'Site description' },
+      privacyNotice: await publishedPrivacyNotice(t.payload),
       enquiryRecipients: [{ email: 'staff@example.org' }],
       enquiryTopics: [{ label: 'Training' }],
       _status: 'published',

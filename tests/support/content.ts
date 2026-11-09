@@ -122,3 +122,37 @@ export const pageData = (slug: string, title = 'Title', extra: Record<string, un
   seo: { title: `${title} | SEO`.slice(0, 60), description: 'Search description' },
   ...extra,
 })
+
+/**
+ * A published privacy notice (legal page) in both languages, for suites that submit enquiries:
+ * the form and `submitEnquiry` refuse languages without one (CD-10). Returns its id, to set as
+ * site settings `privacyNotice`.
+ */
+export async function publishedPrivacyNotice(payload: Payload): Promise<number> {
+  const stamp = `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`
+  const doc = (await payload.create({
+    collection: 'pages',
+    locale: 'en',
+    draft: false,
+    data: {
+      ...pageData(`privacy-fixture-${stamp}`, 'Privacy fixture', { template: 'legal' }),
+      _status: 'published',
+    } as never,
+    overrideAccess: true,
+  })) as unknown as { id: number }
+  await payload.update({
+    collection: 'pages',
+    id: doc.id,
+    locale: 'ar',
+    publishSpecificLocale: 'ar',
+    data: {
+      title: 'خصوصية',
+      slug: `خصوصية-${stamp}`,
+      seo: { title: 'خصوصية', description: 'وصف الصفحة' },
+      sections: [{ blockType: 'richText', content: rt('نص') }],
+      _status: 'published',
+    } as never,
+    overrideAccess: true,
+  })
+  return doc.id
+}

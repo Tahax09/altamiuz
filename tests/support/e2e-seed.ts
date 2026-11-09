@@ -449,12 +449,28 @@ for (const [slug, data] of [
       publishSpecificLocale: locale,
       overrideAccess: true,
     })
+// CD-10: the contact form is shown and accepted only with a published privacy notice (fixture).
+const privacy = await publishDoc(
+  'pages',
+  {
+    title: 'Privacy notice E2E',
+    slug: 'privacy-e2e',
+    template: 'legal',
+    sections: [{ blockType: 'richText', content: rt('E2E privacy fixture') }],
+  },
+  {
+    title: 'إشعار الخصوصية',
+    slug: 'خصوصية-اختبار',
+    sections: [{ blockType: 'richText', content: rt('نص اختباري') }],
+  },
+)
 // US5: enquiry topics (labels per locale on the same rows) and a contact page with the form.
 {
   const en = (await payload.updateGlobal({
     slug: 'site-settings',
     locale: 'en',
     data: {
+      privacyNotice: privacy.id,
       enquiryTopics: [{ label: 'Penetration testing' }, { label: 'Training' }],
       _status: 'published',
     } as never,
@@ -492,6 +508,7 @@ out.public = {
   serviceId: svc.id,
   courseId: course.id,
   homeId: home.id,
+  privacyId: privacy.id,
   aboutId: about.id,
   contactId: contact.id,
 }

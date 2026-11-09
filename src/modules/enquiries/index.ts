@@ -23,6 +23,7 @@ export {
   CAPTCHA_ACTION,
   ENQUIRY_LIMIT,
   enquiryTopics,
+  privacyNoticeFor,
   setCaptchaForTests,
   submitEnquiry,
   type SubmitResult,

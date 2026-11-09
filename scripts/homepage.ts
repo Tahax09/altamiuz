@@ -196,7 +196,7 @@ export async function seedHomepage(
   const current = existing.docs[0] as { id: number } | undefined
   if (current && !opts.replaceDraft)
     throw new HomepageSeedError(
-      `A home page already exists (id ${current.id}). Re-run with --replace-draft to replace its draft; the published version is not changed.`,
+      `A home page already exists (id ${current.id}). Re-run as "pnpm seed:homepage replace-draft" to replace its draft; the published version is not changed.`,
     )
   const contact = await payload.find({
     collection: 'pages',

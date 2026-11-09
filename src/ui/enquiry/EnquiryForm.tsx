@@ -36,11 +36,14 @@ export function EnquiryForm({
   topics,
   captcha,
   messages,
+  privacyHref,
 }: {
   locale: Locale
   topics: string[]
   captcha: CaptchaProps
   messages: EnquiryMessages
+  /** The published privacy notice in this language (CD-10); the consent text links to it. */
+  privacyHref: string
 }) {
   const t = (_l: Locale, key: keyof EnquiryMessages) => messages[key]
   const errText = (_l: Locale, field: string, code?: string) =>
@@ -173,6 +176,12 @@ export function EnquiryForm({
               {t(locale, 'enquiryConsent')}
               <span aria-hidden="true"> *</span>
             </label>
+            {/* Outside the label, so the checkbox keeps a short accessible name. New tab: the
+                form's unsent input survives reading the notice. */}
+            <a className="enquiry__privacy" href={privacyHref} target="_blank" rel="noopener">
+              {t(locale, 'enquiryPrivacyLink')}
+              <span className="sr-only"> {t(locale, 'opensNewTab')}</span>
+            </a>
             {e.consent ? (
               <p id="enq-consent-err" className="field__error">
                 {errText(locale, 'consent', e.consent)}

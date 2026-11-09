@@ -42,6 +42,8 @@ export const ar: Record<keyof typeof en, string> = {
   enquiryTopic: 'الموضوع',
   enquiryMessage: 'الرسالة',
   enquiryConsent: 'اطّلعتُ على إشعار الخصوصية.',
+  enquiryPrivacyLink: 'اقرأ إشعار الخصوصية',
+  opensNewTab: '(يُفتح في علامة تبويب جديدة)',
   enquirySensitive: 'يُرجى عدم إدراج كلمات مرور أو أدلة حوادث أو أي معلومات حساسة أخرى.',
   enquiryRequired: 'الحقول المطلوبة مُعلَّمة بعلامة *.',
   enquirySubmit: 'إرسال الاستفسار',
