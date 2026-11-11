@@ -194,6 +194,14 @@ const course = await publishDoc('courses', {
   deliveryFormat: 'online',
   sections: [{ blockType: 'richText', content: rt('Course body EN only') }],
 })
+// W-1: a second course, so course pages list related courses.
+await publishDoc('courses', {
+  title: 'Risk assessment course',
+  slug: 'risk-assessment',
+  summary: 'Second English-only course.',
+  order: 2,
+  sections: [{ blockType: 'richText', content: rt('Second course body') }],
+})
 const homeSections = (l: 'ar' | 'en') => [
   {
     blockType: 'hero',
@@ -401,6 +409,20 @@ for (const [slug, data] of [
           },
         },
         { link: { linkType: 'external', url: 'https://example.org/', label: 'External' } },
+        // W-1: a group (disclosure menu) with a page and a fixed-route child.
+        {
+          link: { linkType: 'route', route: 'training', label: 'Learning' },
+          children: [
+            {
+              link: {
+                linkType: 'internal',
+                doc: { relationTo: 'pages', value: about.id },
+                label: 'About the company',
+              },
+            },
+            { link: { linkType: 'route', route: 'services', label: 'All services' } },
+          ],
+        },
       ],
     },
   ],
@@ -428,6 +450,7 @@ for (const [slug, data] of [
         ...(data as object),
         ...(locale === 'ar' && slug === 'header-nav'
           ? {
+              // Same rows as English (menu rows are shared; labels are per language).
               items: [
                 {
                   link: {
@@ -435,6 +458,20 @@ for (const [slug, data] of [
                     doc: { relationTo: 'services', value: svc.id },
                     label: 'اختبار الاختراق',
                   },
+                },
+                { link: { linkType: 'external', url: 'https://example.org/', label: 'خارجي' } },
+                {
+                  link: { linkType: 'route', route: 'training', label: 'تعلّم' },
+                  children: [
+                    {
+                      link: {
+                        linkType: 'internal',
+                        doc: { relationTo: 'pages', value: about.id },
+                        label: 'عن الشركة',
+                      },
+                    },
+                    { link: { linkType: 'route', route: 'services', label: 'كل الخدمات' } },
+                  ],
                 },
               ],
             }
@@ -504,7 +541,53 @@ const contact = await publishDoc(
     sections: [{ blockType: 'contactBlock', heading: 'تواصل معنا', intro: 'أرسل إلينا رسالة.' }],
   },
 )
+// W-1: the contact page and listing introductions in published site settings, and a legal page
+// with headed sections (outline).
+for (const [locale, intro] of [
+  ['en', 'E2E services introduction.'],
+  ['ar', 'مقدمة الخدمات التجريبية.'],
+] as const)
+  await payload.updateGlobal({
+    slug: 'site-settings',
+    locale,
+    data: {
+      contactPage: contact.id,
+      listings: { servicesIntro: intro },
+      _status: 'published',
+    } as never,
+    publishSpecificLocale: locale,
+    overrideAccess: true,
+  })
+const headed = (h: string, p: string) => ({
+  root: {
+    ...rt(p).root,
+    children: [
+      {
+        type: 'heading',
+        tag: 'h2',
+        version: 1,
+        direction: null,
+        format: '',
+        indent: 0,
+        children: [{ type: 'text', version: 1, text: h, format: 0 }],
+      },
+      ...rt(p).root.children,
+    ],
+  },
+})
+const terms = await publishDoc('pages', {
+  title: 'Terms E2E',
+  slug: 'terms-e2e',
+  template: 'legal',
+  summary: 'Legal fixture with an outline.',
+  sections: [
+    { blockType: 'richText', content: headed('First topic', 'First topic text') },
+    { blockType: 'richText', content: headed('Second topic', 'Second topic text') },
+    { blockType: 'richText', content: headed('Third topic', 'Third topic text') },
+  ],
+})
 out.public = {
+  termsId: terms.id,
   serviceId: svc.id,
   courseId: course.id,
   homeId: home.id,

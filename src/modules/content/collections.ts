@@ -134,6 +134,13 @@ export const pages = routed('pages', [
     defaultValue: 'default',
     options: ['default', 'home', 'legal'].map((v) => ({ label: v, value: v })),
   },
+  {
+    // Lead paragraph under the page title (W-1). Not shown on a hero-led home page.
+    name: 'summary',
+    type: 'textarea',
+    localized: true,
+    maxLength: 300,
+  },
   sectionsField,
 ])
 

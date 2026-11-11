@@ -204,7 +204,8 @@ export function EnquiryForm({
               value={`${captcha.testToken ?? 'test'}-${state.round}`}
             />
           )}
-          <button type="submit" className="button" disabled={pending}>
+          <button type="submit" className="button" disabled={pending} aria-busy={pending}>
+            {pending ? <span className="button__spinner" aria-hidden="true" /> : null}
             {t(locale, 'enquirySubmit')}
           </button>
         </>

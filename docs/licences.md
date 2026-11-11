@@ -2,28 +2,36 @@
 
 Recorded for constitution I (licences verified when introduced). Source: `pnpm licenses list`
 on 2026-10-16 after `pnpm install` (lockfile `pnpm-lock.yaml`). 640 packages in the resolved tree.
+W-1 (2026-11-11, ADR-011) added `tailwindcss`, `@tailwindcss/postcss`, `motion` (with
+`framer-motion`, `motion-dom`, `motion-utils`, MIT), `clsx`, `tailwind-merge` and
+`class-variance-authority`; none runs an install script (`@tailwindcss/oxide` ships prebuilt
+platform binaries as optional dependencies).
 
 ## Direct dependencies
 
 | Package                      | Version | Licence    |
 | ---------------------------- | ------- | ---------- |
 | @axe-core/playwright         | 4.14.0  | MPL-2.0    |
-| @lhci/cli                    | 0.16.0  | Apache-2.0 |
 | @eslint/js                   | 9.39.5  | MIT        |
+| @lhci/cli                    | 0.16.0  | Apache-2.0 |
 | @payloadcms/db-postgres      | 3.92.1  | MIT        |
 | @payloadcms/next             | 3.92.1  | MIT        |
 | @payloadcms/richtext-lexical | 3.92.1  | MIT        |
 | @payloadcms/translations     | 3.92.1  | MIT        |
 | @payloadcms/ui               | 3.92.1  | MIT        |
 | @playwright/test             | 1.64.1  | Apache-2.0 |
+| @tailwindcss/postcss         | 4.3.3   | MIT        |
 | @types/node                  | 22.20.5 | MIT        |
 | @types/nodemailer            | 8.0.2   | MIT        |
 | @types/pg                    | 8.23.1  | MIT        |
 | @types/react                 | 19.2.18 | MIT        |
 | @types/react-dom             | 19.2.7  | MIT        |
+| class-variance-authority     | 0.7.1   | Apache-2.0 |
+| clsx                         | 2.1.1   | MIT        |
 | eslint                       | 9.39.5  | MIT        |
 | eslint-config-next           | 16.4.5  | MIT        |
 | graphql                      | 16.14.2 | MIT        |
+| motion                       | 14.5.0  | MIT        |
 | next                         | 16.4.5  | MIT        |
 | nodemailer                   | 10.1.7  | MIT-0      |
 | payload                      | 3.92.1  | MIT        |
@@ -33,6 +41,8 @@ on 2026-10-16 after `pnpm install` (lockfile `pnpm-lock.yaml`). 640 packages in 
 | react                        | 19.2.6  | MIT        |
 | react-dom                    | 19.2.6  | MIT        |
 | sharp                        | 0.35.5  | Apache-2.0 |
+| tailwind-merge               | 3.7.0   | MIT        |
+| tailwindcss                  | 4.3.3   | MIT        |
 | tsx                          | 4.23.15 | MIT        |
 | typescript                   | 5.9.3   | Apache-2.0 |
 | typescript-eslint            | 8.71.2  | MIT        |

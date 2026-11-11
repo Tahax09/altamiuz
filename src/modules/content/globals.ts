@@ -407,6 +407,29 @@ export const siteSettings = versionedGlobal('site-settings', 'Site settings', [
     },
   },
   {
+    // Calls to action on service and course pages and in the header link here (only while the
+    // page is published in the language; otherwise they are not shown).
+    name: 'contactPage',
+    type: 'relationship',
+    relationTo: 'pages',
+    admin: {
+      description:
+        'The page with the contact form. Service and course pages and the header link to it where it is published.',
+    },
+  },
+  {
+    // Headings and introductions of the automatic listing pages (FR-018). Empty fields fall back
+    // to the interface vocabulary ("Services", "Training") and no introduction.
+    name: 'listings',
+    type: 'group',
+    fields: [
+      { name: 'servicesHeading', type: 'text', localized: true, maxLength: 120 },
+      { name: 'servicesIntro', type: 'textarea', localized: true, maxLength: 400 },
+      { name: 'trainingHeading', type: 'text', localized: true, maxLength: 120 },
+      { name: 'trainingIntro', type: 'textarea', localized: true, maxLength: 400 },
+    ],
+  },
+  {
     name: 'enquiryTopics',
     type: 'array',
     maxRows: 20,

@@ -4,7 +4,7 @@
 import type { Metadata } from 'next'
 import { headers } from 'next/headers'
 import { notFound, permanentRedirect, redirect } from 'next/navigation'
-import { LANGUAGE_NAMES, t, type Locale, type RoutedCollection } from '@/modules/i18n'
+import { href, LANGUAGE_NAMES, t, type Locale, type RoutedCollection } from '@/modules/i18n'
 import {
   decodeSegments,
   resolvePublicPath,
@@ -12,10 +12,17 @@ import {
   type PublicReaders,
 } from '@/modules/content'
 import { contactFormFor } from '../../contact-form'
-import { DocumentView, ListingCards } from '@/ui'
+import { contactLink, DocumentView, ListingCards } from '@/ui'
+import { CtaBand } from '@/ui/page/CtaBand'
+import { EmptyState } from '@/ui/page/EmptyState'
+import { ListingIndex } from '@/ui/page/ListingIndex'
+import { PageHeader } from '@/ui/page/PageHeader'
+import { StatusView } from '@/ui/page/StatusView'
+import { Icon } from '@/ui/primitives/Icon'
 import { docMetadata, JsonLd, staticMetadata } from '../../seo'
 import {
   cachedAlternates,
+  cachedGlobal,
   cachedListing,
   cachedPublished,
   cachedRedirect,
@@ -49,51 +56,57 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
       title: t(r.locale, 'translationMissing', { language: LANGUAGE_NAMES[r.locale] }),
       robots: { index: false, follow: true },
     }
-  if (r.kind === 'listing')
-    return staticMetadata(
-      r.locale,
-      r.collection === 'services' ? 'services' : 'training',
-      t(r.locale, r.collection === 'services' ? 'services' : 'training'),
-    )
+  if (r.kind === 'listing') {
+    const { heading, intro } = await listingCopy(r.locale, r.collection)
+    return staticMetadata(r.locale, LISTING[r.collection], heading, intro)
+  }
   return docMetadata(r.locale, r.collection, r.doc)
 }
 
-const str = (v: unknown) => (typeof v === 'string' ? v : '')
+const str = (v: unknown) => (typeof v === 'string' ? v.trim() : '')
+const LISTING = { services: 'services', courses: 'training' } as const
 
-function CourseFacts({ doc, locale }: { doc: PublicDoc; locale: Locale }) {
-  const duration = doc.duration as { value?: number; unit?: string } | undefined
-  const unitKey = { hours: 'unitHours', days: 'unitDays', weeks: 'unitWeeks' } as const
-  const formatKey = {
-    'in-person': 'formatInPerson',
-    online: 'formatOnline',
-    hybrid: 'formatHybrid',
-  } as const
-  const rows: [string, string][] = []
-  if (doc.audience) rows.push([t(locale, 'audience'), str(doc.audience)])
-  if (duration?.value && duration.unit && duration.unit in unitKey)
-    rows.push([
-      t(locale, 'duration'),
-      `${duration.value} ${t(locale, unitKey[duration.unit as keyof typeof unitKey])}`,
-    ])
-  if (typeof doc.deliveryFormat === 'string' && doc.deliveryFormat in formatKey)
-    rows.push([
-      t(locale, 'deliveryFormat'),
-      t(locale, formatKey[doc.deliveryFormat as keyof typeof formatKey]),
-    ])
-  if (doc.provider) rows.push([t(locale, 'provider'), str(doc.provider)])
-  if (!rows.length && !doc.accreditationStatement) return null
+/** Listing heading and introduction from published site settings (FR-018), else UI vocabulary. */
+async function listingCopy(locale: Locale, collection: 'services' | 'courses') {
+  const settings = await cachedGlobal('site-settings', locale)
+  const l = (settings?.listings ?? {}) as Record<string, unknown>
+  const key = collection === 'services' ? 'services' : 'training'
+  return {
+    settings,
+    heading: str(l[`${key}Heading`]) || t(locale, LISTING[collection]),
+    intro: str(l[`${key}Intro`]) || undefined,
+  }
+}
+
+/** Service or course page extras: the other published items and a call to the contact page. */
+async function detailExtras(locale: Locale, collection: 'services' | 'courses', doc: PublicDoc) {
+  const [items, settings] = await Promise.all([
+    cachedListing(collection, locale),
+    cachedGlobal('site-settings', locale),
+  ])
+  const others = items.filter((i) => i.slug !== doc.slug).slice(0, 3)
+  const kind = collection === 'services' ? 'service' : 'course'
   return (
-    <aside className="course-facts">
-      <dl>
-        {rows.map(([k, v]) => (
-          <div key={k}>
-            <dt>{k}</dt>
-            <dd>{v}</dd>
+    <>
+      {others.length ? (
+        <section className="section related" data-reveal="">
+          <div className="section__head">
+            <h2>{t(locale, collection === 'services' ? 'relatedServices' : 'relatedCourses')}</h2>
           </div>
-        ))}
-      </dl>
-      {doc.accreditationStatement ? <p>{str(doc.accreditationStatement)}</p> : null}
-    </aside>
+          <ListingCards items={others} kind={kind} locale={locale} headingLevel={3} />
+          <p className="section__more">
+            <a className="text-link" href={href(LISTING[collection], locale)}>
+              {t(locale, LISTING[collection])}
+            </a>
+          </p>
+        </section>
+      ) : null}
+      <CtaBand
+        heading={t(locale, collection === 'services' ? 'serviceCtaHeading' : 'courseCtaHeading')}
+        body={t(locale, 'ctaBody')}
+        action={contactLink(settings, locale)}
+      />
+    </>
   )
 }
 
@@ -111,30 +124,54 @@ export default async function PublicPage({ params }: { params: Params }) {
   if (!r) return redirectOr404()
   if (r.kind === 'missing')
     return (
-      <section className="missing-translation" lang={r.locale}>
-        <div className="notice">
-          <h1>{t(r.locale, 'translationMissing', { language: LANGUAGE_NAMES[r.locale] })}</h1>
-          <p lang={r.other} dir={r.other === 'ar' ? 'rtl' : 'ltr'}>
-            <a className="button" href={r.otherPath} hrefLang={r.other}>
+      <StatusView
+        className="missing-translation"
+        code={LANGUAGE_NAMES[r.locale]}
+        title={t(r.locale, 'translationMissing', { language: LANGUAGE_NAMES[r.locale] })}
+        actions={
+          <>
+            <a
+              className="button button--arrow"
+              href={r.otherPath}
+              hrefLang={r.other}
+              lang={r.other}
+              dir={r.other === 'ar' ? 'rtl' : 'ltr'}
+            >
               {LANGUAGE_NAMES[r.other]}
+              <Icon name="arrow" />
             </a>
-          </p>
-        </div>
-      </section>
+            <a className="button button--secondary" href={href('home', r.locale)}>
+              {t(r.locale, 'backHome')}
+            </a>
+          </>
+        }
+      />
     )
   if (r.kind === 'listing') {
     const kind = r.collection === 'services' ? 'service' : 'course'
+    const { settings, heading, intro } = await listingCopy(r.locale, r.collection)
+    const contact = contactLink(settings, r.locale)
     return (
       <>
-        <JsonLd locale={r.locale} listing={r.collection === 'services' ? 'services' : 'training'} />
-        <header className="page-header">
-          <h1>{t(r.locale, r.collection === 'services' ? 'services' : 'training')}</h1>
-        </header>
-        <section className="section">
+        <JsonLd locale={r.locale} listing={LISTING[r.collection]} />
+        <PageHeader
+          locale={r.locale}
+          crumbs={[
+            { label: t(r.locale, 'home'), href: href('home', r.locale) },
+            { label: t(r.locale, LISTING[r.collection]) },
+          ]}
+          title={heading}
+          lead={intro}
+        />
+        <section className="section section--listing">
           {r.items.length ? (
-            <ListingCards items={r.items} kind={kind} locale={r.locale} headingLevel={2} />
+            <ListingIndex items={r.items} kind={kind} locale={r.locale} headingLevel={2} />
           ) : (
-            <p>{t(r.locale, r.collection === 'services' ? 'noServices' : 'noCourses')}</p>
+            <EmptyState
+              title={t(r.locale, r.collection === 'services' ? 'noServices' : 'noCourses')}
+              body={contact ? t(r.locale, 'listingEmptyHint') : undefined}
+              action={contact}
+            />
           )}
         </section>
       </>
@@ -146,12 +183,13 @@ export default async function PublicPage({ params }: { params: Params }) {
       <DocumentView
         doc={r.doc}
         locale={r.locale}
+        collection={r.collection}
         ctx={{
           listings: await listingsFor(r.doc, r.locale),
           contactForm: await contactFormFor(r.doc, r.locale),
         }}
+        after={r.collection === 'pages' ? null : await detailExtras(r.locale, r.collection, r.doc)}
       />
-      {r.collection === 'courses' ? <CourseFacts doc={r.doc} locale={r.locale} /> : null}
     </>
   )
 }

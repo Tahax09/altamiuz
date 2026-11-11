@@ -6,6 +6,8 @@ import { href, LOCALES, t, type Locale } from '@/modules/i18n'
 import { contactFormFor } from '../contact-form'
 import { docMetadata, JsonLd, staticMetadata } from '../seo'
 import { DocumentView } from '@/ui'
+import { PageHeader } from '@/ui/page/PageHeader'
+import { Icon } from '@/ui/primitives/Icon'
 import { cachedHome, listingsFor } from '../data'
 
 const isLocale = (v: string): v is Locale => (LOCALES as readonly string[]).includes(v)
@@ -43,9 +45,7 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
   return (
     <>
       <JsonLd locale={locale} />
-      <header className="page-header">
-        <h1>{t(locale, 'home')}</h1>
-      </header>
+      <PageHeader locale={locale} title={t(locale, 'home')} />
       <section className="section">
         <ul className="card-grid">
           {(['services', 'training'] as const).map((key) => (
@@ -53,6 +53,7 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
               <h2>
                 <a href={href(key, locale)}>{t(locale, key)}</a>
               </h2>
+              <Icon name="arrow" className="card__arrow" />
             </li>
           ))}
         </ul>

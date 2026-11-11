@@ -3,22 +3,18 @@
 // never render; every link goes through safeHref or the typed route map. Internal links resolve
 // only to published targets, so preview and public produce the same markup for the same document.
 import type { ReactNode } from 'react'
-import { safeHref } from '@/modules/content'
 import { formatDate, href, t, type Locale } from '@/modules/i18n'
+import { linkTarget, newTabProps, type CmsLink } from '../lib/links'
 import { Picture } from '../media/Picture'
+import { Icon as UiIcon } from '../primitives/Icon'
+import { hasMedia, MediaSlot } from '../primitives/MediaSlot'
 import { RichText, type InternalHref } from '../richtext/RichText'
+import { CourseFacts } from '../page/CourseFacts'
+import { legalOutline, LegalToc } from '../page/LegalToc'
+import { PageHeader } from '../page/PageHeader'
+import type { Crumb } from '../primitives/Breadcrumbs'
 
-type Link =
-  | {
-      linkType?: string
-      url?: string
-      email?: string
-      tel?: string
-      label?: string
-      newTab?: boolean
-      doc?: { relationTo?: string; value?: unknown } | null
-    }
-  | undefined
+type Link = CmsLink | undefined
 type Block = Record<string, unknown> & {
   blockType?: string
   hidden?: boolean
@@ -33,6 +29,8 @@ export type RenderContext = {
   listings?: { services?: ListItem[]; courses?: ListItem[] }
   /** The contact form for `contactBlock` sections (public pages only; preview shows none). */
   contactForm?: ReactNode
+  /** Draft preview: empty image slots show a labelled placeholder of the expected size. */
+  preview?: boolean
 }
 
 const ROUTE_OF: Record<string, 'page' | 'service' | 'course'> = {
@@ -59,31 +57,19 @@ export function internalHrefFor(locale: Locale): InternalHref {
 function LinkOut({
   link,
   resolve,
+  locale,
   className,
 }: {
   link: Link
   resolve: InternalHref
+  locale: Locale
   className?: string
 }) {
   if (!link?.label) return null
-  const target =
-    link.linkType === 'external'
-      ? safeHref(link.url)
-      : link.linkType === 'email'
-        ? safeHref(`mailto:${link.email}`)
-        : link.linkType === 'tel'
-          ? safeHref(`tel:${link.tel}`)
-          : link.linkType === 'internal' && link.doc?.relationTo
-            ? resolve(link.doc.relationTo, link.doc.value)
-            : null
+  const target = linkTarget(link, locale, resolve)
   if (!target) return <span>{link.label}</span>
-  const newTab = link.newTab === true && /^https?:/.test(target)
   return (
-    <a
-      href={target}
-      className={className}
-      {...(newTab ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
-    >
+    <a href={target} className={className} {...newTabProps(link, target)}>
       {link.label}
     </a>
   )
@@ -103,11 +89,11 @@ function SectionHead({ b }: { b: Block }) {
   )
 }
 
-function More({ link, resolve }: { link: unknown; resolve: InternalHref }) {
+function More({ link, resolve, locale }: { link: unknown; resolve: InternalHref; locale: Locale }) {
   if (!(link as Link)?.label) return null
   return (
     <p className="section__more">
-      <LinkOut link={link as Link} resolve={resolve} className="text-link" />
+      <LinkOut link={link as Link} resolve={resolve} locale={locale} className="text-link" />
     </p>
   )
 }
@@ -155,11 +141,12 @@ export function ListingCards({
   return (
     <ul className="listing card-grid">
       {visible.map((r) => (
-        <li key={String(r.slug)} className="card card--link">
+        <li key={String(r.slug)} className="card card--link" data-reveal-item="">
           <Heading>
             <a href={href(kind, locale, { slug: String(r.slug) })}>{str(r.title)}</a>
           </Heading>
           {r.summary ? <p>{str(r.summary)}</p> : null}
+          <UiIcon name="arrow" className="card__arrow" />
         </li>
       ))}
     </ul>
@@ -196,13 +183,16 @@ export function Sections({
             case 'hero':
             case 'cta': {
               const primary = (b.primaryCta ?? b.link) as Link
-              const hasMedia = b.blockType === 'hero' && !!b.media && typeof b.media === 'object'
+              const hero = b.blockType === 'hero'
+              const media = hero ? b.media : undefined
+              const showSlot = hero && (hasMedia(media) || !!ctx?.preview)
               return (
                 <section
                   key={key}
                   id={id}
                   data-block={b.blockType}
-                  className={`section section--${b.blockType}${hasMedia ? ' section--split' : ''}`}
+                  data-reveal={i === 0 ? undefined : ''}
+                  className={`section section--${b.blockType}${showSlot ? ' section--split' : ''}`}
                 >
                   <div className="split__text">
                     {b.eyebrow ? <p className="eyebrow">{str(b.eyebrow)}</p> : null}
@@ -210,18 +200,27 @@ export function Sections({
                     {b.subheading || b.text ? <p>{str(b.subheading ?? b.text)}</p> : null}
                     {primary?.label || (b.secondaryCta as Link)?.label ? (
                       <div className="actions">
-                        <LinkOut link={primary} resolve={resolve} className="button" />
+                        <LinkOut
+                          link={primary}
+                          resolve={resolve}
+                          locale={locale}
+                          className="button"
+                        />
                         <LinkOut
                           link={b.secondaryCta as Link}
                           resolve={resolve}
+                          locale={locale}
                           className="button button--secondary"
                         />
                       </div>
                     ) : null}
                   </div>
-                  {hasMedia ? (
-                    <Picture
-                      media={b.media}
+                  {showSlot ? (
+                    <MediaSlot
+                      media={media}
+                      ratio="landscape"
+                      locale={locale}
+                      preview={ctx?.preview}
                       className="media--hero"
                       sizes="(min-width: 64rem) 45vw, 100vw"
                       eager={i === 0}
@@ -231,8 +230,8 @@ export function Sections({
               )
             }
             case 'textMedia': {
-              const hasMedia = !!b.media && typeof b.media === 'object'
-              const cls = hasMedia
+              const showSlot = hasMedia(b.media) || !!ctx?.preview
+              const cls = showSlot
                 ? ` section--split${b.mediaPosition === 'start' ? ' section--media-start' : ''}`
                 : ''
               return (
@@ -240,6 +239,7 @@ export function Sections({
                   key={key}
                   id={id}
                   data-block="textMedia"
+                  data-reveal=""
                   className={`section section--text-media${cls}`}
                 >
                   <div className="split__text">
@@ -248,11 +248,14 @@ export function Sections({
                     <div className="prose">
                       <RichText value={b.body} dir={dir} internalHref={resolve} />
                     </div>
-                    <More link={b.link} resolve={resolve} />
+                    <More link={b.link} resolve={resolve} locale={locale} />
                   </div>
-                  {hasMedia ? (
-                    <Picture
+                  {showSlot ? (
+                    <MediaSlot
                       media={b.media}
+                      ratio="landscape"
+                      locale={locale}
+                      preview={ctx?.preview}
                       className="media--split"
                       sizes="(min-width: 64rem) 40vw, 100vw"
                     />
@@ -263,18 +266,29 @@ export function Sections({
             case 'process': {
               const steps = Array.isArray(b.steps) ? (b.steps as Record<string, unknown>[]) : []
               return (
-                <section key={key} id={id} data-block="process" className="section section--band">
+                <section
+                  key={key}
+                  id={id}
+                  data-block="process"
+                  data-reveal=""
+                  className="section section--band"
+                >
                   <SectionHead b={b} />
-                  {b.media && typeof b.media === 'object' ? (
-                    <Picture
-                      media={b.media}
-                      className="media--process"
-                      sizes="(min-width: 72rem) 72rem, 100vw"
-                    />
-                  ) : null}
+                  <MediaSlot
+                    media={b.media}
+                    ratio="natural"
+                    locale={locale}
+                    preview={ctx?.preview}
+                    className="media--process"
+                    sizes="(min-width: 72rem) 72rem, 100vw"
+                  />
                   <ol className="process">
                     {steps.map((s, j) => (
-                      <li key={(s.id as string | undefined) ?? j} className="process__step">
+                      <li
+                        key={(s.id as string | undefined) ?? j}
+                        className="process__step"
+                        data-reveal-item=""
+                      >
                         <span className="process__index" aria-hidden="true">
                           {String(j + 1).padStart(2, '0')}
                         </span>
@@ -288,11 +302,17 @@ export function Sections({
             }
             case 'standards':
               return (
-                <section key={key} id={id} data-block="standards" className="section">
+                <section
+                  key={key}
+                  id={id}
+                  data-block="standards"
+                  data-reveal=""
+                  className="section"
+                >
                   <SectionHead b={b} />
                   <ul className="standards">
                     {items.map((it, j) => (
-                      <li key={(it.id as string | undefined) ?? j}>
+                      <li key={(it.id as string | undefined) ?? j} data-reveal-item="">
                         <Picture
                           media={it.logo}
                           crop={false}
@@ -308,7 +328,13 @@ export function Sections({
               )
             case 'resourceList':
               return (
-                <section key={key} id={id} data-block="resourceList" className="section">
+                <section
+                  key={key}
+                  id={id}
+                  data-block="resourceList"
+                  data-reveal=""
+                  className="section"
+                >
                   <SectionHead b={b} />
                   <ul className="card-grid">
                     {items.map((it, j) => {
@@ -318,11 +344,16 @@ export function Sections({
                         <li
                           key={(it.id as string | undefined) ?? j}
                           className={link?.linkType ? 'card card--link' : 'card'}
+                          data-reveal-item=""
                         >
                           {it.kind ? <p className="eyebrow">{str(it.kind)}</p> : null}
                           <Heading>
                             {link?.linkType ? (
-                              <LinkOut link={{ ...link, label: str(it.title) }} resolve={resolve} />
+                              <LinkOut
+                                link={{ ...link, label: str(it.title) }}
+                                resolve={resolve}
+                                locale={locale}
+                              />
                             ) : (
                               str(it.title)
                             )}
@@ -332,7 +363,7 @@ export function Sections({
                       )
                     })}
                   </ul>
-                  <More link={b.moreLink} resolve={resolve} />
+                  <More link={b.moreLink} resolve={resolve} locale={locale} />
                 </section>
               )
             case 'richText':
@@ -343,7 +374,7 @@ export function Sections({
               )
             case 'faq':
               return (
-                <section key={key} id={id} data-block="faq" className="section">
+                <section key={key} id={id} data-block="faq" data-reveal="" className="section">
                   <div className="faq">
                     {items.map((q, j) => (
                       <details key={j}>
@@ -358,11 +389,17 @@ export function Sections({
               )
             case 'featureGrid':
               return (
-                <section key={key} id={id} data-block="featureGrid" className="section">
+                <section
+                  key={key}
+                  id={id}
+                  data-block="featureGrid"
+                  data-reveal=""
+                  className="section"
+                >
                   <SectionHead b={b} />
                   <ul className="card-grid">
                     {items.map((it, j) => (
-                      <li key={j} className="card">
+                      <li key={j} className="card" data-reveal-item="">
                         <Icon name={it.icon} />
                         <h3>{str(it.title)}</h3>
                         {it.text ? <p>{str(it.text)}</p> : null}
@@ -373,11 +410,11 @@ export function Sections({
               )
             case 'stats':
               return (
-                <section key={key} id={id} data-block="stats" className="section">
+                <section key={key} id={id} data-block="stats" data-reveal="" className="section">
                   <SectionHead b={b} />
                   <ul className="stats">
                     {items.map((it, j) => (
-                      <li key={j}>
+                      <li key={j} data-reveal-item="">
                         <span className="stats__value">{str(it.value)}</span>{' '}
                         <span className="stats__label">{str(it.label)}</span>
                       </li>
@@ -387,7 +424,13 @@ export function Sections({
               )
             case 'credentials':
               return (
-                <section key={key} id={id} data-block="credentials" className="section">
+                <section
+                  key={key}
+                  id={id}
+                  data-block="credentials"
+                  data-reveal=""
+                  className="section"
+                >
                   <SectionHead b={b} />
                   {b.display === 'logos' ? (
                     <ul className="logo-wall">
@@ -429,12 +472,18 @@ export function Sections({
               )
             case 'mediaGallery':
               return (
-                <section key={key} id={id} data-block="mediaGallery" className="section">
+                <section
+                  key={key}
+                  id={id}
+                  data-block="mediaGallery"
+                  data-reveal=""
+                  className="section"
+                >
                   <SectionHead b={b} />
                   <ul className="gallery">
                     {items.map((it, j) =>
                       it.media && typeof it.media === 'object' ? (
-                        <li key={(it.id as string | undefined) ?? j}>
+                        <li key={(it.id as string | undefined) ?? j} data-reveal-item="">
                           <figure>
                             <Picture
                               media={it.media}
@@ -460,6 +509,7 @@ export function Sections({
                   key={key}
                   id={id}
                   data-block={b.blockType}
+                  data-reveal=""
                   className={`section${kind === 'service' ? ' section--band' : ''}`}
                 >
                   <SectionHead b={b} />
@@ -469,7 +519,7 @@ export function Sections({
                     locale={locale}
                     headingLevel={b.heading ? 3 : 2}
                   />
-                  <More link={b.moreLink} resolve={resolve} />
+                  <More link={b.moreLink} resolve={resolve} locale={locale} />
                 </section>
               )
             }
@@ -491,33 +541,77 @@ export function Sections({
   )
 }
 
+/** Crumbs for a document: Home › listing (services, courses) › the document. */
+export function documentCrumbs(
+  collection: 'pages' | 'services' | 'courses',
+  locale: Locale,
+  title: string,
+): Crumb[] {
+  const crumbs: Crumb[] = [{ label: t(locale, 'home'), href: href('home', locale) }]
+  if (collection === 'services')
+    crumbs.push({ label: t(locale, 'services'), href: href('services', locale) })
+  if (collection === 'courses')
+    crumbs.push({ label: t(locale, 'training'), href: href('training', locale) })
+  crumbs.push({ label: title })
+  return crumbs
+}
+
 export function DocumentView({
   doc,
   locale,
   ctx,
+  collection = 'pages',
+  after,
 }: {
   doc: Record<string, unknown>
   locale: Locale
   ctx?: Omit<RenderContext, 'locale'>
+  collection?: 'pages' | 'services' | 'courses'
+  /** Public-only additions after the sections (related items, closing call to action). */
+  after?: ReactNode
 }) {
   const dir = locale === 'ar' ? 'rtl' : 'ltr'
+  const title = str(doc.title)
+  const template = str(doc.template)
   // A home page that opens with a hero shows the hero as its visual title; the page title stays
   // the document's h1 for assistive technology and outline.
   const first = Array.isArray(doc.sections)
     ? (doc.sections as Block[]).find((b) => b && !b.hidden)
     : undefined
-  const heroLed = doc.template === 'home' && first?.blockType === 'hero'
+  const heroLed = template === 'home' && first?.blockType === 'hero'
+  const renderCtx = { ...ctx, locale }
+  if (heroLed)
+    return (
+      <article lang={locale} dir={dir} data-template="home">
+        <h1 className="sr-only">{title}</h1>
+        <Sections sections={doc.sections} dir={dir} ctx={renderCtx} />
+        {after}
+      </article>
+    )
+  const crumbs = template === 'home' ? [] : documentCrumbs(collection, locale, title)
+  const lead = str(doc.summary) || undefined
+  if (template === 'legal') {
+    const { sections, outline } = legalOutline(doc.sections)
+    return (
+      <article lang={locale} dir={dir} data-template="legal">
+        <PageHeader locale={locale} crumbs={crumbs} title={title} lead={lead} tone="plain" />
+        <div className="legal-layout">
+          {outline.length > 1 ? <LegalToc locale={locale} outline={outline} /> : null}
+          <div className="legal-body">
+            <Sections sections={sections} dir={dir} ctx={renderCtx} />
+          </div>
+        </div>
+        {after}
+      </article>
+    )
+  }
   return (
-    <article lang={locale} dir={dir} data-template={str(doc.template) || undefined}>
-      {heroLed ? (
-        <h1 className="sr-only">{str(doc.title)}</h1>
-      ) : (
-        <header className="page-header">
-          <h1>{str(doc.title)}</h1>
-          {doc.summary ? <p className="lead">{str(doc.summary)}</p> : null}
-        </header>
-      )}
-      <Sections sections={doc.sections} dir={dir} ctx={{ ...ctx, locale }} />
+    <article lang={locale} dir={dir} data-template={template || undefined}>
+      <PageHeader locale={locale} crumbs={crumbs} title={title} lead={lead}>
+        {collection === 'courses' ? <CourseFacts doc={doc} locale={locale} /> : null}
+      </PageHeader>
+      <Sections sections={doc.sections} dir={dir} ctx={renderCtx} />
+      {after}
     </article>
   )
 }

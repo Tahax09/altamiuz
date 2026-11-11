@@ -15,6 +15,7 @@ import * as migration_20261106_220316_seo from './20261106_220316_seo'
 import * as migration_20261108_111257_homepage_sections from './20261108_111257_homepage_sections'
 import * as migration_20261108_211314_process_media from './20261108_211314_process_media'
 import * as migration_20261108_222428_privacy_notice_setting from './20261108_222428_privacy_notice_setting'
+import * as migration_20261111_093233_site_pages_links from './20261111_093233_site_pages_links'
 
 export const migrations = [
   {
@@ -101,5 +102,10 @@ export const migrations = [
     up: migration_20261108_222428_privacy_notice_setting.up,
     down: migration_20261108_222428_privacy_notice_setting.down,
     name: '20261108_222428_privacy_notice_setting',
+  },
+  {
+    up: migration_20261111_093233_site_pages_links.up,
+    down: migration_20261111_093233_site_pages_links.down,
+    name: '20261111_093233_site_pages_links',
   },
 ]

@@ -14,6 +14,9 @@ export default async function setup() {
   await c.end()
   // Files from the previous run belong to the database just dropped.
   fs.rmSync(process.env.MEDIA_DIR!, { recursive: true, force: true })
+  // So does Next's persisted data cache (unstable_cache entries, revalidate 60 s): kept, it serves
+  // the previous run's menus and listings until it revalidates.
+  fs.rmSync('.next/cache/fetch-cache', { recursive: true, force: true })
   const env = {
     ...process.env,
     APP_ENV: 'test',

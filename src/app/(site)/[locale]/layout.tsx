@@ -4,11 +4,10 @@
 import { headers } from 'next/headers'
 import type { ReactNode } from 'react'
 import { DEFAULT_LOCALE, href, LOCALES, matchRoute, type Locale } from '@/modules/i18n'
-import { SiteBanner, SiteFooter, SiteHeader, SkipLink } from '@/ui'
+import { contactLink, SiteBanner, SiteEnhancements, SiteFooter, SiteHeader, SkipLink } from '@/ui'
 import { fontVariables } from '@/ui/fonts'
 import { cachedAlternates, cachedGlobal, cachedPublished } from '../data'
-import '../site.css'
-import '../media.css'
+import '../globals.css'
 
 const isLocale = (v: string): v is Locale => (LOCALES as readonly string[]).includes(v)
 
@@ -66,11 +65,14 @@ export default async function SiteLayout({
           nav={headerNav}
           siteName={typeof settings?.companyName === 'string' ? settings.companyName : undefined}
           alternates={alternates}
+          currentPath={path}
+          contact={contactLink(settings, locale)}
         />
         <main id="main" tabIndex={-1}>
           {children}
         </main>
         <SiteFooter locale={locale} nav={footerNav} settings={settings} />
+        <SiteEnhancements />
       </body>
     </html>
   )

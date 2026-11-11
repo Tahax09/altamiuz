@@ -99,7 +99,8 @@ test('keyboard: every focused link and button shows a visible focus indicator', 
     const style = await page.evaluate(() => {
       const el = document.activeElement as HTMLElement | null
       if (!el || el === document.body) return null
-      const card = el.closest('.card--link')
+      // Linked cards and listing rows draw the ring around the whole item (:focus-within).
+      const card = el.closest('.card--link, .listing-index__row')
       const s = getComputedStyle(card ?? el)
       return { tag: el.tagName, outline: s.outlineStyle, width: parseFloat(s.outlineWidth) }
     })

@@ -2,6 +2,7 @@
 // Localized error page (T104, FR-008, FR-095): never shows the error message, stack or digest.
 import { useState } from 'react'
 import { href, messages, type Locale } from '@/modules/i18n'
+import { StatusView } from '@/ui/page/StatusView'
 
 export default function SiteError({ reset }: { error: Error; reset: () => void }) {
   // Rendered on the client only (error boundary), so the document language is available.
@@ -10,15 +11,20 @@ export default function SiteError({ reset }: { error: Error; reset: () => void }
   )
   const m = messages[locale]
   return (
-    <section className="status-page">
-      <h1>{m.errorTitle}</h1>
-      <p>{m.errorBody}</p>
-      <p>
-        <button type="button" onClick={() => reset()}>
-          {m.tryAgain}
-        </button>{' '}
-        <a href={href('home', locale)}>{m.backHome}</a>
-      </p>
-    </section>
+    <StatusView
+      code={m.errorCode}
+      title={m.errorTitle}
+      body={<p>{m.errorBody}</p>}
+      actions={
+        <>
+          <button type="button" className="button" onClick={() => reset()}>
+            {m.tryAgain}
+          </button>
+          <a className="button button--secondary" href={href('home', locale)}>
+            {m.backHome}
+          </a>
+        </>
+      }
+    />
   )
 }

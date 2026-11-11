@@ -50,3 +50,7 @@ Unresolved (owner decision needed; no CD is assumed):
 - **G-2**: the privacy notice needs decisions outside CD-10's wording: email and hosting
   providers and data locations (T132) and backup retention (T134). They are tracked as "Pending"
   sections of the notice, not as new CDs.
+- **G-3** (W-1, 2026-11-11): the Arabic page slugs created by `pnpm seed:pages` (`من-نحن`,
+  `المعايير-والأطر`, `الخبرة-والتجربة`, `رؤى-وموارد`, `شروط-الاستخدام`) are content, not route
+  vocabulary: they are approved with the copy under **CD-11**, not CD-13. The terms of use are part
+  of **CD-10** (legal texts); the page holds headings only and cannot be published until then.

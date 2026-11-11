@@ -40,11 +40,15 @@ export default async function Preview({
   if (!doc) notFound()
   return (
     <main data-preview="true">
-      <p role="note">Preview — draft content, not public.</p>
+      <p role="note" className="preview-note">
+        Preview: draft content, not public.
+      </p>
       <DocumentView
         doc={doc as unknown as Record<string, unknown>}
         locale={locale}
+        collection={collection as 'pages' | 'services' | 'courses'}
         ctx={{
+          preview: true,
           // Same listing data as the public page (published items only), so output matches.
           listings: {
             services: await listPublished(payload, 'services', locale),

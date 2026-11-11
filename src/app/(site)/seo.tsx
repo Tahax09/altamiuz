@@ -110,10 +110,20 @@ export async function docMetadata(
   })
 }
 
+/** Shortens text to `max` characters at a word boundary. */
+export function clip(text: string, max: number): string {
+  const s = text.replace(/\s+/g, ' ').trim()
+  if (s.length <= max) return s
+  const cut = s.slice(0, max - 1)
+  const space = cut.lastIndexOf(' ')
+  return `${(space > max * 0.6 ? cut.slice(0, space) : cut).trimEnd()}…`
+}
+
 export async function staticMetadata(
   locale: Locale,
   key: 'home' | 'services' | 'training',
   title?: string,
+  description?: string,
 ): Promise<Metadata> {
   const { seo, siteName } = await defaults(locale)
   return buildMetadata({
@@ -122,7 +132,8 @@ export async function staticMetadata(
     path: href(key, locale),
     alternates: Object.fromEntries(LOCALES.map((l) => [l, href(key, l)])),
     title: title ?? seo.title,
-    description: seo.description,
+    // A listing introduction (site settings) describes the listing better than the site default.
+    description: description ? clip(description, 160) : seo.description,
     siteName,
     indexable: indexable(),
   })

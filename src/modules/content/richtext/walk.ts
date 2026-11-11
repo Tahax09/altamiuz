@@ -10,11 +10,22 @@ export const isRichTextValue = (v: unknown): v is { root: unknown } =>
 
 /** A shared `link` group (data-model): has a `linkType` key. */
 const isLinkGroup = (v: unknown): v is Record<string, unknown> =>
-  isObject(v) && 'linkType' in v && ('url' in v || 'email' in v || 'tel' in v || 'doc' in v)
+  isObject(v) &&
+  'linkType' in v &&
+  ('url' in v || 'email' in v || 'tel' in v || 'doc' in v || 'route' in v)
+
+const ROUTE_TARGETS = new Set(['home', 'services', 'training'])
 
 export function linkGroupIssues(link: Record<string, unknown>, path: string): RichTextIssue[] {
   const t = link.linkType
   if (t === 'internal' || t === undefined || t === null) return []
+  if (t === 'route') {
+    const r = link.route
+    if (r === undefined || r === null || r === '') return [] // incomplete draft; required on publish
+    return typeof r === 'string' && ROUTE_TARGETS.has(r)
+      ? []
+      : [{ path: `${path}.route`, code: 'attribute' }]
+  }
   const value =
     t === 'external'
       ? link.url

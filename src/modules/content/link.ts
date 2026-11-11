@@ -1,10 +1,16 @@
 // Shared `link` group (data-model; hero/CTA/nav/social/banner). URL, e-mail and phone are checked
 // with the rich-text URL policy on save; internal links reference documents, never free paths.
+// `route` links point at the fixed site routes that are not documents (home and the two automatic
+// listings), resolved through the typed route map (D-5), so menus can reach the listings.
 import type { Field, GroupField } from 'payload'
 import { publicError } from './errors'
 import { INTERNAL_LINK_COLLECTIONS } from './richtext/editor'
 import { classifyUrl } from './richtext/policy'
 import { linkGroupIssues } from './richtext/walk'
+
+/** Site routes a `route` link may target (typed route map keys without a slug). */
+export const ROUTE_LINK_TARGETS = ['home', 'services', 'training'] as const
+export type RouteLinkTarget = (typeof ROUTE_LINK_TARGETS)[number]
 
 export function linkGroup(
   name: string,
@@ -16,13 +22,25 @@ export function linkGroup(
       type: 'select',
       required: opts.required,
       defaultValue: 'internal',
-      options: ['internal', 'external', 'email', 'tel'].map((v) => ({ label: v, value: v })),
+      options: ['internal', 'route', 'external', 'email', 'tel'].map((v) => ({
+        label: v,
+        value: v,
+      })),
     },
     {
       name: 'doc',
       type: 'relationship',
       relationTo: [...INTERNAL_LINK_COLLECTIONS],
       admin: { condition: (_, s) => s?.linkType === 'internal' },
+    },
+    {
+      name: 'route',
+      type: 'select',
+      options: ROUTE_LINK_TARGETS.map((v) => ({ label: v, value: v })),
+      admin: {
+        condition: (_, s) => s?.linkType === 'route',
+        description: 'Home page or an automatic listing (services, training).',
+      },
     },
     {
       name: 'url',

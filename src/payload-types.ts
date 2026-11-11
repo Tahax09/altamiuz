@@ -260,6 +260,7 @@ export interface Page {
   title: string;
   slug: string;
   template?: ('default' | 'home' | 'legal') | null;
+  summary?: string | null;
   sections?:
     | (
         | {
@@ -268,7 +269,7 @@ export interface Page {
             subheading?: string | null;
             media?: (number | null) | Media;
             primaryCta?: {
-              linkType?: ('internal' | 'external' | 'email' | 'tel') | null;
+              linkType?: ('internal' | 'route' | 'external' | 'email' | 'tel') | null;
               doc?:
                 | ({
                     relationTo: 'pages';
@@ -282,6 +283,10 @@ export interface Page {
                     relationTo: 'courses';
                     value: number | Course;
                   } | null);
+              /**
+               * Home page or an automatic listing (services, training).
+               */
+              route?: ('home' | 'services' | 'training') | null;
               url?: string | null;
               email?: string | null;
               tel?: string | null;
@@ -289,7 +294,7 @@ export interface Page {
               newTab?: boolean | null;
             };
             secondaryCta?: {
-              linkType?: ('internal' | 'external' | 'email' | 'tel') | null;
+              linkType?: ('internal' | 'route' | 'external' | 'email' | 'tel') | null;
               doc?:
                 | ({
                     relationTo: 'pages';
@@ -303,6 +308,10 @@ export interface Page {
                     relationTo: 'courses';
                     value: number | Course;
                   } | null);
+              /**
+               * Home page or an automatic listing (services, training).
+               */
+              route?: ('home' | 'services' | 'training') | null;
               url?: string | null;
               email?: string | null;
               tel?: string | null;
@@ -373,7 +382,7 @@ export interface Page {
              */
             mediaPosition?: ('end' | 'start') | null;
             link?: {
-              linkType?: ('internal' | 'external' | 'email' | 'tel') | null;
+              linkType?: ('internal' | 'route' | 'external' | 'email' | 'tel') | null;
               doc?:
                 | ({
                     relationTo: 'pages';
@@ -387,6 +396,10 @@ export interface Page {
                     relationTo: 'courses';
                     value: number | Course;
                   } | null);
+              /**
+               * Home page or an automatic listing (services, training).
+               */
+              route?: ('home' | 'services' | 'training') | null;
               url?: string | null;
               email?: string | null;
               tel?: string | null;
@@ -457,7 +470,7 @@ export interface Page {
                   title: string;
                   summary?: string | null;
                   link?: {
-                    linkType?: ('internal' | 'external' | 'email' | 'tel') | null;
+                    linkType?: ('internal' | 'route' | 'external' | 'email' | 'tel') | null;
                     doc?:
                       | ({
                           relationTo: 'pages';
@@ -471,6 +484,10 @@ export interface Page {
                           relationTo: 'courses';
                           value: number | Course;
                         } | null);
+                    /**
+                     * Home page or an automatic listing (services, training).
+                     */
+                    route?: ('home' | 'services' | 'training') | null;
                     url?: string | null;
                     email?: string | null;
                     tel?: string | null;
@@ -481,7 +498,7 @@ export interface Page {
                 }[]
               | null;
             moreLink?: {
-              linkType?: ('internal' | 'external' | 'email' | 'tel') | null;
+              linkType?: ('internal' | 'route' | 'external' | 'email' | 'tel') | null;
               doc?:
                 | ({
                     relationTo: 'pages';
@@ -495,6 +512,10 @@ export interface Page {
                     relationTo: 'courses';
                     value: number | Course;
                   } | null);
+              /**
+               * Home page or an automatic listing (services, training).
+               */
+              route?: ('home' | 'services' | 'training') | null;
               url?: string | null;
               email?: string | null;
               tel?: string | null;
@@ -536,7 +557,7 @@ export interface Page {
             heading?: string | null;
             intro?: string | null;
             moreLink?: {
-              linkType?: ('internal' | 'external' | 'email' | 'tel') | null;
+              linkType?: ('internal' | 'route' | 'external' | 'email' | 'tel') | null;
               doc?:
                 | ({
                     relationTo: 'pages';
@@ -550,6 +571,10 @@ export interface Page {
                     relationTo: 'courses';
                     value: number | Course;
                   } | null);
+              /**
+               * Home page or an automatic listing (services, training).
+               */
+              route?: ('home' | 'services' | 'training') | null;
               url?: string | null;
               email?: string | null;
               tel?: string | null;
@@ -572,7 +597,7 @@ export interface Page {
             heading?: string | null;
             intro?: string | null;
             moreLink?: {
-              linkType?: ('internal' | 'external' | 'email' | 'tel') | null;
+              linkType?: ('internal' | 'route' | 'external' | 'email' | 'tel') | null;
               doc?:
                 | ({
                     relationTo: 'pages';
@@ -586,6 +611,10 @@ export interface Page {
                     relationTo: 'courses';
                     value: number | Course;
                   } | null);
+              /**
+               * Home page or an automatic listing (services, training).
+               */
+              route?: ('home' | 'services' | 'training') | null;
               url?: string | null;
               email?: string | null;
               tel?: string | null;
@@ -607,7 +636,7 @@ export interface Page {
             heading: string;
             text?: string | null;
             link?: {
-              linkType?: ('internal' | 'external' | 'email' | 'tel') | null;
+              linkType?: ('internal' | 'route' | 'external' | 'email' | 'tel') | null;
               doc?:
                 | ({
                     relationTo: 'pages';
@@ -621,6 +650,10 @@ export interface Page {
                     relationTo: 'courses';
                     value: number | Course;
                   } | null);
+              /**
+               * Home page or an automatic listing (services, training).
+               */
+              route?: ('home' | 'services' | 'training') | null;
               url?: string | null;
               email?: string | null;
               tel?: string | null;
@@ -966,7 +999,7 @@ export interface Service {
             subheading?: string | null;
             media?: (number | null) | Media;
             primaryCta?: {
-              linkType?: ('internal' | 'external' | 'email' | 'tel') | null;
+              linkType?: ('internal' | 'route' | 'external' | 'email' | 'tel') | null;
               doc?:
                 | ({
                     relationTo: 'pages';
@@ -980,6 +1013,10 @@ export interface Service {
                     relationTo: 'courses';
                     value: number | Course;
                   } | null);
+              /**
+               * Home page or an automatic listing (services, training).
+               */
+              route?: ('home' | 'services' | 'training') | null;
               url?: string | null;
               email?: string | null;
               tel?: string | null;
@@ -987,7 +1024,7 @@ export interface Service {
               newTab?: boolean | null;
             };
             secondaryCta?: {
-              linkType?: ('internal' | 'external' | 'email' | 'tel') | null;
+              linkType?: ('internal' | 'route' | 'external' | 'email' | 'tel') | null;
               doc?:
                 | ({
                     relationTo: 'pages';
@@ -1001,6 +1038,10 @@ export interface Service {
                     relationTo: 'courses';
                     value: number | Course;
                   } | null);
+              /**
+               * Home page or an automatic listing (services, training).
+               */
+              route?: ('home' | 'services' | 'training') | null;
               url?: string | null;
               email?: string | null;
               tel?: string | null;
@@ -1071,7 +1112,7 @@ export interface Service {
              */
             mediaPosition?: ('end' | 'start') | null;
             link?: {
-              linkType?: ('internal' | 'external' | 'email' | 'tel') | null;
+              linkType?: ('internal' | 'route' | 'external' | 'email' | 'tel') | null;
               doc?:
                 | ({
                     relationTo: 'pages';
@@ -1085,6 +1126,10 @@ export interface Service {
                     relationTo: 'courses';
                     value: number | Course;
                   } | null);
+              /**
+               * Home page or an automatic listing (services, training).
+               */
+              route?: ('home' | 'services' | 'training') | null;
               url?: string | null;
               email?: string | null;
               tel?: string | null;
@@ -1155,7 +1200,7 @@ export interface Service {
                   title: string;
                   summary?: string | null;
                   link?: {
-                    linkType?: ('internal' | 'external' | 'email' | 'tel') | null;
+                    linkType?: ('internal' | 'route' | 'external' | 'email' | 'tel') | null;
                     doc?:
                       | ({
                           relationTo: 'pages';
@@ -1169,6 +1214,10 @@ export interface Service {
                           relationTo: 'courses';
                           value: number | Course;
                         } | null);
+                    /**
+                     * Home page or an automatic listing (services, training).
+                     */
+                    route?: ('home' | 'services' | 'training') | null;
                     url?: string | null;
                     email?: string | null;
                     tel?: string | null;
@@ -1179,7 +1228,7 @@ export interface Service {
                 }[]
               | null;
             moreLink?: {
-              linkType?: ('internal' | 'external' | 'email' | 'tel') | null;
+              linkType?: ('internal' | 'route' | 'external' | 'email' | 'tel') | null;
               doc?:
                 | ({
                     relationTo: 'pages';
@@ -1193,6 +1242,10 @@ export interface Service {
                     relationTo: 'courses';
                     value: number | Course;
                   } | null);
+              /**
+               * Home page or an automatic listing (services, training).
+               */
+              route?: ('home' | 'services' | 'training') | null;
               url?: string | null;
               email?: string | null;
               tel?: string | null;
@@ -1234,7 +1287,7 @@ export interface Service {
             heading?: string | null;
             intro?: string | null;
             moreLink?: {
-              linkType?: ('internal' | 'external' | 'email' | 'tel') | null;
+              linkType?: ('internal' | 'route' | 'external' | 'email' | 'tel') | null;
               doc?:
                 | ({
                     relationTo: 'pages';
@@ -1248,6 +1301,10 @@ export interface Service {
                     relationTo: 'courses';
                     value: number | Course;
                   } | null);
+              /**
+               * Home page or an automatic listing (services, training).
+               */
+              route?: ('home' | 'services' | 'training') | null;
               url?: string | null;
               email?: string | null;
               tel?: string | null;
@@ -1270,7 +1327,7 @@ export interface Service {
             heading?: string | null;
             intro?: string | null;
             moreLink?: {
-              linkType?: ('internal' | 'external' | 'email' | 'tel') | null;
+              linkType?: ('internal' | 'route' | 'external' | 'email' | 'tel') | null;
               doc?:
                 | ({
                     relationTo: 'pages';
@@ -1284,6 +1341,10 @@ export interface Service {
                     relationTo: 'courses';
                     value: number | Course;
                   } | null);
+              /**
+               * Home page or an automatic listing (services, training).
+               */
+              route?: ('home' | 'services' | 'training') | null;
               url?: string | null;
               email?: string | null;
               tel?: string | null;
@@ -1305,7 +1366,7 @@ export interface Service {
             heading: string;
             text?: string | null;
             link?: {
-              linkType?: ('internal' | 'external' | 'email' | 'tel') | null;
+              linkType?: ('internal' | 'route' | 'external' | 'email' | 'tel') | null;
               doc?:
                 | ({
                     relationTo: 'pages';
@@ -1319,6 +1380,10 @@ export interface Service {
                     relationTo: 'courses';
                     value: number | Course;
                   } | null);
+              /**
+               * Home page or an automatic listing (services, training).
+               */
+              route?: ('home' | 'services' | 'training') | null;
               url?: string | null;
               email?: string | null;
               tel?: string | null;
@@ -1513,7 +1578,7 @@ export interface Course {
             subheading?: string | null;
             media?: (number | null) | Media;
             primaryCta?: {
-              linkType?: ('internal' | 'external' | 'email' | 'tel') | null;
+              linkType?: ('internal' | 'route' | 'external' | 'email' | 'tel') | null;
               doc?:
                 | ({
                     relationTo: 'pages';
@@ -1527,6 +1592,10 @@ export interface Course {
                     relationTo: 'courses';
                     value: number | Course;
                   } | null);
+              /**
+               * Home page or an automatic listing (services, training).
+               */
+              route?: ('home' | 'services' | 'training') | null;
               url?: string | null;
               email?: string | null;
               tel?: string | null;
@@ -1534,7 +1603,7 @@ export interface Course {
               newTab?: boolean | null;
             };
             secondaryCta?: {
-              linkType?: ('internal' | 'external' | 'email' | 'tel') | null;
+              linkType?: ('internal' | 'route' | 'external' | 'email' | 'tel') | null;
               doc?:
                 | ({
                     relationTo: 'pages';
@@ -1548,6 +1617,10 @@ export interface Course {
                     relationTo: 'courses';
                     value: number | Course;
                   } | null);
+              /**
+               * Home page or an automatic listing (services, training).
+               */
+              route?: ('home' | 'services' | 'training') | null;
               url?: string | null;
               email?: string | null;
               tel?: string | null;
@@ -1618,7 +1691,7 @@ export interface Course {
              */
             mediaPosition?: ('end' | 'start') | null;
             link?: {
-              linkType?: ('internal' | 'external' | 'email' | 'tel') | null;
+              linkType?: ('internal' | 'route' | 'external' | 'email' | 'tel') | null;
               doc?:
                 | ({
                     relationTo: 'pages';
@@ -1632,6 +1705,10 @@ export interface Course {
                     relationTo: 'courses';
                     value: number | Course;
                   } | null);
+              /**
+               * Home page or an automatic listing (services, training).
+               */
+              route?: ('home' | 'services' | 'training') | null;
               url?: string | null;
               email?: string | null;
               tel?: string | null;
@@ -1702,7 +1779,7 @@ export interface Course {
                   title: string;
                   summary?: string | null;
                   link?: {
-                    linkType?: ('internal' | 'external' | 'email' | 'tel') | null;
+                    linkType?: ('internal' | 'route' | 'external' | 'email' | 'tel') | null;
                     doc?:
                       | ({
                           relationTo: 'pages';
@@ -1716,6 +1793,10 @@ export interface Course {
                           relationTo: 'courses';
                           value: number | Course;
                         } | null);
+                    /**
+                     * Home page or an automatic listing (services, training).
+                     */
+                    route?: ('home' | 'services' | 'training') | null;
                     url?: string | null;
                     email?: string | null;
                     tel?: string | null;
@@ -1726,7 +1807,7 @@ export interface Course {
                 }[]
               | null;
             moreLink?: {
-              linkType?: ('internal' | 'external' | 'email' | 'tel') | null;
+              linkType?: ('internal' | 'route' | 'external' | 'email' | 'tel') | null;
               doc?:
                 | ({
                     relationTo: 'pages';
@@ -1740,6 +1821,10 @@ export interface Course {
                     relationTo: 'courses';
                     value: number | Course;
                   } | null);
+              /**
+               * Home page or an automatic listing (services, training).
+               */
+              route?: ('home' | 'services' | 'training') | null;
               url?: string | null;
               email?: string | null;
               tel?: string | null;
@@ -1781,7 +1866,7 @@ export interface Course {
             heading?: string | null;
             intro?: string | null;
             moreLink?: {
-              linkType?: ('internal' | 'external' | 'email' | 'tel') | null;
+              linkType?: ('internal' | 'route' | 'external' | 'email' | 'tel') | null;
               doc?:
                 | ({
                     relationTo: 'pages';
@@ -1795,6 +1880,10 @@ export interface Course {
                     relationTo: 'courses';
                     value: number | Course;
                   } | null);
+              /**
+               * Home page or an automatic listing (services, training).
+               */
+              route?: ('home' | 'services' | 'training') | null;
               url?: string | null;
               email?: string | null;
               tel?: string | null;
@@ -1817,7 +1906,7 @@ export interface Course {
             heading?: string | null;
             intro?: string | null;
             moreLink?: {
-              linkType?: ('internal' | 'external' | 'email' | 'tel') | null;
+              linkType?: ('internal' | 'route' | 'external' | 'email' | 'tel') | null;
               doc?:
                 | ({
                     relationTo: 'pages';
@@ -1831,6 +1920,10 @@ export interface Course {
                     relationTo: 'courses';
                     value: number | Course;
                   } | null);
+              /**
+               * Home page or an automatic listing (services, training).
+               */
+              route?: ('home' | 'services' | 'training') | null;
               url?: string | null;
               email?: string | null;
               tel?: string | null;
@@ -1852,7 +1945,7 @@ export interface Course {
             heading: string;
             text?: string | null;
             link?: {
-              linkType?: ('internal' | 'external' | 'email' | 'tel') | null;
+              linkType?: ('internal' | 'route' | 'external' | 'email' | 'tel') | null;
               doc?:
                 | ({
                     relationTo: 'pages';
@@ -1866,6 +1959,10 @@ export interface Course {
                     relationTo: 'courses';
                     value: number | Course;
                   } | null);
+              /**
+               * Home page or an automatic listing (services, training).
+               */
+              route?: ('home' | 'services' | 'training') | null;
               url?: string | null;
               email?: string | null;
               tel?: string | null;
@@ -2361,6 +2458,7 @@ export interface PagesSelect<T extends boolean = true> {
   title?: T;
   slug?: T;
   template?: T;
+  summary?: T;
   sections?:
     | T
     | {
@@ -2376,6 +2474,7 @@ export interface PagesSelect<T extends boolean = true> {
                 | {
                     linkType?: T;
                     doc?: T;
+                    route?: T;
                     url?: T;
                     email?: T;
                     tel?: T;
@@ -2387,6 +2486,7 @@ export interface PagesSelect<T extends boolean = true> {
                 | {
                     linkType?: T;
                     doc?: T;
+                    route?: T;
                     url?: T;
                     email?: T;
                     tel?: T;
@@ -2420,6 +2520,7 @@ export interface PagesSelect<T extends boolean = true> {
                 | {
                     linkType?: T;
                     doc?: T;
+                    route?: T;
                     url?: T;
                     email?: T;
                     tel?: T;
@@ -2486,6 +2587,7 @@ export interface PagesSelect<T extends boolean = true> {
                       | {
                           linkType?: T;
                           doc?: T;
+                          route?: T;
                           url?: T;
                           email?: T;
                           tel?: T;
@@ -2499,6 +2601,7 @@ export interface PagesSelect<T extends boolean = true> {
                 | {
                     linkType?: T;
                     doc?: T;
+                    route?: T;
                     url?: T;
                     email?: T;
                     tel?: T;
@@ -2540,6 +2643,7 @@ export interface PagesSelect<T extends boolean = true> {
                 | {
                     linkType?: T;
                     doc?: T;
+                    route?: T;
                     url?: T;
                     email?: T;
                     tel?: T;
@@ -2564,6 +2668,7 @@ export interface PagesSelect<T extends boolean = true> {
                 | {
                     linkType?: T;
                     doc?: T;
+                    route?: T;
                     url?: T;
                     email?: T;
                     tel?: T;
@@ -2587,6 +2692,7 @@ export interface PagesSelect<T extends boolean = true> {
                 | {
                     linkType?: T;
                     doc?: T;
+                    route?: T;
                     url?: T;
                     email?: T;
                     tel?: T;
@@ -2735,6 +2841,7 @@ export interface ServicesSelect<T extends boolean = true> {
                 | {
                     linkType?: T;
                     doc?: T;
+                    route?: T;
                     url?: T;
                     email?: T;
                     tel?: T;
@@ -2746,6 +2853,7 @@ export interface ServicesSelect<T extends boolean = true> {
                 | {
                     linkType?: T;
                     doc?: T;
+                    route?: T;
                     url?: T;
                     email?: T;
                     tel?: T;
@@ -2779,6 +2887,7 @@ export interface ServicesSelect<T extends boolean = true> {
                 | {
                     linkType?: T;
                     doc?: T;
+                    route?: T;
                     url?: T;
                     email?: T;
                     tel?: T;
@@ -2845,6 +2954,7 @@ export interface ServicesSelect<T extends boolean = true> {
                       | {
                           linkType?: T;
                           doc?: T;
+                          route?: T;
                           url?: T;
                           email?: T;
                           tel?: T;
@@ -2858,6 +2968,7 @@ export interface ServicesSelect<T extends boolean = true> {
                 | {
                     linkType?: T;
                     doc?: T;
+                    route?: T;
                     url?: T;
                     email?: T;
                     tel?: T;
@@ -2899,6 +3010,7 @@ export interface ServicesSelect<T extends boolean = true> {
                 | {
                     linkType?: T;
                     doc?: T;
+                    route?: T;
                     url?: T;
                     email?: T;
                     tel?: T;
@@ -2923,6 +3035,7 @@ export interface ServicesSelect<T extends boolean = true> {
                 | {
                     linkType?: T;
                     doc?: T;
+                    route?: T;
                     url?: T;
                     email?: T;
                     tel?: T;
@@ -2946,6 +3059,7 @@ export interface ServicesSelect<T extends boolean = true> {
                 | {
                     linkType?: T;
                     doc?: T;
+                    route?: T;
                     url?: T;
                     email?: T;
                     tel?: T;
@@ -3096,6 +3210,7 @@ export interface CoursesSelect<T extends boolean = true> {
                 | {
                     linkType?: T;
                     doc?: T;
+                    route?: T;
                     url?: T;
                     email?: T;
                     tel?: T;
@@ -3107,6 +3222,7 @@ export interface CoursesSelect<T extends boolean = true> {
                 | {
                     linkType?: T;
                     doc?: T;
+                    route?: T;
                     url?: T;
                     email?: T;
                     tel?: T;
@@ -3140,6 +3256,7 @@ export interface CoursesSelect<T extends boolean = true> {
                 | {
                     linkType?: T;
                     doc?: T;
+                    route?: T;
                     url?: T;
                     email?: T;
                     tel?: T;
@@ -3206,6 +3323,7 @@ export interface CoursesSelect<T extends boolean = true> {
                       | {
                           linkType?: T;
                           doc?: T;
+                          route?: T;
                           url?: T;
                           email?: T;
                           tel?: T;
@@ -3219,6 +3337,7 @@ export interface CoursesSelect<T extends boolean = true> {
                 | {
                     linkType?: T;
                     doc?: T;
+                    route?: T;
                     url?: T;
                     email?: T;
                     tel?: T;
@@ -3260,6 +3379,7 @@ export interface CoursesSelect<T extends boolean = true> {
                 | {
                     linkType?: T;
                     doc?: T;
+                    route?: T;
                     url?: T;
                     email?: T;
                     tel?: T;
@@ -3284,6 +3404,7 @@ export interface CoursesSelect<T extends boolean = true> {
                 | {
                     linkType?: T;
                     doc?: T;
+                    route?: T;
                     url?: T;
                     email?: T;
                     tel?: T;
@@ -3307,6 +3428,7 @@ export interface CoursesSelect<T extends boolean = true> {
                 | {
                     linkType?: T;
                     doc?: T;
+                    route?: T;
                     url?: T;
                     email?: T;
                     tel?: T;
@@ -3782,7 +3904,7 @@ export interface SiteSetting {
   socialLinks?:
     | {
         link?: {
-          linkType?: ('internal' | 'external' | 'email' | 'tel') | null;
+          linkType?: ('internal' | 'route' | 'external' | 'email' | 'tel') | null;
           doc?:
             | ({
                 relationTo: 'pages';
@@ -3796,6 +3918,10 @@ export interface SiteSetting {
                 relationTo: 'courses';
                 value: number | Course;
               } | null);
+          /**
+           * Home page or an automatic listing (services, training).
+           */
+          route?: ('home' | 'services' | 'training') | null;
           url?: string | null;
           email?: string | null;
           tel?: string | null;
@@ -3812,7 +3938,7 @@ export interface SiteSetting {
   legalLinks?:
     | {
         link?: {
-          linkType?: ('internal' | 'external' | 'email' | 'tel') | null;
+          linkType?: ('internal' | 'route' | 'external' | 'email' | 'tel') | null;
           doc?:
             | ({
                 relationTo: 'pages';
@@ -3826,6 +3952,10 @@ export interface SiteSetting {
                 relationTo: 'courses';
                 value: number | Course;
               } | null);
+          /**
+           * Home page or an automatic listing (services, training).
+           */
+          route?: ('home' | 'services' | 'training') | null;
           url?: string | null;
           email?: string | null;
           tel?: string | null;
@@ -3848,6 +3978,16 @@ export interface SiteSetting {
    * The privacy notice (a page with the legal template). The contact form is shown only in languages where this page is published.
    */
   privacyNotice?: (number | null) | Page;
+  /**
+   * The page with the contact form. Service and course pages and the header link to it where it is published.
+   */
+  contactPage?: (number | null) | Page;
+  listings?: {
+    servicesHeading?: string | null;
+    servicesIntro?: string | null;
+    trainingHeading?: string | null;
+    trainingIntro?: string | null;
+  };
   enquiryTopics?:
     | {
         label: string;
@@ -3871,7 +4011,7 @@ export interface HeaderNav {
   items?:
     | {
         link: {
-          linkType?: ('internal' | 'external' | 'email' | 'tel') | null;
+          linkType?: ('internal' | 'route' | 'external' | 'email' | 'tel') | null;
           doc?:
             | ({
                 relationTo: 'pages';
@@ -3885,6 +4025,10 @@ export interface HeaderNav {
                 relationTo: 'courses';
                 value: number | Course;
               } | null);
+          /**
+           * Home page or an automatic listing (services, training).
+           */
+          route?: ('home' | 'services' | 'training') | null;
           url?: string | null;
           email?: string | null;
           tel?: string | null;
@@ -3898,7 +4042,7 @@ export interface HeaderNav {
         children?:
           | {
               link: {
-                linkType?: ('internal' | 'external' | 'email' | 'tel') | null;
+                linkType?: ('internal' | 'route' | 'external' | 'email' | 'tel') | null;
                 doc?:
                   | ({
                       relationTo: 'pages';
@@ -3912,6 +4056,10 @@ export interface HeaderNav {
                       relationTo: 'courses';
                       value: number | Course;
                     } | null);
+                /**
+                 * Home page or an automatic listing (services, training).
+                 */
+                route?: ('home' | 'services' | 'training') | null;
                 url?: string | null;
                 email?: string | null;
                 tel?: string | null;
@@ -3941,7 +4089,7 @@ export interface FooterNav {
   items?:
     | {
         link: {
-          linkType?: ('internal' | 'external' | 'email' | 'tel') | null;
+          linkType?: ('internal' | 'route' | 'external' | 'email' | 'tel') | null;
           doc?:
             | ({
                 relationTo: 'pages';
@@ -3955,6 +4103,10 @@ export interface FooterNav {
                 relationTo: 'courses';
                 value: number | Course;
               } | null);
+          /**
+           * Home page or an automatic listing (services, training).
+           */
+          route?: ('home' | 'services' | 'training') | null;
           url?: string | null;
           email?: string | null;
           tel?: string | null;
@@ -3968,7 +4120,7 @@ export interface FooterNav {
         children?:
           | {
               link: {
-                linkType?: ('internal' | 'external' | 'email' | 'tel') | null;
+                linkType?: ('internal' | 'route' | 'external' | 'email' | 'tel') | null;
                 doc?:
                   | ({
                       relationTo: 'pages';
@@ -3982,6 +4134,10 @@ export interface FooterNav {
                       relationTo: 'courses';
                       value: number | Course;
                     } | null);
+                /**
+                 * Home page or an automatic listing (services, training).
+                 */
+                route?: ('home' | 'services' | 'training') | null;
                 url?: string | null;
                 email?: string | null;
                 tel?: string | null;
@@ -4014,7 +4170,7 @@ export interface Banner {
    */
   message?: string | null;
   link?: {
-    linkType?: ('internal' | 'external' | 'email' | 'tel') | null;
+    linkType?: ('internal' | 'route' | 'external' | 'email' | 'tel') | null;
     doc?:
       | ({
           relationTo: 'pages';
@@ -4028,6 +4184,10 @@ export interface Banner {
           relationTo: 'courses';
           value: number | Course;
         } | null);
+    /**
+     * Home page or an automatic listing (services, training).
+     */
+    route?: ('home' | 'services' | 'training') | null;
     url?: string | null;
     email?: string | null;
     tel?: string | null;
@@ -4090,6 +4250,7 @@ export interface SiteSettingsSelect<T extends boolean = true> {
           | {
               linkType?: T;
               doc?: T;
+              route?: T;
               url?: T;
               email?: T;
               tel?: T;
@@ -4112,6 +4273,7 @@ export interface SiteSettingsSelect<T extends boolean = true> {
           | {
               linkType?: T;
               doc?: T;
+              route?: T;
               url?: T;
               email?: T;
               tel?: T;
@@ -4127,6 +4289,15 @@ export interface SiteSettingsSelect<T extends boolean = true> {
         id?: T;
       };
   privacyNotice?: T;
+  contactPage?: T;
+  listings?:
+    | T
+    | {
+        servicesHeading?: T;
+        servicesIntro?: T;
+        trainingHeading?: T;
+        trainingIntro?: T;
+      };
   enquiryTopics?:
     | T
     | {
@@ -4152,6 +4323,7 @@ export interface HeaderNavSelect<T extends boolean = true> {
           | {
               linkType?: T;
               doc?: T;
+              route?: T;
               url?: T;
               email?: T;
               tel?: T;
@@ -4167,6 +4339,7 @@ export interface HeaderNavSelect<T extends boolean = true> {
                 | {
                     linkType?: T;
                     doc?: T;
+                    route?: T;
                     url?: T;
                     email?: T;
                     tel?: T;
@@ -4196,6 +4369,7 @@ export interface FooterNavSelect<T extends boolean = true> {
           | {
               linkType?: T;
               doc?: T;
+              route?: T;
               url?: T;
               email?: T;
               tel?: T;
@@ -4211,6 +4385,7 @@ export interface FooterNavSelect<T extends boolean = true> {
                 | {
                     linkType?: T;
                     doc?: T;
+                    route?: T;
                     url?: T;
                     email?: T;
                     tel?: T;
@@ -4239,6 +4414,7 @@ export interface BannerSelect<T extends boolean = true> {
     | {
         linkType?: T;
         doc?: T;
+        route?: T;
         url?: T;
         email?: T;
         tel?: T;
