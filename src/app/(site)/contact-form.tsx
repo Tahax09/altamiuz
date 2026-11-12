@@ -8,7 +8,7 @@ import { getPayload } from 'payload'
 import { enquiryTopics, privacyNoticeFor } from '@/modules/enquiries'
 import { href, t, type Locale } from '@/modules/i18n'
 import { getConfig } from '@/modules/platform'
-import { EnquiryForm } from '@/ui/enquiry/EnquiryForm'
+import { LazyEnquiryForm as EnquiryForm } from '@/ui/enquiry/LazyEnquiryForm'
 import { ENQUIRY_MESSAGE_KEYS, type EnquiryMessages } from '@/ui/enquiry/messages'
 
 const TURNSTILE_SCRIPT = 'https://challenges.cloudflare.com/turnstile/v0/api.js'

@@ -1,5 +1,8 @@
 // Interface strings that are not editor-managed content (FR-005). Same keys as ar.ts.
+import { statusMessages } from './status'
+
 export const en = {
+  ...statusMessages.en,
   skipToContent: 'Skip to content',
   mainNavigation: 'Main navigation',
   footerNavigation: 'Footer',
@@ -28,10 +31,6 @@ export const en = {
   notFoundTitle: 'Page not found',
   notFoundLinks: 'Where to go next',
   notFoundBody: 'We could not find that page. It may have moved or been removed.',
-  errorTitle: 'Something went wrong',
-  errorBody: 'This page cannot be shown right now. Please try again later.',
-  backHome: 'Back to the home page',
-  tryAgain: 'Try again',
   enquiryName: 'Name',
   enquiryEmail: 'Email address',
   enquiryPhone: 'Phone (optional)',
@@ -76,5 +75,4 @@ export const en = {
   listingEmptyHint: 'Please check back soon, or contact us in the meantime.',
   mediaPending: 'Image to be added ({ratio})',
   socialLinks: 'Social media',
-  errorCode: 'Error',
 } as const

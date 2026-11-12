@@ -94,7 +94,7 @@ describe('homepage sections', () => {
       { blockType: 'standards', eyebrow: 'E', heading: 'H', intro: 'I', items: [{ name: 'N' }] },
     ])
     expect(out).toContain('<p class="eyebrow">E</p><h2>H</h2><p class="section__intro">I</p>')
-    expect(out).toContain('<h3>N</h3>')
+    expect(out).toContain('<h3 class="register__name">N</h3>')
   })
 
   it('resource cards and "more" links never emit unsafe hrefs', () => {

@@ -1,8 +1,10 @@
 // Arabic interface strings (FR-005). Same keys as en.ts. Pending native-speaker review before
 // launch (content dependency, alongside CD-13); not editor-managed content.
 import type { en } from './en'
+import { statusMessages } from './status'
 
 export const ar: Record<keyof typeof en, string> = {
+  ...statusMessages.ar,
   skipToContent: 'تخطَّ إلى المحتوى',
   mainNavigation: 'التنقل الرئيسي',
   footerNavigation: 'روابط التذييل',
@@ -31,10 +33,6 @@ export const ar: Record<keyof typeof en, string> = {
   notFoundTitle: 'الصفحة غير موجودة',
   notFoundLinks: 'إلى أين بعد ذلك',
   notFoundBody: 'لم نعثر على هذه الصفحة. ربما نُقلت أو أُزيلت.',
-  errorTitle: 'حدث خطأ',
-  errorBody: 'تعذّر عرض هذه الصفحة الآن. يرجى المحاولة لاحقاً.',
-  backHome: 'العودة إلى الصفحة الرئيسية',
-  tryAgain: 'إعادة المحاولة',
   enquiryName: 'الاسم',
   enquiryEmail: 'البريد الإلكتروني',
   enquiryPhone: 'الهاتف (اختياري)',
@@ -77,5 +75,4 @@ export const ar: Record<keyof typeof en, string> = {
   listingEmptyHint: 'يُرجى العودة قريبًا، أو التواصل معنا في الأثناء.',
   mediaPending: 'صورة ستُضاف ({ratio})',
   socialLinks: 'وسائل التواصل الاجتماعي',
-  errorCode: 'خطأ',
 }

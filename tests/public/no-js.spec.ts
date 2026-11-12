@@ -62,7 +62,7 @@ for (const [path, locale] of [
     ).toBeVisible()
     const button = page.getByRole('link', { name: NOT_FOUND[locale].home })
     expect(await button.evaluate((e) => getComputedStyle(e).backgroundColor)).toBe(
-      'rgb(18, 53, 91)',
+      'rgb(49, 72, 200)', // --cobalt: the site stylesheet is applied
     )
     expect(res!.headers()['x-robots-tag']).toBe('noindex, nofollow')
   })

@@ -36,3 +36,16 @@ not added: a fourth family would exceed the 120 KB per-language font budget.
 - Preview now loads the public stylesheet and fonts (FR-022: drafts look as published).
 - Adding a Radix-based shadcn component later needs a new decision: it adds client JavaScript.
 - `.next/cache/fetch-cache` is cleared by the browser-test setup (stale data from a previous run).
+
+## Amendment 1 (2026-11-12, V-2)
+
+- The public visual layer was rebuilt for the V-2 direction (`docs/design/v2.md`, proposal for
+  owner review). Stack unchanged: same dependencies, the same single Motion island, which gained
+  plate unmasking and a drawn process line (WAAPI, CSSOM only, off under reduced motion and
+  without JavaScript).
+- Script budget: the error boundary imports only `statusMessages`, and the enquiry form is
+  code-split through `next/dynamic` in a Client Component (a Server Component's dynamic import
+  is not split, `node_modules/next/dist/docs/01-app/02-guides/lazy-loading.md`). It stays
+  server-rendered, so the form works without JavaScript.
+- Pattern sources were re-assessed (shadcn/ui, Motion Primitives, Aceternity UI, React Bits,
+  21st.dev); what was adopted or rejected, and why, is in `docs/design/v2.md`.

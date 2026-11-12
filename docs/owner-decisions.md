@@ -79,12 +79,12 @@ needs it.
 
 ## Design and performance (no ID; recorded under T139)
 
-- **JavaScript budget vs Motion.** Lighthouse fails the 150 KB script budget on every page by
-  about 2.6 KB (156,215 B), unchanged since W-1. Options: keep Motion for React (ADR-011) and let
-  engineering look for savings elsewhere, or replace the one Motion island with native browser
-  animation (same behaviour). Raising the budget is not proposed. Blocks: D (CI runs Lighthouse).
-- **Visual design.** The V-1 refinement (`specs/001-v1-website-cms/tasks.md`) is a proposal for
-  review, not an approved design.
+- **JavaScript budget.** Resolved by engineering in V-2 (2026-11-12) without dropping Motion or
+  raising the budget: 152,576 B on every Lighthouse page, under the 153,600 B limit.
+- **Visual design (V-2).** V-1 was rejected. V-2 (`docs/design/v2.md`) follows the direction you
+  named (WithSecure-style structure) and is a proposal: approve it, or list changes, after
+  reviewing the screenshots. Missing visible content on the real site is the content decisions
+  above, not the design.
 
 ## After each decision (engineering, no owner action)
 

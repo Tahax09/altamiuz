@@ -17,6 +17,7 @@ export {
   type RouteMatch,
   type RoutedCollection,
 } from './routes'
+export { statusMessages } from './messages/status'
 export { LOCALE_COOKIE, localeOfPath, negotiateLocale } from './negotiate'
 export {
   formatDate,

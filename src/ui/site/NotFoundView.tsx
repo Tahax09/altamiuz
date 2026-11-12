@@ -18,13 +18,13 @@ export function NotFoundView({ locale }: { locale: Locale }) {
       }
     >
       <nav className="status-page__links" aria-label={t(locale, 'notFoundLinks')}>
-        <ul className="card-grid">
+        <ul className="ledger">
           {(['services', 'training'] as const).map((key) => (
-            <li key={key} className="card card--link">
-              <h2>
+            <li key={key} className="ledger__row">
+              <h2 className="ledger__title">
                 <a href={href(key, locale)}>{t(locale, key)}</a>
               </h2>
-              <Icon name="arrow" className="card__arrow" />
+              <Icon name="arrow" className="ledger__arrow" />
             </li>
           ))}
         </ul>

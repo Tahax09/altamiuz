@@ -24,7 +24,7 @@ export function PageHeader({
   tone?: 'band' | 'plain'
 }) {
   return (
-    <header className={cn('page-header', tone === 'band' && 'page-header--band')}>
+    <header className={cn('page-header', tone === 'plain' && 'page-header--plain')}>
       <div className="page-header__inner">
         <Breadcrumbs locale={locale} items={crumbs} />
         {eyebrow ? <p className="eyebrow mt-6 mb-0">{eyebrow}</p> : null}

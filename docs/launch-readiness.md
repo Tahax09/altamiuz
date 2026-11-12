@@ -45,17 +45,16 @@ v1 until an owner decision.
 
 ## Engineering items still open
 
-| ID   | Item                                                                                                         | Next action                                                                                                     |
-| ---- | ------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------- |
-| A-1  | Media public-set cache per instance (low)                                                                    | verify on preview; shared invalidation if reproduced                                                            |
-| A-2  | Sign-in timing floor under load (low)                                                                        | measure on preview                                                                                              |
-| A-6  | Security suite not yet run through the Vercel edge                                                           | run `pnpm test:security` against the preview                                                                    |
-| T139 | Lighthouse script budget: 156,215 B > 153,600 B on all 10 URLs since W-1 (`f539024`, re-measured 2026-11-12) | decide: keep Motion (ADR-011) and find 2.6 KB elsewhere, or replace it with native animation; budget not raised |
-| T127 | Analytics (OD-3)                                                                                             | after decision                                                                                                  |
-| T119 | Legacy redirect seeding                                                                                      | loader done (`pnpm seed:redirects`); run after CD-12                                                            |
-| T138 | Manual a11y walkthrough                                                                                      | after OD-5                                                                                                      |
-| T141 | Preview protection checklist                                                                                 | after O-1                                                                                                       |
-| T142 | Usability sessions                                                                                           | after OD-5                                                                                                      |
+| ID   | Item                                               | Next action                                          |
+| ---- | -------------------------------------------------- | ---------------------------------------------------- |
+| A-1  | Media public-set cache per instance (low)          | verify on preview; shared invalidation if reproduced |
+| A-2  | Sign-in timing floor under load (low)              | measure on preview                                   |
+| A-6  | Security suite not yet run through the Vercel edge | run `pnpm test:security` against the preview         |
+| T127 | Analytics (OD-3)                                   | after decision                                       |
+| T119 | Legacy redirect seeding                            | loader done (`pnpm seed:redirects`); run after CD-12 |
+| T138 | Manual a11y walkthrough                            | after OD-5                                           |
+| T141 | Preview protection checklist                       | after O-1                                            |
+| T142 | Usability sessions                                 | after OD-5                                           |
 
 ## Success criteria
 

@@ -1,7 +1,7 @@
 'use client'
 // Localized error page (T104, FR-008, FR-095): never shows the error message, stack or digest.
 import { useState } from 'react'
-import { href, messages, type Locale } from '@/modules/i18n'
+import { href, statusMessages, type Locale } from '@/modules/i18n'
 import { StatusView } from '@/ui/page/StatusView'
 
 export default function SiteError({ reset }: { error: Error; reset: () => void }) {
@@ -9,7 +9,7 @@ export default function SiteError({ reset }: { error: Error; reset: () => void }
   const [locale] = useState<Locale>(() =>
     typeof document !== 'undefined' && document.documentElement.lang === 'en' ? 'en' : 'ar',
   )
-  const m = messages[locale]
+  const m = statusMessages[locale]
   return (
     <StatusView
       code={m.errorCode}

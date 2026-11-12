@@ -23,10 +23,59 @@ import {
   type RevealAxis,
 } from '../motion/tokens'
 
-function clear(el: HTMLElement) {
-  el.style.removeProperty('opacity')
-  el.style.removeProperty('transform')
+type Entrance = { el: HTMLElement; from: Keyframe; to: Keyframe; delay: number }
+
+/** Start and end frames for one group, by kind (`data-reveal` value). */
+function entrances(group: HTMLElement, dir: 'ltr' | 'rtl'): Entrance[] {
+  const kind = group.dataset.reveal
+  if (kind === 'plate')
+    // Images unmask downward; the frame keeps its size, so nothing below moves.
+    return [
+      {
+        el: group,
+        from: { clipPath: 'inset(0 0 22% 0)', opacity: '0' },
+        to: { clipPath: 'inset(0 0 0% 0)', opacity: '1' },
+        delay: 0,
+      },
+    ]
+  const out: Entrance[] = []
+  // A drawn rule grows from the start of the reading direction (process timeline).
+  for (const line of group.querySelectorAll<HTMLElement>('[data-draw]')) {
+    const vertical = line.offsetHeight > line.offsetWidth
+    const axis = vertical ? 'scaleY' : 'scaleX'
+    out.push({
+      el: line,
+      from: { transform: `${axis}(0)` },
+      to: { transform: `${axis}(1)` },
+      delay: 0,
+    })
+  }
+  const items = Array.from(group.querySelectorAll<HTMLElement>('[data-reveal-item]'))
+  const targets = items.length ? items : [group]
+  const axis: RevealAxis = kind === 'inline' ? 'inline' : 'block'
+  const { x, y } = revealOffset(axis, dir)
+  targets.forEach((el, i) =>
+    out.push({
+      el,
+      from: { opacity: '0', transform: `translate3d(${x}px, ${y}px, 0)` },
+      to: { opacity: '1', transform: 'translate3d(0, 0, 0)' },
+      delay: revealDelay(i) + (out.length && kind === 'inline' ? 0.12 : 0),
+    }),
+  )
+  return out
 }
+
+const STYLE_KEYS = ['opacity', 'transform', 'clipPath'] as const
+function clear(el: HTMLElement) {
+  for (const k of STYLE_KEYS) el.style.removeProperty(k === 'clipPath' ? 'clip-path' : k)
+}
+function apply(el: HTMLElement, frame: Keyframe) {
+  for (const k of STYLE_KEYS) if (frame[k] !== undefined) el.style[k] = String(frame[k])
+}
+
+/** `{ prop: [from, to] }` for Motion's animate(). */
+const keyframes = (e: Entrance) =>
+  Object.fromEntries(Object.keys(e.to).map((k) => [k, [e.from[k], e.to[k]]]))
 
 function useReveal() {
   const [, animate] = useAnimate()
@@ -37,32 +86,28 @@ function useReveal() {
     const pending: HTMLElement[] = []
     try {
       for (const group of document.querySelectorAll<HTMLElement>('[data-reveal]')) {
+        if (group.dataset.reveal === 'none') continue
+        if (group.parentElement?.closest('[data-reveal]:not([data-reveal="none"])')) continue
         if (group.getBoundingClientRect().top < window.innerHeight) continue // already visible
-        const items = Array.from(group.querySelectorAll<HTMLElement>('[data-reveal-item]'))
-        const targets = items.length ? items : [group]
-        const axis: RevealAxis = group.dataset.reveal === 'inline' ? 'inline' : 'block'
-        const { x, y } = revealOffset(axis, dir)
-        const from = `translate3d(${x}px, ${y}px, 0)`
-        for (const el of targets) {
-          el.style.opacity = '0'
-          el.style.transform = from
-          pending.push(el)
+        const list = entrances(group, dir)
+        for (const e of list) {
+          apply(e.el, e.from)
+          pending.push(e.el)
         }
         const stop = inView(
           group,
           () => {
             stop()
-            targets.forEach((el, i) => {
+            for (const e of list)
               void Promise.resolve(
-                animate(
-                  el,
-                  { opacity: [0, 1], transform: [from, 'translate3d(0, 0, 0)'] },
-                  { duration: DURATION.slow, ease: EASE_STANDARD, delay: revealDelay(i) },
-                ),
+                animate(e.el, keyframes(e) as never, {
+                  duration: DURATION.slow,
+                  ease: EASE_STANDARD,
+                  delay: e.delay,
+                }),
               )
                 .catch(() => undefined)
-                .finally(() => clear(el))
-            })
+                .finally(() => clear(e.el))
           },
           { margin: REVEAL.margin },
         )
