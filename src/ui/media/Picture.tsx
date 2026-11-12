@@ -3,6 +3,8 @@
 // Alt text comes from the image for the current locale; decorative images get alt="" and are
 // hidden from assistive technology. The focal point becomes CSS classes (the public CSP allows no
 // inline styles) that set `object-position`, so every crop keeps the subject (site.css `.fx-*`).
+// Artwork with transparency (logos) uses `fallback="webp"`: the JPEG variants have no alpha
+// channel, so they are left out and WebP (universal since 2020) is the fallback instead.
 import { MEDIA_FORMATS, MEDIA_WIDTHS, variantName, type MediaFormat } from '@/modules/media'
 
 type Size = { filename?: string | null; width?: number | null; height?: number | null }
@@ -48,6 +50,7 @@ export function Picture({
   className,
   crop = true,
   eager = false,
+  fallback: fallbackFormat = 'jpeg',
 }: {
   media: unknown
   sizes?: string
@@ -55,14 +58,18 @@ export function Picture({
   /** Fill a fixed aspect ratio (cover + focal point); otherwise keep the whole image (contain). */
   crop?: boolean
   eager?: boolean
+  /** `webp` keeps transparency (logos); JPEG variants are then not offered at all. */
+  fallback?: 'jpeg' | 'webp'
 }) {
   if (!media || typeof media !== 'object') return null
   const m = media as PublicMedia
   if (!m.filename || !SAFE_NAME.test(m.filename) || !m.width || !m.height) return null
   const decorative = m.decorative === true
   const alt = decorative ? '' : typeof m.alt === 'string' ? m.alt : ''
-  const fallback = srcset(m, 'jpeg')
+  const fallback = srcset(m, fallbackFormat)
   const largestJpeg = fallback.split(', ').at(-1)?.split(' ')[0] ?? fileUrl(m.filename)
+  const sources: MediaFormat[] =
+    fallbackFormat === 'webp' ? ['avif'] : MEDIA_FORMATS.filter((f) => f !== 'jpeg')
   const classes = [
     'media',
     crop ? 'media--crop' : 'media--contain',
@@ -73,7 +80,7 @@ export function Picture({
     .join(' ')
   return (
     <picture className={classes}>
-      {MEDIA_FORMATS.filter((f) => f !== 'jpeg').map((f) => {
+      {sources.map((f) => {
         const set = srcset(m, f)
         return set ? <source key={f} type={TYPE[f]} srcSet={set} sizes={sizes} /> : null
       })}

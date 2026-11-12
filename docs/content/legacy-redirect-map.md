@@ -1,8 +1,16 @@
 # Legacy redirect map (CD-12) — PENDING OWNER APPROVAL
 
-**Status**: blocked. Every target below must be supplied and approved by Altamiuz (CD-12) before
-`scripts/seed-legacy-redirects.ts` (T119) is written and run. Targets must be v1 paths in the
-approved route vocabulary (CD-13); Arabic targets cannot be written until CD-13 is approved.
+**Status**: blocked on CD-12. The loader exists (T119, 2026-11-12): `pnpm seed:redirects` reads
+this table, checks every row and prints the plan without writing; `pnpm seed:redirects apply`
+writes it. Either refuses the whole run while any row is PENDING, has no "Approved by / date",
+keeps a `<placeholder>` path, points off-site or outside a locale, uses a placeholder Arabic route
+segment (CD-13), or targets a page that is not published in that language. Re-runs update rows in
+place (`source: legacy`); redirects created by editors or slug changes are never overwritten.
+
+How to fill a row: `v1 target` = a code-quoted published path such as `` `/en/services` `` or
+`` `/ar/من-نحن` ``; `Type` = 301 (permanent) or 302; `Approved by / date` = name and date. For `/`
+write `A-3` as the target to keep the language redirect (no stored redirect is created). Arabic
+targets under services or training can only be written after CD-13 is approved.
 
 Inventory: FR-065, taken from the legacy sitemap on 2026-10-16. Each source matches with and
 without a trailing slash and in percent-encoded form (ADR-008). Add any further legacy URLs found

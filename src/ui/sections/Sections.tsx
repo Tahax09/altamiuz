@@ -270,7 +270,7 @@ export function Sections({
                   key={key}
                   id={id}
                   data-block="process"
-                  data-reveal=""
+                  data-reveal="inline"
                   className="section section--band"
                 >
                   <SectionHead b={b} />

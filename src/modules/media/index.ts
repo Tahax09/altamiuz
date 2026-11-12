@@ -6,8 +6,11 @@ export { ALLOWED_MIME_TYPES, sniffImage, type ImageFormat } from './sniff'
 export {
   collectMediaRefs,
   findMediaUsage,
+  globalFieldsOf,
   invalidatePublicMedia,
   publicMediaIds,
+  USAGE_GLOBALS,
   type MediaUse,
+  type UsageGlobal,
 } from './usage'
 export { MAX_PIXELS, MAX_UPLOAD_BYTES, prepareImage, UPLOAD_MESSAGES } from './validate'

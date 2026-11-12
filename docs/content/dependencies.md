@@ -22,9 +22,18 @@ approved it. What each dependency holds back on the homepage: `homepage.md`.
 | CD-12 | Destination for every legacy URL (FR-065 inventory)                                    | open   | Legacy redirects (`docs/content/legacy-redirect-map.md`, "pending owner approval"); SC-012                                                                        | Approve the map                                                   |
 | CD-13 | Arabic/English static route vocabulary                                                 | open   | **Production refuses to start** while `ar-vocab-pending-*` segments exist (`routeVocabularyPending`, `loadConfig`); Arabic redirect targets cannot be written     | Approve the Arabic segments for services and training             |
 
+**Reconciled 2026-11-12** (release-readiness stage R-1): every CD reference in `content/`,
+`scripts/`, `src/` and `docs/` was checked against the canonical meanings above; no new
+misattribution was found and no status changed (all 13 remain open: no approved input has been
+received). Since then, engineering readiness only: CD-09 has CMS fields for logos and a default
+social image (`brand-assets.md`); CD-12 has a fail-closed loader (`pnpm seed:redirects`, T119);
+CD-13's production-build effect was re-verified. The decisions themselves, with options and what
+each blocks, are in `docs/owner-decisions.md`.
+
 ## Enforcement summary
 
-- **Hard gates in code**: CD-13 (production start), CD-01/02/05/07 claims (publish gate and
+- **Hard gates in code**: CD-13 (production build and start), CD-12 (`pnpm seed:redirects`
+  refuses any pending or unapproved row; launch, not build), CD-01/02/05/07 claims (publish gate and
   `pnpm check:evidence`), CD-10 (since H-3, 2026-11-08: the contact form is neither shown nor
   accepted in a language without a published privacy notice, and a legal page with "Pending"
   sections cannot be published; `docs/content/privacy-notice.md`).

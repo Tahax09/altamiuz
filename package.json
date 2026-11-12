@@ -44,6 +44,7 @@
     "seed:homepage": "payload run scripts/seed-homepage.ts",
     "seed:contact": "payload run scripts/seed-contact-privacy.ts",
     "seed:pages": "payload run scripts/seed-site-pages.ts",
+    "seed:redirects": "payload run scripts/seed-legacy-redirects.ts",
     "docs:api": "payload run scripts/write-api-docs.ts",
     "ops:restore-drill": "ops/restore-drill.sh",
     "ops:measure-delivery": "ops/measure/delivery.sh",

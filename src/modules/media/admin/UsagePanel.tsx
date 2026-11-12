@@ -5,7 +5,16 @@ import type { UIFieldServerProps } from 'payload'
 import { can, isMfaVerified, roleOf } from '../../access'
 import { findMediaUsage } from '../usage'
 
-const LABEL = { pages: 'Page', services: 'Service', courses: 'Course' } as const
+const LABEL = {
+  pages: 'Page',
+  services: 'Service',
+  courses: 'Course',
+  'site-settings': 'Site settings',
+} as const
+const hrefOf = (u: { collection: keyof typeof LABEL; id: number }) =>
+  u.collection === 'site-settings'
+    ? `/admin/globals/${u.collection}`
+    : `/admin/collections/${u.collection}/${u.id}`
 
 export async function UsagePanel({ id, payload, req }: UIFieldServerProps) {
   // `req.user` carries the server-set MFA flag; the `user` prop is a client-safe copy without it.
@@ -24,7 +33,7 @@ export async function UsagePanel({ id, payload, req }: UIFieldServerProps) {
     >
       <h3 id="altamiuz-usage-h">Where this image is used</h3>
       {uses.length === 0 ? (
-        <p>Not used on any page, service or course.</p>
+        <p>Not used on any page, service or course, nor in the site settings.</p>
       ) : (
         <>
           <p className="altamiuz-usage__warn" role="note" data-testid="media-delete-warning">
@@ -35,8 +44,9 @@ export async function UsagePanel({ id, payload, req }: UIFieldServerProps) {
           <ul>
             {uses.map((u) => (
               <li key={`${u.collection}:${u.id}`}>
-                <a href={`/admin/collections/${u.collection}/${u.id}`}>
-                  {LABEL[u.collection]}: {u.title || `#${u.id}`}
+                <a href={hrefOf(u)}>
+                  {LABEL[u.collection]}
+                  {u.collection === 'site-settings' ? '' : `: ${u.title || `#${u.id}`}`}
                 </a>{' '}
                 ({[u.published && 'published', u.draft && 'draft'].filter(Boolean).join(', ')})
               </li>

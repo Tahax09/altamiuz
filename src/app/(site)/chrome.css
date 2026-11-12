@@ -952,3 +952,26 @@ nav li {
     opacity: 0.6;
   }
 }
+
+/* ------------------------------------------------------------------------------------------
+   Brand marks (CD-09, src/ui/site/Chrome.tsx BrandMark): a logo from site settings replaces the
+   text name; its height is fixed and the width follows the artwork, so the bar never shifts.
+   ------------------------------------------------------------------------------------------ */
+.site-header__logo,
+.site-footer__logo {
+  display: block;
+}
+.site-header__logo img {
+  inline-size: auto;
+  block-size: 2.25rem;
+  max-inline-size: min(14rem, 50vw);
+  object-fit: contain;
+  border-radius: 0;
+}
+.site-footer__logo img {
+  inline-size: auto;
+  block-size: 2.5rem;
+  max-inline-size: 14rem;
+  object-fit: contain;
+  border-radius: 0;
+}

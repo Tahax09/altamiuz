@@ -29,6 +29,42 @@ approval CD-11, Arabic review included).
 Site search, filters and newsletters are out of scope (spec: "Site search … may be proposed
 later"); listings have no filters.
 
+## Seed safety (verified 2026-11-12)
+
+`pnpm seed:pages` (`tests/integration/content/site-pages.test.ts`, 8/8):
+
+- creates every page as a **draft** in English and Arabic (own slug, title, summary, SEO per
+  language); nothing is public after the run, and an Editor cannot publish it;
+- **refuses** to touch a page whose English slug already exists, and changes nothing else in that
+  case; `replace-draft` replaces only the draft (the published version and other pages stay), and
+  keeps section and row ids so translations stay attached;
+- fills menus and site-settings fields **only when empty**, in the draft; a second run reports
+  "unchanged" and never replaces content an editor has entered;
+- creates no claim block (credentials, statistics), so evidence verification and the per-role
+  publish permissions apply unchanged when an editor later adds one.
+
+Known limits: the run stops at the first page whose Arabic slug collides with an existing page;
+pages created before the collision stay as drafts (nothing published or overwritten). Run
+`seed:contact` first, otherwise call-to-action links to the contact page are left empty.
+
+## Content still missing (supply list, nothing invented)
+
+| Page / feature             | Missing input                                                        | Decision                              |
+| -------------------------- | -------------------------------------------------------------------- | ------------------------------------- |
+| All pages                  | copy approval and Arabic review, including Arabic page slugs         | CD-11                                 |
+| Home                       | services (catalogue), standards, expertise, insights; credentials    | CD-04, CD-06, CD-03/07, CD-11/12, G-1 |
+| About                      | company details (legal name, registration, founding year); team      | CD-01, CD-02, CD-03                   |
+| Services listing and pages | the catalogue in both languages                                      | CD-04                                 |
+| Training listing and pages | courses, providers, accreditation evidence; listing introduction     | CD-05                                 |
+| Standards and frameworks   | standards cited and editions (the page's only section)               | CD-06                                 |
+| Expertise and experience   | team expertise; experience claims with evidence (only section)       | CD-03, CD-07                          |
+| Insights and resources     | published insight pages (legacy blog: approval and redirect mapping) | CD-11, CD-12                          |
+| Contact                    | address, phone, email, hours                                         | CD-02                                 |
+| Privacy notice             | seven pending sections                                               | CD-10, CD-01, CD-02, G-2              |
+| Terms of use               | all six sections                                                     | CD-10                                 |
+| Header, footer, favicon    | logos, favicon, colours                                              | CD-09, CD-01                          |
+| Arabic service/course URLs | Arabic route segments                                                | CD-13                                 |
+
 ## Site settings and menus (drafts filled by the seed only where empty)
 
 - Header menu: About (Expertise, Standards and frameworks), Services, Training, Insights. Footer:
@@ -52,4 +88,5 @@ labelled placeholders in preview and collapse on the public site until an image 
 | Logos                                   | `standards.items.logo`, `credentials.items.logo` | contained            | per language                            |
 | Social preview                          | `seo.ogImage`                                    | 1440 px JPEG variant | per language                            |
 
-Brand assets (logo, favicon) remain CD-09; the header shows the company name as text.
+Brand assets (logo, favicon) remain CD-09; the header shows the company name as text until a logo
+is chosen in Site settings → Brand. Formats, sizes and upload locations: `brand-assets.md`.

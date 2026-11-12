@@ -64,6 +64,7 @@ export default async function SiteLayout({
           locale={locale}
           nav={headerNav}
           siteName={typeof settings?.companyName === 'string' ? settings.companyName : undefined}
+          logo={(settings?.brand as { logo?: unknown } | undefined)?.logo}
           alternates={alternates}
           currentPath={path}
           contact={contactLink(settings, locale)}

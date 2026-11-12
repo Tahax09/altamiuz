@@ -149,6 +149,73 @@ describe('header and footer', () => {
     expect(bare).not.toContain('©')
     expect(bare).not.toContain('<address')
   })
+
+  // CD-09: logos from site settings replace the text name; transparent artwork never falls back
+  // to a JPEG variant; a decorative logo keeps the company name as the link's accessible name.
+  const logo = (over: Record<string, unknown> = {}) => {
+    const id = 'b'.repeat(32)
+    return {
+      filename: `${id}.png`,
+      alt: 'Fixture Co logo',
+      width: 1200,
+      height: 300,
+      sizes: Object.fromEntries(
+        [480, 768, 1024].flatMap((w) =>
+          ['avif', 'webp', 'jpeg'].map((f) => [
+            `w${w}_${f}`,
+            { filename: `${id}-${w}x${w / 4}.${f === 'jpeg' ? 'jpg' : f}`, width: w },
+          ]),
+        ),
+      ),
+      ...over,
+    }
+  }
+  it('header and footer show the brand logo when chosen, else the company name as text', () => {
+    const withLogo = html(
+      createElement(SiteHeader, {
+        locale: 'en',
+        nav: null,
+        siteName: 'Fixture Co',
+        logo: logo(),
+        alternates: {},
+      }),
+    )
+    expect(withLogo).toContain('class="media media--contain site-header__logo"')
+    expect(withLogo).toContain('alt="Fixture Co logo"')
+    expect(withLogo).toContain('type="image/avif"')
+    expect(withLogo).not.toContain('.jpg')
+    expect(withLogo).not.toContain('type="image/webp"') // WebP is the <img> fallback itself
+    expect(withLogo).toContain('loading="eager"')
+    const decorative = html(
+      createElement(SiteHeader, {
+        locale: 'en',
+        nav: null,
+        siteName: 'Fixture Co',
+        logo: logo({ decorative: true }),
+        alternates: {},
+      }),
+    )
+    expect(decorative).toContain('<span class="sr-only">Fixture Co</span>')
+    const text = html(
+      createElement(SiteHeader, {
+        locale: 'en',
+        nav: null,
+        siteName: 'Fixture Co',
+        alternates: {},
+      }),
+    )
+    expect(text).toMatch(/class="site-header__home" href="\/en">Fixture Co<\/a>/)
+    const footer = html(
+      createElement(SiteFooter, {
+        locale: 'en',
+        nav: null,
+        settings: { companyName: 'Fixture Co', brand: { logoInverse: logo({ alt: 'Inverse' }) } },
+      }),
+    )
+    expect(footer).toContain('site-footer__logo')
+    expect(footer).toContain('alt="Inverse"')
+    expect(footer).toContain('<bdi>Fixture Co</bdi>') // copyright keeps the text name
+  })
 })
 
 describe('breadcrumbs and page templates', () => {

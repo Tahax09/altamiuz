@@ -7,6 +7,7 @@ import { formatPhone, href, LANGUAGE_NAMES, LOCALES, t, type Locale } from '@/mo
 import { safeHref } from '@/modules/content'
 import { cn } from '../lib/cn'
 import { linkTarget, newTabProps, samePath, type CmsLink } from '../lib/links'
+import { Picture, type PublicMedia } from '../media/Picture'
 import { buttonVariants } from '../primitives/button'
 import { Icon } from '../primitives/Icon'
 import { internalHrefFor } from '../sections/Sections'
@@ -230,6 +231,40 @@ export function SkipLink({ locale }: { locale: Locale }) {
   )
 }
 
+/**
+ * Brand mark (CD-09): the logo from published site settings when one is chosen for this language,
+ * otherwise the company name as text. A logo whose alt text is empty (decorative) still gives the
+ * link an accessible name through the hidden company name.
+ */
+export function BrandMark({
+  logo,
+  name,
+  className,
+  eager = false,
+}: {
+  logo: unknown
+  name: string
+  className: string
+  eager?: boolean
+}) {
+  const m = logo && typeof logo === 'object' ? (logo as PublicMedia) : null
+  if (!m?.filename) return <>{name}</>
+  const named = typeof m.alt === 'string' && m.alt.trim() !== '' && m.decorative !== true
+  return (
+    <>
+      <Picture
+        media={m}
+        crop={false}
+        fallback="webp"
+        sizes="14rem"
+        eager={eager}
+        className={className}
+      />
+      {named ? null : <span className="sr-only">{name}</span>}
+    </>
+  )
+}
+
 /** The contact page from published site settings, if it is published in this language. */
 export function contactLink(
   settings: Record<string, unknown> | null,
@@ -245,6 +280,7 @@ export function SiteHeader({
   locale,
   nav,
   siteName,
+  logo = null,
   alternates,
   currentPath = '',
   contact = null,
@@ -252,6 +288,8 @@ export function SiteHeader({
   locale: Locale
   nav: Record<string, unknown> | null
   siteName?: string
+  /** `brand.logo` from published site settings (populated media), if any. */
+  logo?: unknown
   alternates: Partial<Record<Locale, string | null>>
   currentPath?: string
   contact?: Resolved | null
@@ -262,7 +300,12 @@ export function SiteHeader({
     <header className="site-header">
       <div className="site-header__bar">
         <a className="site-header__home" href={href('home', locale)}>
-          {siteName || t(locale, 'home')}
+          <BrandMark
+            logo={logo}
+            name={siteName || t(locale, 'home')}
+            className="site-header__logo"
+            eager
+          />
         </a>
         {groups.length ? (
           <DesktopNav groups={groups} locale={locale} current={currentPath} />
@@ -373,6 +416,8 @@ export function SiteFooter({
 }) {
   const name = str(settings?.companyName)
   const about = str((settings?.defaultSeo as { description?: unknown } | undefined)?.description)
+  const logo = (settings?.brand as { logoInverse?: unknown } | undefined)?.logoInverse
+  const hasLogo = !!logo && typeof logo === 'object' && !!(logo as PublicMedia).filename
   const groups = resolveMenu(nav?.items, locale)
   const flat = groups.filter((g) => !g.children.length && g.href)
   const columns = groups.filter((g) => g.children.length)
@@ -403,7 +448,17 @@ export function SiteFooter({
     <footer className="site-footer">
       <div className="site-footer__grid">
         <div className="site-footer__brand">
-          {name ? <p className="site-footer__name">{name}</p> : null}
+          {hasLogo ? (
+            <p className="site-footer__name">
+              <BrandMark
+                logo={logo}
+                name={name || t(locale, 'home')}
+                className="site-footer__logo"
+              />
+            </p>
+          ) : name ? (
+            <p className="site-footer__name">{name}</p>
+          ) : null}
           {about ? <p className="site-footer__about">{about}</p> : null}
         </div>
         {groups.length ? (

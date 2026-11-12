@@ -105,7 +105,8 @@ export async function docMetadata(
     siteName,
     noindex: seo.noindex === true,
     canonicalOverride: seo.canonicalOverride,
-    image: ogImage(seo.ogImage, siteUrl()),
+    // The page's own social image, else the site default (site settings → defaultSeo.ogImage).
+    image: ogImage(seo.ogImage, siteUrl()) ?? ogImage(fallback.ogImage, siteUrl()),
     indexable: indexable(),
   })
 }
@@ -135,6 +136,7 @@ export async function staticMetadata(
     // A listing introduction (site settings) describes the listing better than the site default.
     description: description ? clip(description, 160) : seo.description,
     siteName,
+    image: ogImage(seo.ogImage, siteUrl()),
     indexable: indexable(),
   })
 }

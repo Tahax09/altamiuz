@@ -3931,9 +3931,26 @@ export interface SiteSetting {
         id?: string | null;
       }[]
     | null;
+  /**
+   * Logos for the header and footer, per language. PNG or WebP with a transparent background, at least 960 px wide. The company name is shown as text until a logo is chosen.
+   */
+  brand?: {
+    /**
+     * Header logo, dark artwork on the light page background.
+     */
+    logo?: (number | null) | Media;
+    /**
+     * Footer logo, light artwork on the navy footer.
+     */
+    logoInverse?: (number | null) | Media;
+  };
   defaultSeo?: {
     title?: string | null;
     description?: string | null;
+    /**
+     * Default social preview image (1200 × 630 px) for pages that have none of their own.
+     */
+    ogImage?: (number | null) | Media;
   };
   legalLinks?:
     | {
@@ -4259,11 +4276,18 @@ export interface SiteSettingsSelect<T extends boolean = true> {
             };
         id?: T;
       };
+  brand?:
+    | T
+    | {
+        logo?: T;
+        logoInverse?: T;
+      };
   defaultSeo?:
     | T
     | {
         title?: T;
         description?: T;
+        ogImage?: T;
       };
   legalLinks?:
     | T

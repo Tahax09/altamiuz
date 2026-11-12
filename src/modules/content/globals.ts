@@ -18,6 +18,7 @@ import type {
 } from 'payload'
 import { allow, can, isMfaVerified, roleOf, type Resource } from '../access'
 import { recordAudit } from '../audit'
+import { assertPublishableImages, globalFieldsOf, invalidatePublicMedia } from '../media'
 import { expireCacheTags, getConfig } from '../platform'
 import { contentRead, mayDo } from './access'
 import { assertClaimsVerified, evidenceGroup, unverifiedClaims } from './evidence'
@@ -122,10 +123,13 @@ const auditGlobal =
         meta: slug === 'site-settings' ? { global: slug } : { global: slug, operation },
       })
     expireCacheTags(`global:${slug}`)
+    if (slug === 'site-settings') invalidatePublicMedia() // brand images (FR-056) may change
     return doc
   }
 
-/** L-1 backstop for globals: a publish needs every claim verified for what is stored and published. */
+/** L-1 backstop for globals: a publish needs every claim verified for what is stored and published;
+ * site-settings images (logos, default social image) need alt text in every published language
+ * or must be decorative (FR-054), like images on pages. */
 const verifyStoredGlobalClaims =
   (slug: SiteGlobal): GlobalAfterChangeHook =>
   async ({ doc, req }) => {
@@ -133,7 +137,18 @@ const verifyStoredGlobalClaims =
     // A-8: check the draft and the published version (a per-language publish merges them).
     const read = (draft: boolean) =>
       req.payload.findGlobal({ slug, locale: 'all', draft, depth: 0, overrideAccess: true, req })
-    assertClaimsVerified(await read(true), await read(false))
+    const published = await read(false)
+    assertClaimsVerified(await read(true), published)
+    const status = (published as { _status?: unknown })._status
+    if (slug === 'site-settings' && status && typeof status === 'object')
+      await assertPublishableImages(
+        req,
+        globalFieldsOf(req.payload, slug),
+        published as unknown as Record<string, unknown>,
+        Object.entries(status as Record<string, unknown>)
+          .filter(([, st]) => st === 'published')
+          .map(([locale]) => locale),
+      )
     return doc
   }
 
@@ -360,11 +375,48 @@ export const siteSettings = versionedGlobal('site-settings', 'Site settings', [
   { name: 'hours', type: 'text', localized: true, maxLength: 200 },
   { name: 'socialLinks', type: 'array', maxRows: 10, fields: [linkGroup('link')] },
   {
+    // CD-09: brand images from the media library (docs/content/brand-assets.md). Each is per
+    // language, so Arabic and English wordmarks can differ; alt text lives on the image. Until an
+    // image is chosen the company name is shown as text. The favicon is a static file, not CMS.
+    name: 'brand',
+    type: 'group',
+    admin: {
+      description:
+        'Logos for the header and footer, per language. PNG or WebP with a transparent background, at least 960 px wide. The company name is shown as text until a logo is chosen.',
+    },
+    fields: [
+      {
+        name: 'logo',
+        type: 'upload',
+        relationTo: 'media',
+        localized: true,
+        admin: { description: 'Header logo, dark artwork on the light page background.' },
+      },
+      {
+        name: 'logoInverse',
+        type: 'upload',
+        relationTo: 'media',
+        localized: true,
+        admin: { description: 'Footer logo, light artwork on the navy footer.' },
+      },
+    ],
+  },
+  {
     name: 'defaultSeo',
     type: 'group',
     fields: [
       { name: 'title', type: 'text', localized: true, maxLength: 60 },
       { name: 'description', type: 'textarea', localized: true, maxLength: 160 },
+      {
+        // FR-060: used when a page has no social preview image of its own (1200 × 630 px).
+        name: 'ogImage',
+        type: 'upload',
+        relationTo: 'media',
+        admin: {
+          description:
+            'Default social preview image (1200 × 630 px) for pages that have none of their own.',
+        },
+      },
     ],
   },
   { name: 'legalLinks', type: 'array', maxRows: 10, fields: [linkGroup('link')] },

@@ -80,7 +80,9 @@ const afterMediaChange: CollectionAfterChangeHook = async ({ doc, operation, req
   invalidatePublicMedia()
   if (operation === 'update')
     for (const use of await findMediaUsage(req.payload, doc.id as number))
-      if (use.published) expireCacheTags(`${use.collection}:${use.id}`, use.collection)
+      if (use.published)
+        if (use.collection === 'site-settings') expireCacheTags(`global:${use.collection}`)
+        else expireCacheTags(`${use.collection}:${use.id}`, use.collection)
   return doc
 }
 

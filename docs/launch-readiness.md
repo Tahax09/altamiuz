@@ -30,20 +30,32 @@ v1 until an owner decision.
 | OD-3        | Analytics in v1 or not (T127, FR-084–087)                                                                            | currently deferred                                              |
 | OD-4        | File the drafted Payload accessibility issues upstream                                                               | SC-019, FR-080a                                                 |
 | OD-5        | Nominate two staff for usability (SC-002) and a manual accessibility tester (SC-006)                                 | SC-002, SC-006, T138                                            |
-| CD-01…CD-13 | Content dependencies — **all open** (`docs/content/dependencies.md`)                                                 | content, FR-002 (CD-13), FR-065 (CD-12), FR-079 (CD-10), SC-016 |
+| CD-01…CD-13 | Content dependencies — **all open** (`docs/content/dependencies.md`); options and effects: `docs/owner-decisions.md` | content, FR-002 (CD-13), FR-065 (CD-12), FR-079 (CD-10), SC-016 |
+
+## Blockers by stage (re-verified 2026-11-12, R-1)
+
+- **Production build**: CD-13 (fails `next.config.ts`); O-3 (the build loads the CMS
+  configuration while collecting page data and `STORAGE_DRIVER=s3` is not implemented, probe
+  `APP_ENV=test STORAGE_DRIVER=s3 next build`); and the complete production environment at build
+  time (O-1, O-2, O-5, O-6, O-8 values). Builds with `APP_ENV=test` pass.
+- **Production deployment / launch**: the above plus O-7, O-9, O-10, OD-1 (before 2026-12-05),
+  OD-2, OD-5 and CD-12 (legacy redirects at launch; not a build blocker).
+- **Publication of content**: CD-01…CD-07, CD-09…CD-11, G-1, G-2 per page
+  (`docs/content/site-pages.md`, "Content still missing").
 
 ## Engineering items still open
 
-| ID   | Item                                               | Next action                                          |
-| ---- | -------------------------------------------------- | ---------------------------------------------------- |
-| A-1  | Media public-set cache per instance (low)          | verify on preview; shared invalidation if reproduced |
-| A-2  | Sign-in timing floor under load (low)              | measure on preview                                   |
-| A-6  | Security suite not yet run through the Vercel edge | run `pnpm test:security` against the preview         |
-| T127 | Analytics (OD-3)                                   | after decision                                       |
-| T119 | Legacy redirect seeding                            | after CD-12                                          |
-| T138 | Manual a11y walkthrough                            | after OD-5                                           |
-| T141 | Preview protection checklist                       | after O-1                                            |
-| T142 | Usability sessions                                 | after OD-5                                           |
+| ID   | Item                                                                                                         | Next action                                                                                                     |
+| ---- | ------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------- |
+| A-1  | Media public-set cache per instance (low)                                                                    | verify on preview; shared invalidation if reproduced                                                            |
+| A-2  | Sign-in timing floor under load (low)                                                                        | measure on preview                                                                                              |
+| A-6  | Security suite not yet run through the Vercel edge                                                           | run `pnpm test:security` against the preview                                                                    |
+| T139 | Lighthouse script budget: 156,215 B > 153,600 B on all 10 URLs since W-1 (`f539024`, re-measured 2026-11-12) | decide: keep Motion (ADR-011) and find 2.6 KB elsewhere, or replace it with native animation; budget not raised |
+| T127 | Analytics (OD-3)                                                                                             | after decision                                                                                                  |
+| T119 | Legacy redirect seeding                                                                                      | loader done (`pnpm seed:redirects`); run after CD-12                                                            |
+| T138 | Manual a11y walkthrough                                                                                      | after OD-5                                                                                                      |
+| T141 | Preview protection checklist                                                                                 | after O-1                                                                                                       |
+| T142 | Usability sessions                                                                                           | after OD-5                                                                                                      |
 
 ## Success criteria
 

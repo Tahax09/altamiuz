@@ -11,10 +11,13 @@ import type { Block, Field, Payload } from 'payload'
 export const MEDIA = 'media'
 export const USAGE_COLLECTIONS = ['pages', 'services', 'courses'] as const
 export type UsageCollection = (typeof USAGE_COLLECTIONS)[number]
+/** Globals that show images on the public site (brand logos, default social image; CD-09). */
+export const USAGE_GLOBALS = ['site-settings'] as const
+export type UsageGlobal = (typeof USAGE_GLOBALS)[number]
 export const PUBLIC_TTL_MS = 60_000
 
 export type MediaUse = {
-  collection: UsageCollection
+  collection: UsageCollection | UsageGlobal
   id: number
   title: string
   /** Referenced by the published document (any locale). */
@@ -136,32 +139,52 @@ async function allDocs(payload: Payload, collection: UsageCollection, draft: boo
 const fieldsOf = (payload: Payload, c: UsageCollection) =>
   payload.collections[c]!.config.fields as Field[]
 
+export const globalFieldsOf = (payload: Payload, g: UsageGlobal): Field[] =>
+  (payload.globals.config.find((x) => x.slug === g)?.fields ?? []) as Field[]
+
+/** The published (draft: false) or latest (draft: true) version of a global, every locale. */
+async function globalDoc(payload: Payload, slug: UsageGlobal, draft: boolean) {
+  const doc = (await payload
+    .findGlobal({ slug, draft, locale: 'all', depth: 0, overrideAccess: true })
+    .catch(() => null)) as (Doc & { id?: unknown }) | null
+  return doc ?? null
+}
+
 const titleOf = (t: unknown): string => {
   const v = perLocale(t).find((x) => typeof x === 'string' && x.trim())
   return typeof v === 'string' ? v : ''
 }
 
-/** Every page, service and course that uses `mediaId`, published or in its latest draft. */
+/** Every page, service, course and site-settings global that uses `mediaId`, published or in its
+ * latest draft. */
 export async function findMediaUsage(payload: Payload, mediaId: number): Promise<MediaUse[]> {
   const uses = new Map<string, MediaUse>()
+  const record = (
+    collection: MediaUse['collection'],
+    doc: Doc,
+    fields: Field[],
+    draft: boolean,
+    title: string,
+  ) => {
+    if (!draft && !isPublishedAnywhere(doc._status)) return
+    if (!collectMediaRefs(fields, doc, { skipHidden: !draft }).has(mediaId)) return
+    const key = `${collection}:${doc.id}`
+    const use = uses.get(key) ?? { collection, id: doc.id, title, published: false, draft: false }
+    if (draft) use.draft = true
+    else use.published = true
+    uses.set(key, use)
+  }
   for (const collection of USAGE_COLLECTIONS) {
     const fields = fieldsOf(payload, collection)
+    for (const draft of [false, true])
+      for (const doc of await allDocs(payload, collection, draft))
+        record(collection, doc, fields, draft, titleOf(doc.title))
+  }
+  for (const slug of USAGE_GLOBALS) {
+    const fields = globalFieldsOf(payload, slug)
     for (const draft of [false, true]) {
-      for (const doc of await allDocs(payload, collection, draft)) {
-        if (!draft && !isPublishedAnywhere(doc._status)) continue
-        if (!collectMediaRefs(fields, doc, { skipHidden: !draft }).has(mediaId)) continue
-        const key = `${collection}:${doc.id}`
-        const use = uses.get(key) ?? {
-          collection,
-          id: doc.id,
-          title: titleOf(doc.title),
-          published: false,
-          draft: false,
-        }
-        if (draft) use.draft = true
-        else use.published = true
-        uses.set(key, use)
-      }
+      const doc = await globalDoc(payload, slug, draft)
+      if (doc) record(slug, { ...doc, id: Number(doc.id) || 0 }, fields, draft, 'Site settings')
     }
   }
   return [...uses.values()].sort((a, b) => a.collection.localeCompare(b.collection) || a.id - b.id)
@@ -174,6 +197,11 @@ export async function computePublicMediaIds(payload: Payload): Promise<Set<numbe
     const fields = fieldsOf(payload, collection)
     for (const doc of await allDocs(payload, collection, false))
       if (isPublishedAnywhere(doc._status)) collectMediaRefs(fields, doc, { skipHidden: true }, ids)
+  }
+  for (const slug of USAGE_GLOBALS) {
+    const doc = await globalDoc(payload, slug, false)
+    if (doc && isPublishedAnywhere(doc._status))
+      collectMediaRefs(globalFieldsOf(payload, slug), doc, { skipHidden: true }, ids)
   }
   return ids
 }

@@ -11,6 +11,7 @@
 @import './site.css' layer(components);
 @import './media.css' layer(components);
 @import './chrome.css' layer(components);
+@import './editorial.css' layer(components);
 @import 'tailwindcss/utilities.css' layer(utilities);
 
 @source '../../ui';
