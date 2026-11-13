@@ -862,7 +862,8 @@ main > :not(article) {
   inset-inline-start: 50%;
   inline-size: 0.8rem;
   block-size: var(--rule-strong);
-  margin: -1px 0 0 -0.4rem;
+  margin-block-start: calc(var(--hairline) * -1);
+  margin-inline-start: -0.4rem;
   background: var(--cobalt);
   transition: transform var(--motion);
 }

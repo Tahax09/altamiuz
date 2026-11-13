@@ -291,6 +291,7 @@ function listOf(b: Block, ctx?: RenderContext): unknown[] | null {
     case 'featureGrid':
     case 'stats':
     case 'credentials':
+    case 'faq':
       return rows(b.items)
     case 'mediaGallery':
       return rows(b.items).filter((it) => it.media && typeof it.media === 'object')

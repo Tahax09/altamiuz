@@ -80,7 +80,8 @@ needs it.
 ## Design and performance (no ID; recorded under T139)
 
 - **JavaScript budget.** Resolved by engineering in V-2 (2026-11-12) without dropping Motion or
-  raising the budget: 152,576 B on every Lighthouse page, under the 153,600 B limit.
+  raising the budget: 152,511 B on every Lighthouse page (final V-2 build, commit `85a3384`, all
+  30 runs), under the 153,600 B limit. The first V-2 build (`9e6739a`) measured 152,576 B.
 - **Visual design (V-2).** V-1 was rejected. V-2 (`docs/design/v2.md`) follows the direction you
   named (WithSecure-style structure) and is a proposal: approve it, or list changes, after
   reviewing the screenshots. Missing visible content on the real site is the content decisions

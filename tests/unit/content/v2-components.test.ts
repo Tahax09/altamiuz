@@ -42,6 +42,7 @@ describe('CMS-aware sections', () => {
       { blockType: 'featureGrid', heading: 'H', items: [] },
       { blockType: 'standards', heading: 'H', items: [] },
       { blockType: 'process', heading: 'H', steps: [] },
+      { blockType: 'faq', items: [] },
       { blockType: 'mediaGallery', heading: 'H', items: [{ media: 7 }] }, // unpopulated image
     ])
       expect(render([b]), b.blockType).toBe('')
