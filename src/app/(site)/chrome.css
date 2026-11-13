@@ -281,7 +281,7 @@ nav li {
   padding-inline-start: var(--space-2);
   color: var(--night-muted);
   text-decoration: none;
-  border-inline-start: 2px solid var(--night-rule);
+  border-inline-start: var(--rule-strong) solid var(--night-rule);
 }
 .site-menu__link[aria-current='page'],
 .site-menu__sublink[aria-current='page'] {
@@ -358,17 +358,16 @@ nav li {
 }
 
 /* ------------------------------------------------------------------------------------------
-   Page header: an inset mist panel; the title takes the page, the lead sits beside it.
+   Page header: a full-bleed mist band; the title takes the page, the lead sits beside it.
    ------------------------------------------------------------------------------------------ */
 .page-header {
-  margin: var(--inset) var(--inset) 0;
-  padding: var(--space-3) var(--panel-pad) var(--space-5);
-  border-radius: var(--radius-panel);
+  padding: var(--space-3) var(--band-pad) var(--space-5);
   background: var(--mist);
+  border-block-end: 1px solid var(--mist-2);
 }
 .page-header--plain {
   background: var(--paper);
-  border: 1px solid var(--rule);
+  border-block-end-color: var(--rule);
 }
 .page-header__inner {
   display: grid;
@@ -379,12 +378,14 @@ nav li {
 }
 .page-header h1 {
   margin: 0;
-  font-size: var(--step-4);
-  line-height: 1.04;
-  letter-spacing: -0.035em;
+  font-size: clamp(2.5rem, 1.5rem + 4vw, 5rem);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.045em;
   max-inline-size: 18ch;
 }
 [lang='ar'] .page-header h1 {
+  font-weight: 700;
   line-height: 1.35;
   letter-spacing: 0;
   max-inline-size: 22ch;
@@ -749,9 +750,23 @@ main > .status-page {
   padding-block: var(--space-5) var(--space-4);
   padding-inline: var(--panel-pad);
 }
+@media (min-width: 48rem) {
+  .site-footer__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .site-footer__brand {
+    grid-column: 1 / -1;
+    padding-block-end: var(--space-4);
+    border-block-end: 1px solid var(--night-rule);
+  }
+}
 @media (min-width: 64rem) {
   .site-footer__grid {
-    grid-template-columns: minmax(0, 5fr) minmax(0, 4fr) minmax(0, 3fr);
+    grid-template-columns: minmax(0, 7fr) minmax(0, 3fr);
+    column-gap: var(--space-5);
+  }
+  .site-footer__nav {
+    grid-column: 1;
   }
 }
 .site-footer__name {
@@ -768,9 +783,9 @@ main > .status-page {
 }
 .site-footer__about {
   margin: 0;
-  max-inline-size: 26ch;
+  max-inline-size: 24ch;
   font-family: var(--font-heading);
-  font-size: var(--step-2);
+  font-size: var(--step-3);
   font-weight: 600;
   line-height: 1.25;
   letter-spacing: -0.02em;
@@ -884,10 +899,10 @@ main > .status-page {
 .button__spinner {
   inline-size: 1rem;
   block-size: 1rem;
-  border: 2px solid currentColor;
+  border: var(--rule-strong) solid currentColor;
   border-inline-end-color: transparent;
   border-radius: 50%;
-  animation: button-spin 0.8s linear infinite;
+  animation: button-spin var(--duration-spin) linear infinite;
 }
 @keyframes button-spin {
   to {

@@ -1,0 +1,908 @@
+/* Section compositions, V-2 (2026-11-12; subject to owner review; docs/design/v2.md).
+   Every list section renders only when the CMS has items for it (Sections.tsx), so nothing here
+   styles an empty box. Surfaces vary by role instead of repeating one inset panel:
+     full-bleed night ... hero
+     hairline band ...... trust strip (credentials shown as logos)
+     full-bleed mist .... services and courses
+     inset night panel .. methodology
+     full-bleed cobalt .. statistics
+     inset cobalt panel . call to action
+   Arabic rules ([lang='ar']) set scale, measure and alignment for Arabic, not a mirror. */
+
+/* ------------------------------------------------------------------------------------------
+   Hero: full-bleed night band. English: a tall display heading beside a portrait image.
+   Arabic: the heading takes the wider column, the image is smaller and set to the foot.
+   ------------------------------------------------------------------------------------------ */
+.hero {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  gap: var(--space-4);
+  padding: clamp(3.5rem, 2rem + 7vw, 9rem) var(--band-pad) clamp(3rem, 2rem + 5vw, 7rem);
+  overflow: hidden;
+  background: var(--night);
+  color: var(--on-dark);
+}
+.hero__field {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  inline-size: 100%;
+  block-size: 100%;
+  max-width: none;
+  fill: none;
+  stroke: var(--on-dark);
+  stroke-opacity: 0.06;
+  stroke-width: 1;
+}
+.hero__copy {
+  align-self: center;
+}
+.hero__copy > :last-child {
+  margin-block-end: 0;
+}
+.hero__eyebrow {
+  background: var(--night-2);
+  border-color: var(--night-rule);
+  color: var(--peri);
+}
+.hero__title {
+  margin: 0;
+  font-size: clamp(2.75rem, 1.4rem + 5.4vw, 6.25rem);
+  font-weight: 800;
+  line-height: 0.98;
+  letter-spacing: -0.045em;
+  color: var(--on-dark);
+  max-width: 13ch;
+}
+[lang='ar'] .hero__title {
+  font-size: clamp(2.5rem, 1.6rem + 4vw, 5.25rem);
+  font-weight: 700;
+  line-height: 1.28;
+  letter-spacing: 0;
+  max-width: 15ch;
+}
+.hero__lead {
+  margin-block: var(--space-3) 0;
+  max-width: 44ch;
+  font-size: var(--step-1);
+  line-height: 1.5;
+  color: var(--night-muted);
+}
+[lang='ar'] .hero__lead {
+  max-width: 52ch;
+  line-height: 1.8;
+}
+.hero .actions {
+  margin-block-start: var(--space-4);
+}
+.hero .button--secondary {
+  border-color: var(--on-dark-soft);
+  color: var(--on-dark);
+}
+.hero .button--secondary:hover {
+  background: var(--night-2);
+  border-color: var(--on-dark);
+}
+.hero :focus-visible {
+  outline-color: var(--peri);
+}
+.hero__visual .slot {
+  background: var(--night-2);
+}
+.hero__visual .slot--empty {
+  border-color: var(--night-muted);
+}
+.hero__visual .slot__label {
+  background: var(--night);
+  color: var(--night-muted);
+}
+@media (min-width: 40rem) and (max-width: 63.99rem) {
+  .hero__visual {
+    max-inline-size: 34rem;
+  }
+}
+@media (min-width: 64rem) {
+  .hero--visual {
+    grid-template-columns: minmax(0, 6.5fr) minmax(0, 5.5fr);
+    column-gap: var(--space-4);
+    align-items: center;
+  }
+  [lang='ar'] .hero--visual {
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    align-items: end;
+  }
+}
+
+/* Image frames (all sections) */
+.plate {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-card);
+}
+.plate .slot {
+  border-radius: inherit;
+}
+
+/* ------------------------------------------------------------------------------------------
+   Trust strip: credentials shown as logos, only once verified (evidence gate). A hairline band
+   with its label at the start and the marks in a row.
+   ------------------------------------------------------------------------------------------ */
+.trust {
+  display: grid;
+  gap: var(--space-2) var(--space-4);
+  align-items: center;
+  padding-block: var(--space-3);
+  border-block-end: 1px solid var(--rule);
+}
+@media (min-width: 64rem) {
+  .trust {
+    grid-template-columns: minmax(12rem, 3fr) minmax(0, 9fr);
+  }
+}
+.trust__label {
+  margin: 0;
+  font-size: var(--step--1);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+[lang='ar'] .trust__label {
+  letter-spacing: 0;
+  text-transform: none;
+}
+.trust__title {
+  margin: 0.25rem 0 0;
+  font-size: var(--step-1);
+}
+.logo-wall {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-3);
+  align-items: center;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.logo-wall li {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  max-width: none;
+  min-block-size: 3rem;
+}
+.logo-wall .media--logo {
+  max-inline-size: 8rem;
+}
+.logo-wall .media--logo img {
+  max-block-size: 2.5rem;
+  inline-size: auto;
+}
+.logo-wall__name {
+  font-weight: 600;
+  color: var(--ink);
+}
+/* A logo carries the name visually; keep it for screen readers only. */
+.logo-wall li:has(.media) .logo-wall__name {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* ------------------------------------------------------------------------------------------
+   Services and courses (serviceList/courseList, listing pages): offer cards on a full-bleed
+   mist band. With three or more, the first card leads across two rows.
+   ------------------------------------------------------------------------------------------ */
+.surface--raised,
+.surface--stone {
+  margin-inline: 0;
+  padding-inline: var(--band-pad);
+  border-radius: 0;
+  background: var(--mist);
+}
+.offers {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 18rem), 1fr));
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+@media (min-width: 64rem) {
+  .offers--lead {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .offers--lead > :first-child {
+    grid-column: span 2;
+    grid-row: span 2;
+  }
+  .offers--lead > :first-child .offer__title {
+    font-size: var(--step-3);
+  }
+  .offers--lead > :first-child .offer__image {
+    aspect-ratio: 16 / 9;
+  }
+}
+.offer {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  max-width: none;
+  overflow: hidden;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-card);
+  background: var(--paper);
+  transition: border-color var(--motion);
+}
+.offer:hover {
+  border-color: var(--cobalt);
+}
+.offer:focus-within {
+  outline: var(--focus-width) solid var(--focus);
+  outline-offset: var(--focus-offset);
+}
+.offer__image {
+  border-radius: 0;
+}
+.offer__body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-3);
+}
+.offer__meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0 0 var(--space-2);
+  font-family: var(--font-heading);
+  font-size: var(--step--1);
+  font-weight: 700;
+  color: var(--cobalt);
+  font-variant-numeric: tabular-nums;
+}
+[lang='ar'] .offer__meta {
+  font-family: var(--font-arabic);
+}
+.offer__meta .icon {
+  box-sizing: content-box;
+  padding: 0.65rem;
+  border-radius: 50%;
+  background: var(--mist);
+  color: var(--cobalt);
+}
+.offer__title {
+  margin: 0;
+  font-size: var(--step-2);
+}
+.offer__title a {
+  color: var(--ink);
+  text-decoration: none;
+}
+.offer__title a::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+}
+.offer__title a:focus-visible {
+  outline: none;
+}
+.offer__summary {
+  margin: 0;
+  color: var(--ink-muted);
+}
+.offer__arrow {
+  align-self: flex-end;
+  box-sizing: content-box;
+  margin-block-start: auto;
+  padding: 0.75rem;
+  border-radius: 50%;
+  background: var(--mist);
+  color: var(--cobalt);
+  transition:
+    transform var(--motion),
+    background-color var(--motion),
+    color var(--motion);
+}
+.offer__summary + .offer__arrow,
+.offer__title + .offer__arrow {
+  margin-block-start: var(--space-3);
+}
+.offer:hover .offer__arrow {
+  background: var(--cobalt);
+  color: var(--on-dark);
+  transform: translateX(0.25rem);
+}
+[dir='rtl'] .offer:hover .offer__arrow {
+  transform: scaleX(-1) translateX(0.25rem);
+}
+.section--listing .offers {
+  margin-block-start: 0;
+}
+
+/* ------------------------------------------------------------------------------------------
+   Principles (featureGrid): the header holds its column, the reasons run beside it as ruled
+   entries. No cards.
+   ------------------------------------------------------------------------------------------ */
+.principles {
+  display: grid;
+  gap: var(--space-3) var(--space-5);
+}
+@media (min-width: 64rem) {
+  .principles {
+    grid-template-columns: minmax(0, 4fr) minmax(0, 7fr);
+    align-items: start;
+  }
+  .principles > .section__head {
+    position: sticky;
+    inset-block-start: calc(var(--header-height) + var(--space-3));
+    margin: 0;
+  }
+}
+.principles__list {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-block-start: 1px solid var(--ink);
+}
+.principles__item {
+  display: grid;
+  grid-template-columns: 2.5rem minmax(0, 1fr);
+  column-gap: var(--space-2);
+  max-width: none;
+  padding-block: var(--space-3);
+  border-block-end: 1px solid var(--rule);
+}
+@media (min-width: 48rem) {
+  .principles__item {
+    grid-template-columns: 3rem 3rem minmax(0, 1fr);
+  }
+}
+.principles__index {
+  font-family: var(--font-heading);
+  font-size: var(--step--1);
+  font-weight: 700;
+  color: var(--ink-muted);
+  font-variant-numeric: tabular-nums;
+  padding-block-start: 0.3rem;
+}
+[lang='ar'] .principles__index {
+  font-family: var(--font-arabic);
+}
+.principles__item .icon {
+  display: none;
+  inline-size: 1.75rem;
+  block-size: 1.75rem;
+  color: var(--cobalt);
+}
+@media (min-width: 48rem) {
+  .principles__item .icon {
+    display: block;
+  }
+}
+.principles__item h3 {
+  grid-column: -2;
+  margin: 0 0 0.35rem;
+  font-size: var(--step-2);
+}
+.principles__item p {
+  grid-column: -2;
+  margin: 0;
+  color: var(--ink-muted);
+}
+
+/* ------------------------------------------------------------------------------------------
+   Methodology (process): an inset night panel holding the four-stage sequence as tall stages
+   on one track. The track draws in reading order (Motion), each stage carries a large index
+   and its position (01/04). Phones stack the stages on a vertical track.
+   ------------------------------------------------------------------------------------------ */
+.process__visual {
+  margin-block-end: var(--space-4);
+  background: var(--night-2);
+}
+/* The sequence illustration has no text: mirrored in Arabic so its first panel sits above
+   stage 01 at the start (right) edge, like the stages below it. */
+[dir='rtl'] .media--process img {
+  transform: scaleX(-1);
+}
+.process__track {
+  position: relative;
+}
+.process__line {
+  position: absolute;
+  inset-inline: 0;
+  inset-block-start: 0;
+  block-size: var(--rule-strong);
+  background: var(--peri);
+  transform-origin: left center;
+}
+[dir='rtl'] .process__line {
+  transform-origin: right center;
+}
+.process {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+/* Tablets: two stages per row; the track runs above each row. */
+@media (min-width: 48rem) and (max-width: 63.99rem) {
+  .process {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    row-gap: var(--space-4);
+  }
+  .process__step:nth-child(odd) {
+    padding-inline-start: 0;
+    border-inline-start: 0;
+  }
+  .process__step:nth-child(n + 3) {
+    border-block-start: var(--rule-strong) solid var(--peri);
+  }
+}
+/* More or fewer than four stages: the columns follow the count. */
+@media (min-width: 64rem) {
+  .process:not(:has(> :nth-child(4))),
+  .process:has(> :nth-child(5)) {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
+  }
+}
+.process__step {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  max-width: none;
+  min-block-size: 18rem;
+  padding: var(--space-3) var(--space-3) var(--space-3) 0;
+  transition: background-color var(--motion);
+}
+.process__step::before {
+  /* stage node on the track */
+  content: '';
+  position: absolute;
+  inset-block-start: -0.45rem;
+  inset-inline-start: 0;
+  inline-size: 0.9rem;
+  block-size: 0.9rem;
+  border: var(--rule-strong) solid var(--peri);
+  border-radius: 50%;
+  background: var(--night);
+}
+.process__step + .process__step {
+  padding-inline-start: var(--space-3);
+  border-inline-start: 1px solid var(--night-rule);
+}
+.process__step + .process__step::before {
+  inset-inline-start: calc(-0.45rem - var(--hairline) / 2);
+}
+.process__index {
+  display: block;
+  margin-block: var(--space-3) var(--space-3);
+  font-family: var(--font-heading);
+  font-size: clamp(3rem, 2rem + 3vw, 5rem);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  color: var(--peri);
+  font-variant-numeric: tabular-nums;
+}
+[lang='ar'] .process__index {
+  font-family: var(--font-arabic); /* no Latin face download on Arabic pages (D-24) */
+  letter-spacing: 0;
+}
+.process__step h2,
+.process__step h3 {
+  margin-block: 0 var(--space-1);
+  font-size: var(--step-2);
+  color: var(--on-dark);
+}
+.process__step p {
+  margin: 0;
+  color: var(--night-muted);
+}
+[lang='ar'] .process__step p {
+  font-size: var(--step-1);
+  line-height: 1.75;
+}
+.process__count {
+  margin-block-start: auto;
+  padding-block-start: var(--space-3);
+  font-size: var(--step--1);
+  font-weight: 600;
+  color: var(--night-muted);
+  font-variant-numeric: tabular-nums;
+}
+.process__step:hover {
+  background: var(--night-2);
+}
+@media (max-width: 47.99rem) {
+  .process {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .process__line {
+    inset-block: 0;
+    inset-inline: 0 auto;
+    inline-size: var(--rule-strong);
+    block-size: 100%;
+    transform-origin: center top;
+  }
+  [dir='rtl'] .process__line {
+    transform-origin: center top;
+  }
+  .process__step,
+  .process__step + .process__step {
+    min-block-size: 0;
+    padding: 0 0 var(--space-4) var(--space-4);
+    border: 0;
+  }
+  .process__step::before,
+  .process__step + .process__step::before {
+    inset-block-start: 0.35rem;
+    inset-inline-start: calc(-0.45rem + 1px);
+  }
+  .process__index {
+    margin-block: 0 var(--space-1);
+    font-size: var(--step-4);
+  }
+  .process__count {
+    display: none;
+  }
+}
+/* A process outside a night panel (any other page) keeps the same structure on paper. */
+.section:not(.surface--ink) .process__index {
+  color: var(--cobalt);
+}
+.section:not(.surface--ink) :is(.process__line) {
+  background: var(--cobalt);
+}
+.section:not(.surface--ink) .process__step h3,
+.section:not(.surface--ink) .process__step h2 {
+  color: var(--ink);
+}
+
+/* ------------------------------------------------------------------------------------------
+   Team (evidence-gated, CD-03): portrait, name, role, short biography. The photo appears only
+   when one is chosen (a preview shows its slot).
+   ------------------------------------------------------------------------------------------ */
+.team {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4) var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+@media (min-width: 40rem) {
+  .team {
+    grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
+    column-gap: var(--space-3);
+  }
+}
+.team__member {
+  display: grid;
+  gap: 0.35rem;
+  align-content: start;
+  max-width: none;
+}
+.team__photo,
+.team__monogram {
+  margin-block-end: var(--space-2);
+}
+.team__monogram {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 4 / 5;
+  max-inline-size: 100%;
+  border-radius: var(--radius-card);
+  background: var(--mist);
+  color: var(--cobalt);
+  font-family: var(--font-heading);
+  font-size: clamp(2.5rem, 2rem + 2vw, 4rem);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+}
+[lang='ar'] .team__monogram {
+  font-family: var(--font-arabic);
+  letter-spacing: 0;
+}
+.team__name {
+  margin: 0;
+  font-size: var(--step-2);
+}
+.team__role {
+  margin: 0;
+  font-weight: 600;
+  color: var(--cobalt);
+}
+.team__bio {
+  margin: var(--space-1) 0 0;
+  color: var(--ink-muted);
+}
+
+/* ------------------------------------------------------------------------------------------
+   Statistics (evidence-gated): a full-bleed band, figures set very large in cobalt between
+   heavy rules; the header sits beside them on wide screens.
+   ------------------------------------------------------------------------------------------ */
+.stats-band {
+  display: grid;
+  gap: var(--space-4);
+  padding-inline: var(--band-pad);
+  border-block: var(--rule-strong) solid var(--ink);
+}
+@media (min-width: 64rem) {
+  .stats-band {
+    grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
+    column-gap: var(--space-5);
+    align-items: start;
+  }
+}
+.stats-band .section__head {
+  margin: 0;
+  display: block;
+}
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 11rem), 1fr));
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.stats li {
+  max-width: none;
+  padding-block-start: var(--space-2);
+  border-block-start: var(--rule-strong) solid var(--cobalt);
+}
+.stats__value {
+  display: block;
+  font-family: var(--font-heading);
+  font-size: clamp(3rem, 2rem + 4.5vw, 6.5rem);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.05em;
+  color: var(--cobalt);
+  font-variant-numeric: tabular-nums;
+}
+[lang='ar'] .stats__value {
+  font-family: var(--font-arabic);
+  letter-spacing: 0;
+}
+.stats__label {
+  display: block;
+  margin-block-start: var(--space-1);
+  color: var(--ink-muted);
+}
+
+/* ------------------------------------------------------------------------------------------
+   Insights (resourceList): editorial article cards (image, category, date, title, summary).
+   With three or more, the first leads; the others sit beside it as compact rows.
+   ------------------------------------------------------------------------------------------ */
+.articles {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 18rem), 1fr));
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+@media (min-width: 64rem) {
+  .articles--lead {
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    gap: var(--space-2) var(--space-4);
+  }
+  .articles--lead > :first-child {
+    grid-row: span 3;
+  }
+  .articles--lead > :first-child .article__title {
+    font-size: var(--step-3);
+  }
+  .articles--lead > :not(:first-child) {
+    padding-block-end: var(--space-2);
+    border-block-end: 1px solid var(--rule);
+  }
+  .articles--lead > :not(:first-child).article--image {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+    gap: var(--space-2);
+    align-items: start;
+  }
+}
+.article {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  max-width: none;
+}
+.article__body {
+  display: grid;
+  gap: var(--space-1);
+}
+.article__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1);
+  margin: 0;
+  color: var(--ink-muted);
+  font-size: var(--step--1);
+  font-variant-numeric: tabular-nums;
+}
+.article__title {
+  margin: 0;
+  font-size: var(--step-2);
+}
+.article__title a {
+  color: var(--ink);
+  text-decoration-line: underline;
+  text-decoration-color: transparent;
+  text-decoration-thickness: var(--rule-strong);
+  text-underline-offset: 0.18em;
+  transition: text-decoration-color var(--motion);
+}
+.article--link .article__title a::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+}
+.article--link:hover .article__title a {
+  text-decoration-color: var(--cobalt);
+}
+.article--link:focus-within {
+  outline: var(--focus-width) solid var(--focus);
+  outline-offset: var(--space-1);
+  border-radius: var(--radius);
+}
+.article--link a:focus-visible {
+  outline: none;
+}
+.article__summary {
+  margin: 0;
+  color: var(--ink-muted);
+}
+
+/* ------------------------------------------------------------------------------------------
+   Call to action (cta block): an inset cobalt panel, the action set against the heading.
+   ------------------------------------------------------------------------------------------ */
+.section--cta {
+  padding-block: 0;
+  margin-block: var(--space-4);
+  background: var(--cobalt);
+  color: var(--on-dark);
+}
+.cta__panel {
+  display: grid;
+  gap: var(--space-2);
+  padding-block: clamp(2.5rem, 2rem + 4vw, 6rem);
+}
+.cta__title {
+  margin: 0;
+  font-size: var(--step-4);
+  font-weight: 800;
+  line-height: 1.03;
+  letter-spacing: -0.04em;
+  color: var(--on-dark);
+  max-width: 17ch;
+}
+[lang='ar'] .cta__title {
+  font-weight: 700;
+  line-height: 1.35;
+  letter-spacing: 0;
+  max-width: 20ch;
+}
+.cta__text {
+  margin: 0;
+  max-width: 52ch;
+  font-size: var(--step-1);
+  color: var(--on-dark);
+}
+.section--cta .actions {
+  margin: var(--space-1) 0 0;
+}
+.section--cta :focus-visible {
+  outline-color: var(--on-dark);
+}
+@media (min-width: 64rem) {
+  .cta__panel {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: end;
+    column-gap: var(--space-4);
+  }
+  .cta__panel > .actions {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+  }
+}
+
+/* ------------------------------------------------------------------------------------------
+   Contact (contactBlock): a night panel with the introduction and the published contact details
+   beside the form. Details appear only when the CMS holds them (CD-02).
+   ------------------------------------------------------------------------------------------ */
+.contact {
+  display: grid;
+  gap: var(--space-3);
+  padding-inline: var(--band-pad);
+}
+.contact-panel {
+  align-self: start;
+  display: grid;
+  gap: var(--space-3);
+  padding: clamp(2rem, 1.25rem + 3vw, 4rem);
+  border-radius: var(--radius-panel);
+  background: var(--night);
+  color: var(--on-dark);
+}
+.contact-panel h2 {
+  margin: 0;
+  font-size: var(--step-4);
+  font-weight: 800;
+  line-height: 1.04;
+  letter-spacing: -0.04em;
+  color: var(--on-dark);
+}
+[lang='ar'] .contact-panel h2 {
+  font-weight: 700;
+  line-height: 1.35;
+  letter-spacing: 0;
+}
+.contact-panel__intro {
+  margin: 0;
+  color: var(--night-muted);
+  font-size: var(--step-1);
+  line-height: 1.55;
+}
+.contact-panel__details {
+  display: grid;
+  gap: var(--space-1);
+  margin: 0;
+  padding-block-start: var(--space-3);
+  border-block-start: 1px solid var(--night-rule);
+  font-style: normal;
+}
+.contact-panel__details a,
+.contact-panel__details p {
+  align-items: center;
+  min-height: var(--target);
+  margin: 0;
+  color: var(--on-dark);
+  text-decoration: none;
+}
+.contact-panel__details a:hover {
+  color: var(--peri);
+}
+.contact-panel__icon {
+  box-sizing: content-box;
+  padding: 0.6rem;
+  border-radius: 50%;
+  background: var(--night-2);
+  color: var(--peri);
+}
+.contact-panel :focus-visible {
+  outline-color: var(--peri);
+}
+.contact__form {
+  padding: clamp(1.5rem, 1rem + 2.5vw, 3.5rem);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-panel);
+  background: var(--paper);
+}
+@media (min-width: 64rem) {
+  .contact {
+    grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    gap: var(--space-4);
+    align-items: start;
+  }
+  .contact-panel {
+    position: sticky;
+    inset-block-start: calc(var(--header-height) + var(--space-3));
+    min-block-size: 28rem;
+    align-content: start;
+  }
+}

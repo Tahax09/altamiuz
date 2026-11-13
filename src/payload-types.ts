@@ -469,6 +469,11 @@ export interface Page {
                   kind?: string | null;
                   title: string;
                   summary?: string | null;
+                  /**
+                   * Publication date, if any.
+                   */
+                  date?: string | null;
+                  image?: (number | null) | Media;
                   link?: {
                     linkType?: ('internal' | 'route' | 'external' | 'email' | 'tel') | null;
                     doc?:
@@ -768,6 +773,41 @@ export interface Page {
             id?: string | null;
             blockName?: string | null;
             blockType: 'credentials';
+          }
+        | {
+            eyebrow?: string | null;
+            heading?: string | null;
+            intro?: string | null;
+            members?:
+              | {
+                  name: string;
+                  role?: string | null;
+                  bio?: string | null;
+                  /**
+                   * Only with the person’s written consent (CD-03).
+                   */
+                  photo?: (number | null) | Media;
+                  id?: string | null;
+                }[]
+              | null;
+            /**
+             * Claims are publishable only once verified by an administrator, with a recorded evidence reference. Changing the claim in any language removes the verification.
+             */
+            evidence: {
+              status: 'unverified' | 'verified';
+              reference?: string | null;
+              verifiedBy?: (number | null) | User;
+              verifiedAt?: string | null;
+              claimDigest?: string | null;
+            };
+            /**
+             * Hidden sections stay editable but are not published.
+             */
+            hidden?: boolean | null;
+            anchorId?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'team';
           }
         | {
             eyebrow?: string | null;
@@ -991,6 +1031,14 @@ export interface Service {
   title: string;
   slug: string;
   summary?: string | null;
+  /**
+   * Card image (3:2), optional.
+   */
+  image?: (number | null) | Media;
+  /**
+   * Card icon, used when there is no image.
+   */
+  icon?: ('shield' | 'audit' | 'policy' | 'training' | 'risk' | 'response') | null;
   sections?:
     | (
         | {
@@ -1199,6 +1247,11 @@ export interface Service {
                   kind?: string | null;
                   title: string;
                   summary?: string | null;
+                  /**
+                   * Publication date, if any.
+                   */
+                  date?: string | null;
+                  image?: (number | null) | Media;
                   link?: {
                     linkType?: ('internal' | 'route' | 'external' | 'email' | 'tel') | null;
                     doc?:
@@ -1498,6 +1551,41 @@ export interface Service {
             id?: string | null;
             blockName?: string | null;
             blockType: 'credentials';
+          }
+        | {
+            eyebrow?: string | null;
+            heading?: string | null;
+            intro?: string | null;
+            members?:
+              | {
+                  name: string;
+                  role?: string | null;
+                  bio?: string | null;
+                  /**
+                   * Only with the person’s written consent (CD-03).
+                   */
+                  photo?: (number | null) | Media;
+                  id?: string | null;
+                }[]
+              | null;
+            /**
+             * Claims are publishable only once verified by an administrator, with a recorded evidence reference. Changing the claim in any language removes the verification.
+             */
+            evidence: {
+              status: 'unverified' | 'verified';
+              reference?: string | null;
+              verifiedBy?: (number | null) | User;
+              verifiedAt?: string | null;
+              claimDigest?: string | null;
+            };
+            /**
+             * Hidden sections stay editable but are not published.
+             */
+            hidden?: boolean | null;
+            anchorId?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'team';
           }
         | {
             eyebrow?: string | null;
@@ -1570,6 +1658,14 @@ export interface Course {
   title: string;
   slug: string;
   summary?: string | null;
+  /**
+   * Card image (3:2), optional.
+   */
+  image?: (number | null) | Media;
+  /**
+   * Card icon, used when there is no image.
+   */
+  icon?: ('shield' | 'audit' | 'policy' | 'training' | 'risk' | 'response') | null;
   sections?:
     | (
         | {
@@ -1778,6 +1874,11 @@ export interface Course {
                   kind?: string | null;
                   title: string;
                   summary?: string | null;
+                  /**
+                   * Publication date, if any.
+                   */
+                  date?: string | null;
+                  image?: (number | null) | Media;
                   link?: {
                     linkType?: ('internal' | 'route' | 'external' | 'email' | 'tel') | null;
                     doc?:
@@ -2077,6 +2178,41 @@ export interface Course {
             id?: string | null;
             blockName?: string | null;
             blockType: 'credentials';
+          }
+        | {
+            eyebrow?: string | null;
+            heading?: string | null;
+            intro?: string | null;
+            members?:
+              | {
+                  name: string;
+                  role?: string | null;
+                  bio?: string | null;
+                  /**
+                   * Only with the person’s written consent (CD-03).
+                   */
+                  photo?: (number | null) | Media;
+                  id?: string | null;
+                }[]
+              | null;
+            /**
+             * Claims are publishable only once verified by an administrator, with a recorded evidence reference. Changing the claim in any language removes the verification.
+             */
+            evidence: {
+              status: 'unverified' | 'verified';
+              reference?: string | null;
+              verifiedBy?: (number | null) | User;
+              verifiedAt?: string | null;
+              claimDigest?: string | null;
+            };
+            /**
+             * Hidden sections stay editable but are not published.
+             */
+            hidden?: boolean | null;
+            anchorId?: string | null;
+            id?: string | null;
+            blockName?: string | null;
+            blockType: 'team';
           }
         | {
             eyebrow?: string | null;
@@ -2582,6 +2718,8 @@ export interface PagesSelect<T extends boolean = true> {
                     kind?: T;
                     title?: T;
                     summary?: T;
+                    date?: T;
+                    image?: T;
                     link?:
                       | T
                       | {
@@ -2776,6 +2914,35 @@ export interface PagesSelect<T extends boolean = true> {
               id?: T;
               blockName?: T;
             };
+        team?:
+          | T
+          | {
+              eyebrow?: T;
+              heading?: T;
+              intro?: T;
+              members?:
+                | T
+                | {
+                    name?: T;
+                    role?: T;
+                    bio?: T;
+                    photo?: T;
+                    id?: T;
+                  };
+              evidence?:
+                | T
+                | {
+                    status?: T;
+                    reference?: T;
+                    verifiedBy?: T;
+                    verifiedAt?: T;
+                    claimDigest?: T;
+                  };
+              hidden?: T;
+              anchorId?: T;
+              id?: T;
+              blockName?: T;
+            };
         mediaGallery?:
           | T
           | {
@@ -2826,6 +2993,8 @@ export interface ServicesSelect<T extends boolean = true> {
   title?: T;
   slug?: T;
   summary?: T;
+  image?: T;
+  icon?: T;
   sections?:
     | T
     | {
@@ -2949,6 +3118,8 @@ export interface ServicesSelect<T extends boolean = true> {
                     kind?: T;
                     title?: T;
                     summary?: T;
+                    date?: T;
+                    image?: T;
                     link?:
                       | T
                       | {
@@ -3127,6 +3298,35 @@ export interface ServicesSelect<T extends boolean = true> {
                     issuer?: T;
                     logo?: T;
                     validUntil?: T;
+                    id?: T;
+                  };
+              evidence?:
+                | T
+                | {
+                    status?: T;
+                    reference?: T;
+                    verifiedBy?: T;
+                    verifiedAt?: T;
+                    claimDigest?: T;
+                  };
+              hidden?: T;
+              anchorId?: T;
+              id?: T;
+              blockName?: T;
+            };
+        team?:
+          | T
+          | {
+              eyebrow?: T;
+              heading?: T;
+              intro?: T;
+              members?:
+                | T
+                | {
+                    name?: T;
+                    role?: T;
+                    bio?: T;
+                    photo?: T;
                     id?: T;
                   };
               evidence?:
@@ -3195,6 +3395,8 @@ export interface CoursesSelect<T extends boolean = true> {
   title?: T;
   slug?: T;
   summary?: T;
+  image?: T;
+  icon?: T;
   sections?:
     | T
     | {
@@ -3318,6 +3520,8 @@ export interface CoursesSelect<T extends boolean = true> {
                     kind?: T;
                     title?: T;
                     summary?: T;
+                    date?: T;
+                    image?: T;
                     link?:
                       | T
                       | {
@@ -3496,6 +3700,35 @@ export interface CoursesSelect<T extends boolean = true> {
                     issuer?: T;
                     logo?: T;
                     validUntil?: T;
+                    id?: T;
+                  };
+              evidence?:
+                | T
+                | {
+                    status?: T;
+                    reference?: T;
+                    verifiedBy?: T;
+                    verifiedAt?: T;
+                    claimDigest?: T;
+                  };
+              hidden?: T;
+              anchorId?: T;
+              id?: T;
+              blockName?: T;
+            };
+        team?:
+          | T
+          | {
+              eyebrow?: T;
+              heading?: T;
+              intro?: T;
+              members?:
+                | T
+                | {
+                    name?: T;
+                    role?: T;
+                    bio?: T;
+                    photo?: T;
                     id?: T;
                   };
               evidence?:

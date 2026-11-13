@@ -28,6 +28,8 @@ type Obj = Record<string, unknown>
 const isObj = (v: unknown): v is Obj => !!v && typeof v === 'object' && !Array.isArray(v)
 const norm = (v: unknown, date = false): unknown => {
   if (v === undefined || v === null || v === '') return null
+  // A relationship (e.g. a team photo) compares by id, populated or not.
+  if (isObj(v) && 'id' in v) return v.id ?? null
   if (date && (typeof v === 'string' || v instanceof Date)) {
     const d = new Date(v)
     return Number.isNaN(d.getTime()) ? String(v) : d.toISOString()
@@ -229,6 +231,16 @@ export const CLAIM_BLOCKS: Record<string, ClaimSpec> = {
       { name: 'name', localized: true },
       { name: 'issuer', localized: true },
       { name: 'validUntil', date: true },
+    ],
+  },
+  team: {
+    field: 'members',
+    context: CLAIM_FRAME,
+    rows: [
+      { name: 'name', localized: true },
+      { name: 'role', localized: true },
+      { name: 'bio', localized: true },
+      { name: 'photo' },
     ],
   },
 }

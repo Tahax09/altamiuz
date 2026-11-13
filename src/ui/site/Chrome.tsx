@@ -3,8 +3,7 @@
 // Server components: menus are native <details> disclosures, so they open and close without
 // JavaScript; Enhancements.tsx only adds Escape and click-outside closing. Every href comes from
 // the typed route map or safeHref (lib/links.ts).
-import { formatPhone, href, LANGUAGE_NAMES, LOCALES, t, type Locale } from '@/modules/i18n'
-import { safeHref } from '@/modules/content'
+import { href, LANGUAGE_NAMES, LOCALES, t, type Locale } from '@/modules/i18n'
 import { cn } from '../lib/cn'
 import { linkTarget, newTabProps, samePath, type CmsLink } from '../lib/links'
 import { Picture, type PublicMedia } from '../media/Picture'
@@ -12,6 +11,7 @@ import { buttonVariants } from '../primitives/button'
 import { Icon } from '../primitives/Icon'
 import { internalHrefFor } from '../sections/Sections'
 import { BannerDismiss } from './BannerDismiss'
+import { ContactDetails, hasContactDetails } from './ContactDetails'
 
 type MenuItem = { id?: string; link?: CmsLink; children?: MenuItem[] }
 type Resolved = { label: string; href: string; link: CmsLink }
@@ -335,45 +335,16 @@ function ContactLines({
   settings: Record<string, unknown> | null
   locale: Locale
 }) {
-  // Only published site-settings values; nothing is shown that the CMS does not hold.
-  const email = str(settings?.email)
-  const mail = email ? safeHref(`mailto:${email}`) : null
-  const rawPhone = str(settings?.phone)
-  const phone = formatPhone(rawPhone)
-  const tel = phone ? safeHref(`tel:${rawPhone}`) : null
-  const address = str(settings?.address)
-  const hours = str(settings?.hours)
-  if (!mail && !tel && !address && !hours) return null
-  const row = 'flex items-start gap-3'
+  if (!hasContactDetails(settings)) return null
   return (
     <div>
       <h2 className="site-footer__heading">{t(locale, 'footerContact')}</h2>
-      <address className="site-footer__contact">
-        {mail ? (
-          <a href={mail} className={row}>
-            <Icon name="mail" className="site-footer__icon" />
-            <bdi dir="ltr">{email}</bdi>
-          </a>
-        ) : null}
-        {tel && phone ? (
-          <a href={tel} className={row}>
-            <Icon name="phone" className="site-footer__icon" />
-            <bdi dir={phone.dir}>{phone.text}</bdi>
-          </a>
-        ) : null}
-        {address ? (
-          <p className={row}>
-            <Icon name="pin" className="site-footer__icon" />
-            <span className="whitespace-pre-line">{address}</span>
-          </p>
-        ) : null}
-        {hours ? (
-          <p className={row}>
-            <Icon name="clock" className="site-footer__icon" />
-            <span>{hours}</span>
-          </p>
-        ) : null}
-      </address>
+      <ContactDetails
+        settings={settings}
+        locale={locale}
+        className="site-footer__contact"
+        iconClassName="site-footer__icon"
+      />
     </div>
   )
 }
@@ -447,20 +418,22 @@ export function SiteFooter({
   return (
     <footer className="site-footer">
       <div className="site-footer__grid">
-        <div className="site-footer__brand">
-          {hasLogo ? (
-            <p className="site-footer__name">
-              <BrandMark
-                logo={logo}
-                name={name || t(locale, 'home')}
-                className="site-footer__logo"
-              />
-            </p>
-          ) : name ? (
-            <p className="site-footer__name">{name}</p>
-          ) : null}
-          {about ? <p className="site-footer__about">{about}</p> : null}
-        </div>
+        {hasLogo || name || about ? (
+          <div className="site-footer__brand">
+            {hasLogo ? (
+              <p className="site-footer__name">
+                <BrandMark
+                  logo={logo}
+                  name={name || t(locale, 'home')}
+                  className="site-footer__logo"
+                />
+              </p>
+            ) : name ? (
+              <p className="site-footer__name">{name}</p>
+            ) : null}
+            {about ? <p className="site-footer__about">{about}</p> : null}
+          </div>
+        ) : null}
         {groups.length ? (
           <nav aria-label={t(locale, 'footerNavigation')} className="site-footer__nav">
             {flat.length ? (

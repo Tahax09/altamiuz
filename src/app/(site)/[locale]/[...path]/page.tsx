@@ -12,10 +12,9 @@ import {
   type PublicReaders,
 } from '@/modules/content'
 import { contactFormFor } from '../../contact-form'
-import { contactLink, DocumentView, ListingCards } from '@/ui'
+import { contactLink, DocumentView, ListingCards, OfferCards } from '@/ui'
 import { CtaBand } from '@/ui/page/CtaBand'
 import { EmptyState } from '@/ui/page/EmptyState'
-import { ListingIndex } from '@/ui/page/ListingIndex'
 import { PageHeader } from '@/ui/page/PageHeader'
 import { StatusView } from '@/ui/page/StatusView'
 import { Icon } from '@/ui/primitives/Icon'
@@ -165,7 +164,7 @@ export default async function PublicPage({ params }: { params: Params }) {
         />
         <section className="section section--listing">
           {r.items.length ? (
-            <ListingIndex items={r.items} kind={kind} locale={r.locale} headingLevel={2} />
+            <OfferCards items={r.items} kind={kind} locale={r.locale} headingLevel={2} />
           ) : (
             <EmptyState
               title={t(r.locale, r.collection === 'services' ? 'noServices' : 'noCourses')}
@@ -187,6 +186,7 @@ export default async function PublicPage({ params }: { params: Params }) {
         ctx={{
           listings: await listingsFor(r.doc, r.locale),
           contactForm: await contactFormFor(r.doc, r.locale),
+          settings: await cachedGlobal('site-settings', r.locale),
         }}
         after={r.collection === 'pages' ? null : await detailExtras(r.locale, r.collection, r.doc)}
       />

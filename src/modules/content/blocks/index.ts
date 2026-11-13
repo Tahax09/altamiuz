@@ -46,6 +46,15 @@ const items = (name: string, fields: Field[]): Field => ({
 /** An image from the media library (US4). Alt text lives on the image, per locale (FR-054). */
 const image = (name: string): Field => ({ name, type: 'upload', relationTo: 'media' })
 
+/** Line icons available to feature items, services and courses (rendered by src/ui). */
+export const ICON_NAMES = ['shield', 'audit', 'policy', 'training', 'risk', 'response'] as const
+export const iconField = (description?: string): Field => ({
+  name: 'icon',
+  type: 'select',
+  options: ICON_NAMES.map((v) => ({ label: v, value: v })),
+  ...(description ? { admin: { description } } : {}),
+})
+
 /** Optional section header: a short label above the heading, the heading and an intro line. */
 const header = (headingRequired = false): Field[] => [
   text('eyebrow', 80),
@@ -137,6 +146,8 @@ const definitions: Block[] = [
         text('kind', 60),
         text('title', 200, true),
         textarea('summary', 400),
+        { name: 'date', type: 'date', admin: { description: 'Publication date, if any.' } },
+        image('image'),
         linkGroup('link'),
       ]),
       linkGroup('moreLink'),
@@ -147,18 +158,7 @@ const definitions: Block[] = [
     slug: 'featureGrid',
     fields: [
       ...header(),
-      items('items', [
-        {
-          name: 'icon',
-          type: 'select',
-          options: ['shield', 'audit', 'policy', 'training', 'risk', 'response'].map((v) => ({
-            label: v,
-            value: v,
-          })),
-        },
-        text('title', 120, true),
-        textarea('text', 600),
-      ]),
+      items('items', [iconField(), text('title', 120, true), textarea('text', 600)]),
       ...common,
     ],
   },
@@ -226,6 +226,27 @@ const definitions: Block[] = [
         { name: 'validUntil', type: 'date' },
       ]),
       evidenceGroup('evidence', CLAIM_BLOCKS.credentials!),
+      ...common,
+    ],
+  },
+  {
+    // Team (CD-03): people, their roles, short biographies and photos. Every row is a claim about
+    // a real person (credentials, photo consent), so the block needs verified evidence before it
+    // can be published, like statistics and credentials (CLAIM_BLOCKS.team).
+    slug: 'team',
+    labels: { singular: 'Team (evidence required)', plural: 'Team (evidence required)' },
+    fields: [
+      ...header(),
+      items('members', [
+        text('name', 120, true),
+        text('role', 160),
+        textarea('bio', 600),
+        {
+          ...image('photo'),
+          admin: { description: 'Only with the person’s written consent (CD-03).' },
+        } as Field,
+      ]),
+      evidenceGroup('evidence', CLAIM_BLOCKS.team!),
       ...common,
     ],
   },

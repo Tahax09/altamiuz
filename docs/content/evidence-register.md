@@ -28,8 +28,11 @@ record. The supporting documents themselves are held by the owner outside the CM
 | Course accreditation (`accreditationStatement`)                     | each course → `accreditationEvidence`                                   | CD-05               |
 | Statistics block (values, labels, header text)                      | any page/service/course section `stats`                                 | CD-07               |
 | Credentials block (name, issuer, valid until, header text, display) | any section `credentials` (certifications, registrations, partnerships) | CD-01, CD-05, CD-06 |
+| Team block (members: name, role, biography, photo; header text)     | any section `team` (V-2)                                                | CD-03               |
 
-Client names, logos, testimonials (CD-08) and biographies (CD-03) have no claim block in v1 and
+Biographies now have the evidence-gated `team` block (V-2, 2026-11-12): the evidence `reference`
+names the person's written consent and the source of each credential. Client names, logos and
+testimonials (CD-08) have no claim block in v1 and
 must not be published until a decision adds one.
 
 ## Checks performed

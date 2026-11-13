@@ -10,6 +10,7 @@ import { Icon as UiIcon } from '../primitives/Icon'
 import { hasMedia, MediaSlot } from '../primitives/MediaSlot'
 import { RichText, type InternalHref } from '../richtext/RichText'
 import { CourseFacts } from '../page/CourseFacts'
+import { ContactDetails, hasContactDetails } from '../site/ContactDetails'
 import { legalOutline, LegalToc } from '../page/LegalToc'
 import { PageHeader } from '../page/PageHeader'
 import type { Crumb } from '../primitives/Breadcrumbs'
@@ -21,7 +22,14 @@ type Block = Record<string, unknown> & {
   anchorId?: string
   id?: string
 }
-type ListItem = { title?: unknown; slug?: unknown; summary?: unknown; _status?: unknown }
+type ListItem = {
+  title?: unknown
+  slug?: unknown
+  summary?: unknown
+  _status?: unknown
+  image?: unknown
+  icon?: unknown
+}
 
 export type RenderContext = {
   locale: Locale
@@ -31,6 +39,8 @@ export type RenderContext = {
   contactForm?: ReactNode
   /** Draft preview: empty image slots show a labelled placeholder of the expected size. */
   preview?: boolean
+  /** Published site settings (contact details for `contactBlock`). */
+  settings?: Record<string, unknown> | null
 }
 
 const ROUTE_OF: Record<string, 'page' | 'service' | 'course'> = {
@@ -157,6 +167,73 @@ export function ListingCards({
   )
 }
 
+/** Published (or public-read) services or courses with a slug. */
+function publishedItems(items: ListItem[]): ListItem[] {
+  return items.filter(
+    (r) =>
+      r &&
+      typeof r === 'object' &&
+      typeof r.slug === 'string' &&
+      (r._status === undefined || r._status === 'published'),
+  )
+}
+
+/** Services or courses as offer cards: optional image (or icon), index, title, summary, arrow.
+ * The first card leads when there are three or more. Nothing renders for an empty list. */
+export function OfferCards({
+  items,
+  kind,
+  locale,
+  headingLevel = 3,
+  preview = false,
+}: {
+  items: ListItem[]
+  kind: 'service' | 'course'
+  locale: Locale
+  headingLevel?: 2 | 3
+  preview?: boolean
+}) {
+  const visible = publishedItems(items)
+  if (!visible.length) return null
+  const Heading = headingLevel === 2 ? 'h2' : 'h3'
+  return (
+    <ol className={`listing offers${visible.length > 2 ? ' offers--lead' : ''}`}>
+      {visible.map((r, j) => {
+        const pic = hasMedia(r.image) || preview
+        return (
+          <li
+            key={String(r.slug)}
+            className={`offer${pic ? ' offer--image' : ''}`}
+            data-reveal-item=""
+          >
+            {pic ? (
+              <MediaSlot
+                media={r.image}
+                ratio="classic"
+                locale={locale}
+                preview={preview}
+                className="offer__image"
+                sizes="(min-width: 64rem) 40vw, 100vw"
+              />
+            ) : null}
+            <div className="offer__body">
+              <p className="offer__meta" aria-hidden="true">
+                <span>{pad(j + 1)}</span>
+                {!pic ? <Icon name={r.icon} /> : null}
+              </p>
+              <Heading className="offer__title">
+                <a href={href(kind, locale, { slug: String(r.slug) })}>{str(r.title)}</a>
+              </Heading>
+              {r.summary ? <p className="offer__summary">{str(r.summary)}</p> : null}
+              <UiIcon name="arrow" className="offer__arrow" />
+            </div>
+          </li>
+        )
+      })}
+    </ol>
+  )
+}
+
 /** A credential's expiry date, or null when absent or not a valid date. */
 function validUntil(v: unknown, locale: Locale): string | null {
   const d = typeof v === 'string' ? new Date(v) : null
@@ -191,6 +268,7 @@ const HEADED = new Set([
   'resourceList',
   'featureGrid',
   'stats',
+  'team',
   'credentials',
   'mediaGallery',
   'serviceList',
@@ -198,6 +276,52 @@ const HEADED = new Set([
 ])
 const hasHead = (b: Block) =>
   HEADED.has(String(b.blockType)) && !!(b.eyebrow || b.heading || b.intro)
+
+const rows = (v: unknown) => (Array.isArray(v) ? (v as Record<string, unknown>[]) : [])
+
+/** Items a block would list; a list block with nothing to list renders nothing at all. */
+function listOf(b: Block, ctx?: RenderContext): unknown[] | null {
+  switch (b.blockType) {
+    case 'process':
+      return rows(b.steps)
+    case 'team':
+      return rows(b.members)
+    case 'standards':
+    case 'resourceList':
+    case 'featureGrid':
+    case 'stats':
+    case 'credentials':
+      return rows(b.items)
+    case 'mediaGallery':
+      return rows(b.items).filter((it) => it.media && typeof it.media === 'object')
+    case 'serviceList':
+    case 'courseList': {
+      const kind = b.blockType === 'serviceList' ? 'services' : 'courses'
+      const list = b.mode === 'all' ? (ctx?.listings?.[kind] ?? []) : rows(b[kind])
+      return publishedItems(list as ListItem[])
+    }
+    default:
+      return null
+  }
+}
+
+/** Up to two initials of a name, in its own script (decorative monogram). */
+function initials(name: string): string {
+  return name
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((w) => Array.from(w)[0] ?? '')
+    .join('\u200c') // zero-width non-joiner: Arabic initials stay separate letters
+}
+
+/** A short date for an insight card, or null. */
+function shortDate(v: unknown, locale: Locale): { text: string; iso: string } | null {
+  const d = typeof v === 'string' ? new Date(v) : null
+  return d && !Number.isNaN(d.getTime())
+    ? { text: formatDate(locale, d), iso: d.toISOString().slice(0, 10) }
+    : null
+}
 
 export function Sections({
   sections,
@@ -211,7 +335,11 @@ export function Sections({
   if (!Array.isArray(sections)) return null
   const locale: Locale = ctx?.locale ?? (dir === 'rtl' ? 'ar' : 'en')
   const resolve = internalHrefFor(locale)
-  const visible = (sections as Block[]).filter((b) => b && !b.hidden)
+  const visible = (sections as Block[]).filter((b) => {
+    if (!b || b.hidden) return false
+    const list = listOf(b, ctx)
+    return list === null || list.length > 0 // CMS-aware: no empty list sections
+  })
   // Running section numbers for the rail (only sections with a header are numbered).
   let counter = 0
   const numbers = visible.map((b) => (hasHead(b) ? ++counter : null))
@@ -219,7 +347,7 @@ export function Sections({
     <>
       {visible.map((b, i) => {
         const id = b.anchorId && /^[a-z0-9-]{1,64}$/.test(b.anchorId) ? b.anchorId : undefined
-        const items = Array.isArray(b.items) ? (b.items as Record<string, unknown>[]) : []
+        const items = rows(b.items)
         const key = b.id ?? i
         const n = numbers[i] ?? null
         const shell = (
@@ -277,7 +405,7 @@ export function Sections({
                       ratio="landscape"
                       locale={locale}
                       preview={ctx?.preview}
-                      sizes="(min-width: 64rem) 42vw, 100vw"
+                      sizes="(min-width: 64rem) 40vw, 100vw"
                       eager={i === 0}
                     />
                   </Plate>
@@ -286,11 +414,11 @@ export function Sections({
                   <defs>
                     <pattern
                       id={`field-${key}`}
-                      width="32"
-                      height="32"
+                      width="40"
+                      height="40"
                       patternUnits="userSpaceOnUse"
                     >
-                      <path d="M32 0H0V32" />
+                      <path d="M40 0H0V40" />
                     </pattern>
                   </defs>
                   <rect width="100%" height="100%" fill={`url(#field-${key})`} />
@@ -356,7 +484,7 @@ export function Sections({
             )
           }
           case 'process': {
-            const steps = Array.isArray(b.steps) ? (b.steps as Record<string, unknown>[]) : []
+            const steps = rows(b.steps)
             const hasVisual = hasMedia(b.media) || !!ctx?.preview
             return shell(
               'process',
@@ -388,6 +516,9 @@ export function Sections({
                         </span>
                         {b.heading ? <h3>{str(s.title)}</h3> : <h2>{str(s.title)}</h2>}
                         {s.text ? <p>{str(s.text)}</p> : null}
+                        <span className="process__count" aria-hidden="true">
+                          {pad(j + 1)}/{pad(steps.length)}
+                        </span>
                       </li>
                     ))}
                   </ol>
@@ -433,39 +564,56 @@ export function Sections({
               'resources',
               <>
                 <SectionHead b={b} />
-                <ul className={`dossier${items.length > 1 ? ' dossier--lead' : ''}`}>
+                <ul className={`articles${items.length > 2 ? ' articles--lead' : ''}`}>
                   {items.map((it, j) => {
                     const Heading = b.heading ? 'h3' : 'h2'
                     const link = it.link as Link
+                    const date = shortDate(it.date, locale)
+                    const pic = hasMedia(it.image) || !!ctx?.preview
                     return (
                       <li
                         key={(it.id as string | undefined) ?? j}
-                        className={`dossier__item${link?.linkType ? ' dossier__item--link' : ''}`}
+                        className={`article${link?.linkType ? ' article--link' : ''}${pic ? ' article--image' : ''}`}
                         data-reveal-item=""
                       >
-                        <p className="dossier__meta">
-                          <span aria-hidden="true">{pad(j + 1)}</span>
-                          {it.kind ? <span className="badge">{str(it.kind)}</span> : null}
-                        </p>
-                        <Heading className="dossier__title">
-                          {link?.linkType ? (
-                            <LinkOut
-                              link={{ ...link, label: str(it.title) }}
-                              resolve={resolve}
-                              locale={locale}
-                            />
-                          ) : (
-                            str(it.title)
-                          )}
-                        </Heading>
-                        {it.summary ? <p className="dossier__summary">{str(it.summary)}</p> : null}
+                        {pic ? (
+                          <MediaSlot
+                            media={it.image}
+                            ratio="classic"
+                            locale={locale}
+                            preview={ctx?.preview}
+                            className="article__image"
+                            sizes="(min-width: 64rem) 40vw, 100vw"
+                          />
+                        ) : null}
+                        <div className="article__body">
+                          {it.kind || date ? (
+                            <p className="article__meta">
+                              {it.kind ? <span className="badge">{str(it.kind)}</span> : null}
+                              {date ? <time dateTime={date.iso}>{date.text}</time> : null}
+                            </p>
+                          ) : null}
+                          <Heading className="article__title">
+                            {link?.linkType ? (
+                              <LinkOut
+                                link={{ ...link, label: str(it.title) }}
+                                resolve={resolve}
+                                locale={locale}
+                              />
+                            ) : (
+                              str(it.title)
+                            )}
+                          </Heading>
+                          {it.summary ? (
+                            <p className="article__summary">{str(it.summary)}</p>
+                          ) : null}
+                        </div>
                       </li>
                     )
                   })}
                 </ul>
                 <More link={b.moreLink} resolve={resolve} locale={locale} />
               </>,
-              { surface: 'raised' },
             )
           case 'richText':
             return (
@@ -495,13 +643,13 @@ export function Sections({
             )
           case 'featureGrid':
             return shell(
-              'matrix',
-              <>
+              'principles',
+              <div className="principles">
                 <SectionHead b={b} />
-                <ul className="matrix">
+                <ul className="principles__list">
                   {items.map((it, j) => (
-                    <li key={j} className="matrix__cell" data-reveal-item="">
-                      <span className="matrix__index" aria-hidden="true">
+                    <li key={j} className="principles__item" data-reveal-item="">
+                      <span className="principles__index" aria-hidden="true">
                         {pad(j + 1)}
                       </span>
                       <Icon name={it.icon} />
@@ -510,12 +658,17 @@ export function Sections({
                     </li>
                   ))}
                 </ul>
-              </>,
+              </div>,
             )
           case 'stats':
-            return shell(
-              'stats',
-              <>
+            return (
+              <section
+                key={key}
+                id={id}
+                data-block="stats"
+                data-reveal=""
+                className="section stats-band"
+              >
                 <SectionHead b={b} />
                 <ul className="stats">
                   {items.map((it, j) => (
@@ -525,21 +678,73 @@ export function Sections({
                     </li>
                   ))}
                 </ul>
-              </>,
-              { surface: 'stone' },
+              </section>
             )
-          case 'credentials':
+          case 'team': {
+            const members = rows(b.members)
+            const Heading = b.heading ? 'h3' : 'h2'
             return shell(
-              'credentials',
+              'team',
               <>
                 <SectionHead b={b} />
-                {b.display === 'logos' ? (
+                <ul className="team">
+                  {members.map((m, j) => {
+                    const photo = hasMedia(m.photo) || !!ctx?.preview
+                    return (
+                      <li
+                        key={(m.id as string | undefined) ?? j}
+                        className="team__member"
+                        data-reveal-item=""
+                      >
+                        {photo ? (
+                          <MediaSlot
+                            media={m.photo}
+                            ratio="portrait"
+                            locale={locale}
+                            preview={ctx?.preview}
+                            className="team__photo"
+                            sizes="(min-width: 64rem) 22vw, (min-width: 40rem) 45vw, 100vw"
+                          />
+                        ) : (
+                          // No photo (or no consent): the person's initials in the same frame,
+                          // so the row stays aligned without an empty image box.
+                          <span className="team__monogram" aria-hidden="true">
+                            {initials(str(m.name))}
+                          </span>
+                        )}
+                        <Heading className="team__name">{str(m.name)}</Heading>
+                        {m.role ? <p className="team__role">{str(m.role)}</p> : null}
+                        {m.bio ? <p className="team__bio">{str(m.bio)}</p> : null}
+                      </li>
+                    )
+                  })}
+                </ul>
+              </>,
+            )
+          }
+          case 'credentials':
+            if (b.display === 'logos')
+              return (
+                <section
+                  key={key}
+                  id={id}
+                  data-block="credentials"
+                  data-reveal=""
+                  className="section trust"
+                >
+                  {b.eyebrow || b.heading ? (
+                    <div className="trust__head">
+                      {b.eyebrow ? <p className="trust__label">{str(b.eyebrow)}</p> : null}
+                      {b.heading ? <h2 className="trust__title">{str(b.heading)}</h2> : null}
+                    </div>
+                  ) : null}
                   <ul className="logo-wall">
                     {items.map((it, j) => (
-                      <li key={(it.id as string | undefined) ?? j}>
+                      <li key={(it.id as string | undefined) ?? j} data-reveal-item="">
                         <Picture
                           media={it.logo}
                           crop={false}
+                          fallback="webp"
                           className="media--logo"
                           sizes="10rem"
                         />
@@ -547,36 +752,41 @@ export function Sections({
                       </li>
                     ))}
                   </ul>
-                ) : (
-                  <ul className="register">
-                    {items.map((it, j) => {
-                      const until = validUntil(it.validUntil, locale)
-                      return (
-                        <li key={j} className="register__row">
-                          <span className="register__index" aria-hidden="true">
-                            {pad(j + 1)}
-                          </span>
-                          <h3 className="register__name">{str(it.name)}</h3>
-                          <p className="register__text">
-                            {it.issuer ? str(it.issuer) : null}
-                            {until ? (
-                              <span className="meta">
-                                {' '}
-                                {t(locale, 'validUntil', { date: until })}
-                              </span>
-                            ) : null}
-                          </p>
-                          <Picture
-                            media={it.logo}
-                            crop={false}
-                            className="media--logo register__logo"
-                            sizes="10rem"
-                          />
-                        </li>
-                      )
-                    })}
-                  </ul>
-                )}
+                </section>
+              )
+            return shell(
+              'credentials',
+              <>
+                <SectionHead b={b} />
+                <ul className="register">
+                  {items.map((it, j) => {
+                    const until = validUntil(it.validUntil, locale)
+                    return (
+                      <li key={j} className="register__row">
+                        <span className="register__index" aria-hidden="true">
+                          {pad(j + 1)}
+                        </span>
+                        <h3 className="register__name">{str(it.name)}</h3>
+                        <p className="register__text">
+                          {it.issuer ? str(it.issuer) : null}
+                          {until ? (
+                            <span className="meta">
+                              {' '}
+                              {t(locale, 'validUntil', { date: until })}
+                            </span>
+                          ) : null}
+                        </p>
+                        <Picture
+                          media={it.logo}
+                          crop={false}
+                          fallback="webp"
+                          className="media--logo register__logo"
+                          sizes="10rem"
+                        />
+                      </li>
+                    )
+                  })}
+                </ul>
               </>,
             )
           case 'mediaGallery':
@@ -605,33 +815,42 @@ export function Sections({
           case 'serviceList':
           case 'courseList': {
             const kind = b.blockType === 'serviceList' ? 'service' : 'course'
-            const selected = ((b.services ?? b.courses) as ListItem[] | undefined) ?? []
-            const all =
-              (kind === 'service' ? ctx?.listings?.services : ctx?.listings?.courses) ?? []
             return shell(
-              'listing',
+              'offer',
               <>
                 <SectionHead b={b} />
-                <ListingCards
-                  items={b.mode === 'all' ? all : selected}
+                <OfferCards
+                  items={(listOf(b, ctx) ?? []) as ListItem[]}
                   kind={kind}
                   locale={locale}
                   headingLevel={b.heading ? 3 : 2}
+                  preview={!!ctx?.preview}
                 />
                 <More link={b.moreLink} resolve={resolve} locale={locale} />
               </>,
+              { surface: 'raised' },
             )
           }
-          case 'contactBlock':
+          case 'contactBlock': {
+            const details = hasContactDetails(ctx?.settings)
             return (
               <section key={key} id={id} data-block="contactBlock" className="section contact">
                 <div className="contact-panel">
                   <h2>{str(b.heading)}</h2>
-                  {b.intro ? <p>{str(b.intro)}</p> : null}
+                  {b.intro ? <p className="contact-panel__intro">{str(b.intro)}</p> : null}
+                  {details ? (
+                    <ContactDetails
+                      settings={ctx?.settings}
+                      locale={locale}
+                      className="contact-panel__details"
+                      iconClassName="contact-panel__icon"
+                    />
+                  ) : null}
                 </div>
                 <div className="contact__form">{ctx?.contactForm ?? null}</div>
               </section>
             )
+          }
           default:
             return null
         }

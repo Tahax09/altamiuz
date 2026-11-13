@@ -8,7 +8,7 @@ import { docMetadata, JsonLd, staticMetadata } from '../seo'
 import { DocumentView } from '@/ui'
 import { PageHeader } from '@/ui/page/PageHeader'
 import { Icon } from '@/ui/primitives/Icon'
-import { cachedHome, listingsFor } from '../data'
+import { cachedGlobal, cachedHome, listingsFor } from '../data'
 
 const isLocale = (v: string): v is Locale => (LOCALES as readonly string[]).includes(v)
 
@@ -37,6 +37,7 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
           ctx={{
             listings: await listingsFor(home, locale),
             contactForm: await contactFormFor(home, locale),
+            settings: await cachedGlobal('site-settings', locale),
           }}
         />
       </>

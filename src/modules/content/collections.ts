@@ -2,7 +2,7 @@
 import type { CollectionConfig, Field } from 'payload'
 import type { RoutedCollection } from '../i18n'
 import { contentAccess } from './access'
-import { sectionsField } from './blocks'
+import { iconField, sectionsField } from './blocks'
 import { evidenceGroup } from './evidence'
 import { slugField } from './slugs'
 import {
@@ -113,6 +113,17 @@ function routed(
 
 const listingFields: Field[] = [
   { name: 'summary', type: 'textarea', localized: true, maxLength: 300 },
+  {
+    // Shown on listing cards and the homepage services section; optional (CD-09 assets).
+    name: 'image',
+    type: 'upload',
+    relationTo: 'media',
+    admin: { position: 'sidebar', description: 'Card image (3:2), optional.' },
+  },
+  {
+    ...iconField(),
+    admin: { position: 'sidebar', description: 'Card icon, used when there is no image.' },
+  } as Field,
   sectionsField,
   {
     name: 'order',

@@ -101,10 +101,18 @@ export async function listPublished(
     collection,
     where: { and: notHidden(collection) },
     locale,
-    depth: 0,
+    depth: 1, // card image (published listings make it public, FR-056)
     limit: 200,
     sort: ['order', 'title'],
-    select: { title: true, slug: true, summary: true, order: true, hidden: true },
+    select: {
+      title: true,
+      slug: true,
+      summary: true,
+      order: true,
+      hidden: true,
+      image: true,
+      icon: true,
+    },
     ...PUBLIC,
   })
   return toPublic(res.docs as unknown as PublicDoc[])

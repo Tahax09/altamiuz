@@ -24,7 +24,12 @@ const HOME = [
     items: [{ name: 'Fixture certificate', issuer: 'Fixture body' }],
   },
   { blockType: 'textMedia', heading: 'Fixture introduction', body: rt('Fixture body text') },
-  { blockType: 'serviceList', heading: 'Fixture services', mode: 'selected', services: [] },
+  {
+    blockType: 'serviceList',
+    heading: 'Fixture services',
+    mode: 'selected',
+    services: [{ title: 'Fixture service', slug: 'fixture-service', _status: 'published' }],
+  },
   {
     blockType: 'featureGrid',
     heading: 'Fixture why',
