@@ -114,7 +114,8 @@
       ]
     },
     "overrides": {
-      "@lexical/headless>happy-dom": "21.0.4"
+      "@lexical/headless>happy-dom": "21.0.4",
+      "get-uri>basic-ftp": "6.2.6"
     }
   }
 }

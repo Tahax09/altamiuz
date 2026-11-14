@@ -30,11 +30,6 @@ ignoreUntil = 2026-12-05
 reason = "dompurify 3.4.15 vendored inside monaco-editor 0.57.0; see GHSA-cg2g-xh64-v4q7"
 
 [[IgnoredVulns]]
-id = "GHSA-c475-qrg2-pj4r"
-ignoreUntil = 2026-12-05
-reason = "basic-ftp 5.x via @lhci/cli proxy-agent (dev-only); only reached with an ftp:// PAC URL, none configured; get-uri latest still requires ^5.3.1"
-
-[[IgnoredVulns]]
 id = "GHSA-gcqx-w48m-w2h4"
 ignoreUntil = 2026-12-05
 reason = "deepmerge 4.3.1 via payload (low); no fixed release published"

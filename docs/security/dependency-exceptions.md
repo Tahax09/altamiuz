@@ -18,7 +18,8 @@ change.
 0.57.0 still bundles `dompurify` 3.4.15 (fix is 3.4.17); E-2 `get-uri` latest still requires
 `basic-ftp` ^5.3.1 (fix is in 6.x); E-3 `@typescript-eslint/typescript-estree` latest requires
 `minimatch` ^10 (fix 11.0.1); E-4 `deepmerge` latest is the affected 4.3.1 and Payload 3.93.0
-pins it. **All five expire 2026-12-05; each needs an owner extend-or-lapse decision before then**
+pins it. **Update 2026-11-14**: E-2 retired (override to `basic-ftp` 6.2.6). **The other four
+expire 2026-12-05; each needs an owner extend-or-lapse decision before then**
 (docs/launch-readiness.md, owner decision OD-1).
 
 Every exception has the same owner: **Taha Alabyad (project owner)**. All five expire on
@@ -68,7 +69,14 @@ taken from `pnpm audit --json` on 2026-11-06.
 - **Before expiry**: re-check `monaco-editor` 0.58.0; with no runtime exposure, the owner decides
   whether to re-date.
 
-### E-2 basic-ftp in the Lighthouse CI proxy chain — expires 2026-12-05
+### E-2 basic-ftp in the Lighthouse CI proxy chain — **retired 2026-11-14**
+
+- **Retired**: a scoped override `get-uri>basic-ftp` 6.2.6 (package.json `pnpm.overrides`) fixes
+  GHSA-c475-qrg2-pj4r and the two later advisories GHSA-5pm8-86m8-9m6r and GHSA-r4jh-29pc-gfqr
+  (published after 2026-11-12, which failed the OSV scan). 6.0.0's only breaking change refuses
+  separate FTP transfer hosts by default; `get-uri` uses `access`, `lastMod`, `list`,
+  `downloadTo` and `close` only, unchanged. `pnpm audit:deps` passes; the ignore entry is removed.
+  The record below is kept for history.
 
 - **Advisory**: GHSA-c475-qrg2-pj4r, high; affected ≤6.2.0, fixed in 6.2.1. Quadratic CPU use in
   `Client.list()` when parsing a hostile server's directory listing.
