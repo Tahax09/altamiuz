@@ -94,5 +94,6 @@ needs it.
   `tests/public/*.spec.ts`, `tests/a11y/public/baseline.spec.ts`, `tests/security/public-http.spec.ts`,
   `tests/perf/lighthouserc.cjs`); `pnpm check:route-vocab` then exits 0.
 - CD-12: fill the map, `pnpm seed:redirects` (dry run), then `pnpm seed:redirects apply`.
-- CD-09: upload logos and choose them in Site settings → Brand; add the favicon files.
+- CD-09: upload logos and choose them in Site settings → Brand. (Favicon files: done in
+  `c22cabb`, generated from the emblem with `pnpm brand:icons`.)
 - O-3: implement the R2 adapter (new dependency), then re-run the production build.

@@ -13,24 +13,24 @@ v1 until an owner decision.
 
 ## Owner actions and decisions
 
-| ID          | Action                                                                                                               | Blocks                                                          |
-| ----------- | -------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
-| O-1         | Vercel Pro team/project                                                                                              | preview, production, cron, SC-009/010/015 on host, FR-066       |
-| O-2         | Neon roles (pooled app, direct migration, read-only backup)                                                          | production DB, Neon restore drill                               |
-| O-3         | Approve `@payloadcms/storage-s3`; R2 buckets and scoped tokens                                                       | **production cannot start without it**; FR-050/051/056          |
-| O-4         | Uploads >4.5 MB (direct-to-R2) or lower A-7                                                                          | large uploads on Vercel                                         |
-| O-5         | Cloudflare in front or not; `CLIENT_IP_HEADER`                                                                       | per-client rate limits (FR-094)                                 |
-| O-6         | Email provider, `smtps://` relay, SPF/DKIM/DMARC                                                                     | enquiry email (FR-073, SC-010)                                  |
-| O-7         | Confirm Neon/R2 encryption at rest                                                                                   | FR-078, launch sign-off                                         |
-| O-8         | Production Turnstile keys                                                                                            | contact form in production                                      |
-| O-9         | Monitoring account, two-channel alert recipient(s), escalation, log drain                                            | FR-100, SC-015, ASVS V16.4.3                                    |
-| O-10        | Backup bucket, age key pair (offline, two holders), GitHub secrets, `BACKUP_ENABLED`                                 | FR-102, SC-013 in production                                    |
-| OD-1        | **Before 2026-12-05**: extend or let lapse exceptions E-1…E-5 (no upstream fix exists; E-5 reviewed, 0 loads)        | CI and scanners fail on 2026-12-05 otherwise                    |
-| OD-2        | Pin GitHub Actions to commit SHAs before enabling backup secrets (finding A-7) — engineering can do it once approved | O-10                                                            |
-| OD-3        | Analytics in v1 or not (T127, FR-084–087)                                                                            | currently deferred                                              |
-| OD-4        | File the drafted Payload accessibility issues upstream                                                               | SC-019, FR-080a                                                 |
-| OD-5        | Nominate two staff for usability (SC-002) and a manual accessibility tester (SC-006)                                 | SC-002, SC-006, T138                                            |
-| CD-01…CD-13 | Content dependencies — **all open** (`docs/content/dependencies.md`); options and effects: `docs/owner-decisions.md` | content, FR-002 (CD-13), FR-065 (CD-12), FR-079 (CD-10), SC-016 |
+| ID          | Action                                                                                                                                 | Blocks                                                          |
+| ----------- | -------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
+| O-1         | Vercel Pro team/project                                                                                                                | preview, production, cron, SC-009/010/015 on host, FR-066       |
+| O-2         | Neon roles (pooled app, direct migration, read-only backup)                                                                            | production DB, Neon restore drill                               |
+| O-3         | Approve `@payloadcms/storage-s3`; R2 buckets and scoped tokens                                                                         | **production cannot start without it**; FR-050/051/056          |
+| O-4         | Uploads >4.5 MB (direct-to-R2) or lower A-7                                                                                            | large uploads on Vercel                                         |
+| O-5         | Cloudflare in front or not; `CLIENT_IP_HEADER`                                                                                         | per-client rate limits (FR-094)                                 |
+| O-6         | Email provider, `smtps://` relay, SPF/DKIM/DMARC                                                                                       | enquiry email (FR-073, SC-010)                                  |
+| O-7         | Confirm Neon/R2 encryption at rest                                                                                                     | FR-078, launch sign-off                                         |
+| O-8         | Production Turnstile keys                                                                                                              | contact form in production                                      |
+| O-9         | Monitoring account, two-channel alert recipient(s), escalation, log drain                                                              | FR-100, SC-015, ASVS V16.4.3                                    |
+| O-10        | Backup bucket, age key pair (offline, two holders), GitHub secrets, `BACKUP_ENABLED`                                                   | FR-102, SC-013 in production                                    |
+| OD-1        | **Before 2026-12-05**: extend or let lapse exceptions E-1…E-5 (no upstream fix exists; E-5 reviewed, 0 loads)                          | CI and scanners fail on 2026-12-05 otherwise                    |
+| OD-2        | Pin GitHub Actions to commit SHAs before enabling backup secrets (finding A-7) — engineering can do it once approved                   | O-10                                                            |
+| OD-3        | Analytics in v1 or not (T127, FR-084–087)                                                                                              | currently deferred                                              |
+| OD-4        | File the drafted Payload accessibility issues upstream                                                                                 | SC-019, FR-080a                                                 |
+| OD-5        | Nominate two staff for usability (SC-002) and a manual accessibility tester (SC-006)                                                   | SC-002, SC-006, T138                                            |
+| CD-01…CD-13 | Content dependencies — **all open except CD-09, partly supplied** (`docs/content/dependencies.md`); options: `docs/owner-decisions.md` | content, FR-002 (CD-13), FR-065 (CD-12), FR-079 (CD-10), SC-016 |
 
 ## Blockers by stage (re-verified 2026-11-12, R-1)
 

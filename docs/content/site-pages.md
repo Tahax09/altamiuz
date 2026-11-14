@@ -62,7 +62,7 @@ pages created before the collision stay as drafts (nothing published or overwrit
 | Contact                    | address, phone, email, hours                                         | CD-02                                 |
 | Privacy notice             | seven pending sections                                               | CD-10, CD-01, CD-02, G-2              |
 | Terms of use               | all six sections                                                     | CD-10                                 |
-| Header, footer, favicon    | logos, favicon, colours                                              | CD-09, CD-01                          |
+| Header, footer             | English and reversed lockups, palette approval (favicon done)        | CD-09, CD-01                          |
 | Arabic service/course URLs | Arabic route segments                                                | CD-13                                 |
 
 ## Site settings and menus (drafts filled by the seed only where empty)
@@ -88,5 +88,7 @@ labelled placeholders in preview and collapse on the public site until an image 
 | Logos                                   | `standards.items.logo`, `credentials.items.logo` | contained            | per language                            |
 | Social preview                          | `seo.ogImage`                                    | 1440 px JPEG variant | per language                            |
 
-Brand assets (logo, favicon) remain CD-09; the header shows the company name as text until a logo
-is chosen in Site settings → Brand. Formats, sizes and upload locations: `brand-assets.md`.
+Brand assets remain CD-09 (partly supplied; favicon and app icons generated from the emblem in
+`c22cabb`). Until a logo is chosen in Site settings → Brand, the header shows the supplied emblem
+as the home link, with the company name beside it once published. Formats, sizes and upload
+locations: `brand-assets.md`.
