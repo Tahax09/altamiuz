@@ -257,25 +257,35 @@ export type NavTarget =
   { route: 'services' | 'training' } | { page: PageDef['key'] | 'contact' | 'privacy' }
 export type NavItem = { label: L; target?: NavTarget; children?: NavItem[] }
 
+// Header labels follow the legacy site's wording (owner, 2026-11-14), tidied: "Services"/"الخدمات
+// الأمنية", "Training"/"الدورات التدريبية", "Insights"/"المدونة", "About"/"من نحن". Contact is the
+// header's action button (the contact page title), not a menu item.
+const nav = {
+  services: { en: 'Services', ar: 'الخدمات الأمنية' },
+  training: { en: 'Training', ar: 'الدورات التدريبية' },
+  insights: { en: 'Insights', ar: 'المدونة' },
+  about: { en: 'About', ar: 'من نحن' },
+} as const
+
 export const headerNav: NavItem[] = [
+  { label: nav.services, target: { route: 'services' } },
+  { label: nav.training, target: { route: 'training' } },
+  { label: nav.insights, target: { page: 'insights' } },
   {
-    label: { en: 'About', ar: 'من نحن' },
+    label: nav.about,
     target: { page: 'about' },
     children: [
       { label: home.expertise.heading, target: { page: 'expertise' } },
       { label: home.standards.eyebrow, target: { page: 'standards' } },
     ],
   },
-  { label: home.services.eyebrow, target: { route: 'services' } },
-  { label: { en: 'Training', ar: 'التدريب' }, target: { route: 'training' } },
-  { label: home.insights.heading, target: { page: 'insights' } },
 ]
 
 export const footerNav: NavItem[] = [
   {
     label: { en: 'Company', ar: 'الشركة' },
     children: [
-      { label: { en: 'About', ar: 'من نحن' }, target: { page: 'about' } },
+      { label: nav.about, target: { page: 'about' } },
       { label: home.expertise.heading, target: { page: 'expertise' } },
       { label: home.standards.eyebrow, target: { page: 'standards' } },
     ],
@@ -283,9 +293,9 @@ export const footerNav: NavItem[] = [
   {
     label: { en: 'What we do', ar: 'ما نقدمه' },
     children: [
-      { label: home.services.eyebrow, target: { route: 'services' } },
-      { label: { en: 'Training', ar: 'التدريب' }, target: { route: 'training' } },
-      { label: home.insights.heading, target: { page: 'insights' } },
+      { label: nav.services, target: { route: 'services' } },
+      { label: nav.training, target: { route: 'training' } },
+      { label: nav.insights, target: { page: 'insights' } },
     ],
   },
 ]

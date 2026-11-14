@@ -105,12 +105,24 @@ function build(l: Locale, media: Record<keyof typeof illustrations, number>, con
       mediaPosition: 'end',
     },
     {
+      // CMS-aware: renders the published services and nothing while none is published (C-1).
       blockType: 'serviceList',
-      ...pending(S.services.pending),
+      blockName: 'Services',
       eyebrow: t(S.services.eyebrow),
       heading: t(S.services.heading),
       intro: t(S.services.intro),
       mode: 'all',
+      moreLink: { linkType: 'route', route: 'services', label: t(S.services.more) },
+    },
+    {
+      // Same for the published training courses.
+      blockType: 'courseList',
+      blockName: 'Training',
+      eyebrow: t(S.training.eyebrow),
+      heading: t(S.training.heading),
+      intro: t(S.training.intro),
+      mode: 'all',
+      moreLink: { linkType: 'route', route: 'training', label: t(S.training.more) },
     },
     {
       blockType: 'featureGrid',

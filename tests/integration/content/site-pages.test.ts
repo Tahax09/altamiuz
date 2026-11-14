@@ -179,13 +179,20 @@ describe('site pages seed (W-1)', () => {
       depth: 0,
       overrideAccess: true,
     })) as unknown as { items: { link: Record<string, unknown>; children?: unknown[] }[] }
+    // Order and wording follow the legacy site (owner, 2026-11-14): Services, Training, Insights,
+    // About (with its two sub-pages). Contact is the header's action button, not a menu item.
     expect(header.items.length).toBe(4)
-    expect(header.items[0]!.children).toHaveLength(2)
-    expect(header.items[1]!.link).toMatchObject({
+    expect(header.items[0]!.link).toMatchObject({
       linkType: 'route',
       route: 'services',
-      label: 'الخدمات',
+      label: 'الخدمات الأمنية',
     })
+    expect(header.items[1]!.link).toMatchObject({
+      linkType: 'route',
+      route: 'training',
+      label: 'الدورات التدريبية',
+    })
+    expect(header.items[3]!.children).toHaveLength(2)
     const settings = (await t.payload.findGlobal({
       slug: 'site-settings',
       draft: true,

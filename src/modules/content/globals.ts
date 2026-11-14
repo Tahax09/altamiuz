@@ -370,6 +370,41 @@ export const siteSettings = versionedGlobal('site-settings', 'Site settings', [
     maxLength: 20,
     validate: (v: unknown) =>
       !v || /^\+[0-9]{6,15}$/.test(String(v)) || 'Use +country code digits only.',
+    admin: {
+      description: 'Main number, shown first. +country code and digits, e.g. +218917373202.',
+    },
+  },
+  {
+    // Further numbers, shown after the main one in the order given (footer, contact section).
+    name: 'additionalPhones',
+    type: 'array',
+    maxRows: 5,
+    admin: { description: 'Other numbers, shown after the main number in this order.' },
+    fields: [
+      {
+        name: 'number',
+        type: 'text',
+        required: true,
+        maxLength: 20,
+        validate: (v: unknown) =>
+          /^\+[0-9]{6,15}$/.test(String(v ?? '')) || 'Use +country code digits only.',
+      },
+    ],
+  },
+  {
+    // A link only: no map script, tiles or third-party request on the site (CSP, privacy, script
+    // budget). Shown next to the address, so it is public only once the address is (CD-02).
+    name: 'mapLink',
+    type: 'text',
+    maxLength: 500,
+    validate: (v: unknown) =>
+      !v ||
+      /^https:\/\/maps\.apple\.com\/[^\s"<>]*$/.test(String(v)) ||
+      'Use an Apple Maps link starting with https://maps.apple.com/',
+    admin: {
+      description:
+        'Apple Maps link to the office (https://maps.apple.com/…). Shown with the address only.',
+    },
   },
   { name: 'email', type: 'email' },
   { name: 'hours', type: 'text', localized: true, maxLength: 200 },

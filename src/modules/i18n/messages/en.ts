@@ -62,8 +62,9 @@ export const en = {
   // Site chrome and page templates (W-1)
   menu: 'Menu',
   breadcrumb: 'Breadcrumb',
-  primaryAction: 'Contact',
+  primaryAction: 'Contact us',
   footerContact: 'Contact',
+  openInMaps: 'Open in Apple Maps',
   footerLegal: 'Legal',
   onThisPage: 'On this page',
   courseDetails: 'Course details',

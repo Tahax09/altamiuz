@@ -62,8 +62,9 @@ export const ar: Record<keyof typeof en, string> = {
   // Site chrome and page templates (W-1)
   menu: 'القائمة',
   breadcrumb: 'مسار التنقل',
-  primaryAction: 'تواصل',
+  primaryAction: 'تواصل معنا',
   footerContact: 'التواصل',
+  openInMaps: 'افتح الموقع في خرائط Apple',
   footerLegal: 'معلومات قانونية',
   onThisPage: 'في هذه الصفحة',
   courseDetails: 'تفاصيل الدورة',

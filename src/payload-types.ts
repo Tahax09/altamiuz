@@ -4131,7 +4131,23 @@ export interface SiteSetting {
     verifiedAt?: string | null;
     claimDigest?: string | null;
   };
+  /**
+   * Main number, shown first. +country code and digits, e.g. +218917373202.
+   */
   phone?: string | null;
+  /**
+   * Other numbers, shown after the main number in this order.
+   */
+  additionalPhones?:
+    | {
+        number: string;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Apple Maps link to the office (https://maps.apple.com/…). Shown with the address only.
+   */
+  mapLink?: string | null;
   email?: string | null;
   hours?: string | null;
   socialLinks?:
@@ -4490,6 +4506,13 @@ export interface SiteSettingsSelect<T extends boolean = true> {
         claimDigest?: T;
       };
   phone?: T;
+  additionalPhones?:
+    | T
+    | {
+        number?: T;
+        id?: T;
+      };
+  mapLink?: T;
   email?: T;
   hours?: T;
   socialLinks?:

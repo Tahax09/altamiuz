@@ -379,7 +379,7 @@ nav li {
 }
 .page-header h1 {
   margin: 0;
-  font-size: clamp(2.5rem, 1.5rem + 4vw, 5rem);
+  font-size: clamp(2.125rem, 1.4rem + 3.2vw, 4.125rem);
   font-weight: 800;
   line-height: 1;
   letter-spacing: -0.045em;
@@ -700,7 +700,7 @@ main > .status-page {
 .status-page__code {
   margin: 0 0 var(--space-2);
   font-family: var(--font-heading);
-  font-size: clamp(3.5rem, 2rem + 8vw, 8rem);
+  font-size: clamp(3rem, 1.8rem + 6.5vw, 6.5rem);
   font-weight: 800;
   line-height: 0.95;
   letter-spacing: -0.05em;
@@ -835,6 +835,32 @@ main > .status-page {
   min-height: var(--target-compact);
   margin: 0;
   padding-block: 0.25rem;
+}
+/* Shared by the footer and the contact panel (ContactDetails): several numbers stack under one
+   phone icon, each its own call link; the map link sits under the address. */
+.contact-details__phones {
+  display: flex;
+  flex-direction: column;
+}
+.contact-details__phones a {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  min-height: var(--target-compact);
+}
+.site-footer__contact .contact-details__map,
+.contact-panel__details .contact-details__map {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--target-compact);
+  margin-block-start: 0.25rem;
+  color: var(--peri);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+.site-footer__contact .contact-details__map:hover,
+.contact-panel__details .contact-details__map:hover {
+  text-decoration-thickness: 2px;
 }
 .site-footer__icon {
   inline-size: 1.125rem;

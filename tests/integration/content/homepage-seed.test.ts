@@ -59,6 +59,7 @@ describe('homepage content seed', () => {
       'hero',
       'textMedia',
       'serviceList',
+      'courseList',
       'featureGrid',
       'process',
       'standards',
@@ -70,7 +71,9 @@ describe('homepage content seed', () => {
     expect(en.sections[0]!.heading).toBe(copy.hero.heading.en)
     expect(ar.sections[0]!.heading).toBe(copy.hero.heading.ar)
     const steps = (d: typeof en) =>
-      (d.sections[4]!.steps as { title: string }[]).map((s) => s.title)
+      (d.sections.find((b) => b.blockType === 'process')!.steps as { title: string }[]).map(
+        (s) => s.title,
+      )
     expect(steps(en)).toEqual(['Understand', 'Assess', 'Plan', 'Support'])
     expect(steps(ar)).toEqual(['الفهم', 'التقييم', 'التخطيط', 'الدعم'])
   })
@@ -78,12 +81,7 @@ describe('homepage content seed', () => {
   it('keeps fact-dependent sections hidden and adds no claim blocks', async () => {
     const en = await draft('en')
     const hidden = en.sections.filter((b) => b.hidden)
-    expect(hidden.map((b) => b.blockType)).toEqual([
-      'serviceList',
-      'standards',
-      'textMedia',
-      'resourceList',
-    ])
+    expect(hidden.map((b) => b.blockType)).toEqual(['standards', 'textMedia', 'resourceList'])
     for (const b of hidden) expect(String(b.blockName)).toMatch(/^Pending: /)
     expect(en.sections.some((b) => b.blockType === 'stats' || b.blockType === 'credentials')).toBe(
       false,
@@ -140,9 +138,12 @@ describe('homepage content seed', () => {
     await publish('publisher', 'ar')
     for (const l of ['en', 'ar'] as const) {
       const home = (await getHome(t.payload, l)) as unknown as { sections: Block[] } | null
+      // The lists are public sections; they render nothing until an item is published.
       expect(home!.sections.map((b) => b.blockType)).toEqual([
         'hero',
         'textMedia',
+        'serviceList',
+        'courseList',
         'featureGrid',
         'process',
         'cta',

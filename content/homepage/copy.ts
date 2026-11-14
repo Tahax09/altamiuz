@@ -86,13 +86,26 @@ export const sections = {
     },
   },
   services: {
-    pending: 'CD-04 authoritative service catalogue (ar/en); no service is published yet',
+    // Shown since C-1: the section lists published services and renders nothing without them.
     eyebrow: { en: 'Services', ar: 'الخدمات' },
     heading: { en: 'Advisory, assessment and training', ar: 'الاستشارات والتقييم والتدريب' },
     intro: {
       en: 'Engagements are scoped to your organisation’s size, sector and obligations.',
       ar: 'يُحدَّد نطاق كل مهمة وفق حجم مؤسستك وقطاعها والتزاماتها.',
     },
+    more: { en: 'All services', ar: 'جميع الخدمات' },
+  },
+  training: {
+    eyebrow: { en: 'Training', ar: 'الدورات التدريبية' },
+    heading: {
+      en: 'Training to protect you and your organisation',
+      ar: 'دورات وبرامج تدريبية لحمايتك وحماية مؤسستك',
+    },
+    intro: {
+      en: 'Courses in information security management, business continuity, risk and awareness, in Arabic and English.',
+      ar: 'دورات في إدارة أمن المعلومات واستمرارية الأعمال والمخاطر والتوعية الأمنية، باللغتين العربية والإنجليزية.',
+    },
+    more: { en: 'All courses', ar: 'جميع الدورات' },
   },
   why: {
     eyebrow: { en: 'Why Altamiuz', ar: 'لماذا Altamiuz' },

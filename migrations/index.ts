@@ -18,6 +18,7 @@ import * as migration_20261108_222428_privacy_notice_setting from './20261108_22
 import * as migration_20261111_093233_site_pages_links from './20261111_093233_site_pages_links'
 import * as migration_20261111_155630_brand_assets from './20261111_155630_brand_assets'
 import * as migration_20261112_214337_v2_components from './20261112_214337_v2_components'
+import * as migration_20261114_062000_c1_contact_phones from './20261114_062000_c1_contact_phones'
 
 export const migrations = [
   {
@@ -119,5 +120,10 @@ export const migrations = [
     up: migration_20261112_214337_v2_components.up,
     down: migration_20261112_214337_v2_components.down,
     name: '20261112_214337_v2_components',
+  },
+  {
+    up: migration_20261114_062000_c1_contact_phones.up,
+    down: migration_20261114_062000_c1_contact_phones.down,
+    name: '20261114_062000_c1_contact_phones',
   },
 ]

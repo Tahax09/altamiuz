@@ -1,18 +1,34 @@
 // Contact details from PUBLISHED site settings (CD-02), shared by the footer and the contact
 // section. Only values the CMS holds are shown; the address only exists publicly once its evidence
-// is verified (publish gate). Returns null when there is nothing to show.
-import { formatPhone, type Locale } from '@/modules/i18n'
+// is verified (publish gate), and the map link is shown only with it. Returns null when there is
+// nothing to show.
+import { formatPhone, t, type Locale } from '@/modules/i18n'
 import { safeHref } from '@/modules/content'
 import { Icon } from '../primitives/Icon'
 
 const str = (v: unknown) => (typeof v === 'string' ? v.trim() : '')
+const MAP_LINK = /^https:\/\/maps\.apple\.com\/[^\s"<>]*$/
+
+/** The main number first, then the additional numbers in their CMS order; invalid and repeated
+ * numbers are dropped. */
+export function phonesOf(settings: Record<string, unknown> | null | undefined): string[] {
+  const extra = Array.isArray(settings?.additionalPhones) ? settings.additionalPhones : []
+  const all = [
+    str(settings?.phone),
+    ...extra.map((r) => str((r as { number?: unknown } | null)?.number)),
+  ]
+  return [...new Set(all.filter((p) => formatPhone(p)))]
+}
 
 export function hasContactDetails(settings: Record<string, unknown> | null | undefined): boolean {
-  return ['email', 'phone', 'address', 'hours'].some((k) => !!str(settings?.[k]))
+  return (
+    ['email', 'address', 'hours'].some((k) => !!str(settings?.[k])) || phonesOf(settings).length > 0
+  )
 }
 
 export function ContactDetails({
   settings,
+  locale,
   className,
   iconClassName,
 }: {
@@ -23,12 +39,16 @@ export function ContactDetails({
 }) {
   const email = str(settings?.email)
   const mail = email ? safeHref(`mailto:${email}`) : null
-  const rawPhone = str(settings?.phone)
-  const phone = formatPhone(rawPhone)
-  const tel = phone ? safeHref(`tel:${rawPhone}`) : null
+  const phones = phonesOf(settings).flatMap((raw) => {
+    const phone = formatPhone(raw)
+    const tel = phone ? safeHref(`tel:${raw}`) : null
+    return phone && tel ? [{ raw, tel, ...phone }] : []
+  })
   const address = str(settings?.address)
+  const mapRaw = str(settings?.mapLink)
+  const map = address && MAP_LINK.test(mapRaw) ? safeHref(mapRaw) : null
   const hours = str(settings?.hours)
-  if (!mail && !tel && !address && !hours) return null
+  if (!mail && !phones.length && !address && !hours) return null
   const row = 'flex items-start gap-3'
   return (
     <address className={className}>
@@ -38,16 +58,29 @@ export function ContactDetails({
           <bdi dir="ltr">{email}</bdi>
         </a>
       ) : null}
-      {tel && phone ? (
-        <a href={tel} className={row}>
+      {phones.length ? (
+        <p className={row}>
           <Icon name="phone" className={iconClassName} />
-          <bdi dir={phone.dir}>{phone.text}</bdi>
-        </a>
+          <span className="contact-details__phones">
+            {phones.map((p) => (
+              <a key={p.raw} href={p.tel}>
+                <bdi dir={p.dir}>{p.text}</bdi>
+              </a>
+            ))}
+          </span>
+        </p>
       ) : null}
       {address ? (
         <p className={row}>
           <Icon name="pin" className={iconClassName} />
-          <span className="whitespace-pre-line">{address}</span>
+          <span>
+            <span className="whitespace-pre-line">{address}</span>
+            {map ? (
+              <a href={map} className="contact-details__map" rel="noopener noreferrer">
+                {t(locale, 'openInMaps')}
+              </a>
+            ) : null}
+          </span>
         </p>
       ) : null}
       {hours ? (

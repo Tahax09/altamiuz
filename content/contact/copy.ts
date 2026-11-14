@@ -13,7 +13,7 @@ export type Para = { h?: L; p?: L[]; list?: L[] }
 export type Section = { label: string; pending?: string; body: Para[] }
 
 export const contactPage = {
-  title: { en: 'Contact', ar: 'تواصل معنا' } satisfies L,
+  title: { en: 'Contact us', ar: 'تواصل معنا' } satisfies L,
   slug: { en: 'contact', ar: 'تواصل-معنا' } satisfies L,
   summary: {
     en: 'Tell us about your organisation and what you need to achieve.',
