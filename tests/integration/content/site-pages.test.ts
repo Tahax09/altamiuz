@@ -135,11 +135,19 @@ describe('site pages seed (W-1)', () => {
         ((s[list] as { title?: string }[] | undefined) ?? []).map((r) => r.title),
       )
     expect(rows(en, 'items')).toEqual([
-      'Evidence before opinion',
-      'Priorities set by risk',
-      'Standards applied in context',
-      'Plans you can carry out',
+      'Management and clarity first',
+      'Understand before solving',
+      'Threats, weaknesses and risks, explained',
+      'With you, step by step',
+      'Integrity',
+      'Openness',
+      'Continuous improvement',
+      'Monitoring',
+      'Response',
+      'Protection',
+      'Compliance',
     ])
+    expect(rows(ar, 'items').slice(4, 7)).toEqual(['النزاهة', 'الانفتاح', 'التحسين المستمر'])
     expect(rows(en, 'steps')).toEqual(['Understand', 'Assess', 'Plan', 'Support'])
     expect(rows(ar, 'steps')).toEqual(['الفهم', 'التقييم', 'التخطيط', 'الدعم'])
   })
@@ -213,7 +221,16 @@ describe('site pages seed (W-1)', () => {
     const sections = (live.docs[0] as unknown as { sections: Block[] }).sections
     const { toPublic } = await import('@/modules/content')
     const visible = toPublic(sections)
-    expect(visible.map((s) => s.blockType)).toEqual(['textMedia', 'featureGrid', 'process', 'cta'])
+    expect(visible.map((s) => s.blockType)).toEqual([
+      'textMedia',
+      'textMedia',
+      'featureGrid',
+      'process',
+      'featureGrid',
+      'cta',
+    ])
+    // Company facts (founding year, legal form) stay out of the public page until confirmed.
+    expect(JSON.stringify(visible)).not.toContain('2020')
     expect(JSON.stringify(visible)).not.toContain('Pending')
   })
 

@@ -6,6 +6,7 @@
 import type { Payload } from 'payload'
 import { contactPage, privacyPage } from '../content/contact/copy'
 import {
+  about,
   cta,
   footerNav,
   headerNav,
@@ -65,21 +66,42 @@ const ctaBlock = (l: Locale, ids: Ids) => {
 export function pageSections(key: PageDef['key'], l: Locale, ids: Ids): Obj[] {
   switch (key) {
     case 'about':
+      // Rewritten from the owner's legacy About page (2026-11-13): who we are, vision, how we
+      // work, method, values; company facts, people and capabilities stay hidden until their
+      // inputs are confirmed (labels name the dependency).
       return [
         {
           blockType: 'textMedia',
-          blockName: 'Introduction (illustration slot)',
-          eyebrow: home.introduction.eyebrow[l],
-          heading: home.introduction.heading[l],
-          body: richText([{ p: [...home.introduction.body[l]] }]),
+          blockName: 'Who we are (illustration slot)',
+          eyebrow: about.intro.eyebrow[l],
+          heading: about.intro.heading[l],
+          body: richText([{ p: [...about.intro.body[l]] }]),
           mediaPosition: 'end',
         },
         {
+          blockType: 'richText',
+          hidden: true,
+          blockName: `Pending: ${pending.company}`,
+          content: richText([{ h: headings.company[l], p: [about.company[l]] }]),
+        },
+        {
+          blockType: 'textMedia',
+          blockName: 'Our vision',
+          eyebrow: about.vision.eyebrow[l],
+          heading: about.vision.heading[l],
+          body: richText([{ p: [...about.vision.body[l]] }]),
+          mediaPosition: 'start',
+        },
+        {
           blockType: 'featureGrid',
-          blockName: 'How we approach the work',
-          eyebrow: home.why.eyebrow[l],
-          heading: home.why.heading[l],
-          items: home.why.items.map((i) => ({ icon: i.icon, title: i.title[l], text: i.text[l] })),
+          blockName: 'How we work',
+          eyebrow: about.approach.eyebrow[l],
+          heading: about.approach.heading[l],
+          items: about.approach.items.map((i) => ({
+            icon: i.icon,
+            title: i.title[l],
+            text: i.text[l],
+          })),
         },
         {
           blockType: 'process',
@@ -87,13 +109,24 @@ export function pageSections(key: PageDef['key'], l: Locale, ids: Ids): Obj[] {
           eyebrow: home.methodology.eyebrow[l],
           heading: home.methodology.heading[l],
           intro: home.methodology.intro[l],
-          steps: home.methodology.steps.map((s) => ({ title: s.title[l], text: s.text[l] })),
+          steps: home.methodology.steps.map((st) => ({ title: st.title[l], text: st.text[l] })),
         },
         {
-          blockType: 'richText',
+          blockType: 'featureGrid',
+          blockName: 'Our values',
+          eyebrow: about.values.eyebrow[l],
+          heading: about.values.heading[l],
+          items: about.values.items.map((i) => ({
+            icon: i.icon,
+            title: i.title[l],
+            text: i.text[l],
+          })),
+        },
+        {
+          blockType: 'featureGrid',
           hidden: true,
-          blockName: `Pending: ${pending.company}`,
-          content: richText([{ h: headings.company[l] }]),
+          blockName: `Pending: ${pending.capabilities}`,
+          items: about.capabilities.map((i) => ({ icon: i.icon, title: i.title[l] })),
         },
         {
           blockType: 'richText',

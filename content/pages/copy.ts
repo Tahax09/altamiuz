@@ -29,20 +29,20 @@ export const pages: Record<PageDef['key'], PageDef> = {
   about: {
     key: 'about',
     template: 'default',
-    title: { en: 'About Altamiuz', ar: 'عن Altamiuz' },
+    title: { en: 'About Altamiuz', ar: 'من نحن' },
     slug: { en: 'about', ar: 'من-نحن' },
     summary: {
-      en: 'A Libyan information security consultancy that works with management and technical teams.',
-      ar: 'شركة ليبية لاستشارات أمن المعلومات تعمل مع الفرق الإدارية والتقنية.',
+      en: 'A Libyan information security consultancy that helps organisations meet international standards, step by step.',
+      ar: 'شركة ليبية لاستشارات أمن المعلومات تساعد المؤسسات على الالتزام بالمعايير الدولية خطوةً بخطوة.',
     },
     seo: {
       title: {
         en: 'About Altamiuz | Information security consultancy',
-        ar: 'عن Altamiuz | استشارات أمن المعلومات',
+        ar: 'من نحن | شركة التميز لاستشارات أمن المعلومات',
       },
       description: {
-        en: 'Altamiuz is a Libyan information security consultancy. Each engagement ends with documented findings and a prioritised plan.',
-        ar: 'Altamiuz شركة ليبية لاستشارات أمن المعلومات. تنتهي كل مهمة بنتائج موثقة وخطة مرتبة حسب الأولوية.',
+        en: 'Altamiuz is a Libyan information security consultancy that guides organisations, step by step, towards international standards.',
+        ar: 'شركة التميز شركة ليبية لاستشارات أمن المعلومات، ترافق المؤسسات خطوةً بخطوة نحو الالتزام بالمعايير الدولية.',
       },
     },
   },
@@ -102,10 +102,137 @@ export const pages: Record<PageDef['key'], PageDef> = {
   },
 }
 
+/**
+ * About page (2026-11-13): rewritten from the owner-supplied legacy text
+ * (docs/content/legacy-about.md), reordered and tightened. Claim-free statements are visible in
+ * the draft; facts that need evidence (legal form, founding year, head office, licence, people,
+ * experience figures, partners) are hidden "Pending" sections or stay out of the CMS until an
+ * evidence-gated block can hold them. All of it awaits CD-11 approval and native review.
+ */
+export const about = {
+  intro: {
+    eyebrow: { en: 'Who we are', ar: 'من نحن' },
+    heading: { en: 'A Libyan partner for information security', ar: 'شريك ليبي في أمن المعلومات' },
+    body: {
+      en: [
+        'Altamiuz is a Libyan information security consultancy. We help public and private organisations comply with international information security standards and with the local policies that apply to them, drawing on our own local expertise and, where a project needs it, on established Arab and international firms in the field.',
+        'We act as a local project management office for our clients: present throughout the engagement, and guiding them step by step towards international certification at a proportionate cost.',
+      ],
+      ar: [
+        'شركة التميز شركة ليبية لاستشارات أمن المعلومات. نساعد الجهات العامة والخاصة على الالتزام بالمعايير الدولية لأمن المعلومات وبالسياسات المحلية المتعلقة بها، معتمدين على خبراتنا المحلية، وعلى التعاون مع شركات عربية ودولية متميزة في هذا المجال حين يتطلب المشروع ذلك.',
+        'ونؤدي لعملائنا دور مكتب إدارة مشروعات محلي يرافقهم طوال المهمة، ويوجههم خطوةً بخطوة نحو الحصول على شهادة الالتزام الدولية بتكلفة مناسبة.',
+      ],
+    },
+  },
+  vision: {
+    eyebrow: { en: 'Our vision', ar: 'رؤيتنا' },
+    heading: {
+      en: 'One home for Libya’s information security expertise',
+      ar: 'مظلة واحدة لخبرات أمن المعلومات في ليبيا',
+    },
+    body: {
+      en: [
+        'Our vision is to be the local partner our clients rely on for effective information security, and to bring Libya’s leading expertise together in one organisation: a single place for the solutions, services and qualified people the Libyan market needs.',
+        'We keep an open door to every organisation in Libya’s telecommunications and IT sector. We welcome cooperation in whatever form suits a partner, set out in agreements that protect the rights of our clients.',
+      ],
+      ar: [
+        'رؤيتنا أن نكون الشريك المحلي الذي يعتمد عليه عملاؤنا في حلول أمن المعلومات الفعّالة، وأن نجمع أبرز الخبرات في ليبيا في مؤسسة واحدة تكون مظلةً تقدّم الحلول والخدمات والكفاءات المؤهلة التي يحتاجها السوق الليبي.',
+        'ونعتمد سياسة الباب المفتوح مع جميع الجهات العاملة في قطاع الاتصالات وتقنية المعلومات في ليبيا، ونرحّب بالتعاون بالصيغة التي يراها الشريك مناسبة، على أن يُنظَّم باتفاقيات تحفظ حقوق عملائنا.',
+      ],
+    },
+  },
+  approach: {
+    eyebrow: { en: 'How we work', ar: 'كيف نعمل' },
+    heading: { en: 'Understanding comes before solutions', ar: 'الفهم يسبق الحلول' },
+    items: [
+      {
+        icon: 'policy',
+        title: { en: 'Management and clarity first', ar: 'الإدارة ووضوح العمليات أولاً' },
+        text: {
+          en: 'A project succeeds or fails on how it is managed and how clear its processes are. Technical work and tools support that success; they do not replace it.',
+          ar: 'يتوقف نجاح المشروع أو إخفاقه على إدارته ووضوح سير عملياته، أما الأعمال الفنية والأدوات التقنية فوسائل تعين على هذا النجاح ولا تغني عنه.',
+        },
+      },
+      {
+        icon: 'audit',
+        title: { en: 'Understand before solving', ar: 'نفهم قبل أن نعالج' },
+        text: {
+          en: 'We study each problem, analyse its effects and trace its ramifications before proposing any solution.',
+          ar: 'ندرس كل مشكلة ونحلل آثارها ونتتبع تشعباتها قبل أن نقترح أي حل.',
+        },
+      },
+      {
+        icon: 'risk',
+        title: {
+          en: 'Threats, weaknesses and risks, explained',
+          ar: 'التهديدات ونقاط الضعف والمخاطر بوضوح',
+        },
+        text: {
+          en: 'Most of our time goes into understanding and explaining the threats you face, the weaknesses they exploit and the risks that follow.',
+          ar: 'نخصص معظم وقتنا لفهم التهديدات التي تواجهك وتفسيرها، ونقاط الضعف التي تستغلها، والمخاطر المترتبة عليها.',
+        },
+      },
+      {
+        icon: 'shield',
+        title: { en: 'With you, step by step', ar: 'معك خطوةً بخطوة' },
+        text: {
+          en: 'As your local project office, we stay with you through every stage until the standard is met.',
+          ar: 'بصفتنا مكتب مشروعاتك المحلي، نرافقك في كل مرحلة حتى تستوفي متطلبات المعيار.',
+        },
+      },
+    ],
+  },
+  values: {
+    eyebrow: { en: 'Our values', ar: 'قيمنا' },
+    heading: { en: 'What we hold to', ar: 'ما نلتزم به' },
+    items: [
+      {
+        icon: 'audit',
+        title: { en: 'Integrity', ar: 'النزاهة' },
+        text: {
+          en: 'We report what we find as it is, with the evidence behind it.',
+          ar: 'ننقل ما نجده كما هو، مع الدليل الذي يستند إليه.',
+        },
+      },
+      {
+        icon: 'response',
+        title: { en: 'Openness', ar: 'الانفتاح' },
+        text: {
+          en: 'We are open to cooperation with clients and partners, and clear about how we work.',
+          ar: 'نحن منفتحون على التعاون مع العملاء والشركاء، وواضحون في طريقة عملنا.',
+        },
+      },
+      {
+        icon: 'policy',
+        title: { en: 'Continuous improvement', ar: 'التحسين المستمر' },
+        text: {
+          en: 'Every engagement leaves a plan you can keep improving against.',
+          ar: 'تترك كل مهمة خطةً يمكنك مواصلة التحسين على أساسها.',
+        },
+      },
+    ],
+  },
+  /** Supplied by the owner; shown only after CD-01/CD-02 confirmation (hidden in the draft). */
+  company: {
+    en: 'Altamiuz is a Libyan limited liability company, founded in 2020 and headquartered in Tripoli.',
+    ar: 'شركة التميز للاستشارات وأمن المعلومات شركة ليبية ذات مسؤولية محدودة، تأسست عام 2020 ومقرها الرئيسي في طرابلس.',
+  },
+  /** The legacy "How can we secure you?" capabilities: titles only until CD-04 defines them. */
+  capabilities: [
+    { icon: 'shield', title: { en: 'Monitoring', ar: 'المراقبة' } },
+    { icon: 'response', title: { en: 'Response', ar: 'الاستجابة' } },
+    { icon: 'shield', title: { en: 'Protection', ar: 'الحماية' } },
+    { icon: 'policy', title: { en: 'Compliance', ar: 'الالتزام' } },
+  ],
+} as const
+
 /** Pending dependencies, used as hidden-section labels (admin only). */
 export const pending = {
-  company: 'CD-01 legal name and registration; CD-02 founding year, address and contact details',
-  team: 'CD-03 team biographies, credentials and photo consent',
+  company:
+    'CD-01 legal name and registration; CD-02 founding year and head office (supplied 2026-11-13, unhide once confirmed; the licence no. and Chamber registration go in a Credentials block with evidence, not here)',
+  capabilities:
+    'CD-04 service catalogue (monitoring, response, protection, compliance as services)',
+  team: 'CD-03 founder biography and credentials: add a Team block (evidence: written consent, certificates); proposed text in docs/content/legacy-about.md',
   standards: home.standards.pending,
   expertise: home.expertise.pending,
   insights: home.insights.pending,
