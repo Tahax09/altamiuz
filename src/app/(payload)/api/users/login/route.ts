@@ -3,7 +3,14 @@
 import config from '@payload-config'
 import { getPayload } from 'payload'
 import { generatePayloadCookie } from 'payload/shared'
-import { clientIp, padToFloor, sameOrigin, signIn } from '@/modules/auth'
+import {
+  clientIp,
+  getSecuritySettings,
+  mfaStatus,
+  padToFloor,
+  sameOrigin,
+  signIn,
+} from '@/modules/auth'
 
 export const dynamic = 'force-dynamic'
 const FAILED = { errors: [{ message: 'Sign-in failed. Check your details or try again later.' }] }
@@ -49,12 +56,16 @@ export async function POST(request: Request): Promise<Response> {
     cookiePrefix: payload.config.cookiePrefix,
     token: r.token,
   })
+  // Whether a second step is still needed follows the policy (FR-033 as amended, ADR-012): an
+  // account with an authenticator app, or any account while the owner requires it.
+  const mfaRequired =
+    (await getSecuritySettings(payload)).requireMfa || (await mfaStatus(payload, r.userId)).enrolled
   return Response.json(
     {
-      message: 'Signed in. Second factor required.',
+      message: mfaRequired ? 'Signed in. Second step required.' : 'Signed in.',
       user: { id: r.userId, collection: 'users' },
       exp: r.exp,
-      mfaRequired: true,
+      mfaRequired,
     },
     { headers: { ...noStore, 'set-cookie': cookie } },
   )

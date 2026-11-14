@@ -58,7 +58,7 @@ export async function createMigratedDatabase(): Promise<{
   return db
 }
 
-export async function bootPayload(): Promise<TestPayload> {
+export async function bootPayload(opts: { optionalMfa?: boolean } = {}): Promise<TestPayload> {
   const db = await createMigratedDatabase()
   const mediaDir = fs.mkdtempSync(path.join(os.tmpdir(), 'altamiuz-media-'))
   Object.assign(process.env, {
@@ -72,6 +72,16 @@ export async function bootPayload(): Promise<TestPayload> {
   const { getPayload } = await import('payload')
   const config = (await import('../../src/payload.config')).default
   const payload = await getPayload({ config })
+  // Most suites were written for required MFA (FR-033); `optionalMfa: true` keeps the default.
+  if (!opts.optionalMfa) {
+    await payload.updateGlobal({
+      slug: 'security-settings',
+      data: { requireMfa: true } as never,
+      overrideAccess: true,
+    })
+    const { resetSecuritySettingsCache } = await import('../../src/modules/auth/settings')
+    resetSecuritySettingsCache()
+  }
   const sql = new pg.Pool({ connectionString: db.url, max: 4 })
   return {
     payload,

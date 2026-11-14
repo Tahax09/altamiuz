@@ -459,10 +459,23 @@ the runbook and measure time and data loss.
 - **FR-032**: Passwords MUST meet a minimum length of 12 characters, MUST be checked against a
   list of known-breached or common passwords, and MUST NOT be subject to arbitrary composition
   rules or forced periodic rotation.
-- **FR-033**: Second-factor authentication using an authenticator app (time-based one-time codes)
-  MUST be mandatory for every CMS user in every role; no CMS function, preview, or interface may be
-  reachable before the second factor is completed. Each user MUST receive single-use recovery
-  codes at enrolment.
+- **FR-033** (amended 2026-11-14 by owner decision, ADR-012; superseded text: "Second-factor
+  authentication … MUST be mandatory for every CMS user in every role"): Second-factor
+  authentication using an authenticator app (time-based one-time codes) MUST be available to every
+  CMS user and MUST be required for every account while the Owner's "Require two-factor
+  authentication" setting is on (default: off). An account that enrolled an authenticator app MUST
+  complete the second step at every sign-in. No CMS function, preview or interface may be reachable
+  before sign-in is complete as defined in ADR-012 (the second step done, or the requirement off
+  and no authenticator app enrolled). Each user MUST receive single-use recovery codes at
+  enrolment. Changing the setting MUST require the Owner role, a complete sign-in and recent
+  re-authentication, and MUST be audit-logged.
+- **FR-033d** (added 2026-11-14, ADR-012): Users MAY register passkeys (WebAuthn/FIDO2, user
+  verification required) and use them for passwordless sign-in, or as the second step after a
+  password. A passwordless passkey sign-in MUST NOT be treated or described as two-factor
+  authentication, and MUST NOT be accepted as its own second step. Challenges MUST be single-use,
+  short-lived and bound to their purpose and session; origin, RP ID, user verification, credential
+  ownership and the signature counter MUST be verified. Adding or removing a passkey MUST require
+  a complete sign-in and recent re-authentication, MUST notify the user and MUST be audit-logged.
 - **FR-033a**: Enrolment MUST be confirmed by a valid code before the factor is active; the shared
   secret MUST be shown only during enrolment and never retrievable afterwards; recovery codes MUST
   be stored so they cannot be read back, MUST be single-use, and MUST be regenerable only after
@@ -472,7 +485,8 @@ the runbook and measure time and data loss.
   recovery code MUST revoke the user's other sessions, notify the user, and be audit-logged.
 - **FR-033c**: A lost factor MUST be reset only by an Administrator or Owner acting on a
   lower-privileged account (or an Owner on an Owner), through an audited procedure that forces
-  fresh enrolment at next sign-in.
+  fresh enrolment at next sign-in (while two-factor authentication is required). The reset also
+  removes the account's passkeys (amended 2026-11-14, ADR-012).
 - **FR-034**: Sign-in and recovery MUST resist enumeration (identical responses and comparable
   timing), MUST throttle repeated failures per account and per source, and MUST notify the account
   holder of lockouts, password changes, and second-factor changes.
@@ -761,8 +775,10 @@ None may be invented or inferred from the legacy site without evidence.
 - **SC-015**: Monthly availability of the public site is at least 99.5%, measured by external
   monitoring.
 - **SC-016**: 100% of published claim-bearing content has a recorded evidence reference.
-- **SC-017**: 100% of active CMS accounts have a second factor enrolled, and 0 CMS functions are
-  reachable without completing it in automated and adversarial tests.
+- **SC-017** (amended 2026-11-14, ADR-012; superseded: "100% of active CMS accounts have a
+  second factor enrolled"): 0 CMS functions are reachable without a complete sign-in (ADR-012) in
+  automated and adversarial tests, under both settings of the two-factor requirement; with the
+  requirement on, 100% of sessions with role access completed a second step.
 - **SC-018**: 100% of the rich-text adversarial corpus (malicious links, stored-XSS payloads,
   malformed URLs, unexpected node types and attributes, bypass attempts) is rejected on every
   write path. 0 unsafe `href` values or disallowed elements appear in rendered pages, including

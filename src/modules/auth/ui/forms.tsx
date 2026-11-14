@@ -1,6 +1,8 @@
 'use client'
 // Account forms (T061, FR-080). English UI; labelled fields, errors announced and focused.
-import { useRef, useState, type FormEvent, type ReactNode } from 'react'
+import { startAuthentication, startRegistration } from '@simplewebauthn/browser'
+import Link from 'next/link'
+import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react'
 
 type Field = {
   name: string
@@ -22,6 +24,107 @@ const MESSAGES: Record<string, string> = {
   mfa_required: 'Complete two-factor authentication first.',
   unauthenticated: 'Sign in first.',
   expired: 'Enrolment expired. Start again.',
+  passkey_required:
+    'This account has a passkey. Confirm the sign-in with your passkey first, then set up an authenticator app.',
+  too_many: 'This account already has the maximum number of passkeys. Remove one first.',
+  already_registered: 'That passkey is already registered.',
+  not_found: 'Not found.',
+  not_allowed: 'A passkey sign-in cannot use a passkey as its second step.',
+  not_enrolled: 'Nothing is set up for that yet.',
+  cancelled: 'The passkey request was cancelled or timed out.',
+  unsupported: 'This browser or device does not support passkeys.',
+}
+
+const post = async (url: string, body?: unknown) => {
+  const r = await fetch(url, {
+    method: 'POST',
+    credentials: 'same-origin',
+    headers: { 'content-type': 'application/json' },
+    body: body === undefined ? undefined : JSON.stringify(body),
+  })
+  return { ok: r.ok, body: (await r.json().catch(() => ({}))) as Record<string, unknown> }
+}
+
+/** Runs one WebAuthn ceremony: options → browser → verify. Returns the verify body or an error. */
+async function ceremony(
+  kind: 'register' | 'authenticate',
+  base: string,
+  extra: Record<string, unknown> = {},
+): Promise<{ ok: true; body: Record<string, unknown> } | { ok: false; error: string }> {
+  if (typeof window === 'undefined' || !window.PublicKeyCredential)
+    return { ok: false, error: 'unsupported' }
+  const opts = await post(`${base}/options`)
+  if (!opts.ok) return { ok: false, error: String(opts.body.error ?? 'invalid') }
+  let response: unknown
+  try {
+    const optionsJSON = opts.body.options as never
+    response =
+      kind === 'register'
+        ? await startRegistration({ optionsJSON })
+        : await startAuthentication({ optionsJSON })
+  } catch {
+    return { ok: false, error: 'cancelled' }
+  }
+  const done = await post(`${base}/verify`, {
+    challengeId: opts.body.challengeId,
+    response,
+    ...extra,
+  })
+  return done.ok
+    ? { ok: true, body: done.body }
+    : { ok: false, error: String(done.body.error ?? 'invalid') }
+}
+
+function Message({ text, error }: { text: string; error: boolean }) {
+  const ref = useRef<HTMLParagraphElement>(null)
+  useEffect(() => {
+    if (text) ref.current?.focus()
+  }, [text])
+  return (
+    <p
+      ref={ref}
+      tabIndex={-1}
+      role={error ? 'alert' : 'status'}
+      className={`message${error ? ' error' : ''}`}
+    >
+      {text}
+    </p>
+  )
+}
+
+/**
+ * Passwordless sign-in with a passkey (admin login page and account pages). A passkey replaces
+ * the password; it is not a second factor. Where a second step is still required, the next page
+ * asks for it.
+ */
+export function PasskeySignIn() {
+  const [state, setState] = useState({ text: '', error: false })
+  return (
+    <div className="passkey-sign-in">
+      <button
+        type="button"
+        className="secondary"
+        onClick={async () => {
+          setState({ text: '', error: false })
+          const r = await ceremony('authenticate', '/api/users/passkeys/login')
+          if (!r.ok) {
+            setState({
+              text:
+                r.error === 'invalid'
+                  ? 'Sign-in with a passkey failed. Try again or use your password.'
+                  : (MESSAGES[r.error] ?? 'Request failed.'),
+              error: true,
+            })
+            return
+          }
+          window.location.assign(r.body.secondStepRequired ? '/account/mfa' : '/admin')
+        }}
+      >
+        Sign in with a passkey
+      </button>
+      <Message {...state} />
+    </div>
+  )
 }
 
 export function ApiForm(props: {
@@ -99,11 +202,51 @@ export function RecoveryCodes({ codes }: { codes: string[] }) {
   )
 }
 
+/** QR code drawn as one SVG path from the server's module grid (black on white, 4-module quiet
+ * zone), so it scans in dark mode too. */
+function QrCode({ size, modules }: { size: number; modules: string }) {
+  let d = ''
+  for (let y = 0; y < size; y++)
+    for (let x = 0; x < size; x++)
+      if (modules[y * size + x] === '1') d += `M${x + 4} ${y + 4}h1v1h-1z`
+  const box = size + 8
+  return (
+    <svg
+      role="img"
+      aria-label="QR code for your authenticator app"
+      viewBox={`0 0 ${box} ${box}`}
+      width={220}
+      height={220}
+      shapeRendering="crispEdges"
+    >
+      <rect width={box} height={box} fill="#ffffff" />
+      <path d={d} fill="#000000" />
+    </svg>
+  )
+}
+
 export function MfaFlow() {
-  const [enrolment, setEnrolment] = useState<{ secret: string; otpauthUri: string } | null>(null)
+  const [enrolment, setEnrolment] = useState<{
+    secret: string
+    otpauthUri: string
+    qr?: { size: number; modules: string }
+  } | null>(null)
   const [codes, setCodes] = useState<string[] | null>(null)
   const [useRecovery, setUseRecovery] = useState(false)
+  const [status, setStatus] = useState<{
+    enrolled?: boolean
+    passkeys?: number
+    signInMethod?: string
+  }>({})
+  const [pk, setPk] = useState({ text: '', error: false })
+  useEffect(() => {
+    fetch('/api/users/mfa/status', { credentials: 'same-origin', cache: 'no-store' })
+      .then((r) => r.json())
+      .then(setStatus)
+      .catch(() => undefined)
+  }, [])
   const done = () => window.location.assign('/admin')
+  const passkeyStep = (status.passkeys ?? 0) > 0 && status.signInMethod === 'password'
   if (codes)
     return (
       <>
@@ -116,7 +259,12 @@ export function MfaFlow() {
   if (enrolment)
     return (
       <>
-        <p>Add this account to your authenticator app, then enter the 6-digit code it shows.</p>
+        <p>
+          Scan this code with your authenticator app (for example Google Authenticator, Microsoft
+          Authenticator or 1Password), then enter the 6-digit code it shows.
+        </p>
+        {enrolment.qr ? <QrCode {...enrolment.qr} /> : null}
+        <p>Can’t scan? Enter this setup key in the app instead.</p>
         <label htmlFor="secret">Setup key</label>
         <code id="secret">{enrolment.secret}</code>
         <ApiForm
@@ -136,7 +284,23 @@ export function MfaFlow() {
     )
   return (
     <>
-      {useRecovery ? (
+      {passkeyStep ? (
+        <>
+          <button
+            type="button"
+            onClick={async () => {
+              const r = await ceremony('authenticate', '/api/users/passkeys/second-factor')
+              if (r.ok) done()
+              else
+                setPk({ text: MESSAGES[r.error] ?? 'That passkey was not accepted.', error: true })
+            }}
+          >
+            Confirm with a passkey
+          </button>
+          <Message {...pk} />
+        </>
+      ) : null}
+      {status.enrolled === false ? null : useRecovery ? (
         <ApiForm
           endpoint="/api/users/mfa/recovery"
           submit="Use recovery code"
@@ -158,22 +322,20 @@ export function MfaFlow() {
           onSuccess={done}
         />
       )}
-      <button type="button" className="secondary" onClick={() => setUseRecovery((v) => !v)}>
-        {useRecovery ? 'Use authenticator code instead' : 'Use a recovery code'}
-      </button>
-      <button
-        type="button"
-        className="secondary"
-        onClick={async () => {
-          const r = await fetch('/api/users/mfa/enrol/start', {
-            method: 'POST',
-            credentials: 'same-origin',
-          })
-          if (r.ok) setEnrolment(await r.json())
-        }}
-      >
-        Set up two-factor authentication (first sign-in)
-      </button>
+      {status.enrolled === false ? null : (
+        <button type="button" className="secondary" onClick={() => setUseRecovery((v) => !v)}>
+          {useRecovery ? 'Use authenticator code instead' : 'Use a recovery code'}
+        </button>
+      )}
+      {status.enrolled ? null : (
+        <ApiForm
+          endpoint="/api/users/mfa/enrol/start"
+          submit="Set up an authenticator app"
+          fields={[]}
+          successText="Scan the code below."
+          onSuccess={(b) => setEnrolment(b as never)}
+        />
+      )}
     </>
   )
 }
@@ -212,6 +374,26 @@ export function SecurityPanel() {
   const [sessions, setSessions] = useState<{ id: string; createdAt: string; current: boolean }[]>(
     [],
   )
+  const [mfa, setMfa] = useState<{ enrolled?: boolean }>({})
+  const [passkeys, setPasskeys] = useState<
+    { id: number; name: string; createdAt: string; lastUsedAt: string | null; synced: boolean }[]
+  >([])
+  const [pkName, setPkName] = useState('')
+  const [pkMsg, setPkMsg] = useState({ text: '', error: false })
+  const loadPasskeys = async () => {
+    const r = await fetch('/api/users/passkeys', { credentials: 'same-origin', cache: 'no-store' })
+    if (r.ok) setPasskeys(((await r.json()) as { passkeys: typeof passkeys }).passkeys)
+  }
+  useEffect(() => {
+    fetch('/api/users/mfa/status', { credentials: 'same-origin', cache: 'no-store' })
+      .then((r) => r.json())
+      .then(setMfa)
+      .catch(() => undefined)
+    fetch('/api/users/passkeys', { credentials: 'same-origin', cache: 'no-store' })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((b: { passkeys: typeof passkeys } | null) => b && setPasskeys(b.passkeys))
+      .catch(() => undefined)
+  }, [])
   const load = async () => {
     const r = await fetch('/api/users/sessions', { credentials: 'same-origin' })
     if (r.ok) setSessions(((await r.json()) as { sessions: typeof sessions }).sessions)
@@ -246,14 +428,96 @@ export function SecurityPanel() {
           },
         ]}
       />
-      <h2>Recovery codes</h2>
-      <ApiForm
-        endpoint="/api/users/mfa/recovery-codes"
-        submit="Generate new recovery codes"
-        fields={[]}
-        onSuccess={(b) => setCodes(b.recoveryCodes as string[])}
+      <p>Adding or removing an authenticator app or a passkey needs this confirmation first.</p>
+      <h2>Two-factor authentication (authenticator app)</h2>
+      {mfa.enrolled ? (
+        <>
+          <p>On. Every sign-in asks for a 6-digit code from your authenticator app.</p>
+          <ApiForm
+            endpoint="/api/users/mfa/disable"
+            submit="Turn off the authenticator app"
+            fields={[]}
+            successText="Turned off. Other sessions were ended."
+            onSuccess={() => setMfa((m) => ({ ...m, enrolled: false }))}
+          />
+          <h3>Recovery codes</h3>
+          <ApiForm
+            endpoint="/api/users/mfa/recovery-codes"
+            submit="Generate new recovery codes"
+            fields={[]}
+            onSuccess={(b) => setCodes(b.recoveryCodes as string[])}
+          />
+          {codes && <RecoveryCodes codes={codes} />}
+        </>
+      ) : (
+        <p>
+          Off. Add a 6-digit code from an authenticator app to every sign-in.{' '}
+          <Link href="/account/mfa">Set up an authenticator app</Link>
+        </p>
+      )}
+      <h2>Passkeys</h2>
+      <p>
+        A passkey signs you in with your device’s screen lock (fingerprint, face or PIN) instead of
+        your password. On its own it is one sign-in step, not two-factor authentication: if your
+        account has an authenticator app, or the owner requires two-factor authentication, you are
+        still asked for the second step. After signing in with your password, a passkey can serve as
+        that second step.
+      </p>
+      <ul>
+        {passkeys.map((p) => (
+          <li key={p.id}>
+            {p.name} — added {new Date(p.createdAt).toLocaleDateString('en-GB')}
+            {p.lastUsedAt
+              ? `, last used ${new Date(p.lastUsedAt).toLocaleDateString('en-GB')}`
+              : ''}
+            {p.synced ? ' (synced)' : ''}{' '}
+            <button
+              type="button"
+              className="secondary"
+              onClick={async () => {
+                const r = await fetch(`/api/users/passkeys/${p.id}`, {
+                  method: 'DELETE',
+                  credentials: 'same-origin',
+                })
+                const b = (await r.json().catch(() => ({}))) as { error?: string }
+                setPkMsg(
+                  r.ok
+                    ? { text: 'Passkey removed. Other sessions were ended.', error: false }
+                    : { text: MESSAGES[String(b.error)] ?? 'Request failed.', error: true },
+                )
+                if (r.ok) void loadPasskeys()
+              }}
+            >
+              Remove {p.name}
+            </button>
+          </li>
+        ))}
+      </ul>
+      <label htmlFor="passkey-name">Name for a new passkey (for example “Work laptop”)</label>
+      <input
+        id="passkey-name"
+        maxLength={64}
+        value={pkName}
+        onChange={(e) => setPkName(e.target.value)}
       />
-      {codes && <RecoveryCodes codes={codes} />}
+      <button
+        type="button"
+        onClick={async () => {
+          const r = await ceremony('register', '/api/users/passkeys/register', { name: pkName })
+          setPkMsg(
+            r.ok
+              ? { text: 'Passkey added.', error: false }
+              : { text: MESSAGES[r.error] ?? 'Request failed.', error: true },
+          )
+          if (r.ok) {
+            setPkName('')
+            void loadPasskeys()
+          }
+        }}
+      >
+        Add a passkey
+      </button>
+      <Message {...pkMsg} />
       <h2>Sessions</h2>
       <button type="button" className="secondary" onClick={load}>
         Show my sessions

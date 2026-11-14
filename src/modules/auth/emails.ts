@@ -30,6 +30,17 @@ const T = {
     ar: `تغيّر إعداد التحقق الثنائي لحسابك (${what}). تم إنهاء الجلسات الأخرى.`,
     en: `Your two-factor authentication changed (${what}). Other sessions were ended.`,
   }),
+  passkeyChanged: (what: 'added' | 'removed'): Template => ({
+    subject: 'Passkey changed | تغيير مفتاح المرور',
+    ar:
+      what === 'added'
+        ? 'أُضيف مفتاح مرور جديد إلى حسابك. إن لم تقم بذلك فتواصل مع المسؤول فوراً.'
+        : 'أُزيل مفتاح مرور من حسابك وأُنهيت الجلسات الأخرى. إن لم تقم بذلك فتواصل مع المسؤول فوراً.',
+    en:
+      what === 'added'
+        ? 'A new passkey was added to your account. If this was not you, contact an administrator now.'
+        : 'A passkey was removed from your account and other sessions were ended. If this was not you, contact an administrator now.',
+  }),
 }
 
 export type NoticeKind = keyof typeof T

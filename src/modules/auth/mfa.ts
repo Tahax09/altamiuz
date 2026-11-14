@@ -1,7 +1,10 @@
-// Mandatory TOTP MFA for every CMS user (FR-033–FR-033c, D-6). Secrets and recovery codes live in
-// project tables that no Payload API can read. Replay and single-use are enforced atomically in SQL.
+// TOTP two-factor authentication (FR-033–FR-033c as amended 2026-11-14, D-6, ADR-012). Optional
+// per account unless the owner requires it (security settings); an account that enrolled is always
+// asked for its code. Secrets and recovery codes live in project tables that no Payload API can
+// read. Replay and single-use are enforced atomically in SQL.
 import { randomBytes } from 'node:crypto'
 import { generateSecret, generateURI, verify } from 'otplib'
+import QRCode from 'qrcode'
 import type { Payload, PayloadRequest } from 'payload'
 import { canActOnUser, roleOf, type Role } from '../access'
 import { recordAudit } from '../audit'
@@ -49,6 +52,13 @@ async function throttle(c: Ctx, scope: string) {
   if (!a.allowed || !b.allowed) throw new MfaError('rate_limited')
 }
 
+/** The enrolment link as a QR module grid ("1" dark, "0" light, row by row), drawn by the account
+ * page as inline SVG: no image request, no data: URL, nothing for the CSP to allow. */
+export function qrMatrix(text: string): { size: number; modules: string } {
+  const { modules } = QRCode.create(text, { errorCorrectionLevel: 'M' })
+  return { size: modules.size, modules: Array.from(modules.data, (b) => (b ? '1' : '0')).join('') }
+}
+
 export async function mfaStatus(payload: Payload, userId: number | string) {
   const res = await poolOf(payload).query(
     'select enabled_at is not null as enabled from user_mfa where user_id = $1',
@@ -66,7 +76,8 @@ export async function startEnrolment(c: Ctx) {
      on conflict (user_id) do update set pending_secret_enc = excluded.pending_secret_enc, pending_created_at = excluded.pending_created_at`,
     [c.userId, encryptSecret(secret, key()), new Date()],
   )
-  return { secret, otpauthUri: generateURI({ issuer: ISSUER, label: c.email, secret }) }
+  const otpauthUri = generateURI({ issuer: ISSUER, label: c.email, secret })
+  return { secret, otpauthUri, qr: qrMatrix(otpauthUri) }
 }
 
 async function issueRecoveryCodes(payload: Payload, userId: number | string): Promise<string[]> {
@@ -293,9 +304,12 @@ export async function resetMfa(
     })
     throw new MfaError('forbidden')
   }
+  // Lost-device reset clears every sign-in factor the user holds besides the password: the
+  // authenticator app, its recovery codes and all passkeys (a lost phone often holds both).
   const pool = poolOf(payload)
   await pool.query('delete from mfa_recovery_codes where user_id = $1', [a.targetId])
   await pool.query('delete from user_mfa where user_id = $1', [a.targetId])
+  await pool.query('delete from user_passkeys where user_id = $1', [a.targetId])
   await revokeAllSessions(pool, a.targetId)
   await recordAudit(payload, {
     actor: actor(a.actorId),
@@ -308,8 +322,30 @@ export async function resetMfa(
   await sendNotice(
     target.email,
     'mfaChanged',
-    'reset by an administrator; enrol again at next sign-in',
+    'reset by an administrator: authenticator app, recovery codes and passkeys removed',
   )
+}
+
+/**
+ * The account holder turns their own authenticator app off (endpoint: completed sign-in and recent
+ * re-authentication). Removes the secret and recovery codes and ends other sessions. While the
+ * owner requires two-factor authentication, the next sign-in asks to set it up again.
+ */
+export async function disableMfa(c: Ctx) {
+  if (!(await mfaStatus(c.payload, c.userId)).enrolled) throw new MfaError('not_enrolled')
+  const pool = poolOf(c.payload)
+  await pool.query('delete from mfa_recovery_codes where user_id = $1', [c.userId])
+  await pool.query('delete from user_mfa where user_id = $1', [c.userId])
+  await revokeAllSessions(pool, c.userId, c.sid)
+  await recordAudit(c.payload, {
+    actor: actor(c.userId),
+    action: 'mfa.remove',
+    target: { type: 'users', id: String(c.userId) },
+    outcome: 'success',
+    ip: c.ip,
+    userAgent: c.userAgent,
+  })
+  await sendNotice(c.email, 'mfaChanged', 'authenticator app turned off')
 }
 
 export async function isLastActiveOwner(

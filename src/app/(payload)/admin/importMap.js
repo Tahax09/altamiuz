@@ -15,6 +15,7 @@ import { ItalicFeatureClient as ItalicFeatureClient_e70f5e05f09f93e00b997edb1ef0
 import { HeadingFeatureClient as HeadingFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { ParagraphFeatureClient as ParagraphFeatureClient_e70f5e05f09f93e00b997edb1ef0c864 } from '@payloadcms/richtext-lexical/client'
 import { UsagePanel as UsagePanel_717a04ac31ada38ec27aa71889f67dab } from '../../../modules/media/admin/UsagePanel'
+import { PasskeyLogin as PasskeyLogin_5c9718158ded7b1403745be931c5f23d } from '../../../modules/auth/admin/PasskeyLogin'
 import { MfaGate as MfaGate_70254aeaba4de181b1550c5ba47223af } from '../../../modules/auth/admin/MfaGate'
 import { ErrorFocus as ErrorFocus_fbfccf8b6b14bcbe7e0147b71f2b0490 } from '../../../modules/content/admin/ErrorFocus'
 import { PaginationLabels as PaginationLabels_7c7e19976b3a3866f68b79ada26b0d40 } from '../../../modules/content/admin/PaginationLabels'
@@ -39,6 +40,7 @@ export const importMap = {
   "@payloadcms/richtext-lexical/client#HeadingFeatureClient": HeadingFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "@payloadcms/richtext-lexical/client#ParagraphFeatureClient": ParagraphFeatureClient_e70f5e05f09f93e00b997edb1ef0c864,
   "/modules/media/admin/UsagePanel#UsagePanel": UsagePanel_717a04ac31ada38ec27aa71889f67dab,
+  "/modules/auth/admin/PasskeyLogin#PasskeyLogin": PasskeyLogin_5c9718158ded7b1403745be931c5f23d,
   "/modules/auth/admin/MfaGate#MfaGate": MfaGate_70254aeaba4de181b1550c5ba47223af,
   "/modules/content/admin/ErrorFocus#ErrorFocus": ErrorFocus_fbfccf8b6b14bcbe7e0147b71f2b0490,
   "/modules/content/admin/PaginationLabels#PaginationLabels": PaginationLabels_7c7e19976b3a3866f68b79ada26b0d40,

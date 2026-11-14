@@ -10,6 +10,7 @@ import { poolOf } from './db'
 import { sendNotice } from './emails'
 import { getLimiter } from './services'
 import { createSessionState } from './sessions'
+import { mfaStatus } from './mfa'
 import { getSecuritySettings } from './settings'
 
 export const FAILURE_FLOOR_MS = 400
@@ -107,6 +108,20 @@ export async function signIn(
     const token = res.token!
     const sid = JSON.parse(Buffer.from(token.split('.')[1]!, 'base64url').toString()).sid as string
     await createSessionState(poolOf(payload), sid, found.id)
+    // Optional MFA: an invited account becomes active at its first sign-in when two-factor
+    // authentication is not required and it has no authenticator (otherwise at enrolment).
+    if (
+      found.status === 'invited' &&
+      !s.requireMfa &&
+      !(await mfaStatus(payload, found.id)).enrolled
+    )
+      await payload.update({
+        collection: 'users',
+        id: found.id,
+        data: { status: 'active' } as never,
+        overrideAccess: true,
+        context: { authSystem: true },
+      })
     await recordAudit(payload, {
       actor: `user:${found.id}`,
       action: 'auth.login.success',

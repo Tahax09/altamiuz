@@ -23,6 +23,7 @@ export {
   useRecoveryCode,
   regenerateRecoveryCodes,
   resetMfa,
+  disableMfa,
   mfaStatus,
   MfaError,
   RECOVERY_CODE_COUNT,
@@ -35,9 +36,16 @@ export {
   getSessionState,
 } from './sessions'
 export { checkPassword, PASSWORD_MIN } from './password'
+export {
+  finishPasskeyLogin,
+  listPasskeys,
+  MAX_PASSKEYS,
+  PasskeyError,
+  relyingParty,
+} from './passkeys'
 export { getLimiter, getMailer, setLimiterForTests } from './services'
 export { clientIp, sameOrigin } from './endpoints'
-export { ApiForm, MfaFlow, RecoveryCodes, SecurityPanel, TokenForm } from './ui'
+export { ApiForm, MfaFlow, PasskeySignIn, RecoveryCodes, SecurityPanel, TokenForm } from './ui'
 export {
   AdminServerFunctionDenied,
   assertAdminServerFunctionAllowed,

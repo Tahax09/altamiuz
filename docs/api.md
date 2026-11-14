@@ -70,12 +70,21 @@ GraphQL: disabled. REST prefix: `/api`.
 | POST | `/api/users/login` | Payload built-in |  |
 | POST | `/api/users/logout` | Payload built-in |  |
 | GET | `/api/users/me` | Payload built-in |  |
+| POST | `/api/users/mfa/disable` | custom |  |
 | POST | `/api/users/mfa/enrol/confirm` | custom |  |
 | POST | `/api/users/mfa/enrol/start` | custom |  |
 | POST | `/api/users/mfa/recovery` | custom |  |
 | POST | `/api/users/mfa/recovery-codes` | custom |  |
 | GET | `/api/users/mfa/status` | custom |  |
 | POST | `/api/users/mfa/verify` | custom |  |
+| GET | `/api/users/passkeys` | custom |  |
+| DELETE | `/api/users/passkeys/:id` | custom |  |
+| POST | `/api/users/passkeys/login/options` | custom |  |
+| POST | `/api/users/passkeys/login/verify` | custom |  |
+| POST | `/api/users/passkeys/register/options` | custom |  |
+| POST | `/api/users/passkeys/register/verify` | custom |  |
+| POST | `/api/users/passkeys/second-factor/options` | custom |  |
+| POST | `/api/users/passkeys/second-factor/verify` | custom |  |
 | POST | `/api/users/password` | custom |  |
 | POST | `/api/users/reauth` | custom |  |
 | POST | `/api/users/recovery/complete` | custom |  |

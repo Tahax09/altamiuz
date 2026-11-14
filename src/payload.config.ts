@@ -27,6 +27,7 @@ export default buildConfig({
     // third party (and is blocked by the admin CSP anyway).
     avatar: 'default',
     components: {
+      afterLogin: ['/modules/auth/admin/PasskeyLogin#PasskeyLogin'],
       providers: [
         '/modules/auth/admin/MfaGate#MfaGate',
         '/modules/content/admin/ErrorFocus#ErrorFocus',

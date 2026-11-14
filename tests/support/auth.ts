@@ -129,9 +129,18 @@ export async function verifiedSession(
   const u = await createUser(payload, role, { status: opts.status ?? 'invited' })
   const login = await routeLogin(u.email, u.password)
   if (login.status !== 200) throw new Error(`login failed ${login.status}`)
-  const start = await callEndpoint(payload, 'users', '/mfa/enrol/start', 'post', {
+  let start = await callEndpoint(payload, 'users', '/mfa/enrol/start', 'post', {
     token: login.token,
   })
+  if (start.body.error === 'reauth_required') {
+    // Optional policy: the password session is already complete, so adding an authenticator app
+    // needs re-authentication first (FR-039, ADR-012).
+    await callEndpoint(payload, 'users', '/reauth', 'post', {
+      token: login.token,
+      body: { password: u.password },
+    })
+    start = await callEndpoint(payload, 'users', '/mfa/enrol/start', 'post', { token: login.token })
+  }
   const secret = start.body.secret as string
   const confirm = await callEndpoint(payload, 'users', '/mfa/enrol/confirm', 'post', {
     token: login.token,

@@ -8,6 +8,7 @@ import { poolOf } from './db'
 import { padToFloor } from './login'
 import {
   confirmEnrolment,
+  disableMfa,
   isLastActiveOwner,
   MfaError,
   mfaStatus,
@@ -18,12 +19,31 @@ import {
   verifySecondFactor,
 } from './mfa'
 import { checkPassword } from './password'
+import {
+  finishPasskeyLogin,
+  finishPasskeySecondFactor,
+  finishRegistration,
+  listPasskeys,
+  passkeyCount,
+  PasskeyError,
+  removePasskey,
+  startPasskeyLogin,
+  startPasskeySecondFactor,
+  startRegistration,
+} from './passkeys'
 import { completeRecovery, requestRecovery } from './recovery'
 import { hasRecentReauth, reauthenticate } from './reauth'
 import { listSessions, revokeAllSessions, revokeSession } from './sessions'
 import { sendNotice } from './emails'
 
-type AuthedUser = { id: number; email: string; role?: Role; _sid?: string; status?: string }
+type AuthedUser = {
+  id: number
+  email: string
+  role?: Role
+  _sid?: string
+  status?: string
+  authMethod?: string
+}
 
 export const json = (body: unknown, status = 200, headers?: HeadersInit) =>
   Response.json(body, { status, headers: { 'cache-control': 'no-store', ...(headers ?? {}) } })
@@ -62,7 +82,23 @@ const ctx = (req: PayloadRequest) => {
     sid: u._sid!,
     ip: clientIp(req.headers),
     userAgent: req.headers.get('user-agent') ?? undefined,
+    authMethod: u.authMethod ?? 'password',
   }
+}
+
+const passkeyError = (e: unknown) => {
+  if (e instanceof PasskeyError)
+    return json(
+      { error: e.code },
+      e.code === 'rate_limited'
+        ? 429
+        : e.code === 'not_found'
+          ? 404
+          : e.code === 'not_allowed'
+            ? 403
+            : 400,
+    )
+  throw e
 }
 
 const mfaError = (e: unknown) => {
@@ -100,18 +136,149 @@ export const userEndpoints: Endpoint[] = [
       return json({
         authenticated: true,
         mfaVerified: isMfaVerified(u),
+        signInMethod: u.authMethod ?? 'password',
         ...(await mfaStatus(req.payload, u.id)),
+        passkeys: await passkeyCount(req.payload, u.id),
       })
     },
   },
   {
     path: '/mfa/enrol/start',
     method: 'post',
-    handler: authed(async (req) =>
-      startEnrolment(ctx(req))
+    handler: authed(async (req) => {
+      const u = req.user as unknown as AuthedUser
+      // A completed sign-in adds an authenticator app only after re-authentication. An incomplete
+      // one (the owner requires two-factor authentication) may set one up as its first second
+      // step, except a password session on an account that already holds passkeys: it must use
+      // a passkey, so a stolen password alone cannot attach a new factor.
+      if (isMfaVerified(u)) {
+        if (!hasRecentReauth(u)) return json({ error: 'reauth_required' }, 403)
+      } else if (u.authMethod !== 'passkey' && (await passkeyCount(req.payload, u.id)) > 0) {
+        return json({ error: 'passkey_required' }, 403)
+      }
+      return startEnrolment(ctx(req))
         .then((r) => json(r))
-        .catch(mfaError),
+        .catch(mfaError)
+    }),
+  },
+  {
+    path: '/mfa/disable',
+    method: 'post',
+    handler: authed(
+      async (req) =>
+        disableMfa(ctx(req))
+          .then(() => json({ ok: true }))
+          .catch(mfaError),
+      { verified: true, reauth: true },
     ),
+  },
+  {
+    path: '/passkeys',
+    method: 'get',
+    handler: authed(
+      async (req) => json({ passkeys: await listPasskeys(req.payload, ctx(req).userId) }),
+      { verified: true },
+    ),
+  },
+  {
+    path: '/passkeys/register/options',
+    method: 'post',
+    handler: authed(
+      async (req) =>
+        startRegistration(ctx(req))
+          .then((r) => json(r))
+          .catch(passkeyError),
+      { verified: true, reauth: true },
+    ),
+  },
+  {
+    path: '/passkeys/register/verify',
+    method: 'post',
+    handler: authed(
+      async (req) => {
+        const b = await bodyOf(req)
+        return finishRegistration(ctx(req), {
+          challengeId: b.challengeId,
+          response: b.response,
+          name: b.name,
+        })
+          .then((r) => json(r))
+          .catch(passkeyError)
+      },
+      { verified: true, reauth: true },
+    ),
+  },
+  {
+    path: '/passkeys/:id',
+    method: 'delete',
+    handler: authed(
+      async (req) =>
+        removePasskey(ctx(req), req.routeParams?.id)
+          .then(() => json({ ok: true }))
+          .catch(passkeyError),
+      { verified: true, reauth: true },
+    ),
+  },
+  {
+    // Passwordless sign-in, step 1: a challenge for any passkey of this site (discoverable).
+    path: '/passkeys/login/options',
+    method: 'post',
+    handler: async (req) => {
+      if (!sameOrigin(req.headers)) return json({ error: 'forbidden' }, 403)
+      return startPasskeyLogin(req.payload, clientIp(req.headers))
+        .then((r) => json(r))
+        .catch(passkeyError)
+    },
+  },
+  {
+    // Passwordless sign-in, step 2. One generic failure for every reason (FR-034).
+    path: '/passkeys/login/verify',
+    method: 'post',
+    handler: async (req) => {
+      const started = performance.now()
+      if (!sameOrigin(req.headers)) return json({ error: 'forbidden' }, 403)
+      const b = await bodyOf(req)
+      const r = await finishPasskeyLogin(req.payload, req, {
+        challengeId: b.challengeId,
+        response: b.response,
+        ip: clientIp(req.headers),
+        userAgent: req.headers.get('user-agent') ?? undefined,
+      })
+      if (!r.ok) {
+        await padToFloor(started)
+        return json(
+          { error: r.reason === 'rate_limited' ? 'rate_limited' : 'invalid' },
+          r.reason === 'rate_limited' ? 429 : 401,
+        )
+      }
+      return withCookie(
+        { ok: true, exp: r.exp, secondStepRequired: r.secondStepRequired },
+        r.cookie,
+      )
+    },
+  },
+  {
+    // Second step after a password: a passkey confirms the session (two-factor authentication).
+    path: '/passkeys/second-factor/options',
+    method: 'post',
+    handler: authed(async (req) =>
+      startPasskeySecondFactor(ctx(req))
+        .then((r) => json(r))
+        .catch(passkeyError),
+    ),
+  },
+  {
+    path: '/passkeys/second-factor/verify',
+    method: 'post',
+    handler: authed(async (req) => {
+      const b = await bodyOf(req)
+      return finishPasskeySecondFactor(ctx(req), {
+        challengeId: b.challengeId,
+        response: b.response,
+      })
+        .then((r) => withCookie({ ok: true, exp: r.exp }, r.cookie))
+        .catch(passkeyError)
+    }),
   },
   {
     path: '/mfa/enrol/confirm',

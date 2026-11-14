@@ -20,10 +20,13 @@ platform binaries as optional dependencies).
 | @payloadcms/translations     | 3.92.1  | MIT        |
 | @payloadcms/ui               | 3.92.1  | MIT        |
 | @playwright/test             | 1.64.1  | Apache-2.0 |
+| @simplewebauthn/browser      | 14.0.0  | MIT        |
+| @simplewebauthn/server       | 14.0.3  | MIT        |
 | @tailwindcss/postcss         | 4.3.3   | MIT        |
 | @types/node                  | 22.20.5 | MIT        |
 | @types/nodemailer            | 8.0.2   | MIT        |
 | @types/pg                    | 8.23.1  | MIT        |
+| @types/qrcode                | 1.5.5   | MIT        |
 | @types/react                 | 19.2.18 | MIT        |
 | @types/react-dom             | 19.2.7  | MIT        |
 | class-variance-authority     | 0.7.1   | Apache-2.0 |
@@ -38,6 +41,7 @@ platform binaries as optional dependencies).
 | pg                           | 8.20.0  | MIT        |
 | pino                         | 10.4.0  | MIT        |
 | prettier                     | 3.9.10  | MIT        |
+| qrcode                       | 1.5.4   | MIT        |
 | react                        | 19.2.6  | MIT        |
 | react-dom                    | 19.2.6  | MIT        |
 | sharp                        | 0.35.5  | Apache-2.0 |
@@ -76,6 +80,17 @@ platform binaries as optional dependencies).
 | 0BSD                    | 1        |
 | (MIT OR CC0-1.0)        | 1        |
 | (WTFPL OR MIT)          | 1        |
+
+2026-11-14 (ADR-012, owner decision): new runtime dependencies `qrcode` 1.5.4 (MFA enrolment QR
+code, drawn as inline SVG; MIT; pulls `dijkstrajs`, `pngjs`, `yargs` 15 tree, all MIT/ISC) and
+`@simplewebauthn/server` 14.0.3 / `@simplewebauthn/browser` 14.0.0 (passkeys; MIT; pulls the
+`@peculiar/*` ASN.1/X.509 packages (MIT), `asn1js` (BSD-3-Clause), `reflect-metadata`
+(Apache-2.0), `tslib` (0BSD), `tsyringe` (MIT)). No install scripts. Versions chosen at least two
+weeks old (`@simplewebauthn/server` 14.1.0, published 2026-11-06, skipped). Override
+`get-uri>basic-ftp` 6.2.6 (dev-only, via `@lhci/cli`) fixes GHSA-5pm8-86m8-9m6r and
+GHSA-r4jh-29pc-gfqr; 6.0.0's only breaking change (separate transfer hosts refused by default) does
+not affect `get-uri`'s calls. Totals after the change: 908 packages (462 production); no new
+licence family; the LGPL-3.0-or-later (libvips via `sharp`) and FSL entries are unchanged.
 
 ## Licences needing a note
 

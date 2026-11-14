@@ -30,6 +30,16 @@ blocks nothing technically.
   CD-10 (legal pages and the contact form), CD-01/02/05/07 (evidence-gated claims), image alt text
   and SEO fields per language.
 
+## Decisions recorded (2026-11-14)
+
+- **Two-factor authentication optional, default off; passkeys added** (owner instruction,
+  2026-11-14). Supersedes D-6 (mandatory TOTP); FR-033 and SC-017 amended, FR-033d added
+  (spec.md); design and residual risks: ADR-012. The owner can require two-factor authentication
+  for every account at any time in Security settings (owner, after re-authentication; audited).
+- **Header menu wording and order** follow the legacy site (owner, 2026-11-14): Services
+  (الخدمات الأمنية), Training (الدورات التدريبية), Insights (المدونة), About (من نحن); the header
+  button reads "Contact us". Copy approval and Arabic review remain CD-11.
+
 ## Content decisions (CD-01–CD-07, CD-09–CD-13)
 
 | ID    | Exact decision needed                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | Why it matters                                                                                                                                                                       | Permitted options                                                                                                             | Affected pages / features                                                                                                                              | Blocks                                                   |

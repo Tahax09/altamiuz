@@ -25,18 +25,32 @@ export type SessionState = {
   last_seen_at: Date
   mfa_verified_at: Date | null
   reauth_at: Date | null
+  /** How the session was opened: password, or passwordless passkey (ADR-012). */
+  auth_method: AuthMethod
+  /** Joined from user_mfa: the account has a confirmed authenticator. */
+  mfa_enrolled?: boolean
 }
+
+export type AuthMethod = 'password' | 'passkey'
 
 export async function createSessionState(
   pool: pg.Pool,
   sid: string,
   userId: number | string,
-  init: { createdAt?: Date; mfaVerified?: boolean; reauth?: boolean } = {},
+  init: { createdAt?: Date; mfaVerified?: boolean; reauth?: boolean; authMethod?: AuthMethod } = {},
 ) {
   await pool.query(
-    `insert into auth_sessions (session_id, user_id, created_at, last_seen_at, mfa_verified_at, reauth_at)
-     values ($1, $2, $3, $4, case when $5 then $4::timestamptz end, case when $6 then $4::timestamptz end)`,
-    [sid, userId, init.createdAt ?? new Date(), new Date(), !!init.mfaVerified, !!init.reauth],
+    `insert into auth_sessions (session_id, user_id, created_at, last_seen_at, mfa_verified_at, reauth_at, auth_method)
+     values ($1, $2, $3, $4, case when $5 then $4::timestamptz end, case when $6 then $4::timestamptz end, $7)`,
+    [
+      sid,
+      userId,
+      init.createdAt ?? new Date(),
+      new Date(),
+      !!init.mfaVerified,
+      !!init.reauth,
+      init.authMethod ?? 'password',
+    ],
   )
 }
 
@@ -98,8 +112,21 @@ export async function markReauth(pool: pg.Pool, sid: string) {
 }
 
 export async function getSessionState(pool: pg.Pool, sid: string): Promise<SessionState | null> {
-  const res = await pool.query('select * from auth_sessions where session_id = $1', [sid])
+  const res = await pool.query(
+    `select s.*, coalesce(m.enabled_at is not null, false) as mfa_enrolled
+       from auth_sessions s left join user_mfa m on m.user_id = s.user_id
+      where s.session_id = $1`,
+    [sid],
+  )
   return (res.rows[0] as SessionState | undefined) ?? null
+}
+
+/** The access rule in one place (see the strategy below and the optional-MFA tests). */
+export function sessionComplete(
+  state: Pick<SessionState, 'mfa_verified_at' | 'mfa_enrolled'>,
+  requireMfa: boolean,
+): boolean {
+  return state.mfa_verified_at !== null || (!requireMfa && !state.mfa_enrolled)
 }
 
 export const sessionStrategy: AuthStrategy = {
@@ -130,7 +157,13 @@ export const sessionStrategy: AuthStrategy = {
     // never serialised into admin page payloads, form state or lock responses (WS10 finding).
     for (const [key, value] of [
       ['_sid', user._sid],
-      ['mfaVerified', state.mfa_verified_at !== null],
+      // `mfaVerified` means "sign-in complete; role access may apply" (FR-033 as amended
+      // 2026-11-14, ADR-012). Complete when the second step was done, or, while the owner does
+      // not require two-factor authentication, when the account has no authenticator app. An
+      // account with an authenticator app always needs the second step, whether the first step
+      // was its password or a passkey.
+      ['mfaVerified', sessionComplete(state, settings.requireMfa)],
+      ['authMethod', state.auth_method],
       ['reauthAt', state.reauth_at ? new Date(state.reauth_at).toISOString() : null],
     ] as const)
       Object.defineProperty(user, key, {
@@ -145,19 +178,17 @@ export const sessionStrategy: AuthStrategy = {
 }
 
 /**
- * Replaces the current session with a new one (FR-035: rotate on MFA completion and privilege
- * change), keeping the original creation time so rotation never extends the absolute lifetime.
+ * Opens a new session for a user (Payload session + signed token + project state). Used by
+ * passkey sign-in and by rotation. `createdAt` keeps an absolute lifetime across rotation.
  */
-export async function rotateSession(
+export async function issueSession(
   payload: Payload,
   req: PayloadRequest | undefined,
   userId: number | string,
-  oldSid: string,
-  flags: { mfaVerified: boolean; reauth?: boolean },
+  flags: { mfaVerified: boolean; reauth?: boolean; authMethod: AuthMethod; createdAt?: Date },
 ) {
   const pool = poolOf(payload)
   const collection = payload.collections.users!
-  const old = await getSessionState(pool, oldSid)
   const user = (await payload.findByID({
     collection: 'users',
     id: userId,
@@ -173,9 +204,10 @@ export async function rotateSession(
   })
   if (!sid) throw new Error('sessions disabled')
   await createSessionState(pool, sid, userId, {
-    createdAt: old?.created_at,
+    createdAt: flags.createdAt,
     mfaVerified: flags.mfaVerified,
     reauth: flags.reauth,
+    authMethod: flags.authMethod,
   })
   const fieldsToSign = getFieldsToSign({
     collectionConfig: collection.config,
@@ -188,11 +220,33 @@ export async function rotateSession(
     secret: payload.secret,
     tokenExpiration: collection.config.auth.tokenExpiration,
   })
-  await revokeSession(pool, oldSid)
   const cookie = generatePayloadCookie({
     collectionAuthConfig: collection.config.auth,
     cookiePrefix: payload.config.cookiePrefix,
     token,
   })
   return { token, exp, cookie, sid }
+}
+
+/**
+ * Replaces the current session with a new one (FR-035: rotate on MFA completion and privilege
+ * change), keeping the original creation time so rotation never extends the absolute lifetime,
+ * and the original sign-in method.
+ */
+export async function rotateSession(
+  payload: Payload,
+  req: PayloadRequest | undefined,
+  userId: number | string,
+  oldSid: string,
+  flags: { mfaVerified: boolean; reauth?: boolean },
+) {
+  const pool = poolOf(payload)
+  const old = await getSessionState(pool, oldSid)
+  const next = await issueSession(payload, req, userId, {
+    ...flags,
+    createdAt: old?.created_at,
+    authMethod: old?.auth_method ?? 'password',
+  })
+  await revokeSession(pool, oldSid)
+  return next
 }

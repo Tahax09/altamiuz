@@ -5,6 +5,12 @@ import config from '../../src/payload.config'
 import { confirmEnrolment, signIn, startEnrolment } from '../../src/modules/auth'
 
 const payload = await getPayload({ config })
+// The suites were written for required MFA (FR-033); optional MFA has its own tests.
+await payload.updateGlobal({
+  slug: 'security-settings',
+  data: { requireMfa: true } as never,
+  overrideAccess: true,
+})
 const { generate } = await import('otplib')
 const out: Record<string, unknown> = {}
 const pw = (r: string) => `e2e ${r} pass phrase ${Math.random().toString(36).slice(2)} 7` // gitleaks:allow (synthetic)

@@ -214,6 +214,8 @@ export interface AuditEvent {
     | 'mfa.remove'
     | 'mfa.recovery_code_used'
     | 'mfa.recovery_codes_regenerate'
+    | 'passkey.register'
+    | 'passkey.remove'
     | 'session.revoke'
     | 'user.invite'
     | 'user.create'
@@ -4096,6 +4098,10 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
  */
 export interface SecuritySetting {
   id: number;
+  /**
+   * Off (default): accounts without an authenticator app complete sign-in with their password or a passkey alone; anyone can add an authenticator app or passkeys under Account security. On: every sign-in needs a second step (authenticator code, recovery code, or a passkey after the password); accounts without one are asked to set up an authenticator app at their next sign-in. Other server instances apply a change within 30 seconds.
+   */
+  requireMfa?: boolean | null;
   idleMinutes: number;
   absoluteHours: number;
   lockoutThreshold: number;
@@ -4472,6 +4478,7 @@ export interface Banner {
  * via the `definition` "security-settings_select".
  */
 export interface SecuritySettingsSelect<T extends boolean = true> {
+  requireMfa?: T;
   idleMinutes?: T;
   absoluteHours?: T;
   lockoutThreshold?: T;

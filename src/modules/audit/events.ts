@@ -1,7 +1,7 @@
 // FR-045 audit actions and the metadata each may carry (FR-046: no secrets, no content).
 export const AUDIT_ACTIONS = {
-  'auth.login.success': [],
-  'auth.login.failure': ['reason'],
+  'auth.login.success': ['method'],
+  'auth.login.failure': ['reason', 'method'],
   'auth.logout': [],
   'auth.lockout': [],
   'auth.recovery.request': [],
@@ -12,6 +12,8 @@ export const AUDIT_ACTIONS = {
   'mfa.remove': [],
   'mfa.recovery_code_used': ['remaining'],
   'mfa.recovery_codes_regenerate': [],
+  'passkey.register': [],
+  'passkey.remove': [],
   'session.revoke': ['scope'],
   'user.invite': ['role'],
   'user.create': ['role'],
