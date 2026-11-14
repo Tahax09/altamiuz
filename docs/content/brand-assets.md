@@ -1,6 +1,10 @@
 # Brand assets and images: what to supply and where it goes (CD-09)
 
-**Status (2026-11-12)**: the CMS and the public site are ready to receive the owner's assets.
+**Status (2026-11-13)**: the owner supplied the logo (emblem and Arabic lockup, SVG and PNG at
+1x–4x), now in `content/brand/`. The favicon and app icons are generated from the emblem
+(`pnpm brand:icons`, scaling and padding only), and the brand colours are applied
+(`docs/design/brand-palette.md`). Still to supply: an English lockup and a reversed (light)
+lockup for the navy footer; photographs and illustrations. Earlier status (2026-11-12): the CMS and the public site are ready to receive the owner's assets.
 **No logo, favicon, photograph or illustration has been supplied, generated or substituted.** Until
 an asset exists, the site shows the company name as text and every image slot collapses on the
 public site (preview shows a labelled placeholder of the expected size).
@@ -31,7 +35,7 @@ variants at 480, 768, 1024, 1440 and 1920 px wide; nothing is enlarged.
 
 | Slot                          | Field                                            | Shown at                                 | Aspect ratio                    | Supply at least                    | Notes                                                                                                  |
 | ----------------------------- | ------------------------------------------------ | ---------------------------------------- | ------------------------------- | ---------------------------------- | ------------------------------------------------------------------------------------------------------ |
-| Header logo                   | `brand.logo`                                     | 36 px tall, up to 224 px wide            | the artwork's own (wide lockup) | 960 px wide                        | **Transparent PNG or WebP**; served as AVIF/WebP (JPEG variants have no transparency and are not used) |
+| Header logo                   | `brand.logo`                                     | 40–46 px tall, up to 224 px wide         | the artwork's own (wide lockup) | 960 px wide                        | **Transparent PNG or WebP**; served as AVIF/WebP (JPEG variants have no transparency and are not used) |
 | Footer logo                   | `brand.logoInverse`                              | 40 px tall on navy `#12355b`             | the artwork's own               | 960 px wide                        | light artwork, transparent background                                                                  |
 | Hero image                    | `hero.media`                                     | about 45 % of the width on desktop       | **4:3** (cropped)               | 1920 × 1440                        | set the focal point; loaded eagerly (largest image above the fold)                                     |
 | Text beside image             | `textMedia.media`                                | about 40 % of the width                  | **4:3** (cropped)               | 1600 × 1200                        | focal point                                                                                            |
@@ -74,7 +78,7 @@ place the owner's files in `src/app/` and commit them:
 | `src/app/icon.png`       | 512 × 512 PNG (or `icon.svg`, static file) |
 | `src/app/apple-icon.png` | 180 × 180 PNG, opaque background           |
 
-Lighthouse best-practices stays at 0.96 until a favicon exists (T139).
+Generated from the supplied emblem on 2026-11-13 (`pnpm brand:icons`); `src/app/icon.svg` is the supplied vector without its editor title. Regenerate after any change to `content/brand/emblem.svg`.
 
 ## Existing project-made drawings (owner decision)
 
@@ -85,6 +89,18 @@ removes them (the slots then collapse). This is part of CD-09 in `docs/owner-dec
 
 ## Brand colours
 
-Design tokens are provisional (`src/app/(site)/site.css`, "Brand tokens" block: navy `#12355b`,
-links `#1d4ed8`). When CD-09 supplies colour references, only that block changes; every
-contrast pair listed there must be re-checked (WCAG 2.2 AA).
+Applied 2026-11-13 from the owner's palette and logo: navy `#14243A`, blue `#2563EB`, charcoal
+`#111827`, slate (`#475569` for text, `#64748B` large text only), cool white `#F8FAFC`, red
+`#C30000` for errors only. Evaluation, contrast pairs and the derived tokens:
+`docs/design/brand-palette.md` (adjustments await owner approval). The project-made homepage line
+drawings still use the earlier navy `#12355b`; they are kept, replaced or removed with CD-09.
+
+## Logo files (`content/brand/`)
+
+| File                                | What                                                                    | Use                                                             |
+| ----------------------------------- | ----------------------------------------------------------------------- | --------------------------------------------------------------- |
+| `emblem.svg`, `emblem@4x.png`       | The circuit "T" mark (634 × 632 px PNG)                                 | App icons; English header candidate (owner decision)            |
+| `lockup-ar.svg`, `lockup-ar@4x.png` | Emblem with "شركة التميز للاستشارات وأمن المعلومات" (1611 × 632 px PNG) | Arabic header logo at 40–46 px tall; not on navy (dark artwork) |
+
+Upload the PNGs to the media library (SVG is refused by the upload pipeline), give each alt text
+per language, and choose them in Site settings → Brand.

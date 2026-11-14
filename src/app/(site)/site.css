@@ -7,44 +7,46 @@
    gradients, no inline styles (CSP), no new client JavaScript. */
 
 /* ------------------------------------------------------------------------------------------
-   Brand tokens: PROVISIONAL until the owner supplies brand assets (CD-09). Only this block
-   changes when CD-09 arrives; every pair below is checked against WCAG 2.2 AA.
+   Brand tokens (CD-09, 2026-11-13): from the owner's logo and proposed palette, as evaluated in
+   docs/design/brand-palette.md (awaiting owner approval of the adjustments). Navy, blue,
+   charcoal and slate are the logo's own values. Red is the error colour only. Every text pair
+   below is checked against WCAG 2.2 AA (ratio after each value).
    ------------------------------------------------------------------------------------------ */
 :root {
-  --night: #0b1533; /* feature panels, footer; #fff on it 17.9:1 */
-  --night-2: #16245a; /* raised elements on night */
-  --night-muted: #b9c2dd; /* text on night 10.1:1 (8.2:1 on night-2) */
-  --night-rule: #2c3b6b;
-  --cobalt: #3148c8; /* the one accent: links, primary actions; 7.3:1 on white, #fff on it 7.3:1 */
-  --cobalt-hover: #2537a3;
-  --peri: #aab8ff; /* accent on night (9.4:1) */
-  --mist: #eef0fb; /* tinted surfaces; muted text on it 6.7:1 */
-  --mist-2: #dbe0fb; /* chips and hover on mist */
+  --night: #14243a; /* Deep Navy (logo): panels, footer; #fff on it 15.6:1 */
+  --night-2: #1e3350; /* raised elements on navy */
+  --night-muted: #b8c4d6; /* secondary text on navy 8.9:1 (7.2:1 on night-2) */
+  --night-rule: #2e4566; /* rules on navy (decorative) */
+  --cobalt: #2563eb; /* Corporate Blue (logo): links, actions; 5.2:1 on white, #fff on it 5.2:1 */
+  --cobalt-hover: #1d4ed8; /* #fff on it 6.7:1 */
+  --peri: #8ab4ff; /* the blue on navy: 7.5:1 (6.1:1 on night-2); #2563EB on navy is only 3.0:1 */
+  --mist: #eef4ff; /* tinted surfaces; cobalt text on it 4.7:1, muted text 6.9:1 */
+  --mist-2: #dce7fe; /* chips and hover on mist */
 
   /* Names used by the components and Tailwind theme (globals.css). */
   --brand: var(--night);
   --brand-hover: var(--night-2);
-  --on-dark: #ffffff; /* text on night and cobalt */
-  --on-dark-soft: rgb(255 255 255 / 0.5); /* outline of secondary actions on night */
-  --shadow-menu: 0 24px 48px -28px rgb(11 21 51 / 0.45); /* dropdown elevation (the only shadow) */
+  --on-dark: #ffffff; /* text on navy and blue */
+  --on-dark-soft: rgb(255 255 255 / 0.5); /* outline of secondary actions on navy */
+  --shadow-menu: 0 24px 48px -28px rgb(20 36 58 / 0.45); /* dropdown elevation (the only shadow) */
   --brand-ink: var(--on-dark);
   --brand-tint: var(--mist);
   --accent: var(--cobalt);
   --navy-muted: var(--night-muted);
   --navy-rule: var(--night-rule);
-  --danger: #b3261e; /* 6.5:1 on white */
-  --success: #146c43; /* 6.5:1 on white */
+  --danger: #c30000; /* the proposed red, for errors and alerts only: 6.3:1 on white */
+  --success: #15803d; /* 5.0:1 on white */
 }
 
 /* ------------------------------------------------------------------------------------------
    Neutrals, type scale, spacing, shape, motion
    ------------------------------------------------------------------------------------------ */
 :root {
-  --ink: #0b1533;
-  --ink-muted: #4b5468; /* 7.6:1 on white */
+  --ink: #111827; /* Charcoal (logo): body text 17.7:1 on white */
+  --ink-muted: #475569; /* secondary text 7.6:1 on white, 7.2:1 on --paper-alt (the logo's #64748B is 4.8:1: large text only) */
   --paper: var(--on-dark);
-  --paper-alt: #f5f6f9;
-  --rule: #dde1ea;
+  --paper-alt: #f8fafc; /* Cool White (proposed background) */
+  --rule: #e2e8f0;
   --focus: var(--cobalt);
 
   --font-heading: var(--font-manrope), system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
@@ -88,7 +90,7 @@
   --duration-spin: 800ms; /* one turn of the pending-submission ring */
   --ease-standard: cubic-bezier(0.2, 0, 0, 1);
   --motion: var(--duration-fast) var(--ease-standard);
-  --header-height: 4.75rem;
+  --header-height: 4.25rem;
   /* Inline padding that centres content in a full-width band. */
   --band-pad: max(var(--gutter), calc((100% - var(--container)) / 2));
   /* Inset panels sit `--inset` from the viewport edge; their inner padding keeps the column. */
@@ -113,11 +115,17 @@ html {
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
 }
-/* The document (and a previewed article) only: a lang="ar" link on an English page, such as the
-   language switcher, keeps the English face so English pages never download the Arabic font. */
+/* Arabic pages, and any Arabic text marked lang="ar" on an English page (the language
+   switcher, Arabic names), use the Arabic face. A font-stack fallback cannot do this: Next.js's
+   metric-matched "Inter Fallback" face (local Arial) has Arabic glyphs and would win. The face's
+   Arabic file loads only when such text is present (unicode-range). */
+html[lang='ar'],
+article[lang='ar'],
+:lang(ar) {
+  font-family: var(--font-arabic);
+}
 html[lang='ar'],
 article[lang='ar'] {
-  font-family: var(--font-arabic);
   line-height: 1.75; /* D-24 */
 }
 body {

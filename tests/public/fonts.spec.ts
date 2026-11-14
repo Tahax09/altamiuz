@@ -1,6 +1,8 @@
 // T101 (D-24) and T102: public typefaces are served from this origin (no requests to Google or any
-// other host at runtime), each language stays within its 120 KB first-load font budget, a page
-// never downloads the other script's face, and the design system's faces are what render.
+// other host at runtime), each language stays within its 120 KB first-load font budget, and the
+// design system's faces are what render. Arabic pages never download the Latin faces. English
+// pages may download the Arabic face, but only to render Arabic text marked `lang="ar"` (the
+// language switcher's "العربية"; owner request 2026-11-13), and still within the same budget.
 // Planned as tests/perf/fonts.test.ts; font downloads only exist in a browser, so this runs in the
 // `public` and `public-webkit` projects against the production build.
 import { expect, test } from '@playwright/test'
@@ -39,7 +41,23 @@ for (const [path, own, other] of [
       [...document.fonts].filter((f) => f.status === 'loaded').map((f) => f.family),
     )
     expect(loaded.some((f) => own.test(f))).toBe(true)
-    expect(loaded.some((f) => other.test(f))).toBe(false)
+    if (path === '/en') {
+      // The Arabic face is used only by lang="ar" text; nothing else on the page renders in it.
+      const misuse = await page.evaluate(
+        () =>
+          [...document.querySelectorAll('body *')].filter(
+            (el) =>
+              !el.closest('[lang="ar"]') &&
+              [...el.childNodes].some((n) => n.nodeType === 3 && n.textContent!.trim()) &&
+              /Plex Sans Arabic/.test(getComputedStyle(el).fontFamily.split(',')[0]!),
+          ).length,
+      )
+      expect(misuse).toBe(0)
+      if (loaded.some((f) => other.test(f)))
+        expect(await page.locator('[lang="ar"]').count()).toBeGreaterThan(0)
+    } else {
+      expect(loaded.some((f) => other.test(f))).toBe(false)
+    }
     // The body text and the main heading render in the design system's faces.
     const families = await page.evaluate(() => ({
       body: getComputedStyle(document.body).fontFamily,

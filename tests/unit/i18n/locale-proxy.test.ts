@@ -167,6 +167,9 @@ describe('server-rendered 404 for missing public paths (FR-008, FR-082)', () => 
       '/account/mfa',
       '/robots.txt',
       '/sitemap.xml',
+      '/favicon.ico',
+      '/icon.svg',
+      '/apple-icon.png',
     ])
       expect((await call(p)).status, p).toBe(200)
     // Client-side navigations (the router's fetch) are rendered by Next's not-found boundary.

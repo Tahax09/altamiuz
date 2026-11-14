@@ -204,7 +204,11 @@ describe('header and footer', () => {
         alternates: {},
       }),
     )
-    expect(text).toMatch(/class="site-header__home" href="\/en">Fixture Co<\/a>/)
+    // No published logo: the supplied emblem marks the home link, the name beside it.
+    expect(text).toContain('class="site-header__home" href="/en"><img src="/icon.svg" alt=""')
+    expect(text).toContain('<span>Fixture Co</span></a>')
+    const unnamed = html(createElement(SiteHeader, { locale: 'en', nav: null, alternates: {} }))
+    expect(unnamed).toContain('<span class="sr-only">Home</span>')
     const footer = html(
       createElement(SiteFooter, {
         locale: 'en',

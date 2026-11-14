@@ -2,9 +2,11 @@
 // IBM Plex Sans Arabic (Arabic, 400/700). Sourced from Google Fonts through next/font/google
 // (owner instruction, 2026-10-29): the files are downloaded at build time and served from this
 // origin, so visitors make no requests to Google and CSP keeps `font-src 'self'`.
-// Not preloaded: each page then fetches only the faces its text uses (an English page never
-// downloads the Arabic font), which keeps the per-language font budget (D-24). `swap` shows the
-// fallback stack until a face arrives.
+// Not preloaded: each page then fetches only the faces its text uses. Arabic text marked
+// lang="ar" on an English page (the language switcher) uses IBM Plex Sans Arabic (site.css
+// `:lang(ar)`), so an English page loads that face's Arabic file for those glyphs only
+// (unicode-range); the per-language font budget (D-24, ≤120 KB) is checked by Lighthouse.
+// `swap` shows the fallback stack until a face arrives.
 // Arabic uses two weights, not three: every Plex weight is an Arabic-script file plus a Latin file
 // (digits and Latin words appear on every page), and 400/600/700 measured 146 KB, over the
 // 120 KB per-language target; 400/700 is 96 KB. Weight 600 resolves to 700 (CSS font matching).

@@ -231,6 +231,8 @@ export function SkipLink({ locale }: { locale: Locale }) {
   )
 }
 
+const hasPublicImage = (m: unknown) => !!m && typeof m === 'object' && !!(m as PublicMedia).filename
+
 /**
  * Brand mark (CD-09): the logo from published site settings when one is chosen for this language,
  * otherwise the company name as text. A logo whose alt text is empty (decorative) still gives the
@@ -300,12 +302,34 @@ export function SiteHeader({
     <header className="site-header">
       <div className="site-header__bar">
         <a className="site-header__home" href={href('home', locale)}>
-          <BrandMark
-            logo={logo}
-            name={siteName || t(locale, 'home')}
-            className="site-header__logo"
-            eager
-          />
+          {hasPublicImage(logo) ? (
+            <BrandMark
+              logo={logo}
+              name={siteName || t(locale, 'home')}
+              className="site-header__logo"
+              eager
+            />
+          ) : (
+            // No logo published yet: the owner-supplied emblem (src/app/icon.svg, CD-09) marks
+            // the home link, with the company name beside it once published, or for screen
+            // readers only until then.
+            <>
+              {/* eslint-disable-next-line @next/next/no-img-element -- static same-origin SVG; next/image would add client JS (153,600 B budget) and nothing else with images.unoptimized */}
+              <img
+                src="/icon.svg"
+                alt=""
+                width={40}
+                height={40}
+                className="site-header__emblem"
+                decoding="async"
+              />
+              {siteName ? (
+                <span>{siteName}</span>
+              ) : (
+                <span className="sr-only">{t(locale, 'home')}</span>
+              )}
+            </>
+          )}
         </a>
         {groups.length ? (
           <DesktopNav groups={groups} locale={locale} current={currentPath} />

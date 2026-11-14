@@ -251,3 +251,43 @@ test('detail and listing pages stay within the client JavaScript budget', async 
     await ctx.close()
   }
 })
+
+test('brand icons (CD-09) are linked from every page and served from this origin', async ({
+  page,
+  request,
+}) => {
+  await page.goto('/en')
+  const links = await page.evaluate(() =>
+    [...document.querySelectorAll('link[rel="icon"], link[rel="apple-touch-icon"]')].map(
+      (l) => new URL(l.getAttribute('href')!, location.href).pathname,
+    ),
+  )
+  for (const p of ['/favicon.ico', '/icon.svg', '/apple-icon.png']) expect(links, p).toContain(p)
+  for (const [p, type] of [
+    ['/favicon.ico', /image\/(x-icon|vnd\.microsoft\.icon)/],
+    ['/icon.svg', /image\/svg\+xml/],
+    ['/apple-icon.png', /image\/png/],
+  ] as const) {
+    const r = await request.get(p)
+    expect(r.status(), p).toBe(200)
+    expect(r.headers()['content-type'], p).toMatch(type)
+  }
+})
+
+test('Arabic text on English pages uses the Arabic face; Latin text on Arabic pages keeps it', async ({
+  page,
+}) => {
+  await page.goto('/en')
+  const ar = page.locator('.language-switcher a[lang="ar"]')
+  await expect(ar).toHaveCount(1)
+  expect(await ar.evaluate((e) => getComputedStyle(e).fontFamily)).toMatch(
+    /^"?IBM Plex Sans Arabic/,
+  )
+  // English text on the same page stays in the English faces.
+  expect(
+    await page
+      .locator('h1, .site-header__home')
+      .first()
+      .evaluate((e) => getComputedStyle(e).fontFamily),
+  ).not.toMatch(/^"?IBM Plex Sans Arabic/)
+})

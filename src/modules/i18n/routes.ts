@@ -55,6 +55,10 @@ export const RESERVED_SEGMENTS = [
   '_next',
   'sitemap.xml',
   'robots.txt',
+  // App icons (src/app/favicon.ico, icon.svg, apple-icon.png; CD-09)
+  'favicon.ico',
+  'icon.svg',
+  'apple-icon.png',
   ...LOCALES,
 ]
 
