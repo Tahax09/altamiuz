@@ -67,6 +67,9 @@ const rawSchema = z.object({
   TURNSTILE_SECRET_KEY: optional,
   // ADR-007: first-party aggregate counter; off unless set (FR-086).
   ANALYTICS_DRIVER: z.enum(['none', 'counter']).default('none'),
+  // Local/test review aid: empty image slots on public pages show a labelled placeholder (as in
+  // draft preview). Off by default; refused in production so placeholders never reach the live site.
+  MEDIA_PLACEHOLDERS: z.enum(['on', 'off']).default('off'),
   BOOTSTRAP_OWNER_EMAIL: optional.pipe(z.email().optional()),
 })
 
@@ -156,6 +159,7 @@ function crossChecks(raw: Raw): ConfigIssue[] {
       ['JOBS_TRIGGER', 'local-runner'],
       ['RATELIMIT_DRIVER', 'memory'],
       ['CAPTCHA_DRIVER', 'test'],
+      ['MEDIA_PLACEHOLDERS', 'on'],
     ]
     for (const [variable, value] of devOnly) {
       if (raw[variable] === value)
@@ -212,6 +216,7 @@ function build(raw: Raw) {
   return {
     appEnv: raw.APP_ENV as AppEnv,
     siteUrl: raw.SITE_URL,
+    mediaPlaceholders: raw.MEDIA_PLACEHOLDERS === 'on',
     logLevel: raw.LOG_LEVEL,
     database: { url: raw.DATABASE_URL, allowPush: raw.DATABASE_ALLOW_PUSH === 'true' },
     secrets: {

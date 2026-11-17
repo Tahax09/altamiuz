@@ -10,6 +10,7 @@ import { PageHeader } from '@/ui/page/PageHeader'
 import { Icon } from '@/ui/primitives/Icon'
 import { cachedGlobal, cachedHome, listingsFor } from '../data'
 import { countPageView } from '../analytics'
+import { getConfig } from '@/modules/platform'
 
 const isLocale = (v: string): v is Locale => (LOCALES as readonly string[]).includes(v)
 
@@ -40,6 +41,7 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
             listings: await listingsFor(home, locale),
             contactForm: await contactFormFor(home, locale),
             settings: await cachedGlobal('site-settings', locale),
+            preview: getConfig().mediaPlaceholders,
           }}
         />
       </>

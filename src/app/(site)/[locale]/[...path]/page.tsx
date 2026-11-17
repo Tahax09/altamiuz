@@ -28,6 +28,7 @@ import {
   listingsFor,
 } from '../../data'
 import { countPageView } from '../../analytics'
+import { getConfig } from '@/modules/platform'
 
 type Params = Promise<{ locale: string; path: string[] }>
 type Resolved =
@@ -167,7 +168,13 @@ export default async function PublicPage({ params }: { params: Params }) {
         />
         <section className="section section--listing">
           {r.items.length ? (
-            <OfferCards items={r.items} kind={kind} locale={r.locale} headingLevel={2} />
+            <OfferCards
+              items={r.items}
+              kind={kind}
+              locale={r.locale}
+              headingLevel={2}
+              preview={getConfig().mediaPlaceholders}
+            />
           ) : (
             <EmptyState
               title={t(r.locale, r.collection === 'services' ? 'noServices' : 'noCourses')}
@@ -190,6 +197,7 @@ export default async function PublicPage({ params }: { params: Params }) {
           listings: await listingsFor(r.doc, r.locale),
           contactForm: await contactFormFor(r.doc, r.locale),
           settings: await cachedGlobal('site-settings', r.locale),
+          preview: getConfig().mediaPlaceholders,
         }}
         after={r.collection === 'pages' ? null : await detailExtras(r.locale, r.collection, r.doc)}
       />

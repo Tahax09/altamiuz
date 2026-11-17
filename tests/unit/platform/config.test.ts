@@ -83,6 +83,13 @@ describe('loadConfig — development', () => {
     )
   })
 
+  it('media placeholders are off unless configured', () => {
+    const env = devEnv()
+    delete env.MEDIA_PLACEHOLDERS
+    expect(loadConfig(env).mediaPlaceholders).toBe(false)
+    expect(loadConfig({ ...devEnv(), MEDIA_PLACEHOLDERS: 'on' }).mediaPlaceholders).toBe(true)
+  })
+
   it('analytics is off unless configured; only the first-party counter is accepted (ADR-007)', () => {
     const env = devEnv()
     delete env.ANALYTICS_DRIVER
@@ -115,6 +122,7 @@ describe('loadConfig — production refuses unsafe configuration (FR-105)', () =
     ['JOBS_TRIGGER', 'local-runner'],
     ['RATELIMIT_DRIVER', 'memory'],
     ['CAPTCHA_DRIVER', 'test'],
+    ['MEDIA_PLACEHOLDERS', 'on'],
   ])('rejects development substitute %s=%s', (variable, value) => {
     // EMAIL_DRIVER=smtp is allowed only over smtps:// (see "production operations guards").
     const issues = errorFor({ ...prodEnv(), [variable]: value }).issues

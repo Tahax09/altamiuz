@@ -37,7 +37,8 @@ export type RenderContext = {
   listings?: { services?: ListItem[]; courses?: ListItem[] }
   /** The contact form for `contactBlock` sections (public pages only; preview shows none). */
   contactForm?: ReactNode
-  /** Draft preview: empty image slots show a labelled placeholder of the expected size. */
+  /** Empty image slots show a labelled placeholder of the expected size: draft preview, or public
+   * pages when MEDIA_PLACEHOLDERS=on (local/test only). Changes nothing else. */
   preview?: boolean
   /** Published site settings (contact details for `contactBlock`). */
   settings?: Record<string, unknown> | null
