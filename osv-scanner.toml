@@ -38,3 +38,8 @@ reason = "deepmerge 4.3.1 via payload (low); no fixed release published"
 id = "GHSA-g3hv-75wg-m249"
 ignoreUntil = 2026-12-05
 reason = "minimatch 10.x via eslint-config-next typescript-estree (dev-only lint, trusted globs); upstream requires ^10"
+
+[[IgnoredVulns]]
+id = "GHSA-fc5q-39xc-vjpf"
+ignoreUntil = 2026-12-05
+reason = "picomatch <=4.0.7, no fixed release; build/type-generation/lint tooling only, repository-constant patterns, not in .next/server; E-6, added 2026-11-17, owner acceptance under OD-1"

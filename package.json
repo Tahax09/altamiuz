@@ -115,7 +115,8 @@
       "ignoreGhsas": [
         "GHSA-cg2g-xh64-v4q7",
         "GHSA-mrv2-3pqr-j5jr",
-        "GHSA-c475-qrg2-pj4r"
+        "GHSA-c475-qrg2-pj4r",
+        "GHSA-fc5q-39xc-vjpf"
       ]
     },
     "overrides": {

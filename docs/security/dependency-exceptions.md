@@ -22,7 +22,7 @@ pins it. **Update 2026-11-14**: E-2 retired (override to `basic-ftp` 6.2.6). **T
 expire 2026-12-05; each needs an owner extend-or-lapse decision before then**
 (docs/launch-readiness.md, owner decision OD-1).
 
-Every exception has the same owner: **Taha Alabyad (project owner)**. All five expire on
+Every exception has the same owner: **Taha Alabyad (project owner)**. All expire on
 2026-12-05; only the owner may extend one (E-5 was extended on the owner's instruction on
 2026-11-06). Each block says what must happen before it expires. Affected and fixed ranges are
 taken from `pnpm audit --json` on 2026-11-06.
@@ -156,6 +156,26 @@ taken from `pnpm audit --json` on 2026-11-06.
   `@esbuild-kit/esm-loader`; `@payloadcms/db-postgres` latest 3.93.0 still pins `drizzle-kit`
   0.31.7. No fix is available. (3) Decision needed from the owner **before 2026-12-05**: extend
   (the evidence above supports it) or let it lapse (CI fails from that date). Not extended here.
+
+### E-6 picomatch in build, type-generation and lint tooling — expires 2026-12-05
+
+- **Advisory**: GHSA-fc5q-39xc-vjpf, high (CVSS 3.1 7.5, availability); affected ≤4.0.7, **no
+  fixed release** (4.0.7 is the latest, checked 2026-11-17). ReDoS when an attacker supplies the
+  glob _pattern_ (single-branch repeated extglobs such as `+(*)`).
+- **Paths**: `picomatch` 4.0.7 ← `tinyglobby` 0.2.17 ← `json-schema-to-typescript` 15.0.3 ←
+  `payload` 3.92.1 (production tree); ← `anymatch`/`readdirp` ← `chokidar` 3.6.0 ← `sass` (build);
+  `picomatch` 2.3.2 and 4.0.7 under `eslint-config-next` (dev, lint).
+- **Exposure (checked 2026-11-17)**: none found. Payload loads `json-schema-to-typescript` only in
+  `bin/generateTypes.js` (`pnpm generate:types`, a developer command); its runtime defers type
+  generation to that CLI. The production server build (`.next/server`) contains no `picomatch`.
+  `src/` and `scripts/` import no glob library. Every pattern compiled is a repository constant
+  (lint globs, Sass watch paths, type-generation paths); no request data becomes a glob.
+- **Mitigation**: no glob pattern is accepted from users or content.
+- **Why no fix**: no patched `picomatch` release exists.
+- **Added 2026-11-17 by engineering** (the advisory appeared after the 2026-11-14 audit and made
+  `pnpm audit --audit-level high` fail). Same expiry as the others; **owner acceptance needed under
+  OD-1**. Before expiry: check for `picomatch` ≥4.0.8 (then remove the exception, with an override
+  if parents lag) and re-run the `.next/server` check.
 
 Retired 2026-11-05: GHSA-vfj7-8cjw-p6xm (`braces`). Neither pnpm audit nor osv-scanner matches it
 in the current lockfile (`braces` 3.0.3), so it was removed from both configurations.
