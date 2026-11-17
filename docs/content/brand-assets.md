@@ -104,3 +104,18 @@ drawings still use the earlier navy `#12355b`; they are kept, replaced or remove
 
 Upload the PNGs to the media library (SVG is refused by the upload pipeline), give each alt text
 per language, and choose them in Site settings → Brand.
+
+## Partner logos (`content/partners/`)
+
+Supplied by the owner on 2026-11-14: `dataprotect.webp`, `pecb.webp`, `searchinform.webp`,
+`xertiance.webp` (transparent WebP, used unchanged). Naming a partner is a claim: the logos go
+only into a **credentials** block (homepage or About "trust strip"), which cannot be published
+until each item has a verified evidence record (a written partnership or accreditation
+confirmation, CD-05 and gap G-1). PECB and DataProtect appear on the legacy site; SearchInform and
+Xertiance are new and need the same evidence. Upload: `pnpm seed:partners` puts the four files in
+the media library through the upload pipeline (alt text = the partner's name in both languages;
+re-runs reuse them) and places them nowhere; then Credentials block (display "Logos") → item →
+Logo. The logo is part of the verified claim, like a team photo: changing an item's logo after
+verification removes the verification (`tests/integration/content/team-claims.test.ts`). The
+site must not imply accreditation by these bodies: the block heading and intro are verified with
+the items, so they say what the evidence supports (for example "Partners", not "Accredited by").

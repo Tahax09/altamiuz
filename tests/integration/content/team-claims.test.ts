@@ -142,3 +142,59 @@ describe('team block evidence gate (CD-03)', () => {
     expect((await evidenceOf(id)).evidence?.status).not.toBe('verified')
   })
 })
+
+describe('credentials block logos (partners, CD-05)', () => {
+  const logosPage = async (logoId: number, evidence?: Record<string, unknown>) =>
+    (
+      (await t.payload.create({
+        collection: 'pages',
+        locale: 'en',
+        draft: true,
+        data: pageData(slug(), 'Partners page', {
+          sections: [
+            {
+              blockType: 'credentials',
+              heading: 'Fixture partners',
+              display: 'logos',
+              items: [{ name: 'Fixture Partner', logo: logoId }],
+              ...(evidence ? { evidence } : {}),
+            },
+          ],
+        }) as never,
+        user: await u('administrator'),
+        overrideAccess: false,
+      })) as unknown as { id: number }
+    ).id
+  const block = async (id: number) =>
+    (
+      (await t.payload.findByID({
+        collection: 'pages',
+        id,
+        draft: true,
+        depth: 0,
+        overrideAccess: true,
+      })) as unknown as { sections: { evidence: Ev; items: { id: string }[] }[] }
+    ).sections[0]!
+
+  it('changing a partner logo after verification removes verification', async () => {
+    const id = await logosPage(await photo('First partner logo'), {
+      status: 'verified',
+      reference: 'Partnership letter 3',
+    })
+    const before = await block(id)
+    expect(before.evidence.status).toBe('verified')
+    await t.payload.update({
+      collection: 'pages',
+      id,
+      locale: 'en',
+      draft: true,
+      data: {
+        sections: [{ ...before, items: [{ ...before.items[0], logo: await photo('Other logo') }] }],
+      } as never,
+      user: await u('publisher'),
+      overrideAccess: false,
+    })
+    expect((await block(id)).evidence.status).not.toBe('verified')
+    await expect(publish(id)).rejects.toMatchObject({ status: 400 })
+  })
+})

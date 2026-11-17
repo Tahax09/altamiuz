@@ -230,6 +230,8 @@ export const CLAIM_BLOCKS: Record<string, ClaimSpec> = {
     rows: [
       { name: 'name', localized: true },
       { name: 'issuer', localized: true },
+      // The logo is the claim in the `logos` display (partners): swapping it re-opens verification.
+      { name: 'logo' },
       { name: 'validUntil', date: true },
     ],
   },
