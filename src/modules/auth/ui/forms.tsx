@@ -45,6 +45,15 @@ const post = async (url: string, body?: unknown) => {
   return { ok: r.ok, body: (await r.json().catch(() => ({}))) as Record<string, unknown> }
 }
 
+/** GET a JSON body, or null on any non-2xx. An unread error body is cancelled: left open it keeps
+ *  the request pending in the browser (the page never reaches network idle). */
+const getJson = async <T,>(url: string): Promise<T | null> => {
+  const r = await fetch(url, { credentials: 'same-origin', cache: 'no-store' })
+  if (r.ok) return (await r.json()) as T
+  await r.body?.cancel().catch(() => undefined)
+  return null
+}
+
 /** Runs one WebAuthn ceremony: options → browser → verify. Returns the verify body or an error. */
 async function ceremony(
   kind: 'register' | 'authenticate',
@@ -381,22 +390,21 @@ export function SecurityPanel() {
   const [pkName, setPkName] = useState('')
   const [pkMsg, setPkMsg] = useState({ text: '', error: false })
   const loadPasskeys = async () => {
-    const r = await fetch('/api/users/passkeys', { credentials: 'same-origin', cache: 'no-store' })
-    if (r.ok) setPasskeys(((await r.json()) as { passkeys: typeof passkeys }).passkeys)
+    const b = await getJson<{ passkeys: typeof passkeys }>('/api/users/passkeys')
+    if (b) setPasskeys(b.passkeys)
   }
   useEffect(() => {
     fetch('/api/users/mfa/status', { credentials: 'same-origin', cache: 'no-store' })
       .then((r) => r.json())
       .then(setMfa)
       .catch(() => undefined)
-    fetch('/api/users/passkeys', { credentials: 'same-origin', cache: 'no-store' })
-      .then((r) => (r.ok ? r.json() : null))
-      .then((b: { passkeys: typeof passkeys } | null) => b && setPasskeys(b.passkeys))
+    getJson<{ passkeys: typeof passkeys }>('/api/users/passkeys')
+      .then((b) => b && setPasskeys(b.passkeys))
       .catch(() => undefined)
   }, [])
   const load = async () => {
-    const r = await fetch('/api/users/sessions', { credentials: 'same-origin' })
-    if (r.ok) setSessions(((await r.json()) as { sessions: typeof sessions }).sessions)
+    const b = await getJson<{ sessions: typeof sessions }>('/api/users/sessions')
+    if (b) setSessions(b.sessions)
   }
   return (
     <>
