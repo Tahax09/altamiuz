@@ -153,6 +153,29 @@ describe('T080 slug rules', () => {
     })
     expect(r.docs.map((d) => (d as unknown as { to: string }).to)).toEqual([`/en/${c}`, `/en/${c}`])
   })
+
+  it('an Arabic slug change whose redirect already exists publishes and reuses it', async () => {
+    // Arabic slugs are stored decoded (NFC) in `redirects.from`, but pathFor() percent-encodes
+    // them: the existing-redirect lookup must compare normalised paths, or a second publish of the
+    // same change (e.g. after a failed or reverted one) collides with `from` uniqueness.
+    const old = `تواصل-${n++}`
+    const neu = `تواصل-معنا-${n++}`
+    const p = await draft(old, 'ar')
+    await publish(p.id, 'ar')
+    await t.payload.create({
+      collection: 'redirects',
+      data: { from: `/ar/${old}`, to: `/ar/${neu}`, type: '301', source: 'slug-change' } as never,
+      overrideAccess: true,
+    })
+    await expect(publish(p.id, 'ar', { slug: neu })).resolves.toBeTruthy()
+    const r = await t.payload.find({
+      collection: 'redirects',
+      where: { from: { equals: `/ar/${old}` } },
+      overrideAccess: true,
+    })
+    expect(r.totalDocs).toBe(1)
+    expect(r.docs[0]).toMatchObject({ to: `/ar/${neu}`, source: 'slug-change' })
+  })
 })
 
 describe('T084 scan:richtext', () => {

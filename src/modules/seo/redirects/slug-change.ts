@@ -1,6 +1,7 @@
 // FR-025: publishing a new slug for a published document creates a redirect from the old path.
 import type { PayloadRequest } from 'payload'
 import { pathFor, type Locale, type RoutedCollection } from '../../i18n'
+import { normaliseSitePath } from '../paths'
 
 export async function createSlugChangeRedirect(
   req: PayloadRequest,
@@ -10,8 +11,12 @@ export async function createSlugChangeRedirect(
   newSlug: string,
 ) {
   if (!oldSlug || oldSlug === newSlug) return
-  const from = pathFor(collection, locale, oldSlug)
-  const to = pathFor(collection, locale, newSlug)
+  // Redirects store normalised paths (decoded, NFC; collection hook), while pathFor() percent-
+  // encodes non-ASCII slugs. Compare in the stored form, or an Arabic path never matches.
+  const encodedFrom = pathFor(collection, locale, oldSlug)
+  const encodedTo = pathFor(collection, locale, newSlug)
+  const from = normaliseSitePath(encodedFrom) ?? encodedFrom
+  const to = normaliseSitePath(encodedTo) ?? encodedTo
   const existing = await req.payload.find({
     collection: 'redirects',
     where: { from: { equals: from } },
