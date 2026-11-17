@@ -9,6 +9,7 @@ import { DocumentView } from '@/ui'
 import { PageHeader } from '@/ui/page/PageHeader'
 import { Icon } from '@/ui/primitives/Icon'
 import { cachedGlobal, cachedHome, listingsFor } from '../data'
+import { countPageView } from '../analytics'
 
 const isLocale = (v: string): v is Locale => (LOCALES as readonly string[]).includes(v)
 
@@ -26,6 +27,7 @@ export async function generateMetadata({
 export default async function Home({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params
   if (!isLocale(locale)) notFound()
+  await countPageView(locale)
   const home = await cachedHome(locale)
   if (home)
     return (

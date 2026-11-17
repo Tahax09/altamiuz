@@ -82,6 +82,18 @@ describe('loadConfig — development', () => {
       'STORAGE_DRIVER',
     )
   })
+
+  it('analytics is off unless configured; only the first-party counter is accepted (ADR-007)', () => {
+    const env = devEnv()
+    delete env.ANALYTICS_DRIVER
+    expect(loadConfig(env).analytics.driver).toBe('none')
+    expect(loadConfig({ ...devEnv(), ANALYTICS_DRIVER: 'counter' }).analytics.driver).toBe(
+      'counter',
+    )
+    expect(errorFor({ ...devEnv(), ANALYTICS_DRIVER: 'umami' }).issues[0]?.variable).toBe(
+      'ANALYTICS_DRIVER',
+    )
+  })
 })
 
 describe('loadConfig — production refuses unsafe configuration (FR-105)', () => {

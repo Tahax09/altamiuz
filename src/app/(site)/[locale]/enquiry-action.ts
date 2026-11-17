@@ -6,6 +6,7 @@ import config from '@payload-config'
 import { headers } from 'next/headers'
 import { getPayload } from 'payload'
 import { FIELDS, submitEnquiry, type ErrorCode } from '@/modules/enquiries'
+import { countEnquiryConversion } from '../analytics'
 
 export type EnquiryState = {
   status: 'idle' | 'sent' | 'invalid' | 'rejected' | 'limited' | 'unavailable'
@@ -33,6 +34,7 @@ export async function sendEnquiry(prev: EnquiryState, form: FormData): Promise<E
   }
   switch (result.status) {
     case 200:
+      countEnquiryConversion(raw.locale)
       return { status: 'sent', round }
     case 400:
       return { status: 'invalid', errors: result.errors, values: keep(raw), round }

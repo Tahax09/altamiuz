@@ -21,6 +21,7 @@ import * as migration_20261112_214337_v2_components from './20261112_214337_v2_c
 import * as migration_20261114_062000_c1_contact_phones from './20261114_062000_c1_contact_phones'
 import * as migration_20261114_064904_optional_mfa from './20261114_064904_optional_mfa'
 import * as migration_20261114_142706_passkeys from './20261114_142706_passkeys'
+import * as migration_20261117_120000_analytics_daily from './20261117_120000_analytics_daily'
 
 export const migrations = [
   {
@@ -137,5 +138,10 @@ export const migrations = [
     up: migration_20261114_142706_passkeys.up,
     down: migration_20261114_142706_passkeys.down,
     name: '20261114_142706_passkeys',
+  },
+  {
+    up: migration_20261117_120000_analytics_daily.up,
+    down: migration_20261117_120000_analytics_daily.down,
+    name: '20261117_120000_analytics_daily',
   },
 ]

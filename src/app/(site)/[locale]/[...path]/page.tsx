@@ -27,6 +27,7 @@ import {
   cachedRedirect,
   listingsFor,
 } from '../../data'
+import { countPageView } from '../../analytics'
 
 type Params = Promise<{ locale: string; path: string[] }>
 type Resolved =
@@ -121,6 +122,8 @@ async function redirectOr404(): Promise<never> {
 export default async function PublicPage({ params }: { params: Params }) {
   const r = await resolve(params)
   if (!r) return redirectOr404()
+  // A status page ("not available in this language") is not a page view.
+  if (r.kind !== 'missing') await countPageView(r.locale)
   if (r.kind === 'missing')
     return (
       <StatusView

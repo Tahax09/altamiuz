@@ -10,3 +10,4 @@ export {
   type ReadinessCheck,
 } from './health'
 export { expireCacheTags } from './cache'
+export { analyticsEnabled, countsAsPageView, getAnalytics, setAnalyticsForTests } from './analytics'

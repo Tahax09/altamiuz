@@ -2,7 +2,7 @@
 // Production adapters (s3, resend, postgres/upstash limiter, Payload/QStash jobs, Turnstile,
 // analytics provider) are added in the phases that first need them.
 import path from 'node:path'
-import { noAnalytics, type Analytics } from './analytics'
+import { createCounterAnalytics, noAnalytics, type Analytics } from './analytics'
 import { createTestCaptcha, type CaptchaVerifier } from './captcha'
 import { createTurnstile } from './captcha/turnstile'
 import { createEmail, type EmailAdapter, type EmailConfig } from './email'
@@ -26,6 +26,14 @@ import type { Pool } from 'pg'
 import { createPostgresRateLimiter } from './ratelimit/postgres'
 import { createLocalStorage, type StorageAdapter } from './storage'
 
+export {
+  ANALYTICS_EVENTS,
+  purgeAnalytics,
+  readAnalytics,
+  utcDay,
+  type AnalyticsEvent,
+  type AnalyticsRow,
+} from './analytics'
 export { EmailValidationError } from './email'
 export { StorageKeyError } from './storage'
 export type { CaptchaContext, CaptchaResult } from './captcha'
@@ -88,7 +96,14 @@ export function createCaptchaVerifier(cfg: {
   throw new NotYetImplemented('captcha', cfg.driver)
 }
 
-export function createAnalytics(cfg: { driver: string }): Analytics {
+export function createAnalytics(
+  cfg: { driver: string },
+  opts: { pool?: Pool; now?: () => number; onError?: (e: Error) => void } = {},
+): Analytics {
   if (cfg.driver === 'none') return noAnalytics
+  if (cfg.driver === 'counter') {
+    if (!opts.pool) throw new Error('counter analytics needs a database pool')
+    return createCounterAnalytics({ pool: opts.pool, now: opts.now, onError: opts.onError })
+  }
   throw new NotYetImplemented('analytics', cfg.driver)
 }

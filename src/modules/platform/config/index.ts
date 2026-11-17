@@ -65,7 +65,8 @@ const rawSchema = z.object({
   CAPTCHA_DRIVER: z.enum(['test', 'turnstile']).default('test'),
   TURNSTILE_SITE_KEY: optional,
   TURNSTILE_SECRET_KEY: optional,
-  ANALYTICS_DRIVER: z.enum(['none']).default('none'),
+  // ADR-007: first-party aggregate counter; off unless set (FR-086).
+  ANALYTICS_DRIVER: z.enum(['none', 'counter']).default('none'),
   BOOTSTRAP_OWNER_EMAIL: optional.pipe(z.email().optional()),
 })
 

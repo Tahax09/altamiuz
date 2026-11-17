@@ -664,7 +664,7 @@ publish-to-live wiring ready for T106 → commit checkpoint.
 - [X] T124 [US5] Implement Turnstile server verification (hostname + action, single use) in `src/modules/platform/adapters/captcha/turnstile.ts` (FR-072)
 - [X] T125 [US5] Implement `sendEnquiryEmail` job (retries with backoff, operator alert after final failure; plain-text body; escaped validated reply-to) and configurable recipients (FR-073, FR-074, FR-075)
 - [X] T126 [US5] Implement enquiry inbox admin views, audited export, `purgeExpiredEnquiries` job until T122 passes (FR-076, FR-077)
-- [ ] T127 [US5] R-F: evaluate analytics options, record `docs/adr/ADR-007-analytics.md`; implement cookieless adapter (page views per locale, successful enquiry conversion; no identifiers) disabled by default (FR-084, FR-085, FR-086, FR-087)
+- [X] T127 [US5] R-F: evaluate analytics options, record `docs/adr/ADR-007-analytics.md`; implement cookieless adapter (page views per locale, successful enquiry conversion; no identifiers) disabled by default (FR-084, FR-085, FR-086, FR-087) — **Done 2026-11-17 (engineering; enabling is OD-3 + CD-10)**: `docs/adr/ADR-007-analytics.md` (5 options; chosen: first-party server-side daily counter, `ANALYTICS_DRIVER=counter`, default `none`); table `analytics_daily` (day, locale, event, count; migration `20261117_120000_analytics_daily`); page views counted server-side after the response (prefetches, 404s, status pages and automated agents excluded), accepted enquiries by language only; no browser code, cookie or storage; failures logged by class and ignored; 25-month retention in the retention job. Tests: `tests/unit/platform/analytics.test.ts`, `tests/integration/platform/analytics.test.ts`, config case.
 - [X] T128 [P] [US5] Write `docs/content/privacy-notice-requirements.md` listing FR-079 items for CD-10 legal review (FR-079)
 - [X] T129 [US5] Write `docs/security/TM-enquiry.md`; update ASVS V14 (FR-097)
 
@@ -702,9 +702,8 @@ commit checkpoint.
 - T128 `docs/content/privacy-notice-requirements.md` (facts and open decisions for CD-10 review,
   no notice wording). T129 `docs/security/TM-enquiry.md`; ASVS V14.2.1 verified, V14.1.1,
   V14.2.3, V14.2.4, V14.3.2 partial.
-- **T127 not done**: R-F analytics evaluation and ADR-007 need an owner decision on a provider
-  and its disclosure (CD-10); `ANALYTICS_DRIVER=none` stays (no analytics, so no enquiry content
-  can reach one).
+- **T127 done 2026-11-17** (ADR-007): first-party aggregate counter, off by default; the enquiry
+  hook passes the language only, so no enquiry content can reach analytics. Enabling: OD-3, CD-10.
 - **Verified (2026-11-06)**: unit 395, integration 599 (18 new), full Playwright 222 passed (9
   new), typecheck, lint, format. Lighthouse CI: the first run failed one budget (JS 150.14 KB >
   150 KB): the form imported the i18n dictionaries into the shared client bundle. The server now
