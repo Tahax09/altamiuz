@@ -4,13 +4,13 @@
    `.ContentEditable__root:focus-visible { outline: none !important }` inside a cascade layer, and
    layered !important beats any unlayered rule, so the indicator goes on the editor container. */
 .rich-text-lexical .editor-container:focus-within {
-  outline: 3px solid #1d4ed8;
+  outline: 3px solid var(--altamiuz-focus);
   outline-offset: 2px;
 }
 
 /* Visible focus for every interactive admin control. */
 .payload__app :is(a, button, input, select, textarea, [tabindex]):focus-visible {
-  outline: 3px solid #1d4ed8;
+  outline: 3px solid var(--altamiuz-focus);
   outline-offset: 2px;
 }
 
@@ -66,4 +66,124 @@
 .altamiuz-json-viewer pre:focus-visible {
   outline: 2px solid var(--theme-success-500);
   outline-offset: 2px;
+}
+
+// Altamiuz brand colours (CD-09, docs/design/brand-palette.md). Payload's neutral and "success"
+// (its accent) scales are replaced step by step with colours of the same relative luminance taken
+// from the brand ramps: neutrals along slate through brand navy #14243A, the accent along blue
+// through brand blue #2563EB. Every text/background pair Payload composes from these scales keeps
+// its contrast ratio, so admin accessibility is unchanged (baseline: docs/accessibility). Payload
+// declares its scales inside `@layer payload-default`; these unlayered declarations take
+// precedence. Error and warning scales are Payload's own (alarm semantics, as on the site).
+// Method and checks: docs/design/brand-palette.md, "Payload Admin"; tests/unit/platform/admin-brand.test.ts.
+:root {
+  --color-base-0: #ffffff;
+  --color-base-50: #f2f6f9;
+  --color-base-100: #e6ecf3;
+  --color-base-150: #d6dee8;
+  --color-base-200: #c7d1de;
+  --color-base-250: #b9c4d3;
+  --color-base-300: #a9b6c8;
+  --color-base-350: #9ba9bd;
+  --color-base-400: #8c9bb1;
+  --color-base-450: #7f8ea4;
+  --color-base-500: #728198;
+  --color-base-550: #63738a;
+  --color-base-600: #57667c;
+  --color-base-650: #4a586c;
+  --color-base-700: #3d4b5f;
+  --color-base-750: #2f3d50;
+  --color-base-800: #243042;
+  --color-base-850: #132238;
+  --color-base-900: #0c1326;
+  --color-base-950: #020617;
+  --color-base-1000: #000000;
+  --color-success-50: #edf5ff;
+  --color-success-100: #ddebfe;
+  --color-success-150: #c5defe;
+  --color-success-200: #b0d4fe;
+  --color-success-250: #96c7fd;
+  --color-success-300: #7eb8fc;
+  --color-success-350: #69abfb;
+  --color-success-400: #569bf9;
+  --color-success-450: #4289f7;
+  --color-success-500: #357af3;
+  --color-success-550: #2968ed;
+  --color-success-600: #225be4;
+  --color-success-650: #1d4dd5;
+  --color-success-700: #1e46c1;
+  --color-success-750: #1e3ea2;
+  --color-success-800: #1d3885;
+  --color-success-850: #1b3070;
+  --color-success-900: #172656;
+  --color-success-950: #121d42;
+  --altamiuz-focus: #1d4ed8;
+}
+html[data-theme='dark'] {
+  // #1d4ed8 is 2.76:1 on the dark admin background (#0c1326); light brand blue #8ab4ff is 8.84:1.
+  --altamiuz-focus: #8ab4ff;
+}
+
+// Brand graphics (src/modules/platform/admin/Brand.tsx).
+.altamiuz-brand {
+  display: inline-flex;
+  gap: 0.875rem;
+  align-items: center;
+}
+.altamiuz-brand__mark {
+  inline-size: 56px;
+  block-size: 56px;
+}
+.altamiuz-brand__text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+.altamiuz-brand__name {
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--theme-elevation-1000);
+}
+.altamiuz-brand__label {
+  font-size: 0.875rem;
+  color: var(--theme-elevation-650);
+}
+.altamiuz-brand__icon {
+  display: block;
+  inline-size: 18px;
+  block-size: 18px;
+}
+// The emblem's navy would vanish on the dark theme's navy surfaces: give it a light tile there.
+html[data-theme='dark'] :is(.altamiuz-brand__mark, .altamiuz-brand__icon) {
+  border-radius: 4px;
+  background: #f8fafc;
+  padding: 2px;
+}
+html[data-theme='dark'] .altamiuz-brand__mark {
+  border-radius: 8px;
+  padding: 6px;
+}
+
+// Passkey sign-in on the admin login page (ADR-012): Payload's secondary button look, full width
+// under the primary "Login" button, instead of the browser's default control.
+.passkey-sign-in button.secondary {
+  inline-size: 100%;
+  min-block-size: 40px;
+  padding: 0.5rem 1rem;
+  border: 1px solid var(--theme-elevation-800);
+  border-radius: var(--style-radius-s, 4px);
+  background: transparent;
+  color: var(--theme-text, var(--theme-elevation-1000));
+  font: inherit;
+  cursor: pointer;
+}
+.passkey-sign-in button.secondary:hover:not(:disabled) {
+  border-color: var(--theme-elevation-400);
+  color: var(--theme-elevation-600);
+}
+.passkey-sign-in button.secondary:disabled {
+  cursor: not-allowed;
+  border-color: var(--theme-elevation-200);
+  color: var(--theme-elevation-400);
 }

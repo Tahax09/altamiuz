@@ -74,3 +74,23 @@ from the navy surfaces, the emblem and the type, not from a rare hue.
 2. Supply or approve an English lockup and a reversed (light) lockup for dark backgrounds.
 3. Confirm the company name in each language (CD-01). The Arabic lockup reads "شركة التميز
    للاستشارات وأمن المعلومات"; the site copy uses the Latin "Altamiuz".
+
+## Payload Admin
+
+The admin uses the same palette (2026-11-17), through Payload's supported extension points only:
+
+- **Graphics** (`src/modules/platform/admin/Brand.tsx`): the supplied emblem replaces Payload's logo
+  on the login page (with the text "Altamiuz / Content management"; no English lockup exists) and its
+  icon in the navigation. The emblem file is served unchanged from `src/app/icon.svg`. On the dark
+  theme it sits on a light tile, since its navy would disappear on navy.
+- **Meta** (`src/payload.config.ts`): page titles end "· Altamiuz CMS"; favicon and touch icon are the
+  site's; admin pages are `noindex`; generated Open Graph images (`/api/og`) are off.
+- **Colours** (`src/app/(payload)/custom.scss`): Payload's 21-step neutral scale and 19-step accent
+  ("success") scale are replaced step for step by colours with the **same relative luminance**,
+  taken from the slate ramp through brand navy `#14243A` and the blue ramp through brand blue
+  `#2563EB`. Every contrast pair Payload builds from these scales therefore keeps its ratio (drift
+  under 2 %), so the admin accessibility baseline is unaffected. The dark theme's surfaces become
+  navy (`base-850` ≈ `#14243A`). Error and warning scales stay Payload's. Focus rings: `#1D4ED8` on
+  light (6.70:1), `#8AB4FF` on dark (8.84:1; the old blue was 2.76:1 there).
+  `tests/unit/platform/admin-brand.test.ts` re-checks the luminance match against the installed
+  Payload release, so an upgrade that adds or retunes a step fails the unit suite.

@@ -28,6 +28,11 @@ export default buildConfig({
     avatar: 'default',
     components: {
       afterLogin: ['/modules/auth/admin/PasskeyLogin#PasskeyLogin'],
+      // CD-09: supplied emblem in place of Payload's graphics; colours in (payload)/custom.scss.
+      graphics: {
+        Logo: '/modules/platform/admin/Brand#AdminLogo',
+        Icon: '/modules/platform/admin/Brand#AdminIcon',
+      },
       providers: [
         '/modules/auth/admin/MfaGate#MfaGate',
         '/modules/content/admin/ErrorFocus#ErrorFocus',
@@ -35,6 +40,16 @@ export default buildConfig({
       ],
     },
     importMap: { baseDir: dirname },
+    meta: {
+      titleSuffix: ' · Altamiuz CMS',
+      icons: [
+        { rel: 'icon', type: 'image/svg+xml', url: '/icon.svg' },
+        { rel: 'apple-touch-icon', url: '/apple-icon.png' },
+      ],
+      // No generated Open Graph images for admin pages; this also disables /api/og.
+      defaultOGImageType: 'off',
+      robots: { index: false, follow: false },
+    },
   },
   // D-23: English-only CMS navigation and controls in v1.
   i18n: { supportedLanguages: { en }, fallbackLanguage: 'en' },
