@@ -66,6 +66,8 @@ export const ar: Record<keyof typeof en, string> = {
   footerContact: 'التواصل',
   openInMaps: 'افتح الموقع في خرائط Apple',
   footerLegal: 'معلومات قانونية',
+  brandName: 'التميز',
+  allRightsReserved: 'جميع الحقوق محفوظة.',
   onThisPage: 'في هذه الصفحة',
   courseDetails: 'تفاصيل الدورة',
   relatedServices: 'خدمات أخرى',

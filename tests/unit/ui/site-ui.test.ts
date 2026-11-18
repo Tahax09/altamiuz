@@ -141,12 +141,13 @@ describe('header and footer', () => {
         year: 2026,
       }),
     )
-    expect(out).toContain('© <bdi>2026</bdi> <bdi>Fixture Co</bdi>')
+    expect(out).toContain('© <bdi>2026</bdi> <bdi>Fixture Co</bdi>. All rights reserved.')
     expect(out).toContain('href="mailto:info@example.org"')
     expect(out).toContain('+218 91 123 4567')
     expect(out).toContain('class="site-footer__heading"><a href="/en/about">About</a>')
     const bare = html(createElement(SiteFooter, { locale: 'en', nav: null, settings: null }))
-    expect(bare).not.toContain('©')
+    // Owner request 2026-11-18: the copyright line always shows, with the brand name as fallback.
+    expect(bare).toMatch(/© <bdi>\d{4}<\/bdi> <bdi>Altamiuz<\/bdi>\. All rights reserved\./)
     expect(bare).not.toContain('<address')
   })
 

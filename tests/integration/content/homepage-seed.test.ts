@@ -7,6 +7,7 @@ import { bootPayload, type TestPayload } from '../../support/payload'
 import { userFor, verifiedSession, type Role, type Session } from '../../support/auth'
 import { HomepageSeedError, illustrationSources, seedHomepage } from '../../../scripts/homepage'
 import { illustrations, sections as copy } from '../../../content/homepage/copy'
+import { OWNER_ATTESTATION } from '../../../content/attestation'
 
 let t: TestPayload
 const S = {} as Record<Role, Session>
@@ -63,7 +64,8 @@ describe('homepage content seed', () => {
       'featureGrid',
       'process',
       'standards',
-      'textMedia',
+      'stats',
+      'credentials',
       'resourceList',
       'cta',
     ])
@@ -78,14 +80,25 @@ describe('homepage content seed', () => {
     expect(steps(ar)).toEqual(['الفهم', 'التقييم', 'التخطيط', 'الدعم'])
   })
 
-  it('keeps fact-dependent sections hidden and adds no claim blocks', async () => {
+  it('hides only sections without content; claims carry the owner attestation (2026-11-18)', async () => {
     const en = await draft('en')
     const hidden = en.sections.filter((b) => b.hidden)
-    expect(hidden.map((b) => b.blockType)).toEqual(['standards', 'textMedia', 'resourceList'])
+    expect(hidden.map((b) => b.blockType)).toEqual(['resourceList'])
     for (const b of hidden) expect(String(b.blockName)).toMatch(/^Pending: /)
-    expect(en.sections.some((b) => b.blockType === 'stats' || b.blockType === 'credentials')).toBe(
-      false,
+    const claims = en.sections.filter(
+      (b) => b.blockType === 'stats' || b.blockType === 'credentials',
     )
+    expect(claims.map((b) => b.blockType)).toEqual(['stats', 'credentials'])
+    for (const b of claims)
+      expect(b.evidence).toMatchObject({ status: 'verified', reference: OWNER_ATTESTATION })
+    const partners = claims.find((b) => b.blockType === 'credentials')!
+    expect(partners.display).toBe('logos')
+    expect((partners.items as { name: string }[]).map((i) => i.name)).toEqual([
+      'DataProtect',
+      'PECB',
+      'SearchInform',
+      'Xertiance',
+    ])
   })
 
   it('illustrations go through the media pipeline with alt text in both languages', async () => {
@@ -121,21 +134,20 @@ describe('homepage content seed', () => {
   })
 
   it('an Editor cannot publish it; a Publisher can, and only visible sections go public', async () => {
-    // Publishing is per language: English, then Arabic.
-    const publish = async (role: Role, locale: 'en' | 'ar') =>
+    // The page carries claims (figures, partner logos); both languages are published together so
+    // the evidence covers what goes live (evidence-publish.test.ts covers the mismatch cases).
+    const publish = async (role: Role, only?: 'en' | 'ar') =>
       t.payload.update({
         collection: 'pages',
         id: seeded.id,
-        locale,
+        locale: only ?? 'en',
         data: { _status: 'published' } as never,
-        ...(locale === 'ar' ? { publishSpecificLocale: 'ar' } : {}),
+        ...(only ? { publishSpecificLocale: only } : { publishAllLocales: true }),
         user: await u(role),
         overrideAccess: false,
-      })
-    await expect(publish('editor', 'en')).rejects.toBeTruthy()
-    await publish('publisher', 'en')
-    expect(await getHome(t.payload, 'ar')).toBeNull()
-    await publish('publisher', 'ar')
+      } as never)
+    await expect(publish('editor')).rejects.toBeTruthy()
+    await publish('publisher')
     for (const l of ['en', 'ar'] as const) {
       const home = (await getHome(t.payload, l)) as unknown as { sections: Block[] } | null
       // The lists are public sections; they render nothing until an item is published.
@@ -146,6 +158,9 @@ describe('homepage content seed', () => {
         'courseList',
         'featureGrid',
         'process',
+        'standards',
+        'stats',
+        'credentials',
         'cta',
       ])
     }

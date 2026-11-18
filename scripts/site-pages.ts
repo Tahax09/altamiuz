@@ -4,6 +4,8 @@
 // replaces a non-empty menu or setting. Run after `pnpm seed:contact` so links to the contact page
 // and privacy notice resolve.
 import type { Payload } from 'payload'
+import { attestClaimBlocks } from './attest'
+import { loadPartnerLogos } from './partner-logos'
 import { contactPage, privacyPage } from '../content/contact/copy'
 import {
   about,
@@ -46,7 +48,25 @@ const richText = (blocks: { h?: string; p?: string[] }[]) => ({
   ),
 })
 
-type Ids = Partial<Record<PageDef['key'] | 'contact' | 'privacy', number>>
+type Ids = Partial<Record<PageDef['key'] | 'contact' | 'privacy', number>> & {
+  /** Partner logos in the media library (scripts/partner-logos.ts). */
+  partners?: { name: string; id: number }[]
+}
+
+/** Partner logos as a credentials block (logos display); nothing when no logo is loaded. */
+const partnersBlock = (l: Locale, ids: Ids): Obj[] =>
+  ids.partners?.length
+    ? [
+        {
+          blockType: 'credentials',
+          blockName: 'Partners',
+          display: 'logos',
+          eyebrow: home.partners.eyebrow[l],
+          heading: home.partners.heading[l],
+          items: ids.partners.map((p) => ({ name: p.name, logo: p.id })),
+        },
+      ]
+    : []
 
 const internal = (id: number | undefined, label: string) =>
   id ? { linkType: 'internal', doc: { relationTo: 'pages', value: id }, label } : null
@@ -80,8 +100,7 @@ export function pageSections(key: PageDef['key'], l: Locale, ids: Ids): Obj[] {
         },
         {
           blockType: 'richText',
-          hidden: true,
-          blockName: `Pending: ${pending.company}`,
+          blockName: 'Company',
           content: richText([{ h: headings.company[l], p: [about.company[l]] }]),
         },
         {
@@ -129,11 +148,14 @@ export function pageSections(key: PageDef['key'], l: Locale, ids: Ids): Obj[] {
           items: about.capabilities.map((i) => ({ icon: i.icon, title: i.title[l] })),
         },
         {
-          blockType: 'richText',
-          hidden: true,
-          blockName: `Pending: ${pending.team}`,
-          content: richText([{ h: headings.team[l] }]),
+          blockType: 'credentials',
+          blockName: 'Registration',
+          display: 'cards',
+          eyebrow: about.registration.eyebrow[l],
+          heading: about.registration.heading[l],
+          items: about.registration.items.map((i) => ({ name: i.name[l], issuer: i.issuer[l] })),
         },
+        ...partnersBlock(l, ids),
         ctaBlock(l, ids),
       ]
     case 'standards':
@@ -151,11 +173,24 @@ export function pageSections(key: PageDef['key'], l: Locale, ids: Ids): Obj[] {
     case 'expertise':
       return [
         {
-          blockType: 'textMedia',
-          hidden: true,
-          blockName: `Pending: ${pending.expertise}`,
-          eyebrow: home.expertise.eyebrow[l],
-          heading: home.expertise.heading[l],
+          blockType: 'stats',
+          blockName: 'Experience',
+          eyebrow: home.experience.eyebrow[l],
+          heading: home.experience.heading[l],
+          items: home.experience.items.map((it) => ({ value: it.value, label: it.label[l] })),
+        },
+        {
+          blockType: 'team',
+          blockName: 'Founder',
+          eyebrow: about.founder.eyebrow[l],
+          heading: about.founder.heading[l],
+          members: [
+            {
+              name: about.founder.name[l],
+              role: about.founder.role[l],
+              bio: about.founder.bio[l],
+            },
+          ],
         },
         ctaBlock(l, ids),
       ]
@@ -197,9 +232,11 @@ async function findBySlug(payload: Payload, slug: string) {
  * replacing them (localized fields inside shared arrays). */
 function withIds(stored: Obj[], next: Obj[]): Obj[] {
   return next.map((b, i) => {
-    const prev = stored[i] ?? {}
-    const out: Obj = { ...b, id: prev.id }
-    for (const list of ['items', 'steps'] as const)
+    // Reuse a stored id only for the same block type, and always send `hidden`: otherwise a block
+    // inherits the stored flags of whatever block used that position before.
+    const prev = stored[i]?.blockType === b.blockType ? stored[i]! : {}
+    const out: Obj = { ...b, hidden: b.hidden ?? false, id: prev.id }
+    for (const list of ['items', 'steps', 'members'] as const)
       if (Array.isArray(b[list]) && Array.isArray(prev[list]))
         out[list] = (b[list] as Obj[]).map((row, j) => ({
           ...row,
@@ -393,12 +430,15 @@ export async function seedSitePages(
   const ids: Ids = {
     contact: (await findBySlug(payload, contactPage.slug.en))?.id,
     privacy: (await findBySlug(payload, privacyPage.slug.en))?.id,
+    partners: await loadPartnerLogos(payload),
   }
   const out = {} as Record<PageDef['key'], number>
   for (const def of Object.values(pages)) {
     const r = await upsertPage(payload, def, ids, !!opts.replaceDraft)
     out[def.key] = r.id
     ids[def.key] = r.id
+    // Owner attestation on figures, registration, founder and partners (content/attestation.ts).
+    await attestClaimBlocks(payload, 'pages', r.id)
   }
   // CTA blocks link only to the contact page, which exists before this run (seed:contact) or not
   // at all; menus and settings below use the ids of the pages created here.

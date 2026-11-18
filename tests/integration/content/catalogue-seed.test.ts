@@ -8,6 +8,7 @@ import { bootPayload, type TestPayload } from '../../support/payload'
 import { CatalogueSeedError, seedCatalogue } from '../../../scripts/catalogue'
 import { article, contactDetails, courses, services } from '../../../content/catalogue/copy'
 import { getPublished } from '../../../src/modules/content/public'
+import { OWNER_ATTESTATION } from '../../../content/attestation'
 
 let t: TestPayload
 let seeded: Awaited<ReturnType<typeof seedCatalogue>>
@@ -60,7 +61,7 @@ describe('catalogue seed (C-1)', () => {
       }
   })
 
-  it('keeps legacy claims out of the drafts', async () => {
+  it('keeps unconfirmed legacy claims out; confirmed course facts are attested', async () => {
     const ids = [
       ...seeded.services.map((id) => ['services', id] as const),
       ...seeded.courses.map((id) => ['courses', id] as const),
@@ -70,10 +71,19 @@ describe('catalogue seed (C-1)', () => {
       for (const l of ['en', 'ar'] as const) {
         const d = await doc(c, id, l)
         const text = JSON.stringify([d.title, d.summary, d.sections, d.audience, d.seo])
-        expect(text, `${c} ${id} ${l}`).not.toMatch(CLAIMS)
+        // PECB is named only where the owner confirmed the accreditation (2026-11-18).
+        const item = c === 'courses' ? courses[seeded.courses.indexOf(id)] : undefined
+        const allowed = item?.facts?.accreditation ? text.replace(/PECB/g, '') : text
+        expect(allowed, `${c} ${id} ${l}`).not.toMatch(CLAIMS)
         if (c === 'courses') {
-          expect(d.accreditationStatement ?? null).toBeNull()
-          expect(d.provider ?? null).toBeNull()
+          const f = item?.facts
+          expect(d.accreditationStatement ?? null).toBe(f?.accreditation?.[l] ?? null)
+          expect(d.provider ?? null).toBe(f?.provider[l] ?? null)
+          if (f?.accreditation)
+            expect(d.accreditationEvidence).toMatchObject({
+              status: 'verified',
+              reference: OWNER_ATTESTATION,
+            })
         }
       }
   })
@@ -91,8 +101,18 @@ describe('catalogue seed (C-1)', () => {
     expect((s.additionalPhones as { number: string }[]).map((r) => r.number)).toEqual(
       contactDetails.phones.slice(1),
     )
-    expect(s.address ?? null).toBeNull() // claim-bearing, never seeded
-    expect(seeded.contact).toEqual({ email: false, phone: true, additionalPhones: true })
+    // Claim-bearing, confirmed by the owner (2026-11-18): seeded with the owner's attestation.
+    expect(s.address).toBe(contactDetails.address.en)
+    expect(s.companyName).toBe(contactDetails.companyName.en)
+    expect(s.addressEvidence).toMatchObject({ status: 'verified', reference: OWNER_ATTESTATION })
+    expect(s.companyNameEvidence).toMatchObject({ status: 'verified' })
+    expect(seeded.contact).toEqual({
+      email: false,
+      phone: true,
+      additionalPhones: true,
+      companyName: true,
+      address: true,
+    })
   })
 
   it('refuses a second run without replace-draft and keeps ids with it', async () => {
@@ -101,7 +121,13 @@ describe('catalogue seed (C-1)', () => {
     expect(again.services).toEqual(seeded.services)
     expect(again.courses).toEqual(seeded.courses)
     expect(again.article).toBe(seeded.article)
-    expect(again.contact).toEqual({ email: false, phone: false, additionalPhones: false })
+    expect(again.contact).toEqual({
+      email: false,
+      phone: false,
+      additionalPhones: false,
+      companyName: false,
+      address: false,
+    })
   }, 240_000)
 
   it('validates phone numbers and map links', async () => {

@@ -212,10 +212,46 @@ export const about = {
       },
     ],
   },
-  /** Supplied by the owner; shown only after CD-01/CD-02 confirmation (hidden in the draft). */
+  /** Supplied by the owner; confirmed 2026-11-18 (content/attestation.ts). */
   company: {
     en: 'Altamiuz is a Libyan limited liability company, founded in 2020 and headquartered in Tripoli.',
     ar: 'شركة التميز للاستشارات وأمن المعلومات شركة ليبية ذات مسؤولية محدودة، تأسست عام 2020 ومقرها الرئيسي في طرابلس.',
+  },
+  /** Licence and registration from the legacy About page; owner confirmed 2026-11-18. */
+  registration: {
+    eyebrow: { en: 'Registration', ar: 'الترخيص والقيد' },
+    heading: { en: 'Licensed and registered in Libya', ar: 'مرخّصة ومقيّدة في ليبيا' },
+    items: [
+      {
+        name: {
+          en: 'Licence to practise consulting and information security, no. 01041961254',
+          ar: 'ترخيص مزاولة الاستشارات وأمن المعلومات رقم 01041961254',
+        },
+        issuer: {
+          en: 'Libyan Ministry of Economy and Industry',
+          ar: 'وزارة الاقتصاد والصناعة الليبية',
+        },
+      },
+      {
+        name: { en: 'Commercial registration', ar: 'القيد التجاري' },
+        issuer: {
+          en: 'Tripoli Chamber of Commerce, Industry and Agriculture',
+          ar: 'غرفة التجارة والصناعة والزراعة طرابلس',
+        },
+      },
+    ],
+  },
+  /** Founder entry from the legacy About page (docs/content/legacy-about.md); owner confirmed
+   *  2026-11-18. The title "أ.م" is left out until its meaning is confirmed. */
+  founder: {
+    eyebrow: { en: 'Leadership', ar: 'القيادة' },
+    heading: { en: 'Led by practitioners', ar: 'يقودها أهل الخبرة' },
+    name: { en: 'Salah Eddin Al-Shteiwi', ar: 'صلاح الدين الشتيوي' },
+    role: { en: 'Founder and Chief Executive Officer', ar: 'المؤسس والرئيس التنفيذي' },
+    bio: {
+      en: 'A retired colonel of the Libyan Navy with 25 years in telecommunications and information security across the public and private, military and civilian sectors. He has delivered dozens of projects and, since 2003, has taken part in combat training projects with NATO naval forces. He founded Altamiuz in 2020 on a simple conviction: projects succeed on management and clear processes, and every security solution starts with understanding the problem.',
+      ar: 'عقيد متقاعد من القوات البحرية الليبية، بخبرة 25 عاماً في الاتصالات وأمن المعلومات في القطاعين العام والخاص، العسكري والمدني. نفّذ عشرات المشاريع، وشارك منذ عام 2003 في مشاريع تدريبية قتالية مع القوات البحرية لحلف الناتو. أسّس شركة التميز عام 2020 انطلاقاً من قناعة بسيطة: نجاح المشاريع رهين بإدارتها ووضوح عملياتها، وكل حل أمني يبدأ بفهم المشكلة.',
+    },
   },
   /** The legacy "How can we secure you?" capabilities: titles only until CD-04 defines them. */
   capabilities: [
@@ -228,13 +264,9 @@ export const about = {
 
 /** Pending dependencies, used as hidden-section labels (admin only). */
 export const pending = {
-  company:
-    'CD-01 legal name and registration; CD-02 founding year and head office (supplied 2026-11-13, unhide once confirmed; the licence no. and Chamber registration go in a Credentials block with evidence, not here)',
   capabilities:
     'CD-04 service catalogue (monitoring, response, protection, compliance as services)',
-  team: 'CD-03 founder biography and credentials: add a Team block (evidence: written consent, certificates); proposed text in docs/content/legacy-about.md',
   standards: home.standards.pending,
-  expertise: home.expertise.pending,
   insights: home.insights.pending,
   terms: 'CD-10 terms of use reviewed under applicable law (legal approval)',
 } as const

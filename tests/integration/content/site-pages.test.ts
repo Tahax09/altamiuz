@@ -8,6 +8,7 @@ import { userFor, verifiedSession, type Role, type Session } from '../../support
 import { seedSitePages, SitePagesSeedError, pageSections } from '../../../scripts/site-pages'
 import { seedContactAndPrivacy } from '../../../scripts/contact-privacy'
 import { pages } from '../../../content/pages/copy'
+import { OWNER_ATTESTATION } from '../../../content/attestation'
 
 let t: TestPayload
 const S = {} as Record<Role, Session>
@@ -76,16 +77,18 @@ const draft = async (id: number, locale: 'en' | 'ar') =>
     sections: Block[]
   }
 
-const publish = async (id: number, role: Role, locale: 'en' | 'ar' = 'en') =>
+// Without a language, both are published together (pages with claims need that: the evidence
+// must cover every language that goes live).
+const publish = async (id: number, role: Role, locale?: 'en' | 'ar') =>
   t.payload.update({
     collection: 'pages',
     id,
-    locale,
+    locale: locale ?? 'en',
     data: { _status: 'published' } as never,
-    publishSpecificLocale: locale,
+    ...(locale ? { publishSpecificLocale: locale } : { publishAllLocales: true }),
     user: await u(role),
     overrideAccess: false,
-  })
+  } as never)
 
 describe('site pages seed (W-1)', () => {
   it('creates every page as a draft in both languages with its own slug and summary', async () => {
@@ -111,15 +114,28 @@ describe('site pages seed (W-1)', () => {
     }
   })
 
-  it('missing facts are hidden "Pending" sections; no claim block exists', async () => {
+  it('missing facts are hidden "Pending" sections; claims carry the owner attestation', async () => {
+    const claimTypes = ['stats', 'credentials', 'team']
     for (const def of Object.values(pages)) {
       const d = await draft(seeded.pages[def.key], 'en')
       for (const b of d.sections) {
         if (b.blockName?.startsWith('Pending:'))
           expect(b.hidden, `${def.key} ${b.blockName}`).toBe(true)
-        expect(['stats', 'credentials']).not.toContain(b.blockType)
+        // Owner decision 2026-11-18: claims confirmed by the owner, documents waived. Each claim
+        // block is recorded as verified with that reference; the gate itself is unchanged.
+        if (claimTypes.includes(b.blockType))
+          expect(b.evidence, `${def.key} ${b.blockType}`).toMatchObject({
+            status: 'verified',
+            reference: OWNER_ATTESTATION,
+          })
       }
     }
+    const claimsOf = async (key: keyof typeof seeded.pages) =>
+      (await draft(seeded.pages[key], 'en')).sections
+        .filter((b) => claimTypes.includes(b.blockType))
+        .map((b) => b.blockName)
+    expect(await claimsOf('about')).toEqual(['Registration', 'Partners'])
+    expect(await claimsOf('expertise')).toEqual(['Experience', 'Founder'])
     const terms = await draft(seeded.pages.terms, 'en')
     expect(terms.sections.length).toBeGreaterThan(0)
     expect(terms.sections.every((b) => b.hidden && b.blockName?.startsWith('Pending: CD-10'))).toBe(
@@ -132,7 +148,9 @@ describe('site pages seed (W-1)', () => {
     // Rows inside sections are translated, not replaced: English text survives the Arabic save.
     const rows = (d: typeof en, list: 'items' | 'steps') =>
       d.sections.flatMap((s) =>
-        ((s[list] as { title?: string }[] | undefined) ?? []).map((r) => r.title),
+        ((s[list] as { title?: string }[] | undefined) ?? []).flatMap((r) =>
+          r.title ? [r.title] : [],
+        ),
       )
     expect(rows(en, 'items')).toEqual([
       'Management and clarity first',
@@ -230,14 +248,18 @@ describe('site pages seed (W-1)', () => {
     const visible = toPublic(sections)
     expect(visible.map((s) => s.blockType)).toEqual([
       'textMedia',
+      'richText',
       'textMedia',
       'featureGrid',
       'process',
       'featureGrid',
+      'credentials',
+      'credentials',
       'cta',
     ])
-    // Company facts (founding year, legal form) stay out of the public page until confirmed.
-    expect(JSON.stringify(visible)).not.toContain('2020')
+    // Company facts confirmed by the owner (2026-11-18) are public; pending sections are not.
+    expect(JSON.stringify(visible)).toContain('2020')
+    expect(JSON.stringify(visible)).toContain('01041961254')
     expect(JSON.stringify(visible)).not.toContain('Pending')
   })
 

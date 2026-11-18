@@ -4,6 +4,7 @@
 // It never publishes, never replaces a non-empty setting, and refuses to touch an existing item
 // unless asked to replace its draft (the published version is never changed).
 import type { Payload } from 'payload'
+import { OWNER_ATTESTATION } from '../content/attestation'
 import {
   article,
   contactDetails,
@@ -131,10 +132,45 @@ const itemData = (item: CatalogueItem, order: number) => (l: Locale) => ({
   seo: { title: fit(item.title[l], 60), description: fit(item.summary[l], 160) },
 })
 
-const courseData = (item: CourseItem, order: number) => (l: Locale) => ({
-  ...itemData(item, order)(l),
-  ...(item.audience ? { audience: item.audience[l] } : {}),
-})
+const courseData = (item: CourseItem, order: number) => (l: Locale) => {
+  const base = itemData(item, order)(l)
+  const f = item.facts
+  return {
+    ...base,
+    ...(item.audience ? { audience: item.audience[l] } : {}),
+    ...(f
+      ? {
+          duration: f.duration,
+          deliveryFormat: f.format,
+          provider: f.provider[l],
+          ...(f.accreditation ? { accreditationStatement: f.accreditation[l] } : {}),
+          sections: [
+            ...base.sections,
+            {
+              blockType: 'richText',
+              blockName: 'Course details',
+              content: richText([
+                { h: l === 'ar' ? 'تفاصيل الدورة' : 'Course details', p: f.details[l] },
+              ]),
+            },
+          ],
+        }
+      : {}),
+  }
+}
+
+/** Records the owner's attestation (content/attestation.ts) on a course's accreditation claim,
+ *  after both languages are written (any later edit of the claim removes it again). */
+async function attestAccreditation(payload: Payload, id: number) {
+  await payload.update({
+    collection: 'courses',
+    id,
+    locale: 'ar',
+    draft: true,
+    data: { accreditationEvidence: { status: 'verified', reference: OWNER_ATTESTATION } } as never,
+    overrideAccess: true,
+  })
+}
 
 const articleData = (l: Locale) => ({
   title: article.title[l],
@@ -160,6 +196,10 @@ async function fillContact(payload: Payload) {
   if (!s.phone) data.phone = main
   if (!(Array.isArray(s.additionalPhones) && s.additionalPhones.length))
     data.additionalPhones = more.map((number) => ({ number }))
+  const named = !s.companyName
+  const addressed = !s.address
+  if (named) data.companyName = contactDetails.companyName.en
+  if (addressed) data.address = contactDetails.address.en
   if (Object.keys(data).length)
     await payload.updateGlobal({
       slug: 'site-settings',
@@ -168,10 +208,36 @@ async function fillContact(payload: Payload) {
       data: data as never,
       overrideAccess: true,
     })
+  if (named || addressed) {
+    const ar: Obj = {}
+    if (named) ar.companyName = contactDetails.companyName.ar
+    if (addressed) ar.address = contactDetails.address.ar
+    await payload.updateGlobal({
+      slug: 'site-settings',
+      draft: true,
+      locale: 'ar',
+      data: ar as never,
+      overrideAccess: true,
+    })
+    // Both languages written: record the owner's attestation on the claims just filled.
+    const attested = { status: 'verified', reference: OWNER_ATTESTATION }
+    await payload.updateGlobal({
+      slug: 'site-settings',
+      draft: true,
+      locale: 'ar',
+      data: {
+        ...(named ? { companyNameEvidence: attested } : {}),
+        ...(addressed ? { addressEvidence: attested } : {}),
+      } as never,
+      overrideAccess: true,
+    })
+  }
   return {
     email: 'email' in data,
     phone: 'phone' in data,
     additionalPhones: 'additionalPhones' in data,
+    companyName: named,
+    address: addressed,
   }
 }
 
@@ -203,10 +269,11 @@ export async function seedCatalogue(
     out.services.push(
       await upsert(payload, 'services', s.slug.en, itemData(s, (i + 1) * 10), replace),
     )
-  for (const [i, c] of courses.entries())
-    out.courses.push(
-      await upsert(payload, 'courses', c.slug.en, courseData(c, (i + 1) * 10), replace),
-    )
+  for (const [i, c] of courses.entries()) {
+    const id = await upsert(payload, 'courses', c.slug.en, courseData(c, (i + 1) * 10), replace)
+    if (c.facts?.accreditation) await attestAccreditation(payload, id)
+    out.courses.push(id)
+  }
   out.article = await upsert(payload, 'pages', article.slug.en, articleData, replace)
   out.contact = await fillContact(payload)
   return out

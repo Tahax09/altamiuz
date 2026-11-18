@@ -40,6 +40,20 @@ blocks nothing technically.
   (الخدمات الأمنية), Training (الدورات التدريبية), Insights (المدونة), About (من نحن); the header
   button reads "Contact us". Copy approval and Arabic review remain CD-11.
 
+## Owner decision 2026-11-18: claims published on the owner's word
+
+The owner instructed "no need for proof" for the company's own claims. They are recorded as verified
+evidence with the reference in `content/attestation.ts` (owner attestation, documents waived), so
+the evidence gate still runs and any later edit of a claim removes the verification. Covered:
+company name and address (Site settings), licence no. 01041961254 and Chamber registration
+(About), "30+ years" combined, founder's 25 years and founding year 2020 (home, Expertise), founder
+entry (Expertise; the title "أ.م" left out), PECB accreditation and course facts for the three
+legacy course pages (duration, format, exam and re-sit, delivery in Turkey), partner logos
+DataProtect, PECB, SearchInform, Xertiance (home, About; neutral heading "Organisations we work
+with", no accreditation claim). This resolves the evidence part of CD-01, CD-02, CD-03, CD-05 and
+CD-07 by decision, not by documents. Not covered: the privacy notice and terms of use (CD-10 legal
+approval), photos of people (none supplied).
+
 ## Content decisions (CD-01–CD-07, CD-09–CD-13)
 
 | ID    | Exact decision needed                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | Why it matters                                                                                                                                                                       | Permitted options                                                                                                             | Affected pages / features                                                                                                                              | Blocks                                                   |

@@ -212,11 +212,41 @@ export const sections = {
       },
     ],
   },
+  /** Title of the Expertise page and menu entry. */
   expertise: {
-    pending:
-      'CD-03 team expertise and biographies; CD-07 experience claims with evidence (a stats block needs verified evidence)',
     eyebrow: { en: 'Expertise and experience', ar: 'الخبرة والتجربة' },
     heading: { en: 'Expertise and experience', ar: 'الخبرة والتجربة' },
+  },
+  /** Legacy home and About figures; owner confirmed 2026-11-18 (content/attestation.ts). */
+  experience: {
+    eyebrow: { en: 'Experience', ar: 'الخبرة' },
+    heading: { en: 'Experience you can rely on', ar: 'خبرة يمكنك الاعتماد عليها' },
+    items: [
+      {
+        value: '30+',
+        label: {
+          en: 'years of combined experience in telecommunications and IT across our team and partners',
+          ar: 'عاماً من الخبرة المتراكمة في الاتصالات وتقنية المعلومات لفريقنا وشركائنا',
+        },
+      },
+      {
+        value: '25',
+        label: {
+          en: 'years of our founder’s experience in telecommunications and information security',
+          ar: 'عاماً من خبرة مؤسسنا في الاتصالات وأمن المعلومات',
+        },
+      },
+      {
+        value: '2020',
+        label: { en: 'founded in Tripoli, Libya', ar: 'سنة التأسيس في طرابلس، ليبيا' },
+      },
+    ],
+  },
+  /** Supplied logos (content/partners/); owner confirmed 2026-11-18. Neutral wording: names the
+   *  organisations Altamiuz works with, and claims no accreditation by them. */
+  partners: {
+    eyebrow: { en: 'Partners', ar: 'شركاؤنا' },
+    heading: { en: 'Organisations we work with', ar: 'جهات نعمل معها' },
   },
   insights: {
     pending: 'published insight pages (legacy /blog/ content, CD-11 approval, CD-12 mapping)',

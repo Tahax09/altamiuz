@@ -8,6 +8,8 @@ import path from 'node:path'
 import sharp from 'sharp'
 import type { Payload } from 'payload'
 import { illustrations, page, sections as S, type Locale } from '../content/homepage/copy'
+import { attestClaimBlocks } from './attest'
+import { loadPartnerLogos } from './partner-logos'
 
 type Obj = Record<string, unknown>
 type Lx = { en: string; ar: string }
@@ -78,7 +80,12 @@ async function illustration(payload: Payload, key: keyof typeof illustrations): 
 }
 
 /** Section data for one language. Ids (sections and rows) are carried over for the second one. */
-function build(l: Locale, media: Record<keyof typeof illustrations, number>, contactId?: number) {
+function build(
+  l: Locale,
+  media: Record<keyof typeof illustrations, number>,
+  contactId?: number,
+  partners: { name: string; id: number }[] = [],
+) {
   const t = (v: Lx) => v[l]
   const contact = (label: Lx) =>
     contactId
@@ -143,18 +150,31 @@ function build(l: Locale, media: Record<keyof typeof illustrations, number>, con
     },
     {
       blockType: 'standards',
-      ...pending(S.standards.pending),
+      blockName: 'Standards',
       eyebrow: t(S.standards.eyebrow),
       heading: t(S.standards.heading),
       intro: t(S.standards.intro),
       items: S.standards.items.map((it) => ({ name: t(it.name), text: t(it.text) })),
     },
     {
-      blockType: 'textMedia',
-      ...pending(S.expertise.pending),
-      eyebrow: t(S.expertise.eyebrow),
-      heading: t(S.expertise.heading),
+      blockType: 'stats',
+      blockName: 'Experience',
+      eyebrow: t(S.experience.eyebrow),
+      heading: t(S.experience.heading),
+      items: S.experience.items.map((it) => ({ value: it.value, label: t(it.label) })),
     },
+    ...(partners.length
+      ? [
+          {
+            blockType: 'credentials',
+            blockName: 'Partners',
+            display: 'logos',
+            eyebrow: t(S.partners.eyebrow),
+            heading: t(S.partners.heading),
+            items: partners.map((p) => ({ name: p.name, logo: p.id })),
+          },
+        ]
+      : []),
     {
       blockType: 'resourceList',
       ...pending(S.insights.pending),
@@ -175,11 +195,16 @@ function build(l: Locale, media: Record<keyof typeof illustrations, number>, con
 /** Keeps the stored section and row ids, so the second language is a translation, not new rows. */
 function withIds(stored: Obj[], next: Obj[]): Obj[] {
   return next.map((b, i) => {
-    const s = stored[i] ?? {}
-    const out: Obj = { ...b, id: s.id }
-    for (const list of ['items', 'steps'] as const)
+    // Reuse a stored id only for the same block type, and always send `hidden`: otherwise a block
+    // inherits the stored flags of whatever block used that position before.
+    const s = stored[i]?.blockType === b.blockType ? stored[i]! : {}
+    const out: Obj = { ...b, hidden: b.hidden ?? false, id: s.id }
+    for (const list of ['items', 'steps', 'members'] as const)
       if (Array.isArray(b[list]) && Array.isArray(s[list]))
-        out[list] = (b[list] as Obj[]).map((row, j) => ({ ...row, id: (s[list] as Obj[])[j]?.id }))
+        out[list] = (b[list] as Obj[]).map((row, j) => ({
+          ...row,
+          id: (s[list] as Obj[])[j]?.id,
+        }))
     return out
   })
 }
@@ -225,13 +250,14 @@ export async function seedHomepage(
     introduction: await illustration(payload, 'introduction'),
     methodology: await illustration(payload, 'methodology'),
   }
+  const partners = await loadPartnerLogos(payload)
   const base = (l: Locale) => ({
     title: page.title[l],
     slug: page.slug[l],
     template: 'home',
     seo: { title: page.seo.title[l], description: page.seo.description[l] },
   })
-  const en = { ...base('en'), sections: build('en', media, contactId) }
+  const en = { ...base('en'), sections: build('en', media, contactId, partners) }
   const id = current
     ? (
         (await payload.update({
@@ -262,10 +288,12 @@ export async function seedHomepage(
     draft: true,
     data: {
       ...base('ar'),
-      sections: withIds(await sectionsOf(payload, id), build('ar', media, contactId)),
+      sections: withIds(await sectionsOf(payload, id), build('ar', media, contactId, partners)),
     } as never,
     overrideAccess: true,
   })
+  // Owner attestation on the experience figures and partner logos (content/attestation.ts).
+  await attestClaimBlocks(payload, 'pages', id)
   return {
     id,
     replaced: !!current,

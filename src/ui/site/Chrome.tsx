@@ -410,6 +410,8 @@ export function SiteFooter({
   year?: number
 }) {
   const name = str(settings?.companyName)
+  // The copyright line always shows: the published company name, else the brand name.
+  const holder = name || t(locale, 'brandName')
   const about = str((settings?.defaultSeo as { description?: unknown } | undefined)?.description)
   const logo = (settings?.brand as { logoInverse?: unknown } | undefined)?.logoInverse
   const hasLogo = !!logo && typeof logo === 'object' && !!(logo as PublicMedia).filename
@@ -417,11 +419,9 @@ export function SiteFooter({
   const flat = groups.filter((g) => !g.children.length && g.href)
   const columns = groups.filter((g) => g.children.length)
   const base = [
-    name ? (
-      <p key="copyright">
-        © <bdi>{year}</bdi> <bdi>{name}</bdi>
-      </p>
-    ) : null,
+    <p key="copyright">
+      © <bdi>{year}</bdi> <bdi>{holder}</bdi>. {t(locale, 'allRightsReserved')}
+    </p>,
     hasRows(settings?.legalLinks, locale) ? (
       <LinkRow
         key="legal"

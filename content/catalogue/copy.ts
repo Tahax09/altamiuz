@@ -26,7 +26,34 @@ export type CatalogueItem = {
   body: Paras
 }
 
-export type CourseItem = CatalogueItem & { audience?: L }
+/** Course facts from the legacy course pages (www.altamiuz.ly/training_courses/…, re-read
+ *  2026-11-18), confirmed by the owner (content/attestation.ts). */
+export type CourseFacts = {
+  duration: { value: number; unit: 'hours' | 'days' }
+  format: 'in-person'
+  provider: L
+  /** Claim: needs verified evidence (owner attestation) to publish. */
+  accreditation?: L
+  details: { en: readonly string[]; ar: readonly string[] }
+}
+export type CourseItem = CatalogueItem & { audience?: L; facts?: CourseFacts }
+
+const PECB_PACK = (days: { en: string; ar: string }) => ({
+  en: [
+    `Duration: ${days.en}, six hours a day.`,
+    'Course pack: the PECB-accredited curriculum, a certificate of attendance, and the PECB certificate after passing the exam.',
+    'Exam entry and a re-sit are free.',
+    'The course can also be delivered in Turkey; venue, travel and accommodation are quoted separately.',
+  ],
+  ar: [
+    `مدة الدورة ${days.ar} بواقع 6 ساعات يومياً.`,
+    'الحقيبة التدريبية: المنهج المعتمد من PECB، وشهادة حضور، وشهادة الاعتماد بعد اجتياز الامتحان.',
+    'الدخول إلى الامتحان وإعادته مجاناً.',
+    'يمكن تقديم الدورة في تركيا، وتُقدَّم تكاليف القاعات والسفر والإقامة في عرض منفصل.',
+  ],
+})
+const ALTAMIUZ = { en: 'Altamiuz', ar: 'شركة التميز' }
+const PECB_ACCREDITED = { en: 'Accredited by PECB', ar: 'دورة معتمدة من PECB' }
 
 export const services: CatalogueItem[] = [
   {
@@ -286,7 +313,8 @@ export const services: CatalogueItem[] = [
 ]
 
 // The legacy "programmes" list, with the three detailed course texts folded into their entries.
-// No provider, accreditation, exam, duration or format: none is evidenced yet (CD-05).
+// Duration, format, provider and PECB accreditation for the three legacy course pages (owner
+// confirmed 2026-11-18); the other programmes had no detail page and carry none.
 export const courses: CourseItem[] = [
   {
     key: 'isms-intro',
@@ -300,6 +328,21 @@ export const courses: CourseItem[] = [
       ar: 'ما هو نظام إدارة أمن المعلومات، والمبادئ التي يقوم عليها، وما يتطلبه المعيار ISO/IEC 27001.',
     },
     icon: 'training',
+    facts: {
+      duration: { value: 1, unit: 'days' },
+      format: 'in-person',
+      provider: ALTAMIUZ,
+      details: {
+        en: [
+          'Duration: one day, six hours over two sessions.',
+          'Course pack: the presentation, and an Altamiuz certificate of attendance for participants who pass the end-of-course test.',
+        ],
+        ar: [
+          'مدة الدورة يوم واحد بواقع 6 ساعات على محاضرتين.',
+          'الحقيبة التدريبية: العرض التقديمي، وشهادة حضور من شركة التميز لمن يجتاز امتحان نهاية الدورة.',
+        ],
+      },
+    },
     audience: {
       en: 'Managers and staff new to information security management',
       ar: 'المديرون والموظفون الجدد على إدارة أمن المعلومات',
@@ -327,6 +370,22 @@ export const courses: CourseItem[] = [
       ar: 'العناصر الأساسية لتطبيق نظام إدارة أمن المعلومات وإدارته: السياسات والإجراءات وقياس الأداء والتدقيق الداخلي ومراجعة الإدارة والتحسين المستمر.',
     },
     icon: 'training',
+    facts: {
+      duration: { value: 2, unit: 'days' },
+      format: 'in-person',
+      provider: ALTAMIUZ,
+      accreditation: PECB_ACCREDITED,
+      details: {
+        en: [
+          ...PECB_PACK({ en: 'two days', ar: '' }).en,
+          'After passing the exam you can apply for the certificate under PECB’s certification rules.',
+        ],
+        ar: [
+          ...PECB_PACK({ en: '', ar: 'يومان' }).ar,
+          'بعد اجتياز الامتحان يمكنك التقدم بطلب الشهادة وفق قواعد وسياسات إصدار الشهادات لدى PECB.',
+        ],
+      },
+    },
     body: {
       en: [
         'This course teaches the core elements of implementing and managing an information security management system as specified in ISO/IEC 27001.',
@@ -350,6 +409,22 @@ export const courses: CourseItem[] = [
       ar: 'لمن سيتولى تطبيق نظام إدارة أمن المعلومات وإدارته وصيانته وتحسينه وفق ISO/IEC 27001، أو تقديم الاستشارات فيه.',
     },
     icon: 'training',
+    facts: {
+      duration: { value: 5, unit: 'days' },
+      format: 'in-person',
+      provider: ALTAMIUZ,
+      accreditation: PECB_ACCREDITED,
+      details: {
+        en: [
+          ...PECB_PACK({ en: 'five days', ar: '' }).en,
+          'On passing the exam and meeting the certification conditions you receive a certificate of attendance and the PECB Provisional Implementer certificate; the Lead Implementer certificate follows after two years of practical ISMS implementation experience.',
+        ],
+        ar: [
+          ...PECB_PACK({ en: '', ar: 'خمسة أيام' }).ar,
+          'بعد اجتياز الامتحان واستيفاء شروط الشهادة يحصل المتدرب على شهادة حضور وشهادة المنفذ المؤقت (Provisional Implementer)، ثم شهادة كبير مسؤولي التنفيذ بعد خبرة عملية في تنفيذ نظم إدارة أمن المعلومات لمدة سنتين.',
+        ],
+      },
+    },
     audience: {
       en: 'People who will run an ISMS, and independent consultants',
       ar: 'من سيتولون إدارة نظام أمن المعلومات، والمستشارون المستقلون',
@@ -534,6 +609,10 @@ export const article = {
  * claim-bearing field that needs verified evidence before it can be published (CD-02); the
  * value to enter is recorded in docs/content/legacy-site-content.md. */
 export const contactDetails = {
+  /** Legacy About page and footer; owner confirmed 2026-11-18 (content/attestation.ts). No
+   *  English legal name was supplied, so English uses the brand name. */
+  companyName: { en: 'Altamiuz', ar: 'شركة التميز للاستشارات وأمن المعلومات' },
+  address: { en: 'Al-Sabaa, Tripoli, Libya', ar: 'ليبيا - طرابلس / السبعة' },
   email: 'info@altamiuz.ly',
   phones: ['+218917373202', '+218927373201', '+218214629298'],
 } as const

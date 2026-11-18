@@ -66,6 +66,8 @@ export const en = {
   footerContact: 'Contact',
   openInMaps: 'Open in Apple Maps',
   footerLegal: 'Legal',
+  brandName: 'Altamiuz',
+  allRightsReserved: 'All rights reserved.',
   onThisPage: 'On this page',
   courseDetails: 'Course details',
   relatedServices: 'Other services',
