@@ -665,7 +665,8 @@
   display: grid;
   gap: var(--space-4);
   padding-inline: var(--band-pad);
-  border-block: var(--rule-strong) solid var(--ink);
+  /* A soft tinted band instead of heavy dark rules (they read as stray black lines). */
+  background: var(--mist);
 }
 @media (min-width: 64rem) {
   .stats-band {

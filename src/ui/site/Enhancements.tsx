@@ -160,8 +160,55 @@ function useDisclosures() {
   }, [])
 }
 
+/** Statistics count up from zero (a year from 30 below) when scrolled into view, then show the
+ *  exact CMS text. Server markup already holds the final value, so no-JS and reduced-motion
+ *  visitors, and anything above the fold, see it unchanged. */
+function useCountUp() {
+  useEffect(() => {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    const stops: (() => void)[] = []
+    const frames: number[] = []
+    const restore: [HTMLElement, string][] = []
+    for (const el of document.querySelectorAll<HTMLElement>('.stats__value')) {
+      const text = el.textContent ?? ''
+      const m = /^(\D*)(\d{1,6})(\D*)$/.exec(text.trim())
+      if (!m || el.getBoundingClientRect().top < window.innerHeight) continue
+      const [, before, digits, after] = m as unknown as [string, string, string, string]
+      const end = Number(digits)
+      const start = end >= 1900 && end <= 2100 ? end - 30 : 0
+      restore.push([el, text])
+      el.textContent = `${before}${start}${after}`
+      const stop = inView(
+        el,
+        () => {
+          stop()
+          const t0 = performance.now()
+          const tick = (now: number) => {
+            const p = Math.min(1, (now - t0) / COUNT_MS)
+            const eased = 1 - (1 - p) ** 3
+            el.textContent =
+              p < 1 ? `${before}${Math.round(start + (end - start) * eased)}${after}` : text
+            if (p < 1) frames.push(requestAnimationFrame(tick))
+          }
+          frames.push(requestAnimationFrame(tick))
+        },
+        { margin: REVEAL.margin },
+      )
+      stops.push(stop)
+    }
+    return () => {
+      stops.forEach((s) => s())
+      frames.forEach((f) => cancelAnimationFrame(f))
+      for (const [el, text] of restore) el.textContent = text
+    }
+  }, [])
+}
+
+const COUNT_MS = 1400
+
 export function SiteEnhancements() {
   useReveal()
+  useCountUp()
   useDisclosures()
   return null
 }
