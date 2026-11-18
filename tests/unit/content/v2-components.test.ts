@@ -77,6 +77,30 @@ describe('CMS-aware sections', () => {
     expect(preview.match(/data-slot-placeholder/g)).toHaveLength(1)
   })
 
+  it('an automatic list that links to its full listing shows the first four only', () => {
+    const items = Array.from({ length: 7 }, (_, i) => ({
+      title: `S${i}`,
+      slug: `s${i}`,
+      icon: 'audit',
+      _status: 'published',
+    }))
+    const more = { linkType: 'route', route: 'services', label: 'All services' }
+    const linked = render(
+      [{ blockType: 'serviceList', heading: 'S', mode: 'all', moreLink: more }],
+      {
+        listings: { services: items },
+      },
+    )
+    expect(linked.match(/href="\/en\/services\/s\d"/g)).toHaveLength(4)
+    expect(linked).toContain('href="/en/services/s0"')
+    expect(linked).not.toContain('href="/en/services/s4"')
+    // Without a link to the full listing the list is complete.
+    const full = render([{ blockType: 'serviceList', heading: 'S', mode: 'all' }], {
+      listings: { services: items },
+    })
+    expect(full.match(/href="\/en\/services\/s\d"/g)).toHaveLength(7)
+  })
+
   it('article cards carry category, a machine-readable date and an optional image', () => {
     const out = render([
       {

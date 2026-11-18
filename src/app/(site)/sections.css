@@ -18,7 +18,8 @@
   isolation: isolate;
   display: grid;
   gap: var(--space-4);
-  padding: clamp(3.5rem, 2rem + 7vw, 9rem) var(--band-pad) clamp(3rem, 2rem + 5vw, 7rem);
+  padding: clamp(2.75rem, 1.75rem + 4.5vw, 6rem) var(--band-pad)
+    clamp(2.5rem, 1.75rem + 3.5vw, 5rem);
   overflow: hidden;
   background: var(--night);
   color: var(--on-dark);
@@ -144,8 +145,7 @@
   margin: 0;
   font-size: var(--step--1);
   font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  letter-spacing: 0.01em;
   color: var(--ink-muted);
 }
 [lang='ar'] .trust__label {
@@ -159,7 +159,7 @@
 .logo-wall {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--space-1) var(--space-3);
+  gap: var(--space-2) var(--space-4);
   align-items: center;
   margin: 0;
   padding: 0;
@@ -173,10 +173,10 @@
   min-block-size: 3rem;
 }
 .logo-wall .media--logo {
-  max-inline-size: 8rem;
+  max-inline-size: 11rem;
 }
 .logo-wall .media--logo img {
-  max-block-size: 2.5rem;
+  max-block-size: 3.25rem;
   inline-size: auto;
 }
 .logo-wall__name {
@@ -216,15 +216,23 @@
   .offers--lead {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
+  /* The lead card takes the whole first row, image beside the text, so it never becomes a tall
+     box holding one short title (or stretches to match a taller neighbour). */
   .offers--lead > :first-child {
-    grid-column: span 2;
-    grid-row: span 2;
+    grid-column: 1 / -1;
+  }
+  .offers--lead > :first-child.offer--image {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+  .offers--lead > :first-child.offer--image .offer__image {
+    aspect-ratio: auto;
+    block-size: 100%;
+    min-block-size: 12rem;
+    max-block-size: 20rem;
   }
   .offers--lead > :first-child .offer__title {
-    font-size: var(--step-3);
-  }
-  .offers--lead > :first-child .offer__image {
-    aspect-ratio: 16 / 9;
+    font-size: var(--step-2);
   }
 }
 .offer {
@@ -343,6 +351,13 @@
     inset-block-start: calc(var(--header-height) + var(--space-3));
     margin: 0;
   }
+}
+/* The head already has its own column here: keep heading and intro stacked, not side by side. */
+.principles > .section__head:has(.section__intro) {
+  display: block;
+}
+.principles > .section__head .section__intro {
+  margin-block-start: var(--space-2);
 }
 .principles__list {
   display: grid;
@@ -592,6 +607,20 @@
   gap: 0.35rem;
   align-content: start;
   max-width: none;
+}
+/* One person: portrait beside the text, not a narrow card next to an empty row. */
+@media (min-width: 48rem) {
+  .team:has(> .team__member:only-child) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .team__member:only-child {
+    grid-template-columns: minmax(10rem, 15rem) minmax(0, 42rem);
+    column-gap: var(--space-4);
+  }
+  .team__member:only-child > :first-child {
+    grid-row: 1 / span 4;
+    margin-block-end: 0;
+  }
 }
 .team__photo,
 .team__monogram {

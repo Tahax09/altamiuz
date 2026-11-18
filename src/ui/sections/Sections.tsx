@@ -281,6 +281,12 @@ const hasHead = (b: Block) =>
 const rows = (v: unknown) => (Array.isArray(v) ? (v as Record<string, unknown>[]) : [])
 
 /** Items a block would list; a list block with nothing to list renders nothing at all. */
+/** Items shown by an automatic list that also links to its full listing page. */
+export const LIST_PREVIEW = 4
+
+const hasLink = (l: unknown) =>
+  !!l && typeof l === 'object' && !!((l as { linkType?: unknown }).linkType ?? null)
+
 function listOf(b: Block, ctx?: RenderContext): unknown[] | null {
   switch (b.blockType) {
     case 'process':
@@ -300,7 +306,10 @@ function listOf(b: Block, ctx?: RenderContext): unknown[] | null {
     case 'courseList': {
       const kind = b.blockType === 'serviceList' ? 'services' : 'courses'
       const list = b.mode === 'all' ? (ctx?.listings?.[kind] ?? []) : rows(b[kind])
-      return publishedItems(list as ListItem[])
+      const items = publishedItems(list as ListItem[])
+      // An automatic list that links to its full listing page is a preview: the first few items
+      // (editor order), so a homepage never repeats the whole catalogue.
+      return b.mode === 'all' && hasLink(b.moreLink) ? items.slice(0, LIST_PREVIEW) : items
     }
     default:
       return null

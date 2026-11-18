@@ -362,7 +362,7 @@ nav li {
    Page header: a full-bleed mist band; the title takes the page, the lead sits beside it.
    ------------------------------------------------------------------------------------------ */
 .page-header {
-  padding: var(--space-3) var(--band-pad) var(--space-5);
+  padding: var(--space-3) var(--band-pad) var(--space-4);
   background: var(--mist);
   border-block-end: 1px solid var(--mist-2);
 }
@@ -375,11 +375,11 @@ nav li {
   gap: var(--space-2) var(--space-4);
 }
 .page-header .breadcrumbs {
-  margin-block-end: var(--space-4);
+  margin-block-end: var(--space-3);
 }
 .page-header h1 {
   margin: 0;
-  font-size: clamp(2.125rem, 1.4rem + 3.2vw, 4.125rem);
+  font-size: clamp(1.875rem, 1.35rem + 2.4vw, 3.25rem);
   font-weight: 800;
   line-height: 1;
   letter-spacing: -0.045em;
@@ -807,8 +807,7 @@ main > .status-page {
   margin: 0 0 var(--space-1);
   font-size: var(--step--1);
   font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  letter-spacing: 0.01em;
   color: var(--peri);
 }
 [lang='ar'] .site-footer__heading {
