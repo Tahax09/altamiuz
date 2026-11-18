@@ -47,6 +47,7 @@
     "seed:catalogue": "payload run scripts/seed-catalogue.ts",
     "seed:redirects": "payload run scripts/seed-legacy-redirects.ts",
     "seed:partners": "payload run scripts/seed-partner-logos.ts",
+    "map:static": "payload run scripts/seed-static-map.ts",
     "brand:icons": "tsx scripts/brand-icons.ts",
     "docs:api": "payload run scripts/write-api-docs.ts",
     "ops:restore-drill": "ops/restore-drill.sh",
