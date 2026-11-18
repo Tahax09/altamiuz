@@ -7,7 +7,6 @@ import fs from 'node:fs'
 import path from 'node:path'
 import type { Payload } from 'payload'
 import { attestClaimBlocks } from './attest'
-import { loadPartnerLogos } from './partner-logos'
 import { contactPage, privacyPage } from '../content/contact/copy'
 import {
   about,
@@ -24,6 +23,7 @@ import {
   type PageDef,
 } from '../content/pages/copy'
 import { sections as home } from '../content/homepage/copy'
+import { article } from '../content/catalogue/copy'
 
 type Obj = Record<string, unknown>
 export class SitePagesSeedError extends Error {}
@@ -51,10 +51,10 @@ const richText = (blocks: { h?: string; p?: string[] }[]) => ({
 })
 
 type Ids = Partial<Record<PageDef['key'] | 'contact' | 'privacy', number>> & {
-  /** Partner logos in the media library (scripts/partner-logos.ts). */
-  partners?: { name: string; id: number }[]
   /** Founder portrait in the media library, when content/team/founder.* exists. */
   founderPhoto?: number
+  /** The first insight article (seed:catalogue), listed on the Insights page. */
+  article?: number
 }
 
 const FOUNDER_DIR = path.join(process.cwd(), 'content/team')
@@ -111,21 +111,6 @@ async function founderPhoto(payload: Payload): Promise<number | undefined> {
   })
   return id
 }
-
-/** Partner logos as a credentials block (logos display); nothing when no logo is loaded. */
-const partnersBlock = (l: Locale, ids: Ids): Obj[] =>
-  ids.partners?.length
-    ? [
-        {
-          blockType: 'credentials',
-          blockName: 'Partners',
-          display: 'logos',
-          eyebrow: home.partners.eyebrow[l],
-          heading: home.partners.heading[l],
-          items: ids.partners.map((p) => ({ name: p.name, logo: p.id })),
-        },
-      ]
-    : []
 
 const internal = (id: number | undefined, label: string) =>
   id ? { linkType: 'internal', doc: { relationTo: 'pages', value: id }, label } : null
@@ -185,14 +170,6 @@ export function pageSections(key: PageDef['key'], l: Locale, ids: Ids): Obj[] {
           })),
         },
         {
-          blockType: 'process',
-          blockName: 'Methodology',
-          eyebrow: home.methodology.eyebrow[l],
-          heading: home.methodology.heading[l],
-          intro: home.methodology.intro[l],
-          steps: home.methodology.steps.map((st) => ({ title: st.title[l], text: st.text[l] })),
-        },
-        {
           blockType: 'featureGrid',
           blockName: 'Our values',
           eyebrow: about.values.eyebrow[l],
@@ -217,15 +194,13 @@ export function pageSections(key: PageDef['key'], l: Locale, ids: Ids): Obj[] {
           heading: about.registration.heading[l],
           items: about.registration.items.map((i) => ({ name: i.name[l], issuer: i.issuer[l] })),
         },
-        ...partnersBlock(l, ids),
         ctaBlock(l, ids),
       ]
     case 'standards':
       return [
         {
           blockType: 'standards',
-          hidden: true,
-          blockName: `Pending: ${pending.standards}`,
+          blockName: 'Standards',
           eyebrow: home.standards.eyebrow[l],
           heading: home.standards.heading[l],
           items: home.standards.items.map((i) => ({ name: i.name[l], text: i.text[l] })),
@@ -260,13 +235,21 @@ export function pageSections(key: PageDef['key'], l: Locale, ids: Ids): Obj[] {
     case 'insights':
       return [
         {
+          // The page header already carries the title and lead: no repeated section heading.
           blockType: 'resourceList',
-          hidden: true,
-          blockName: `Pending: ${pending.insights}`,
-          eyebrow: home.insights.eyebrow[l],
-          heading: home.insights.heading[l],
-          intro: home.insights.intro[l],
+          blockName: 'Insights',
+          items: ids.article
+            ? [
+                {
+                  kind: l === 'ar' ? 'مقال' : 'Article',
+                  title: article.title[l],
+                  summary: article.summary[l],
+                  link: internal(ids.article, article.title[l]),
+                },
+              ]
+            : [],
         },
+        ctaBlock(l, ids),
       ]
     case 'terms':
       return terms.map((t) => ({
@@ -500,8 +483,8 @@ export async function seedSitePages(
   const ids: Ids = {
     contact: (await findBySlug(payload, contactPage.slug.en))?.id,
     privacy: (await findBySlug(payload, privacyPage.slug.en))?.id,
-    partners: await loadPartnerLogos(payload),
     founderPhoto: await founderPhoto(payload),
+    article: (await findBySlug(payload, article.slug.en))?.id,
   }
   const out = {} as Record<PageDef['key'], number>
   for (const def of Object.values(pages)) {

@@ -134,7 +134,8 @@ describe('site pages seed (W-1)', () => {
       (await draft(seeded.pages[key], 'en')).sections
         .filter((b) => claimTypes.includes(b.blockType))
         .map((b) => b.blockName)
-    expect(await claimsOf('about')).toEqual(['Registration', 'Partners'])
+    // Partners and the four-stage process are on the homepage; About does not repeat them.
+    expect(await claimsOf('about')).toEqual(['Registration'])
     expect(await claimsOf('expertise')).toEqual(['Experience', 'Founder'])
     // The supplied portrait (content/team/founder.*) is attached to the founder entry.
     const team = (await draft(seeded.pages.expertise, 'en')).sections.find(
@@ -179,8 +180,8 @@ describe('site pages seed (W-1)', () => {
       'Compliance',
     ])
     expect(rows(ar, 'items').slice(4, 7)).toEqual(['النزاهة', 'الانفتاح', 'التحسين المستمر'])
-    expect(rows(en, 'steps')).toEqual(['Understand', 'Assess', 'Plan', 'Support'])
-    expect(rows(ar, 'steps')).toEqual(['الفهم', 'التقييم', 'التخطيط', 'الدعم'])
+    expect(rows(en, 'steps')).toEqual([])
+    expect(rows(ar, 'steps')).toEqual([])
   })
 
   it('calls to action link to the contact page', () => {
@@ -264,9 +265,7 @@ describe('site pages seed (W-1)', () => {
       'textMedia',
       'richText',
       'featureGrid',
-      'process',
       'featureGrid',
-      'credentials',
       'credentials',
       'cta',
     ])

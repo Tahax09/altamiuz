@@ -91,7 +91,6 @@ function build(
     contactId
       ? { linkType: 'internal', doc: { relationTo: 'pages', value: contactId }, label: t(label) }
       : undefined
-  const pending = (reason: string) => ({ hidden: true, blockName: `Pending: ${reason}` })
   return [
     {
       blockType: 'hero',
@@ -102,6 +101,18 @@ function build(
       media: media.hero,
       primaryCta: contact(S.hero.cta),
     },
+    ...(partners.length
+      ? [
+          {
+            blockType: 'credentials',
+            blockName: 'Partners',
+            display: 'logos',
+            eyebrow: t(S.partners.eyebrow),
+            heading: t(S.partners.heading),
+            items: partners.map((p) => ({ name: p.name, logo: p.id })),
+          },
+        ]
+      : []),
     {
       blockType: 'textMedia',
       blockName: 'Company introduction',
@@ -149,38 +160,11 @@ function build(
       steps: S.methodology.steps.map((s) => ({ title: t(s.title), text: t(s.text) })),
     },
     {
-      blockType: 'standards',
-      blockName: 'Standards',
-      eyebrow: t(S.standards.eyebrow),
-      heading: t(S.standards.heading),
-      intro: t(S.standards.intro),
-      items: S.standards.items.map((it) => ({ name: t(it.name), text: t(it.text) })),
-    },
-    {
       blockType: 'stats',
       blockName: 'Experience',
       eyebrow: t(S.experience.eyebrow),
       heading: t(S.experience.heading),
       items: S.experience.items.map((it) => ({ value: it.value, label: t(it.label) })),
-    },
-    ...(partners.length
-      ? [
-          {
-            blockType: 'credentials',
-            blockName: 'Partners',
-            display: 'logos',
-            eyebrow: t(S.partners.eyebrow),
-            heading: t(S.partners.heading),
-            items: partners.map((p) => ({ name: p.name, logo: p.id })),
-          },
-        ]
-      : []),
-    {
-      blockType: 'resourceList',
-      ...pending(S.insights.pending),
-      eyebrow: t(S.insights.eyebrow),
-      heading: t(S.insights.heading),
-      intro: t(S.insights.intro),
     },
     {
       blockType: 'cta',

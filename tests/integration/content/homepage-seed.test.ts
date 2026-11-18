@@ -58,15 +58,13 @@ describe('homepage content seed', () => {
     const ar = await draft('ar')
     expect(en.sections.map((b) => b.blockType)).toEqual([
       'hero',
+      'credentials',
       'textMedia',
       'serviceList',
       'courseList',
       'featureGrid',
       'process',
-      'standards',
       'stats',
-      'credentials',
-      'resourceList',
       'cta',
     ])
     expect(ar.sections.map((b) => b.id)).toEqual(en.sections.map((b) => b.id))
@@ -80,15 +78,13 @@ describe('homepage content seed', () => {
     expect(steps(ar)).toEqual(['الفهم', 'التقييم', 'التخطيط', 'الدعم'])
   })
 
-  it('hides only sections without content; claims carry the owner attestation (2026-11-18)', async () => {
+  it('no hidden placeholders on home; claims carry the owner attestation (2026-11-18)', async () => {
     const en = await draft('en')
-    const hidden = en.sections.filter((b) => b.hidden)
-    expect(hidden.map((b) => b.blockType)).toEqual(['resourceList'])
-    for (const b of hidden) expect(String(b.blockName)).toMatch(/^Pending: /)
+    expect(en.sections.filter((b) => b.hidden)).toEqual([])
     const claims = en.sections.filter(
       (b) => b.blockType === 'stats' || b.blockType === 'credentials',
     )
-    expect(claims.map((b) => b.blockType)).toEqual(['stats', 'credentials'])
+    expect(claims.map((b) => b.blockType)).toEqual(['credentials', 'stats'])
     for (const b of claims)
       expect(b.evidence).toMatchObject({ status: 'verified', reference: OWNER_ATTESTATION })
     const partners = claims.find((b) => b.blockType === 'credentials')!
@@ -153,14 +149,13 @@ describe('homepage content seed', () => {
       // The lists are public sections; they render nothing until an item is published.
       expect(home!.sections.map((b) => b.blockType)).toEqual([
         'hero',
+        'credentials',
         'textMedia',
         'serviceList',
         'courseList',
         'featureGrid',
         'process',
-        'standards',
         'stats',
-        'credentials',
         'cta',
       ])
     }
