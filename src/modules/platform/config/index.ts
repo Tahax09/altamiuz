@@ -38,7 +38,9 @@ const rawSchema = z.object({
   MFA_ENCRYPTION_KEY: z.string().regex(/^[0-9a-fA-F]{64}$/, 'must be 64 hex characters (32 bytes)'),
   HEALTH_READY_TOKEN: z.string().min(16, 'must be at least 16 characters'),
   JOBS_SIGNING_SECRET: optional,
-  STORAGE_DRIVER: z.enum(['local', 's3']).default('local'),
+  // vercel-blob: Vercel Blob store (test deployments on Vercel; 2026-11-18). s3: R2, not built.
+  STORAGE_DRIVER: z.enum(['local', 's3', 'vercel-blob']).default('local'),
+  BLOB_READ_WRITE_TOKEN: optional,
   MEDIA_DIR: optional,
   S3_ENDPOINT: optional,
   S3_BUCKET: optional,
@@ -118,6 +120,8 @@ function crossChecks(raw: Raw): ConfigIssue[] {
     ] as const)
       need(v, 'STORAGE_DRIVER=s3')
   }
+  if (raw.STORAGE_DRIVER === 'vercel-blob')
+    need('BLOB_READ_WRITE_TOKEN', 'STORAGE_DRIVER=vercel-blob')
   if (raw.EMAIL_DRIVER === 'smtp') need('SMTP_URL', 'EMAIL_DRIVER=smtp')
   if (raw.EMAIL_DRIVER === 'resend') {
     need('RESEND_API_KEY', 'EMAIL_DRIVER=resend')
@@ -234,7 +238,9 @@ function build(raw: Raw) {
             accessKeyId: raw.S3_ACCESS_KEY_ID!,
             secretAccessKey: raw.S3_SECRET_ACCESS_KEY!,
           }
-        : { driver: 'local' as const, dir: path.resolve(raw.MEDIA_DIR || 'media') },
+        : raw.STORAGE_DRIVER === 'vercel-blob'
+          ? { driver: 'vercel-blob' as const, token: raw.BLOB_READ_WRITE_TOKEN! }
+          : { driver: 'local' as const, dir: path.resolve(raw.MEDIA_DIR || 'media') },
     email: {
       driver: raw.EMAIL_DRIVER,
       from: raw.EMAIL_FROM ?? 'no-reply@localhost',

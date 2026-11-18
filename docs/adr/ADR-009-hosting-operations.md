@@ -33,3 +33,16 @@
   drill against a Neon branch.
 - SC-010 measured locally at the production cadence (docs/runbooks/monitoring.md#sc-010); not a
   production guarantee until re-measured on the preview deployment with the chosen provider.
+
+## Amendment 2026-11-18: Hobby test deployment
+
+At the owner's request a **test** deployment runs on the Vercel Hobby team (non-commercial terms;
+the owner accepted that for a test link). Differences from the architecture above, all to be
+reverted on the Pro team before launch:
+
+- `vercel.json` runs `/api/jobs/run` once a day (03:05 UTC) because Hobby allows daily cron only;
+  enquiry notification retries are therefore delayed up to a day. Restore `* * * * *` on Pro.
+- Media uses Vercel Blob (`STORAGE_DRIVER=vercel-blob`, `@payloadcms/storage-vercel-blob`) instead
+  of R2, which is not built yet (O-3). Files are still served through `/api/media/file/…`.
+- `APP_ENV=preview`: the site is not indexed (robots disallow) and production-only checks
+  (route vocabulary CD-13, email provider) do not apply. Database: the Neon `dev` branch.

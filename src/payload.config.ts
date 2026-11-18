@@ -5,6 +5,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { buildConfig } from 'payload'
 import sharp from 'sharp'
+import { vercelBlobStorage } from '@payloadcms/storage-vercel-blob'
 import { auditDeniedOperations, auditEvents } from '@/modules/audit'
 import { invitations, securitySettings, users } from '@/modules/auth'
 import { courses, pages, safeEditor, services, siteGlobals } from '@/modules/content'
@@ -107,6 +108,12 @@ export default buildConfig({
   // Any rich-text field without its own editor still gets the allow-listed one (D-22).
   editor: safeEditor,
   sharp,
+  // Vercel Blob for media when STORAGE_DRIVER=vercel-blob (test deployments on Vercel). Files are
+  // still served through /api/media/file/… with Payload's access control (same origin, CSP).
+  plugins:
+    cfg.storage.driver === 'vercel-blob'
+      ? [vercelBlobStorage({ collections: { media: true }, token: cfg.storage.token })]
+      : [],
   // A-7: the multipart parser stops at 20 MB (also its default; pinned here so a Payload upgrade
   // cannot loosen it). The media hook re-checks the size and content (D-12).
   upload: { limits: { fileSize: 20 * 1024 * 1024 }, abortOnLimit: true },

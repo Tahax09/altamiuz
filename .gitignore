@@ -33,3 +33,7 @@ playwright-report/
 
 # Agent-tooling mirror of the tracked .claude/skills (byte-identical speckit skills; regenerated)
 /.agents/
+# Vercel CLI (project link, pulled env files); .env.example stays tracked
+.vercel
+.env*
+!.env.example

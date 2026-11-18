@@ -96,6 +96,8 @@ export function storageCheck(storage: { driver: string; dir?: string }): Readine
   return {
     critical: true,
     run: async () => {
+      // Vercel Blob: the plugin owns storage; a misconfigured token fails at startup (config).
+      if (storage.driver === 'vercel-blob') return true
       if (storage.driver !== 'local' || !storage.dir) return false
       // Payload creates the directory on the first upload; a fresh install is not a failure.
       await mkdir(storage.dir, { recursive: true })

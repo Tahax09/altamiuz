@@ -1,5 +1,6 @@
 // Media library (US4, D-12, FR-050–FR-057, T110–T112). One master per image, re-encoded without
 // metadata under a random 128-bit name, plus 15 responsive variants (5 widths × AVIF/WebP/JPEG).
+import path from 'node:path'
 import type {
   CollectionAfterChangeHook,
   CollectionAfterDeleteHook,
@@ -31,12 +32,14 @@ const imageSizes: ImageSize[] = MEDIA_WIDTHS.flatMap((width) =>
   })),
 )
 
-/** Storage selection (T111). Only `local` exists until the S3/R2 adapter is approved (T132). */
+/** Storage selection (T111). `local` writes to MEDIA_DIR; `vercel-blob` is handled by the storage
+ *  plugin in payload.config.ts (the directory is then unused); S3/R2 is not built yet (T132). */
 export function mediaStaticDir(): string {
   const storage = getConfig().storage
+  if (storage.driver === 'vercel-blob') return path.resolve('media')
   if (storage.driver !== 'local')
     throw new Error(
-      'STORAGE_DRIVER=s3 is not available yet: it needs the S3 storage adapter dependency and the hosting decision (T132). Use STORAGE_DRIVER=local.',
+      'STORAGE_DRIVER=s3 is not available yet: it needs the S3 storage adapter dependency and the hosting decision (T132). Use STORAGE_DRIVER=local or vercel-blob.',
     )
   return storage.dir
 }

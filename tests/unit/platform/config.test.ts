@@ -83,6 +83,18 @@ describe('loadConfig — development', () => {
     )
   })
 
+  it('vercel-blob storage needs its token', () => {
+    expect(
+      errorFor({ ...devEnv(), STORAGE_DRIVER: 'vercel-blob' }).issues.map((i) => i.variable),
+    ).toContain('BLOB_READ_WRITE_TOKEN')
+    const cfg = loadConfig({
+      ...devEnv(),
+      STORAGE_DRIVER: 'vercel-blob',
+      BLOB_READ_WRITE_TOKEN: 'vercel_blob_rw_fixture_token', // gitleaks:allow (synthetic)
+    })
+    expect(cfg.storage).toEqual({ driver: 'vercel-blob', token: 'vercel_blob_rw_fixture_token' })
+  })
+
   it('media placeholders are off unless configured', () => {
     const env = devEnv()
     delete env.MEDIA_PLACEHOLDERS
