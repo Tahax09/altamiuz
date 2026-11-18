@@ -115,11 +115,11 @@ export const about = {
     heading: { en: 'A Libyan partner for information security', ar: 'شريك ليبي في أمن المعلومات' },
     body: {
       en: [
-        'Altamiuz is a Libyan information security consultancy. We help public and private organisations comply with international information security standards and with the local policies that apply to them, drawing on our own local expertise and, where a project needs it, on established Arab and international firms in the field.',
+        'We help public and private organisations comply with international information security standards and with the local policies that apply to them, drawing on our own local expertise and, where a project needs it, on established Arab and international firms in the field.',
         'We act as a local project management office for our clients: present throughout the engagement, and guiding them step by step towards international certification at a proportionate cost.',
       ],
       ar: [
-        'شركة التميز شركة ليبية لاستشارات أمن المعلومات. نساعد الجهات العامة والخاصة على الالتزام بالمعايير الدولية لأمن المعلومات وبالسياسات المحلية المتعلقة بها، معتمدين على خبراتنا المحلية، وعلى التعاون مع شركات عربية ودولية متميزة في هذا المجال حين يتطلب المشروع ذلك.',
+        'نساعد الجهات العامة والخاصة على الالتزام بالمعايير الدولية لأمن المعلومات وبالسياسات المحلية المتعلقة بها، معتمدين على خبراتنا المحلية، وعلى التعاون مع شركات عربية ودولية متميزة في هذا المجال حين يتطلب المشروع ذلك.',
         'ونؤدي لعملائنا دور مكتب إدارة مشروعات محلي يرافقهم طوال المهمة، ويوجههم خطوةً بخطوة نحو الحصول على شهادة الالتزام الدولية بتكلفة مناسبة.',
       ],
     },

@@ -64,7 +64,6 @@ export const ar: Record<keyof typeof en, string> = {
   breadcrumb: 'مسار التنقل',
   primaryAction: 'تواصل معنا',
   footerContact: 'التواصل',
-  openInMaps: 'افتح الموقع في خرائط Apple',
   footerLegal: 'معلومات قانونية',
   brandName: 'التميز',
   allRightsReserved: 'جميع الحقوق محفوظة.',

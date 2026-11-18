@@ -1,13 +1,12 @@
 // Contact details from PUBLISHED site settings (CD-02), shared by the footer and the contact
 // section. Only values the CMS holds are shown; the address only exists publicly once its evidence
-// is verified (publish gate), and the map link is shown only with it. Returns null when there is
-// nothing to show.
-import { formatPhone, t, type Locale } from '@/modules/i18n'
+// is verified (publish gate). No external map link (owner 2026-11-18): the office map is on the
+// contact page. Returns null when there is nothing to show.
+import { formatPhone, type Locale } from '@/modules/i18n'
 import { safeHref } from '@/modules/content'
 import { Icon } from '../primitives/Icon'
 
 const str = (v: unknown) => (typeof v === 'string' ? v.trim() : '')
-const MAP_LINK = /^https:\/\/maps\.apple\.com\/[^\s"<>]*$/
 
 /** The main number first, then the additional numbers in their CMS order; invalid and repeated
  * numbers are dropped. */
@@ -28,12 +27,12 @@ export function hasContactDetails(settings: Record<string, unknown> | null | und
 
 export function ContactDetails({
   settings,
-  locale,
   className,
   iconClassName,
 }: {
   settings: Record<string, unknown> | null | undefined
-  locale: Locale
+  /** Kept for callers; the details themselves are language-neutral. */
+  locale?: Locale
   className: string
   iconClassName: string
 }) {
@@ -45,8 +44,6 @@ export function ContactDetails({
     return phone && tel ? [{ raw, tel, ...phone }] : []
   })
   const address = str(settings?.address)
-  const mapRaw = str(settings?.mapLink)
-  const map = address && MAP_LINK.test(mapRaw) ? safeHref(mapRaw) : null
   const hours = str(settings?.hours)
   if (!mail && !phones.length && !address && !hours) return null
   const row = 'flex items-start gap-3'
@@ -75,11 +72,6 @@ export function ContactDetails({
           <Icon name="pin" className={iconClassName} />
           <span>
             <span className="whitespace-pre-line">{address}</span>
-            {map ? (
-              <a href={map} className="contact-details__map" rel="noopener noreferrer">
-                {t(locale, 'openInMaps')}
-              </a>
-            ) : null}
           </span>
         </p>
       ) : null}

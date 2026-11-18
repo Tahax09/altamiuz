@@ -847,20 +847,6 @@ main > .status-page {
   align-self: flex-start;
   min-height: var(--target-compact);
 }
-.site-footer__contact .contact-details__map,
-.contact-panel__details .contact-details__map {
-  display: inline-flex;
-  align-items: center;
-  min-height: var(--target-compact);
-  margin-block-start: 0.25rem;
-  color: var(--peri);
-  text-decoration: underline;
-  text-underline-offset: 0.2em;
-}
-.site-footer__contact .contact-details__map:hover,
-.contact-panel__details .contact-details__map:hover {
-  text-decoration-thickness: 2px;
-}
 .site-footer__icon {
   inline-size: 1.125rem;
   block-size: 1.125rem;

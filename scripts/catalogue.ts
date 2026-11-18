@@ -193,7 +193,6 @@ async function fillContact(payload: Payload) {
   const data: Obj = {}
   const [main, ...more] = contactDetails.phones
   if (!s.email) data.email = contactDetails.email
-  if (!s.mapLink) data.mapLink = contactDetails.mapLink
   if (!s.phone) data.phone = main
   if (!(Array.isArray(s.additionalPhones) && s.additionalPhones.length))
     data.additionalPhones = more.map((number) => ({ number }))
@@ -235,7 +234,6 @@ async function fillContact(payload: Payload) {
   }
   return {
     email: 'email' in data,
-    mapLink: 'mapLink' in data,
     phone: 'phone' in data,
     additionalPhones: 'additionalPhones' in data,
     companyName: named,

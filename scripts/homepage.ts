@@ -198,7 +198,15 @@ function withIds(stored: Obj[], next: Obj[]): Obj[] {
     // Reuse a stored id only for the same block type, and always send `hidden`: otherwise a block
     // inherits the stored flags of whatever block used that position before.
     const s = stored[i]?.blockType === b.blockType ? stored[i]! : {}
-    const out: Obj = { ...b, hidden: b.hidden ?? false, id: s.id }
+    // Header fields are always sent too, so a block never keeps text it no longer has.
+    const out: Obj = {
+      eyebrow: null,
+      heading: null,
+      intro: null,
+      ...b,
+      hidden: b.hidden ?? false,
+      id: s.id,
+    }
     for (const list of ['items', 'steps', 'members'] as const)
       if (Array.isArray(b[list]) && Array.isArray(s[list]))
         out[list] = (b[list] as Obj[]).map((row, j) => ({

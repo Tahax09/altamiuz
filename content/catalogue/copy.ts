@@ -615,7 +615,6 @@ export const contactDetails = {
   address: { en: 'Al-Sabaa, Tripoli, Libya', ar: 'ليبيا - طرابلس / السبعة' },
   /** Office location supplied by the owner 2026-11-18: 32°50'56.2"N 13°15'34.9"E. */
   location: { lat: 32.848944, lng: 13.259694 },
-  mapLink: 'https://maps.apple.com/?ll=32.848944,13.259694&q=Altamiuz',
   email: 'info@altamiuz.ly',
   phones: ['+218917373202', '+218927373201', '+218214629298'],
 } as const

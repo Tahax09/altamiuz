@@ -4150,9 +4150,6 @@ export interface SiteSetting {
         id?: string | null;
       }[]
     | null;
-  /**
-   * Apple Maps link to the office (https://maps.apple.com/…). Shown with the address only.
-   */
   mapLink?: string | null;
   email?: string | null;
   hours?: string | null;

@@ -64,7 +64,6 @@ export const en = {
   breadcrumb: 'Breadcrumb',
   primaryAction: 'Contact us',
   footerContact: 'Contact',
-  openInMaps: 'Open in Apple Maps',
   footerLegal: 'Legal',
   brandName: 'Altamiuz',
   allRightsReserved: 'All rights reserved.',

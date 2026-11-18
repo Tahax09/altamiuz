@@ -401,10 +401,9 @@ export const siteSettings = versionedGlobal('site-settings', 'Site settings', [
       !v ||
       /^https:\/\/maps\.apple\.com\/[^\s"<>]*$/.test(String(v)) ||
       'Use an Apple Maps link starting with https://maps.apple.com/',
-    admin: {
-      description:
-        'Apple Maps link to the office (https://maps.apple.com/…). Shown with the address only.',
-    },
+    // Not shown on the site (owner 2026-11-18: the office map is on the contact page instead).
+    // Kept so stored values stay valid; hidden from editors.
+    admin: { hidden: true },
   },
   { name: 'email', type: 'email' },
   { name: 'hours', type: 'text', localized: true, maxLength: 200 },

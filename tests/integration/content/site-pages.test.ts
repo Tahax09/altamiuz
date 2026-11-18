@@ -136,6 +136,20 @@ describe('site pages seed (W-1)', () => {
         .map((b) => b.blockName)
     expect(await claimsOf('about')).toEqual(['Registration', 'Partners'])
     expect(await claimsOf('expertise')).toEqual(['Experience', 'Founder'])
+    // The supplied portrait (content/team/founder.*) is attached to the founder entry.
+    const team = (await draft(seeded.pages.expertise, 'en')).sections.find(
+      (b) => b.blockType === 'team',
+    )!
+    const photo = (team.members as { photo?: number }[])[0]!.photo
+    expect(typeof photo).toBe('number')
+    const media = (await t.payload.findByID({
+      collection: 'media',
+      id: photo!,
+      locale: 'ar',
+      depth: 0,
+      overrideAccess: true,
+    })) as unknown as { alt: string }
+    expect(media.alt).toContain('صلاح الدين')
     const terms = await draft(seeded.pages.terms, 'en')
     expect(terms.sections.length).toBeGreaterThan(0)
     expect(terms.sections.every((b) => b.hidden && b.blockName?.startsWith('Pending: CD-10'))).toBe(
@@ -248,7 +262,6 @@ describe('site pages seed (W-1)', () => {
     const visible = toPublic(sections)
     expect(visible.map((s) => s.blockType)).toEqual([
       'textMedia',
-      'richText',
       'textMedia',
       'richText',
       'featureGrid',

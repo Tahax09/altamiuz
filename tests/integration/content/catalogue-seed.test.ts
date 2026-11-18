@@ -106,10 +106,8 @@ describe('catalogue seed (C-1)', () => {
     expect(s.companyName).toBe(contactDetails.companyName.en)
     expect(s.addressEvidence).toMatchObject({ status: 'verified', reference: OWNER_ATTESTATION })
     expect(s.companyNameEvidence).toMatchObject({ status: 'verified' })
-    expect(s.mapLink).toBe(contactDetails.mapLink)
     expect(seeded.contact).toEqual({
       email: false,
-      mapLink: true,
       phone: true,
       additionalPhones: true,
       companyName: true,
@@ -125,7 +123,6 @@ describe('catalogue seed (C-1)', () => {
     expect(again.article).toBe(seeded.article)
     expect(again.contact).toEqual({
       email: false,
-      mapLink: false,
       phone: false,
       additionalPhones: false,
       companyName: false,

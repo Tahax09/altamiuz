@@ -3,6 +3,8 @@
 // menus, legal links, contact page, services introduction). It never publishes anything and never
 // replaces a non-empty menu or setting. Run after `pnpm seed:contact` so links to the contact page
 // and privacy notice resolve.
+import fs from 'node:fs'
+import path from 'node:path'
 import type { Payload } from 'payload'
 import { attestClaimBlocks } from './attest'
 import { loadPartnerLogos } from './partner-logos'
@@ -51,6 +53,63 @@ const richText = (blocks: { h?: string; p?: string[] }[]) => ({
 type Ids = Partial<Record<PageDef['key'] | 'contact' | 'privacy', number>> & {
   /** Partner logos in the media library (scripts/partner-logos.ts). */
   partners?: { name: string; id: number }[]
+  /** Founder portrait in the media library, when content/team/founder.* exists. */
+  founderPhoto?: number
+}
+
+const FOUNDER_DIR = path.join(process.cwd(), 'content/team')
+const FOUNDER_TYPES: Record<string, string> = {
+  '.jpg': 'image/jpeg',
+  '.jpeg': 'image/jpeg',
+  '.png': 'image/png',
+  '.webp': 'image/webp',
+}
+
+/** Uploads content/team/founder.(jpg|jpeg|png|webp) once (matched by its English alt text) through
+ *  the media pipeline, with alt text in both languages. Undefined when no file was supplied. */
+async function founderPhoto(payload: Payload): Promise<number | undefined> {
+  const file = fs.existsSync(FOUNDER_DIR)
+    ? fs.readdirSync(FOUNDER_DIR).find((f) => /^founder\.(jpe?g|png|webp)$/i.test(f))
+    : undefined
+  if (!file) return undefined
+  const alt = {
+    en: `Portrait of ${about.founder.name.en}, ${about.founder.role.en}`,
+    ar: `صورة ${about.founder.name.ar}، ${about.founder.role.ar}`,
+  }
+  const found = await payload.find({
+    collection: 'media',
+    where: { alt: { equals: alt.en } },
+    locale: 'en',
+    limit: 1,
+    depth: 0,
+    overrideAccess: true,
+  })
+  let id = (found.docs[0] as { id?: number } | undefined)?.id
+  if (id === undefined) {
+    const data = fs.readFileSync(path.join(FOUNDER_DIR, file))
+    id = (
+      (await payload.create({
+        collection: 'media',
+        locale: 'en',
+        data: { alt: alt.en } as never,
+        file: {
+          data,
+          mimetype: FOUNDER_TYPES[path.extname(file).toLowerCase()]!,
+          name: file,
+          size: data.length,
+        },
+        overrideAccess: true,
+      })) as unknown as { id: number }
+    ).id
+  }
+  await payload.update({
+    collection: 'media',
+    id,
+    locale: 'ar',
+    data: { alt: alt.ar } as never,
+    overrideAccess: true,
+  })
+  return id
 }
 
 /** Partner logos as a credentials block (logos display); nothing when no logo is loaded. */
@@ -95,13 +154,9 @@ export function pageSections(key: PageDef['key'], l: Locale, ids: Ids): Obj[] {
           blockName: 'Who we are (illustration slot)',
           eyebrow: about.intro.eyebrow[l],
           heading: about.intro.heading[l],
-          body: richText([{ p: [...about.intro.body[l]] }]),
+          // Company facts open the story, so they read as part of it, not a separate box.
+          body: richText([{ p: [about.company[l], ...about.intro.body[l]] }]),
           mediaPosition: 'end',
-        },
-        {
-          blockType: 'richText',
-          blockName: 'Company',
-          content: richText([{ h: headings.company[l], p: [about.company[l]] }]),
         },
         {
           blockType: 'textMedia',
@@ -196,6 +251,7 @@ export function pageSections(key: PageDef['key'], l: Locale, ids: Ids): Obj[] {
               name: about.founder.name[l],
               role: about.founder.role[l],
               bio: about.founder.bio[l],
+              ...(ids.founderPhoto ? { photo: ids.founderPhoto } : {}),
             },
           ],
         },
@@ -242,7 +298,15 @@ function withIds(stored: Obj[], next: Obj[]): Obj[] {
     // Reuse a stored id only for the same block type, and always send `hidden`: otherwise a block
     // inherits the stored flags of whatever block used that position before.
     const prev = stored[i]?.blockType === b.blockType ? stored[i]! : {}
-    const out: Obj = { ...b, hidden: b.hidden ?? false, id: prev.id }
+    // Header fields are always sent too, so a block never keeps text it no longer has.
+    const out: Obj = {
+      eyebrow: null,
+      heading: null,
+      intro: null,
+      ...b,
+      hidden: b.hidden ?? false,
+      id: prev.id,
+    }
     for (const list of ['items', 'steps', 'members'] as const)
       if (Array.isArray(b[list]) && Array.isArray(prev[list]))
         out[list] = (b[list] as Obj[]).map((row, j) => ({
@@ -438,6 +502,7 @@ export async function seedSitePages(
     contact: (await findBySlug(payload, contactPage.slug.en))?.id,
     privacy: (await findBySlug(payload, privacyPage.slug.en))?.id,
     partners: await loadPartnerLogos(payload),
+    founderPhoto: await founderPhoto(payload),
   }
   const out = {} as Record<PageDef['key'], number>
   for (const def of Object.values(pages)) {
