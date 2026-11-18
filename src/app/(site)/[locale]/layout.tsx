@@ -56,7 +56,14 @@ export default async function SiteLayout({
     isLocale(raw) ? alternatesFor(path) : Promise.resolve({}),
   ])
   return (
-    <html lang={locale} dir={locale === 'ar' ? 'rtl' : 'ltr'} className={fontVariables}>
+    // suppressHydrationWarning: browser extensions (e.g. Scribe, Grammarly) add attributes to
+    // <html> before React hydrates; this ignores attribute differences on this element only.
+    <html
+      lang={locale}
+      dir={locale === 'ar' ? 'rtl' : 'ltr'}
+      className={fontVariables}
+      suppressHydrationWarning
+    >
       <body>
         <SkipLink locale={locale} />
         <SiteBanner locale={locale} banner={banner} />
