@@ -112,6 +112,13 @@ export function pageSections(key: PageDef['key'], l: Locale, ids: Ids): Obj[] {
           mediaPosition: 'start',
         },
         {
+          blockType: 'richText',
+          blockName: 'From our founder',
+          content: richText([
+            { h: about.founderMessage.heading[l], p: [...about.founderMessage.body[l]] },
+          ]),
+        },
+        {
           blockType: 'featureGrid',
           blockName: 'How we work',
           eyebrow: about.approach.eyebrow[l],

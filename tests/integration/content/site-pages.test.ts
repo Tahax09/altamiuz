@@ -250,6 +250,7 @@ describe('site pages seed (W-1)', () => {
       'textMedia',
       'richText',
       'textMedia',
+      'richText',
       'featureGrid',
       'process',
       'featureGrid',
@@ -260,6 +261,7 @@ describe('site pages seed (W-1)', () => {
     // Company facts confirmed by the owner (2026-11-18) are public; pending sections are not.
     expect(JSON.stringify(visible)).toContain('2020')
     expect(JSON.stringify(visible)).toContain('01041961254')
+    expect(JSON.stringify(visible)).toContain('From our founder')
     expect(JSON.stringify(visible)).not.toContain('Pending')
   })
 

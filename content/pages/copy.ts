@@ -214,8 +214,27 @@ export const about = {
   },
   /** Supplied by the owner; confirmed 2026-11-18 (content/attestation.ts). */
   company: {
-    en: 'Altamiuz is a Libyan limited liability company, founded in 2020 and headquartered in Tripoli.',
-    ar: 'شركة التميز للاستشارات وأمن المعلومات شركة ليبية ذات مسؤولية محدودة، تأسست عام 2020 ومقرها الرئيسي في طرابلس.',
+    en: 'Altamiuz for Consulting and Information Security is a Libyan limited liability company, founded in 2020 on the 25 years of experience in telecommunications and information security of its founder, Salah Eddin Ali Mohamed Al-Shteiwi, a retired colonel of the Libyan Navy. Its head office is in Tripoli.',
+    ar: 'شركة التميز للاستشارات وأمن المعلومات شركة ليبية ذات مسؤولية محدودة، تأسست عام 2020 ثمرةً لخبرة 25 عاماً في الاتصالات وأمن المعلومات لمؤسسها صلاح الدين علي محمد الشتيوي، العقيد المتقاعد من القوات البحرية الليبية. ومقرها الرئيسي في مدينة طرابلس.',
+  },
+  /** The founder's own statement from the legacy About page (owner re-supplied 2026-11-18),
+   *  lightly edited; first person kept. */
+  founderMessage: {
+    heading: { en: 'From our founder', ar: 'كلمة المؤسس' },
+    body: {
+      en: [
+        'Throughout my career in the public and private, military and civilian sectors, delivering dozens of telecommunications and information security projects and, since 2003, taking part in combat training projects with NATO naval forces as part of many teams, I have learned one thing above all: what decides whether a project succeeds or fails is its management and the clarity of its processes. Technical work and every other technical means are aids towards that success.',
+        'In our work to protect information, we start by understanding the problem: we study it, analyse it and its effects, and follow all its ramifications. Only then do we put in place the solutions that fit. That is why we spend most of our time understanding and explaining the threats, the weaknesses and the risks that arise from them.',
+        'What drives us is passion, and that is what we offer our clients: a constant determination to solve their problems.',
+        '— Salah Eddin Al-Shteiwi, Founder and Chief Executive Officer',
+      ],
+      ar: [
+        'تعلّمتُ طوال مسيرتي المهنية بين القطاعين العام والخاص، العسكري والمدني، ومن تنفيذ عشرات المشاريع في الاتصالات وأمن المعلومات، والمشاركة منذ عام 2003 ضمن فرق عديدة في مشاريع تدريبية قتالية مع القوات البحرية لحلف الناتو، أن أهم ما يُحكم به على نجاح المشروع أو فشله هو إدارته ووضوح سير عملياته، وأن الأعمال الفنية وسائر الوسائل التقنية ليست إلا أدوات تعين على الوصول إلى هذا النجاح.',
+        'وفي عملنا لحماية المعلومات نبدأ بفهم المشكلة: ندرسها ونحلّلها ونحلّل آثارها ونفهم كل تشعباتها، ثم نضع الحلول المتاحة والمناسبة لها. ولهذا نقضي الجزء الأكبر من وقتنا في فهم التهديدات ونقاط الضعف والمخاطر الناتجة عنها وشرحها.',
+        'إن ما يدفعنا إلى خوض هذه التجربة هو الشغف، وهذا ما نقدّمه لعملائنا: إصرار دائم على حل جميع مشكلاتهم.',
+        '— صلاح الدين الشتيوي، المؤسس والرئيس التنفيذي',
+      ],
+    },
   },
   /** Licence and registration from the legacy About page; owner confirmed 2026-11-18. */
   registration: {
@@ -246,7 +265,7 @@ export const about = {
   founder: {
     eyebrow: { en: 'Leadership', ar: 'القيادة' },
     heading: { en: 'Led by practitioners', ar: 'يقودها أهل الخبرة' },
-    name: { en: 'Salah Eddin Al-Shteiwi', ar: 'صلاح الدين الشتيوي' },
+    name: { en: 'Salah Eddin Al-Shteiwi', ar: 'صلاح الدين علي محمد الشتيوي' },
     role: { en: 'Founder and Chief Executive Officer', ar: 'المؤسس والرئيس التنفيذي' },
     bio: {
       en: 'A retired colonel of the Libyan Navy with 25 years in telecommunications and information security across the public and private, military and civilian sectors. He has delivered dozens of projects and, since 2003, has taken part in combat training projects with NATO naval forces. He founded Altamiuz in 2020 on a simple conviction: projects succeed on management and clear processes, and every security solution starts with understanding the problem.',
