@@ -439,14 +439,8 @@ main > :not(article) {
 .section {
   padding-block: var(--space-5);
 }
-:where(.section) + .section:not([class*='surface--'], .section--cta) {
-  border-block-start: 1px solid var(--rule);
-}
-.section[class*='surface--'] + .section,
-.section.section--cta + .section,
-.hero + .section {
-  border-block-start: 0;
-}
+/* No divider lines between sections: neighbouring sections alternate white and mist instead
+   (sectionTones in Sections.tsx). */
 @media (min-width: 64rem) {
   .section:has(> .section__rail) {
     display: grid;
@@ -587,10 +581,6 @@ main > :not(article) {
   }
   .section--media-start .split__text {
     order: 2;
-  }
-  [lang='ar'] .section--split .section__main {
-    grid-template-columns: minmax(0, 6fr) minmax(0, 5fr);
-    align-items: start;
   }
 }
 .split__text h2 {

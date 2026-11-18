@@ -409,12 +409,6 @@ nav li {
     grid-column: 2;
     padding-block-end: 0.5rem;
   }
-  /* Arabic: the lead sits under the title, aligned to the start, in a wider measure. */
-  [lang='ar'] .page-header__inner > .lead {
-    grid-column: 1;
-    padding: 0;
-    max-inline-size: 60ch;
-  }
 }
 .page-header__inner > .eyebrow {
   justify-self: start;

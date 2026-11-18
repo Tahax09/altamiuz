@@ -6,6 +6,7 @@ import { createElement } from 'react'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
 import { Sections } from '@/ui'
+import { sectionTones } from '@/ui/sections/Sections'
 import { CLAIM_BLOCKS, unverifiedClaims } from '@/modules/content/evidence'
 
 const render = (
@@ -99,6 +100,41 @@ describe('CMS-aware sections', () => {
       listings: { services: items },
     })
     expect(full.match(/href="\/en\/services\/s\d"/g)).toHaveLength(7)
+  })
+
+  it('light sections alternate white and mist; neighbours never share a background', () => {
+    const b = (blockType: string, extra = {}) => ({ blockType, ...extra })
+    const home = [
+      b('hero'),
+      b('credentials', { display: 'logos' }),
+      b('textMedia'),
+      b('serviceList'),
+      b('courseList'),
+      b('featureGrid'),
+      b('process'),
+      b('stats'),
+      b('cta'),
+    ]
+    expect(sectionTones(home as never)).toEqual([
+      'dark',
+      'mist', // partner strip
+      'white', // introduction
+      'mist', // services
+      'white', // training
+      'mist', // approach
+      'dark', // methodology
+      'mist', // experience
+      'panel', // call to action
+    ])
+    const tones = sectionTones([
+      b('textMedia'),
+      b('textMedia'),
+      b('richText'),
+      b('featureGrid'),
+      b('stats'),
+      b('team'),
+    ] as never)
+    for (let i = 1; i < tones.length; i++) expect(tones[i], `position ${i}`).not.toBe(tones[i - 1])
   })
 
   it('article cards carry category, a machine-readable date and an optional image', () => {

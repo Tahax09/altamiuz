@@ -317,6 +317,26 @@ function listOf(b: Block, ctx?: RenderContext): unknown[] | null {
   }
 }
 
+/** Background of each visible section. The hero and the methodology are dark and the call to
+ *  action a blue panel; every other section alternates white and mist: mist first after a dark
+ *  section (the hero), white first after the page header (itself mist) or the panel. So two
+ *  neighbours never share a background, whatever order editors choose. */
+export function sectionTones(blocks: Block[]): ('white' | 'mist' | 'dark' | 'panel')[] {
+  let last: 'white' | 'mist' | 'dark' | 'panel' = 'mist' // the page header
+  return blocks.map((b) => {
+    const t =
+      b.blockType === 'hero' || b.blockType === 'process'
+        ? 'dark'
+        : b.blockType === 'cta'
+          ? 'panel'
+          : last === 'white' || last === 'dark'
+            ? 'mist'
+            : 'white'
+    last = t
+    return t
+  })
+}
+
 /** Up to two initials of a name, in its own script (decorative monogram). */
 function initials(name: string): string {
   return name
@@ -355,6 +375,7 @@ export function Sections({
   // Running section numbers for the rail (only sections with a header are numbered).
   let counter = 0
   const numbers = visible.map((b) => (hasHead(b) ? ++counter : null))
+  const tones = sectionTones(visible)
   return (
     <>
       {visible.map((b, i) => {
@@ -366,18 +387,23 @@ export function Sections({
           kind: string,
           children: ReactNode,
           opts: { surface?: 'raised' | 'stone' | 'ink'; reveal?: string; rail?: boolean } = {},
-        ) => (
-          <section
-            key={key}
-            id={id}
-            data-block={b.blockType}
-            data-reveal={opts.reveal ?? ''}
-            className={`section section--${kind}${opts.surface ? ` surface--${opts.surface}` : ''}`}
-          >
-            {opts.rail === false ? null : <Rail n={n} />}
-            <div className="section__main">{children}</div>
-          </section>
-        )
+        ) => {
+          // Light sections alternate white and mist by position (owner, 2026-11-18), so two
+          // neighbours never share a background, whatever order editors choose.
+          const surface = opts.surface ?? (tones[i] === 'mist' ? 'raised' : undefined)
+          return (
+            <section
+              key={key}
+              id={id}
+              data-block={b.blockType}
+              data-reveal={opts.reveal ?? ''}
+              className={`section section--${kind}${surface ? ` surface--${surface}` : ''}`}
+            >
+              {opts.rail === false ? null : <Rail n={n} />}
+              <div className="section__main">{children}</div>
+            </section>
+          )
+        }
         switch (b.blockType) {
           case 'hero': {
             const primary = b.primaryCta as Link
@@ -705,13 +731,15 @@ export function Sections({
                 id={id}
                 data-block="stats"
                 data-reveal=""
-                className="section stats-band"
+                className={`section stats-band${tones[i] === 'mist' ? ' surface--raised' : ''}`}
               >
                 <SectionHead b={b} />
                 <ul className="stats">
                   {items.map((it, j) => (
                     <li key={j} data-reveal-item="">
-                      <span className="stats__value">{str(it.value)}</span>{' '}
+                      <span className="stats__value" dir="ltr">
+                        {str(it.value)}
+                      </span>{' '}
                       <span className="stats__label">{str(it.label)}</span>
                     </li>
                   ))}
@@ -768,7 +796,7 @@ export function Sections({
                   id={id}
                   data-block="credentials"
                   data-reveal=""
-                  className="section trust"
+                  className={`section trust${tones[i] === 'mist' ? ' surface--raised' : ''}`}
                 >
                   {b.eyebrow || b.heading ? (
                     <div className="trust__head">
@@ -866,7 +894,6 @@ export function Sections({
                 />
                 <More link={b.moreLink} resolve={resolve} locale={locale} />
               </>,
-              { surface: 'raised' },
             )
           }
           case 'contactBlock': {
