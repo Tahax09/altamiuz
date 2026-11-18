@@ -287,8 +287,70 @@ export const pending = {
     'CD-04 service catalogue (monitoring, response, protection, compliance as services)',
   standards: home.standards.pending,
   insights: home.insights.pending,
-  terms: 'CD-10 terms of use reviewed under applicable law (legal approval)',
 } as const
+
+/** Terms of use, drafted 2026-11-18 from docs/content/legal-review-libya.md at the owner's
+ *  request (a lawyer's review, CD-10, is still recommended). */
+export const terms: { h: L; p: L[] }[] = [
+  {
+    h: { en: 'Use of this website', ar: 'استخدام هذا الموقع' },
+    p: [
+      {
+        en: 'This website describes the services and training offered by Altamiuz for Consulting and Information Security. Its content is general information, not advice for a particular case: contact us before acting on it.',
+        ar: 'يعرض هذا الموقع الخدمات والدورات التي تقدمها شركة التميز للاستشارات وأمن المعلومات. ومحتواه معلومات عامة وليس استشارة لحالة بعينها، فتواصل معنا قبل الاعتماد عليه.',
+      },
+      {
+        en: 'Do not try to access, disrupt or test the security of this website without our written permission. Doing so may be an offence under Libyan law, including Law No. 5 of 2022 on combating cybercrimes.',
+        ar: 'لا تحاول الوصول إلى هذا الموقع أو تعطيله أو اختبار أمنه دون إذن كتابي منا، فقد يُعد ذلك جريمة وفق القانون الليبي، ومنه القانون رقم 5 لسنة 2022 بشأن مكافحة الجرائم الإلكترونية.',
+      },
+    ],
+  },
+  {
+    h: { en: 'Intellectual property', ar: 'الملكية الفكرية' },
+    p: [
+      {
+        en: 'The text, design and logo of this website belong to Altamiuz. Partner logos belong to their owners and appear with their permission. You may share links to our pages, but not copy their content for commercial use without our written permission.',
+        ar: 'نصوص هذا الموقع وتصميمه وشعاره مملوكة لشركة التميز. وشعارات الشركاء مملوكة لأصحابها وتُعرض بإذنهم. ويمكنك مشاركة روابط صفحاتنا، لكن لا يجوز نسخ محتواها لاستخدام تجاري دون إذن كتابي منا.',
+      },
+    ],
+  },
+  {
+    h: { en: 'Limitation of liability', ar: 'حدود المسؤولية' },
+    p: [
+      {
+        en: 'We publish this information in good faith and keep it up to date as far as we can. To the extent the law allows, we are not liable for decisions taken on the basis of this website alone.',
+        ar: 'ننشر هذه المعلومات بحسن نية ونحرص على تحديثها قدر الإمكان. وفي الحدود التي يسمح بها القانون، لا نتحمل المسؤولية عن قرارات تُتخذ بالاستناد إلى هذا الموقع وحده.',
+      },
+    ],
+  },
+  {
+    h: { en: 'Links to other websites', ar: 'الروابط إلى مواقع أخرى' },
+    p: [
+      {
+        en: 'Links to other websites are provided for convenience. We are not responsible for their content or their privacy practices.',
+        ar: 'نوفّر الروابط إلى المواقع الأخرى للتيسير، ولسنا مسؤولين عن محتواها أو عن ممارساتها في الخصوصية.',
+      },
+    ],
+  },
+  {
+    h: { en: 'Governing law', ar: 'القانون الواجب التطبيق' },
+    p: [
+      {
+        en: 'These terms are governed by Libyan law. The courts of Tripoli have jurisdiction over any dispute about them.',
+        ar: 'تخضع هذه الشروط للقانون الليبي، وتختص محاكم طرابلس بالنظر في أي نزاع يتعلق بها.',
+      },
+    ],
+  },
+  {
+    h: { en: 'Changes to these terms', ar: 'التعديلات على هذه الشروط' },
+    p: [
+      {
+        en: 'These terms apply from 18 November 2026. If we change them, we will publish the new version here with its date.',
+        ar: 'تسري هذه الشروط اعتباراً من 18 نوفمبر 2026. وإذا عدّلناها، ننشر النسخة الجديدة هنا مع تاريخها.',
+      },
+    ],
+  },
+]
 
 export const headings = {
   company: { en: 'Company details', ar: 'بيانات الشركة' },

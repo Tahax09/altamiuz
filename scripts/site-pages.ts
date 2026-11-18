@@ -14,7 +14,7 @@ import {
   cta,
   footerNav,
   headerNav,
-  headings,
+  terms,
   legalLinks,
   listings,
   pages,
@@ -269,11 +269,10 @@ export function pageSections(key: PageDef['key'], l: Locale, ids: Ids): Obj[] {
         },
       ]
     case 'terms':
-      return headings.terms.map((h) => ({
+      return terms.map((t) => ({
         blockType: 'richText',
-        hidden: true,
-        blockName: `Pending: ${pending.terms}`,
-        content: richText([{ h: h[l] }]),
+        blockName: t.h.en,
+        content: richText([{ h: t.h[l], p: t.p.map((x) => x[l]) }]),
       }))
   }
 }

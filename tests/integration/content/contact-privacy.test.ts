@@ -113,33 +113,51 @@ describe('contact page and privacy notice seed', () => {
     await expect(seedContactAndPrivacy(t.payload)).rejects.toBeInstanceOf(ContactSeedError)
   })
 
-  it('the contact page states no contact details; the missing ones are a hidden pending section', async () => {
+  it('the contact page holds the enquiry form only (contact details come from site settings)', async () => {
     const d = await draft(seeded.contactId, 'en')
-    expect(d.sections.map((b) => b.blockType)).toEqual(['contactBlock', 'richText'])
-    expect(d.sections[1]!.hidden).toBe(true)
-    expect(d.sections[1]!.blockName).toMatch(/^Pending: CD-02/)
-    expect(JSON.stringify(d)).not.toMatch(/@|\+218|Tripoli|طرابلس/)
+    expect(d.sections.map((b) => b.blockType)).toEqual(['contactBlock'])
   })
 
-  it('every open legal decision in the notice is a hidden "Pending" section', async () => {
+  it('the notice is complete: no placeholder sections, every section visible (2026-11-18)', async () => {
+    expect(privacySections.every((s) => !s.pending)).toBe(true)
     const d = await draft(seeded.privacyId, 'en')
-    const pending = d.sections.filter((b) => /^Pending: /.test(b.blockName ?? ''))
-    expect(pending.length).toBe(privacySections.filter((s) => s.pending).length)
-    for (const b of pending) expect(b.hidden).toBe(true)
-    // Nothing invented: no legal basis, controller, processor or compliance wording is visible.
-    const visible = JSON.stringify(d.sections.filter((b) => !b.hidden))
-    expect(visible).not.toMatch(
-      /GDPR|legitimate interest|consent as|controller|Resend|Cloudflare|complian/i,
-    )
+    expect(d.sections.some((b) => /^Pending/.test(b.blockName ?? '') || b.hidden)).toBe(false)
+    const text = JSON.stringify(d.sections)
+    for (const fact of ['info@altamiuz.ly', 'Neon', 'Cloudflare', 'altamiuz-locale', '30 days'])
+      expect(text).toContain(fact)
   })
 
   it('a legal page with a Pending section cannot be published, even hidden; without one it can', async () => {
+    // The rule itself is unchanged: a placeholder section in a legal page blocks publishing.
+    const d0 = await draft(seeded.privacyId, 'en')
+    await t.payload.update({
+      collection: 'pages',
+      id: seeded.privacyId,
+      locale: 'en',
+      draft: true,
+      data: {
+        sections: [
+          ...d0.sections,
+          {
+            blockType: 'richText',
+            hidden: true,
+            blockName: 'Pending: open item',
+            content: rt('x'),
+          },
+        ],
+      } as never,
+      user: await u('editor'),
+      overrideAccess: false,
+    })
     await expect(publish(seeded.privacyId, 'editor')).rejects.toBeTruthy()
     for (const role of ['publisher', 'administrator'] as const)
-      await expect(publish(seeded.privacyId, role)).rejects.toMatchObject({ status: 400 })
+      await expect(publish(seeded.privacyId, role)).rejects.toMatchObject({
+        status: 400,
+        message: expect.stringMatching(/placeholder sections/),
+      })
     // Rolled back: still not public.
     expect(await m.privacyNoticeFor(t.payload, 'en')).toBeNull()
-    // Once the decisions are resolved (pending sections removed), it publishes.
+    // Once the placeholder is removed, it publishes.
     const d = await draft(seeded.privacyId, 'en')
     await t.payload.update({
       collection: 'pages',

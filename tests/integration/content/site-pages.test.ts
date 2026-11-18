@@ -1,7 +1,7 @@
 // W-1 site pages: the seed creates drafts only (both languages), keeps every missing fact in a
 // hidden "Pending" section, never publishes or replaces menus/settings that already have content;
 // `route` links validate and resolve; page summaries and listing introductions are per language;
-// the terms of use cannot be published while sections are pending (CD-10).
+// the terms of use are complete (2026-11-18) and publish normally.
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { bootPayload, type TestPayload } from '../../support/payload'
 import { userFor, verifiedSession, type Role, type Session } from '../../support/auth'
@@ -151,10 +151,9 @@ describe('site pages seed (W-1)', () => {
     })) as unknown as { alt: string }
     expect(media.alt).toContain('صلاح الدين')
     const terms = await draft(seeded.pages.terms, 'en')
-    expect(terms.sections.length).toBeGreaterThan(0)
-    expect(terms.sections.every((b) => b.hidden && b.blockName?.startsWith('Pending: CD-10'))).toBe(
-      true,
-    )
+    // Terms drafted 2026-11-18: every section visible, none a placeholder.
+    expect(terms.sections.length).toBe(6)
+    expect(terms.sections.some((b) => b.hidden || b.blockName?.startsWith('Pending'))).toBe(false)
     // Arabic rows are the same sections (shared ids), so hiding applies in both languages.
     const ar = await draft(seeded.pages.about, 'ar')
     const en = await draft(seeded.pages.about, 'en')
@@ -278,9 +277,9 @@ describe('site pages seed (W-1)', () => {
     expect(JSON.stringify(visible)).not.toContain('Pending')
   })
 
-  it('the terms of use cannot be published while sections are pending (CD-10)', async () => {
-    for (const role of ['publisher', 'administrator'] as const)
-      await expect(publish(seeded.pages.terms, role)).rejects.toMatchObject({ status: 400 })
+  it('the terms of use, now complete, can be published by a Publisher', async () => {
+    await expect(publish(seeded.pages.terms, 'editor')).rejects.toBeTruthy()
+    await expect(publish(seeded.pages.terms, 'publisher')).resolves.toBeTruthy()
   })
 })
 

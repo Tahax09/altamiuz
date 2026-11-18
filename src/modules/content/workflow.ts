@@ -100,7 +100,7 @@ export function assertNoPendingLegalSections(doc: unknown) {
     .filter((i) => i >= 0)
   if (pending.length)
     throw publicError(
-      'This legal page still has sections marked "Pending". Resolve each open decision and remove the section or its label before publishing.',
+      'This page still has placeholder sections, so it can’t be published yet. Fill them in or delete them, then publish.',
       400,
       { paths: pending.map((i) => `$.sections.${i}`) },
     )

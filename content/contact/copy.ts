@@ -5,8 +5,9 @@
 // channel. Privacy notice: every visible statement describes behaviour verified in the code
 // (paths in docs/content/privacy-notice.md). Every open legal decision is a section labelled
 // "Pending …"; a legal page with such a section cannot be published (workflow
-// `assertNoPendingLegalSections`). Nothing here states a legal basis, data controller, processor
-// or compliance claim. All text awaits approval (CD-11) and legal review (CD-10).
+// `assertNoPendingLegalSections`). Privacy sections completed 2026-11-18 from the draft wording in
+// docs/content/legal-review-libya.md at the owner's request; a lawyer's review (CD-10) is still
+// recommended.
 
 type L = { en: string; ar: string }
 export type Para = { h?: L; p?: L[]; list?: L[] }
@@ -32,10 +33,6 @@ export const contactPage = {
       en: 'Describe your organisation and what you need to achieve, and we will contact you using the details you provide.',
       ar: 'صف مؤسستك وما تسعى إلى تحقيقه، وسنتواصل معك عبر البيانات التي تقدمها.',
     } satisfies L,
-  },
-  otherChannels: {
-    pending: 'CD-02 address, phone, email and hours (not stated until supplied and verified)',
-    heading: { en: 'Other ways to reach us', ar: 'وسائل تواصل أخرى' } satisfies L,
   },
   /** One neutral topic so the form can work; the owner sets the real list in site settings. */
   defaultTopic: { en: 'General enquiry', ar: 'استفسار عام' } satisfies L,
@@ -74,10 +71,16 @@ export const privacySections: Section[] = [
   },
   {
     label: 'Controller',
-    pending:
-      'CD-01 registered legal name; CD-10 identity and contact details of the party responsible for the data',
     body: [
-      { h: { en: 'Who is responsible for your information', ar: 'الجهة المسؤولة عن معلوماتك' } },
+      {
+        h: { en: 'Who is responsible for your information', ar: 'الجهة المسؤولة عن معلوماتك' },
+        p: [
+          {
+            en: 'Altamiuz for Consulting and Information Security, Al-Sabaa, Tripoli, Libya, is responsible for the information you send through this form. You can reach us at info@altamiuz.ly.',
+            ar: 'شركة التميز للاستشارات وأمن المعلومات، السبعة، طرابلس، ليبيا، هي الجهة المسؤولة عن المعلومات التي ترسلها عبر هذا النموذج. ويمكنك التواصل معنا على info@altamiuz.ly.',
+          },
+        ],
+      },
     ],
   },
   {
@@ -140,8 +143,17 @@ export const privacySections: Section[] = [
   },
   {
     label: 'Legal basis',
-    pending: 'CD-10 legal basis for processing enquiries under Libyan and any other applicable law',
-    body: [{ h: { en: 'Legal basis', ar: 'الأساس القانوني' } }],
+    body: [
+      {
+        h: { en: 'Why we may use it', ar: 'أساس استخدامها' },
+        p: [
+          {
+            en: 'We use your information because you ask us to reply to your enquiry. We use it only for that, and for nothing else without your agreement.',
+            ar: 'نستخدم معلوماتك لأنك تطلب منا الرد على استفسارك، ولا نستخدمها إلا لهذا الغرض، ولا لغيره دون موافقتك.',
+          },
+        ],
+      },
+    ],
   },
   {
     label: 'Access',
@@ -159,9 +171,17 @@ export const privacySections: Section[] = [
   },
   {
     label: 'Service providers',
-    pending:
-      'T132 email delivery provider and hosting provider with data locations; CD-10 disclosure of the bot check (Cloudflare Turnstile in production)',
-    body: [{ h: { en: 'Service providers', ar: 'مزودو الخدمات' } }],
+    body: [
+      {
+        h: { en: 'Service providers', ar: 'مزودو الخدمات' },
+        p: [
+          {
+            en: 'The website’s database is hosted by Neon in Frankfurt, Germany. The check that stops automated submissions is provided by Cloudflare. Notification e-mails to our staff are sent through an e-mail delivery provider. These providers process your information only to provide their service to us, under their own security commitments.',
+            ar: 'تستضيف شركة Neon قاعدة بيانات الموقع في فرانكفورت، ألمانيا. وتقدّم Cloudflare خدمة التحقق التي تمنع الإرسال الآلي. وتُرسل رسائل الإشعار إلى موظفينا عبر مزوّد لخدمة البريد الإلكتروني. ولا يعالج هؤلاء المزودون معلوماتك إلا لتقديم خدماتهم لنا وفق التزاماتهم الأمنية.',
+          },
+        ],
+      },
+    ],
   },
   {
     label: 'Retention',
@@ -179,27 +199,62 @@ export const privacySections: Section[] = [
   },
   {
     label: 'Backups',
-    pending:
-      'T134 backup retention period (copies may remain in encrypted backups until they expire); T132 schedule of the maintenance task',
-    body: [{ h: { en: 'Backups', ar: 'النسخ الاحتياطية' } }],
+    body: [
+      {
+        h: { en: 'Backups', ar: 'النسخ الاحتياطية' },
+        p: [
+          {
+            en: 'Copies may remain in our encrypted backups for up to 30 days after an enquiry is deleted, and are then removed.',
+            ar: 'قد تبقى نسخ في نسخنا الاحتياطية المشفّرة مدة أقصاها 30 يوماً بعد حذف الاستفسار، ثم تُزال.',
+          },
+        ],
+      },
+    ],
   },
   {
     label: 'Requests',
-    pending:
-      'CD-10 rights under applicable law, request procedure and response time; CD-02 contact point for requests',
-    body: [{ h: { en: 'Your requests', ar: 'طلباتك' } }],
+    body: [
+      {
+        h: { en: 'Your requests', ar: 'طلباتك' },
+        p: [
+          {
+            en: 'You can ask to see, correct or delete your enquiry by writing to info@altamiuz.ly. We reply within 30 days.',
+            ar: 'يمكنك طلب الاطلاع على استفسارك أو تصحيحه أو حذفه بالكتابة إلى info@altamiuz.ly، ونرد خلال 30 يوماً.',
+          },
+        ],
+      },
+    ],
   },
   {
     label: 'Cookies and storage',
-    pending:
-      'CD-10 cookie statement: language cookie (altamiuz-locale, one year), banner dismissal in browser storage, bot-check provider, analytics (FR-087)',
     body: [
-      { h: { en: 'Cookies and similar storage', ar: 'ملفات تعريف الارتباط والتخزين المماثل' } },
+      {
+        h: { en: 'Cookies and similar storage', ar: 'ملفات تعريف الارتباط والتخزين المماثل' },
+        p: [
+          {
+            en: 'This site sets one cookie, altamiuz-locale, to remember your language for one year. If a site notice is shown, closing it is remembered in your browser’s storage. The check on the contact form is provided by Cloudflare and may use its own technical data. The site uses no advertising or tracking cookies.',
+            ar: 'يضع الموقع ملف تعريف ارتباط واحداً هو altamiuz-locale لتذكّر لغتك مدة سنة. وإذا ظهر تنبيه في الموقع، يُحفظ إغلاقه في ذاكرة متصفحك. ويقدّم Cloudflare خدمة التحقق في نموذج التواصل وقد يستخدم بيانات تقنية خاصة به. ولا يستخدم الموقع ملفات إعلانية أو للتتبع.',
+          },
+          {
+            en: 'The map on the contact page loads only if you choose to open it. It then fetches map images from OpenFreeMap, which receives your IP address as any website you visit does.',
+            ar: 'لا تُحمَّل الخريطة في صفحة التواصل إلا إذا اخترت فتحها، وعندها تُجلب صور الخريطة من OpenFreeMap التي تتلقى عنوان IP الخاص بك كما يحدث عند زيارة أي موقع.',
+          },
+        ],
+      },
     ],
   },
   {
     label: 'Changes',
-    pending: 'CD-10 effective date and how changes are announced (set when the notice is approved)',
-    body: [{ h: { en: 'Changes to this notice', ar: 'التغييرات على هذا الإشعار' } }],
+    body: [
+      {
+        h: { en: 'Changes to this notice', ar: 'التغييرات على هذا الإشعار' },
+        p: [
+          {
+            en: 'This notice applies from 18 November 2026. If we change it, we will publish the new version here with its date.',
+            ar: 'يسري هذا الإشعار اعتباراً من 18 نوفمبر 2026. وإذا عدّلناه، ننشر النسخة الجديدة هنا مع تاريخها.',
+          },
+        ],
+      },
+    ],
   },
 ]

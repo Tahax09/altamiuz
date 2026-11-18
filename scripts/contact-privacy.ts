@@ -45,12 +45,6 @@ const contactSections = (l: Locale) => [
     heading: contactPage.form.heading[l],
     intro: contactPage.form.intro[l],
   },
-  {
-    blockType: 'richText',
-    hidden: true,
-    blockName: `Pending: ${contactPage.otherChannels.pending}`,
-    content: richText([{ h: contactPage.otherChannels.heading }], l),
-  },
 ]
 const privacyBlocks = (l: Locale) =>
   privacySections.map((s) => ({
