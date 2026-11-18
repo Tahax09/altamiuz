@@ -14,3 +14,4 @@ src/payload-types.ts
 .pw-browsers/
 .lighthouseci/
 docs/api.md
+public/vendor/

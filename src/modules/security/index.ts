@@ -18,6 +18,7 @@ export const staticSecurityHeaders: { key: string; value: string }[] = [
   { key: 'Cross-Origin-Opener-Policy', value: 'same-origin' },
 ]
 
+const MAP_TILES = 'https://tiles.openfreemap.org'
 const TURNSTILE = 'https://challenges.cloudflare.com'
 
 export type CspOptions = {
@@ -70,7 +71,10 @@ export function buildCsp({ kind, nonce, dev, upgradeInsecureRequests }: CspOptio
     `style-src 'self' 'nonce-${nonce}'`,
     "img-src 'self' data: blob:",
     "font-src 'self'",
-    `connect-src 'self'`,
+    // Contact page map (OfficeMap): style, tiles, glyphs and sprites, fetched only after the
+    // visitor opens the map; MapLibre renders in a blob: worker.
+    `connect-src 'self' ${MAP_TILES}`,
+    "worker-src 'self' blob:",
     `frame-src ${TURNSTILE}`,
     ...common,
   ].join('; ')

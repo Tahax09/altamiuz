@@ -8,6 +8,7 @@ import { linkTarget, newTabProps, type CmsLink } from '../lib/links'
 import { Picture } from '../media/Picture'
 import { Icon as UiIcon } from '../primitives/Icon'
 import { hasMedia, MediaSlot } from '../primitives/MediaSlot'
+import { OfficeMap } from '../site/OfficeMap'
 import { RichText, type InternalHref } from '../richtext/RichText'
 import { CourseFacts } from '../page/CourseFacts'
 import { ContactDetails, hasContactDetails } from '../site/ContactDetails'
@@ -465,7 +466,11 @@ export function Sections({
             )
           }
           case 'textMedia': {
-            const showSlot = hasMedia(b.media) || !!ctx?.preview
+            const loc = b.location as
+              | { latitude?: number | null; longitude?: number | null; zoom?: number | null }
+              | undefined
+            const hasMap = typeof loc?.latitude === 'number' && typeof loc?.longitude === 'number'
+            const showSlot = hasMedia(b.media) || !!ctx?.preview || hasMap
             const start = b.mediaPosition === 'start'
             return shell(
               `text-media${showSlot ? ' section--split' : ''}${start ? ' section--media-start' : ''}`,
@@ -478,7 +483,29 @@ export function Sections({
                   </div>
                   <More link={b.link} resolve={resolve} locale={locale} />
                 </div>
-                {showSlot ? (
+                {hasMap ? (
+                  <div className="split__visual split__visual--map">
+                    <OfficeMap
+                      latitude={loc!.latitude!}
+                      longitude={loc!.longitude!}
+                      zoom={loc?.zoom ?? 15}
+                      label={str(b.heading)}
+                      openLabel={t(locale, 'mapOpen')}
+                      loadingLabel={t(locale, 'mapLoading')}
+                      failedLabel={t(locale, 'mapFailed')}
+                    >
+                      {hasMedia(b.media) ? (
+                        <MediaSlot
+                          media={b.media}
+                          ratio="landscape"
+                          locale={locale}
+                          className="media--split"
+                          sizes="(min-width: 64rem) 40vw, 100vw"
+                        />
+                      ) : null}
+                    </OfficeMap>
+                  </div>
+                ) : showSlot ? (
                   <Plate className="split__visual">
                     <MediaSlot
                       media={b.media}

@@ -9,50 +9,51 @@ platform binaries as optional dependencies).
 
 ## Direct dependencies
 
-| Package                      | Version | Licence    |
-| ---------------------------- | ------- | ---------- |
-| @axe-core/playwright         | 4.14.0  | MPL-2.0    |
-| @eslint/js                   | 9.39.5  | MIT        |
-| @lhci/cli                    | 0.16.0  | Apache-2.0 |
-| @payloadcms/db-postgres      | 3.92.1  | MIT        |
-| @payloadcms/next             | 3.92.1  | MIT        |
-| @payloadcms/richtext-lexical | 3.92.1  | MIT        |
-| @payloadcms/translations     | 3.92.1  | MIT        |
-| @payloadcms/ui               | 3.92.1  | MIT        |
-| @playwright/test             | 1.64.1  | Apache-2.0 |
-| @simplewebauthn/browser      | 14.0.0  | MIT        |
-| @simplewebauthn/server       | 14.0.3  | MIT        |
-| @tailwindcss/postcss         | 4.3.3   | MIT        |
-| @types/node                  | 22.20.5 | MIT        |
-| @types/nodemailer            | 8.0.2   | MIT        |
-| @types/pg                    | 8.23.1  | MIT        |
-| @types/qrcode                | 1.5.5   | MIT        |
-| @types/react                 | 19.2.18 | MIT        |
-| @types/react-dom             | 19.2.7  | MIT        |
-| class-variance-authority     | 0.7.1   | Apache-2.0 |
-| clsx                         | 2.1.1   | MIT        |
-| eslint                       | 9.39.5  | MIT        |
-| eslint-config-next           | 16.4.5  | MIT        |
-| graphql                      | 16.14.2 | MIT        |
-| motion                       | 14.5.0  | MIT        |
-| next                         | 16.4.5  | MIT        |
-| nodemailer                   | 10.1.7  | MIT-0      |
-| payload                      | 3.92.1  | MIT        |
-| pg                           | 8.20.0  | MIT        |
-| pino                         | 10.4.0  | MIT        |
-| prettier                     | 3.9.10  | MIT        |
-| qrcode                       | 1.5.4   | MIT        |
-| react                        | 19.2.6  | MIT        |
-| react-dom                    | 19.2.6  | MIT        |
-| sharp                        | 0.35.5  | Apache-2.0 |
-| tailwind-merge               | 3.7.0   | MIT        |
-| tailwindcss                  | 4.3.3   | MIT        |
-| tsx                          | 4.23.15 | MIT        |
-| typescript                   | 5.9.3   | Apache-2.0 |
-| typescript-eslint            | 8.71.2  | MIT        |
-| vite                         | 7.3.7   | MIT        |
-| vitest                       | 5.0.5   | MIT        |
-| zod                          | 4.6.7   | MIT        |
+| Package                      | Version | Licence      |
+| ---------------------------- | ------- | ------------ |
+| @axe-core/playwright         | 4.14.0  | MPL-2.0      |
+| @eslint/js                   | 9.39.5  | MIT          |
+| @lhci/cli                    | 0.16.0  | Apache-2.0   |
+| @payloadcms/db-postgres      | 3.92.1  | MIT          |
+| @payloadcms/next             | 3.92.1  | MIT          |
+| @payloadcms/richtext-lexical | 3.92.1  | MIT          |
+| @payloadcms/translations     | 3.92.1  | MIT          |
+| @payloadcms/ui               | 3.92.1  | MIT          |
+| @playwright/test             | 1.64.1  | Apache-2.0   |
+| @simplewebauthn/browser      | 14.0.0  | MIT          |
+| @simplewebauthn/server       | 14.0.3  | MIT          |
+| @tailwindcss/postcss         | 4.3.3   | MIT          |
+| @types/node                  | 22.20.5 | MIT          |
+| @types/nodemailer            | 8.0.2   | MIT          |
+| @types/pg                    | 8.23.1  | MIT          |
+| @types/qrcode                | 1.5.5   | MIT          |
+| @types/react                 | 19.2.18 | MIT          |
+| @types/react-dom             | 19.2.7  | MIT          |
+| class-variance-authority     | 0.7.1   | Apache-2.0   |
+| clsx                         | 2.1.1   | MIT          |
+| eslint                       | 9.39.5  | MIT          |
+| eslint-config-next           | 16.4.5  | MIT          |
+| graphql                      | 16.14.2 | MIT          |
+| maplibre-gl                  | 6.16.0  | BSD-3-Clause |
+| motion                       | 14.5.0  | MIT          |
+| next                         | 16.4.5  | MIT          |
+| nodemailer                   | 10.1.7  | MIT-0        |
+| payload                      | 3.92.1  | MIT          |
+| pg                           | 8.20.0  | MIT          |
+| pino                         | 10.4.0  | MIT          |
+| prettier                     | 3.9.10  | MIT          |
+| qrcode                       | 1.5.4   | MIT          |
+| react                        | 19.2.6  | MIT          |
+| react-dom                    | 19.2.6  | MIT          |
+| sharp                        | 0.35.5  | Apache-2.0   |
+| tailwind-merge               | 3.7.0   | MIT          |
+| tailwindcss                  | 4.3.3   | MIT          |
+| tsx                          | 4.23.15 | MIT          |
+| typescript                   | 5.9.3   | Apache-2.0   |
+| typescript-eslint            | 8.71.2  | MIT          |
+| vite                         | 7.3.7   | MIT          |
+| vitest                       | 5.0.5   | MIT          |
+| zod                          | 4.6.7   | MIT          |
 
 ## Licence distribution (full tree)
 
@@ -169,3 +170,13 @@ files from Google Fonts and Next serves them unchanged from `/_next/static/media
   self-processing (subsetting, conversion) of IBM Plex Sans Arabic must not keep the name "Plex".
 - `tests/public/fonts.spec.ts` re-checks on every run that each served font names its OFL licence
   and the expected copyright, and that the licence files are served unchanged.
+
+## Map data and worker (contact page, 2026-11-18)
+
+- `maplibre-gl` 6.16.0 (BSD-3-Clause): loaded only when a visitor opens the contact-page map; its
+  render worker is served unchanged from `public/vendor/maplibre-gl-worker-6.16.0.mjs` (kept equal
+  to the installed file by `tests/unit/ui/office-map.test.ts`).
+- Map style and tiles: OpenFreeMap (free, no key, commercial use allowed), data © OpenMapTiles and
+  © OpenStreetMap contributors (ODbL); attribution shown on the map.
+- Static preview image: OpenStreetMap standard tiles composited once on the server (`pnpm
+map:static`), credited "© OpenStreetMap contributors".

@@ -938,3 +938,62 @@
     align-content: start;
   }
 }
+
+/* ------------------------------------------------------------------------------------------
+   Office map (OfficeMap): the stored preview with an "Explore the map" button; on open, an
+   interactive MapLibre map fills the same frame. Same rounded frame as other visuals.
+   ------------------------------------------------------------------------------------------ */
+.office-map {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-card);
+  background: var(--mist);
+}
+/* MapLibre's unlayered stylesheet sets `.maplibregl-map { position: relative }` on the map
+   container and beats these layered rules, so a positioned frame holds a container sized 100%. */
+.office-map__frame,
+.office-map__preview {
+  position: absolute;
+  inset: 0;
+}
+.office-map__canvas {
+  inline-size: 100%;
+  block-size: 100%;
+}
+.office-map__preview .slot,
+.office-map__preview .media,
+.office-map__preview img {
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+}
+.office-map__open {
+  position: absolute;
+  inset-block-end: var(--space-2);
+  inset-inline-start: 50%;
+  translate: -50% 0;
+  box-shadow: var(--shadow-menu);
+}
+[dir='rtl'] .office-map__open {
+  translate: 50% 0;
+}
+.office-map__marker {
+  display: block;
+  padding-block-end: 0.4rem; /* the teardrop's tip sits on the location */
+}
+.office-map__pin {
+  display: block;
+  inline-size: 1.75rem;
+  block-size: 1.75rem;
+  border: 3px solid var(--paper);
+  border-radius: 50% 50% 50% 0;
+  background: var(--cobalt);
+  rotate: -45deg;
+  box-shadow: var(--shadow-menu);
+}
+.office-map .maplibregl-ctrl-group button {
+  inline-size: 2.25rem;
+  block-size: 2.25rem;
+}

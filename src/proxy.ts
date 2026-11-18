@@ -295,7 +295,8 @@ export const config = {
   matcher: [
     {
       // fonts/: licence texts for the self-hosted typefaces (public/fonts/LICENSES, T101).
-      source: '/((?!_next/static|_next/image|favicon.ico|fonts/).*)',
+      // vendor/: the MapLibre render worker for the contact-page map (OfficeMap).
+      source: '/((?!_next/static|_next/image|favicon.ico|fonts/|vendor/).*)',
       missing: [{ type: 'header', key: 'next-router-prefetch' }],
     },
   ],

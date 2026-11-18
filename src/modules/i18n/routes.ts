@@ -59,6 +59,8 @@ export const RESERVED_SEGMENTS = [
   'favicon.ico',
   'icon.svg',
   'apple-icon.png',
+  // Static vendor files (public/vendor/: the contact-page map worker).
+  'vendor',
   ...LOCALES,
 ]
 

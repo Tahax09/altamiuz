@@ -28,7 +28,7 @@
   --brand-hover: var(--night-2);
   --on-dark: #ffffff; /* text on navy and blue */
   --on-dark-soft: rgb(255 255 255 / 0.5); /* outline of secondary actions on navy */
-  --shadow-menu: 0 24px 48px -28px rgb(20 36 58 / 0.45); /* dropdown elevation (the only shadow) */
+  --shadow-menu: 0 24px 48px -28px rgb(20 36 58 / 0.45); /* dropdown and map-control elevation */
   --brand-ink: var(--on-dark);
   --brand-tint: var(--mist);
   --accent: var(--cobalt);

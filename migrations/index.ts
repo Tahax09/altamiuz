@@ -22,6 +22,7 @@ import * as migration_20261114_062000_c1_contact_phones from './20261114_062000_
 import * as migration_20261114_064904_optional_mfa from './20261114_064904_optional_mfa'
 import * as migration_20261114_142706_passkeys from './20261114_142706_passkeys'
 import * as migration_20261117_120000_analytics_daily from './20261117_120000_analytics_daily'
+import * as migration_20261118_130443_text_media_location from './20261118_130443_text_media_location'
 
 export const migrations = [
   {
@@ -143,5 +144,10 @@ export const migrations = [
     up: migration_20261117_120000_analytics_daily.up,
     down: migration_20261117_120000_analytics_daily.down,
     name: '20261117_120000_analytics_daily',
+  },
+  {
+    up: migration_20261118_130443_text_media_location.up,
+    down: migration_20261118_130443_text_media_location.down,
+    name: '20261118_130443_text_media_location',
   },
 ]

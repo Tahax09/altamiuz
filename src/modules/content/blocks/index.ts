@@ -100,6 +100,21 @@ const definitions: Block[] = [
       image('media'),
       select('mediaPosition', ['end', 'start'], 'Side of the image (end = right in English).'),
       linkGroup('link'),
+      {
+        // Optional map: with coordinates, the image becomes the preview of an interactive map
+        // that loads only when the visitor opens it (no third-party request before that).
+        name: 'location',
+        type: 'group',
+        admin: {
+          description:
+            'Optional. Set latitude and longitude to show an interactive map; the image above is its preview.',
+        },
+        fields: [
+          { name: 'latitude', type: 'number', min: -90, max: 90 },
+          { name: 'longitude', type: 'number', min: -180, max: 180 },
+          { name: 'zoom', type: 'number', min: 3, max: 19, defaultValue: 15 },
+        ],
+      },
       ...common,
     ],
   },

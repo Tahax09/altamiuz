@@ -27,6 +27,7 @@ const config = [
   {
     ignores: [
       'node_modules/**',
+      'public/vendor/**',
       '.pw-browsers/**',
       '.next/**',
       'coverage/**',

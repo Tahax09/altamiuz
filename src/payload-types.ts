@@ -409,6 +409,14 @@ export interface Page {
               newTab?: boolean | null;
             };
             /**
+             * Optional. Set latitude and longitude to show an interactive map; the image above is its preview.
+             */
+            location?: {
+              latitude?: number | null;
+              longitude?: number | null;
+              zoom?: number | null;
+            };
+            /**
              * Hidden sections stay editable but are not published.
              */
             hidden?: boolean | null;
@@ -1187,6 +1195,14 @@ export interface Service {
               newTab?: boolean | null;
             };
             /**
+             * Optional. Set latitude and longitude to show an interactive map; the image above is its preview.
+             */
+            location?: {
+              latitude?: number | null;
+              longitude?: number | null;
+              zoom?: number | null;
+            };
+            /**
              * Hidden sections stay editable but are not published.
              */
             hidden?: boolean | null;
@@ -1812,6 +1828,14 @@ export interface Course {
               tel?: string | null;
               label?: string | null;
               newTab?: boolean | null;
+            };
+            /**
+             * Optional. Set latitude and longitude to show an interactive map; the image above is its preview.
+             */
+            location?: {
+              latitude?: number | null;
+              longitude?: number | null;
+              zoom?: number | null;
             };
             /**
              * Hidden sections stay editable but are not published.
@@ -2665,6 +2689,13 @@ export interface PagesSelect<T extends boolean = true> {
                     label?: T;
                     newTab?: T;
                   };
+              location?:
+                | T
+                | {
+                    latitude?: T;
+                    longitude?: T;
+                    zoom?: T;
+                  };
               hidden?: T;
               anchorId?: T;
               id?: T;
@@ -3064,6 +3095,13 @@ export interface ServicesSelect<T extends boolean = true> {
                     tel?: T;
                     label?: T;
                     newTab?: T;
+                  };
+              location?:
+                | T
+                | {
+                    latitude?: T;
+                    longitude?: T;
+                    zoom?: T;
                   };
               hidden?: T;
               anchorId?: T;
@@ -3466,6 +3504,13 @@ export interface CoursesSelect<T extends boolean = true> {
                     tel?: T;
                     label?: T;
                     newTab?: T;
+                  };
+              location?:
+                | T
+                | {
+                    latitude?: T;
+                    longitude?: T;
+                    zoom?: T;
                   };
               hidden?: T;
               anchorId?: T;
