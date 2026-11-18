@@ -884,6 +884,7 @@ export interface Page {
  */
 export interface Media {
   id: number;
+  _objectKey?: string | null;
   /**
    * Describe the image for people who cannot see it, in each language. Required to publish a page that uses it, unless the image is decorative.
    */
@@ -3860,6 +3861,7 @@ export interface CoursesSelect<T extends boolean = true> {
  * via the `definition` "media_select".
  */
 export interface MediaSelect<T extends boolean = true> {
+  _objectKey?: T;
   alt?: T;
   decorative?: T;
   updatedAt?: T;
