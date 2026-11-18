@@ -203,7 +203,12 @@ describe('site pages seed (W-1)', () => {
 
   it('fills empty menus and settings in drafts only, and never replaces existing ones', async () => {
     expect(seeded.menus).toEqual({ header: true, footer: true })
-    expect(seeded.settings).toEqual({ contactPage: true, legalLinks: true, servicesIntro: true })
+    expect(seeded.settings).toEqual({
+      contactPage: true,
+      legalLinks: true,
+      servicesIntro: true,
+      defaultSeo: true,
+    })
     const header = (await t.payload.findGlobal({
       slug: 'header-nav',
       draft: true,
@@ -242,7 +247,12 @@ describe('site pages seed (W-1)', () => {
     // The second run (replace-draft above) left the filled menus and settings alone.
     const rerun = await seedSitePages(t.payload, { replaceDraft: true })
     expect(rerun.menus).toEqual({ header: false, footer: false })
-    expect(rerun.settings).toEqual({ contactPage: false, legalLinks: false, servicesIntro: false })
+    expect(rerun.settings).toEqual({
+      contactPage: false,
+      legalLinks: false,
+      servicesIntro: false,
+      defaultSeo: false,
+    })
   })
 
   it('an Editor cannot publish; a Publisher publishes only the visible sections', async () => {

@@ -134,6 +134,20 @@ export const mediaCollection = (): CollectionConfig => ({
     },
   },
   fields: [
+    // Storage object key used by the Vercel Blob plugin (STORAGE_DRIVER=vercel-blob), declared
+    // here too so the database schema is the same with every storage driver (the plugin replaces
+    // this definition with its own when it is loaded). Migration 20261118_231108_media_object_key.
+    {
+      name: '_objectKey',
+      type: 'text',
+      admin: {
+        hidden: true,
+        readOnly: true,
+        disableBulkEdit: true,
+        disableListColumn: true,
+        disableListFilter: true,
+      },
+    },
     {
       name: 'alt',
       type: 'text',

@@ -23,6 +23,7 @@ import * as migration_20261114_064904_optional_mfa from './20261114_064904_optio
 import * as migration_20261114_142706_passkeys from './20261114_142706_passkeys'
 import * as migration_20261117_120000_analytics_daily from './20261117_120000_analytics_daily'
 import * as migration_20261118_130443_text_media_location from './20261118_130443_text_media_location'
+import * as migration_20261118_231108_media_object_key from './20261118_231108_media_object_key'
 
 export const migrations = [
   {
@@ -149,5 +150,10 @@ export const migrations = [
     up: migration_20261118_130443_text_media_location.up,
     down: migration_20261118_130443_text_media_location.down,
     name: '20261118_130443_text_media_location',
+  },
+  {
+    up: migration_20261118_231108_media_object_key.up,
+    down: migration_20261118_231108_media_object_key.down,
+    name: '20261118_231108_media_object_key',
   },
 ]

@@ -22,7 +22,7 @@ import {
   type NavItem,
   type PageDef,
 } from '../content/pages/copy'
-import { sections as home } from '../content/homepage/copy'
+import { page as homePage, sections as home } from '../content/homepage/copy'
 import { article } from '../content/catalogue/copy'
 
 type Obj = Record<string, unknown>
@@ -423,7 +423,7 @@ async function fillMenu(
 
 async function fillSettings(payload: Payload, ids: Ids) {
   const s = await readDraft(payload, 'site-settings', 'en')
-  const done = { contactPage: false, legalLinks: false, servicesIntro: false }
+  const done = { contactPage: false, legalLinks: false, servicesIntro: false, defaultSeo: false }
   const lst = (s.listings ?? {}) as Obj
   const legal = legalLinks.filter((i) => navLink(i, 'en', ids)) // targets that exist
   const data: Obj = {}
@@ -440,6 +440,17 @@ async function fillSettings(payload: Payload, ids: Ids) {
   if (!lst.servicesIntro) {
     data.listings = { ...lst, servicesIntro: listings.servicesIntro.en }
     done.servicesIntro = true
+  }
+  // Site settings cannot be published without a default search title and description: use the
+  // home page's own (content/homepage/copy.ts) where they are empty.
+  const seo = (s.defaultSeo ?? {}) as Obj
+  if (!seo.title || !seo.description) {
+    data.defaultSeo = {
+      ...seo,
+      title: homePage.seo.title.en,
+      description: homePage.seo.description.en,
+    }
+    done.defaultSeo = true
   }
   if (!Object.keys(data).length) return done
   await payload.updateGlobal({
@@ -459,6 +470,12 @@ async function fillSettings(payload: Payload, ids: Ids) {
     }))
   if (done.servicesIntro)
     ar.listings = { ...((en.listings as Obj) ?? {}), servicesIntro: listings.servicesIntro.ar }
+  if (done.defaultSeo)
+    ar.defaultSeo = {
+      ...((en.defaultSeo as Obj) ?? {}),
+      title: homePage.seo.title.ar,
+      description: homePage.seo.description.ar,
+    }
   if (Object.keys(ar).length)
     await payload.updateGlobal({
       slug: 'site-settings',
@@ -473,7 +490,12 @@ async function fillSettings(payload: Payload, ids: Ids) {
 export type SitePagesSeedResult = {
   pages: Record<PageDef['key'], number>
   menus: { header: boolean; footer: boolean }
-  settings: { contactPage: boolean; legalLinks: boolean; servicesIntro: boolean }
+  settings: {
+    contactPage: boolean
+    legalLinks: boolean
+    servicesIntro: boolean
+    defaultSeo: boolean
+  }
 }
 
 export async function seedSitePages(
